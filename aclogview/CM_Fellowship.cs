@@ -26,8 +26,7 @@ public class CM_Fellowship : MessageProcessor {
             // TODO: PacketOpcode.Evt_Fellowship__FellowUpdateDone_ID = 457,
             // TODO: PacketOpcode.Evt_Fellowship__FellowStatsDone_ID = 458,
             // TODO: PacketOpcode.Evt_Fellowship__ChangeFellowOpeness_ID = 657,
-            // TODO: PacketOpcode.Evt_Fellowship__Disband_ID = 703,
-            // TODO: PacketOpcode.Evt_Fellowship__UpdateFellow_ID = 704,
+           
             case PacketOpcode.Evt_Fellowship__Disband_ID:
                 {
                     EmptyMessage message = new EmptyMessage(opcode);
@@ -57,6 +56,12 @@ public class CM_Fellowship : MessageProcessor {
             case PacketOpcode.Evt_Fellowship__FullUpdate_ID:
                 {
                     FellowshipFullUpdate message = FellowshipFullUpdate.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Fellowship__UpdateFellow_ID:
+                {
+                    FellowshipUpdate message = FellowshipUpdate.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -284,4 +289,38 @@ public class CM_Fellowship : MessageProcessor {
             node.Nodes.Add("unknown_4 = " + unknown_4);
         }
     }
+
+    public class FellowshipUpdate : Message
+    {
+        public uint i_iidPlayer;
+        public Fellow fellow;
+        public uint i_uiUpdateType;
+
+        public static FellowshipUpdate read(BinaryReader binaryReader)
+        {
+            FellowshipUpdate newObj = new FellowshipUpdate();
+            newObj.i_iidPlayer = binaryReader.ReadUInt32();
+            newObj.fellow = Fellow.read(binaryReader);
+            newObj.i_uiUpdateType = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+
+            rootNode.Nodes.Add("i_iidPlayer = " + Utility.FormatGuid(i_iidPlayer));
+
+            TreeNode FellowNode = rootNode.Nodes.Add("Fellow");
+            FellowNode.Expand();
+            fellow.contributeToTreeNode(FellowNode);
+
+            rootNode.Nodes.Add("i_uiUpdateType = " + i_uiUpdateType);
+
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+
 }
