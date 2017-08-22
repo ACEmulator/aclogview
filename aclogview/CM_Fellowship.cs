@@ -14,13 +14,10 @@ public class CM_Fellowship : MessageProcessor {
 
         PacketOpcode opcode = Util.readOpcode(messageDataReader);
         switch (opcode) {
-            // TODO: PacketOpcode.Evt_Fellowship__Create_ID = 162,
-            // TODO: PacketOpcode.Evt_Fellowship__Quit_ID = 163, // Bidirectional
-            // TODO: PacketOpcode.Evt_Fellowship__Dismiss_ID = 164, // Bidirectional
-            // TODO: PacketOpcode.Evt_Fellowship__Recruit_ID = 165,,
+
             // TODO: PacketOpcode.Evt_Fellowship__UpdateRequest_ID = 166,
-            // TODO: PacketOpcode.RECV_QUIT_FELLOW_EVENT = 167,
-            // TODO: PacketOpcode.RECV_FELLOWSHIP_UPDATE_EVENT = 175,
+            // TODO: PacketOpcode.RECV_QUIT_FELLOW_EVENT = 167, - RETIRED
+            // TODO: PacketOpcode.RECV_FELLOWSHIP_UPDATE_EVENT = 175, - RETIRED
             // TODO: PacketOpcode.RECV_UPDATE_FELLOW_EVENT = 176,
             // TODO: PacketOpcode.RECV_DISMISS_FELLOW_EVENT = 177,
             // TODO: PacketOpcode.RECV_LOGOFF_FELLOW_EVENT = 178,
@@ -29,9 +26,15 @@ public class CM_Fellowship : MessageProcessor {
             // TODO: PacketOpcode.Evt_Fellowship__FellowUpdateDone_ID = 457,
             // TODO: PacketOpcode.Evt_Fellowship__FellowStatsDone_ID = 458,
             // TODO: PacketOpcode.Evt_Fellowship__ChangeFellowOpeness_ID = 657,
-            // TODO: PacketOpcode.Evt_Fellowship__FullUpdate_ID = 702,
             // TODO: PacketOpcode.Evt_Fellowship__Disband_ID = 703,
             // TODO: PacketOpcode.Evt_Fellowship__UpdateFellow_ID = 704,
+            case PacketOpcode.Evt_Fellowship__Disband_ID:
+                {
+                    EmptyMessage message = new EmptyMessage(opcode);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+
             case PacketOpcode.Evt_Fellowship__Create_ID:
                 {
                     FellowshipCreate message = FellowshipCreate.read(messageDataReader);
@@ -42,6 +45,12 @@ public class CM_Fellowship : MessageProcessor {
             case PacketOpcode.Evt_Fellowship__Dismiss_ID:
                 {
                     FellowshipQuit message = FellowshipQuit.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Fellowship__Recruit_ID:
+                {
+                    FellowshipRecruit message = FellowshipRecruit.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -105,6 +114,27 @@ public class CM_Fellowship : MessageProcessor {
         }
     }
 
+    public class FellowshipRecruit : Message
+    {
+        public uint player_id;
+
+        public static FellowshipRecruit read(BinaryReader binaryReader)
+        {
+            FellowshipRecruit newObj = new FellowshipRecruit();
+            newObj.player_id = binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("player_id = " + Utility.FormatGuid(player_id));
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
     public class FellowshipFullUpdate : Message
     {
         public PackableHashTable<uint, Fellow> _fellowship_table = new PackableHashTable<uint, Fellow>();
@@ -114,7 +144,10 @@ public class CM_Fellowship : MessageProcessor {
         public uint _even_xp_split;
         public uint _open_fellow;
         public uint _locked;
-        public PackableHashTable<uint, uint> _fellows_departed = new PackableHashTable<uint, uint>();
+        public PackableHashTable<uint, int> _fellows_departed = new PackableHashTable<uint, int>();
+
+        // This is not unpacked or defined in the client.
+        public PackableHashTable<PStringChar, FellowshipLock__GuessedName> unk = new PackableHashTable<PStringChar, FellowshipLock__GuessedName>();
 
         public static FellowshipFullUpdate read(BinaryReader binaryReader)
         {
@@ -126,7 +159,8 @@ public class CM_Fellowship : MessageProcessor {
             newObj._even_xp_split = binaryReader.ReadUInt32();
             newObj._open_fellow = binaryReader.ReadUInt32();
             newObj._locked = binaryReader.ReadUInt32();
-            newObj._fellows_departed = PackableHashTable<uint, uint>.read(binaryReader);
+            newObj._fellows_departed = PackableHashTable<uint, int>.read(binaryReader);
+            newObj.unk = PackableHashTable<PStringChar, FellowshipLock__GuessedName>.read(binaryReader);
             return newObj;
         }
 
@@ -136,7 +170,12 @@ public class CM_Fellowship : MessageProcessor {
             rootNode.Expand();
 
             TreeNode FellowshipTableNode = rootNode.Nodes.Add("_fellowship_table");
-            _fellowship_table.contributeToTreeNode(FellowshipTableNode);
+            foreach (KeyValuePair<uint, Fellow> element in _fellowship_table.hashTable)
+            {
+                TreeNode FellowNode = FellowshipTableNode.Nodes.Add("Fellow");
+                element.Value.contributeToTreeNode(FellowNode);
+            }
+
             rootNode.Nodes.Add("_name = " + _name);
             rootNode.Nodes.Add("_leader = " + Utility.FormatGuid(_leader));
             rootNode.Nodes.Add("_share_xp = " + _share_xp);
@@ -144,7 +183,19 @@ public class CM_Fellowship : MessageProcessor {
             rootNode.Nodes.Add("_open_fellow = " + _open_fellow);
             rootNode.Nodes.Add("_locked = " + _locked);
             TreeNode FellowsDepartedNode = rootNode.Nodes.Add("_fellows_departed");
-            _fellows_departed.contributeToTreeNode(FellowsDepartedNode);
+            foreach (KeyValuePair<uint, int> element in _fellows_departed.hashTable)
+            {
+                TreeNode FellowNode = FellowsDepartedNode.Nodes.Add(Utility.FormatGuid(element.Key) + " = " + element.Value);
+            }
+
+            TreeNode UnknownNode = rootNode.Nodes.Add("FellowshipLock__GuessedName");
+            foreach (KeyValuePair<PStringChar, FellowshipLock__GuessedName> element in unk.hashTable)
+            {
+                TreeNode UnknownSubNode = UnknownNode.Nodes.Add(element.Key.ToString());
+                element.Value.contributeToTreeNode(UnknownSubNode);
+            }
+
+           // unk.contributeToTreeNode(UnknownNode);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -196,6 +247,41 @@ public class CM_Fellowship : MessageProcessor {
             node.Nodes.Add("_current_mana = " + _current_mana);
             node.Nodes.Add("_share_loot = " + _share_loot);
             node.Nodes.Add("_name = " + _name);
+        }
+    }
+
+    /// <summary>
+    /// This is not unpacked in the client. Values/structures are gusses.
+    /// </summary>
+    public class FellowshipLock__GuessedName
+    {
+        //public PStringChar _name;
+        public uint unknown_1;
+        public uint unknown_2;
+        public uint unknown_3;
+        public uint timestamp;
+        public uint unknown_4;
+
+        public static FellowshipLock__GuessedName read(BinaryReader binaryReader)
+        {
+            FellowshipLock__GuessedName newObj = new FellowshipLock__GuessedName();
+            //newObj._name = PStringChar.read(binaryReader);
+            newObj.unknown_1 = binaryReader.ReadUInt32();
+            newObj.unknown_2 = binaryReader.ReadUInt32();
+            newObj.unknown_3 = binaryReader.ReadUInt32();
+            newObj.timestamp = binaryReader.ReadUInt32();
+            newObj.unknown_4 = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+          //  node.Nodes.Add("_name = " + _name);
+            node.Nodes.Add("unknown_1 = " + unknown_1);
+            node.Nodes.Add("unknown_2 = " + unknown_2);
+            node.Nodes.Add("unknown_3 = " + unknown_3);
+            node.Nodes.Add("timestamp__guessedname = " + timestamp);
+            node.Nodes.Add("unknown_4 = " + unknown_4);
         }
     }
 }
