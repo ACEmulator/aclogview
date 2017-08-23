@@ -15,18 +15,22 @@ public class CM_Fellowship : MessageProcessor {
         PacketOpcode opcode = Util.readOpcode(messageDataReader);
         switch (opcode) {
 
-            // TODO: PacketOpcode.Evt_Fellowship__UpdateRequest_ID = 166,
             // TODO: PacketOpcode.RECV_QUIT_FELLOW_EVENT = 167, - RETIRED
             // TODO: PacketOpcode.RECV_FELLOWSHIP_UPDATE_EVENT = 175, - RETIRED
-            // TODO: PacketOpcode.RECV_UPDATE_FELLOW_EVENT = 176,
-            // TODO: PacketOpcode.RECV_DISMISS_FELLOW_EVENT = 177,
-            // TODO: PacketOpcode.RECV_LOGOFF_FELLOW_EVENT = 178,
-            // TODO: PacketOpcode.RECV_DISBAND_FELLOWSHIP_EVENT = 179,
-            // TODO: PacketOpcode.Evt_Fellowship__Appraise_ID = 202, 
-            // TODO: PacketOpcode.Evt_Fellowship__FellowUpdateDone_ID = 457,
-            // TODO: PacketOpcode.Evt_Fellowship__FellowStatsDone_ID = 458,
-            // TODO: PacketOpcode.Evt_Fellowship__ChangeFellowOpeness_ID = 657,
-           
+            // TODO: PacketOpcode.RECV_UPDATE_FELLOW_EVENT = 176 / 0xB0,
+            // TODO: PacketOpcode.RECV_DISMISS_FELLOW_EVENT = 177 / 0xB1,
+            // TODO: PacketOpcode.RECV_LOGOFF_FELLOW_EVENT = 178 / 0xB2,
+            // TODO: PacketOpcode.RECV_DISBAND_FELLOWSHIP_EVENT = 179 / 0xB3,
+            // TODO: PacketOpcode.Evt_Fellowship__Appraise_ID = 202 / 0xCA, 
+            // TODO: PacketOpcode.Evt_Fellowship__FellowUpdateDone_ID = 457 / 0x1C9 - NO LOGS FOUND
+            // TODO: PacketOpcode.Evt_Fellowship__FellowStatsDone_ID = 458 / 0x1CA - NO LOGS FOUND
+
+            case PacketOpcode.Evt_Fellowship__UpdateRequest_ID:
+                {
+                    UpdateRequest message = UpdateRequest.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             case PacketOpcode.Evt_Fellowship__Disband_ID:
                 {
                     EmptyMessage message = new EmptyMessage(opcode);
@@ -62,6 +66,12 @@ public class CM_Fellowship : MessageProcessor {
             case PacketOpcode.Evt_Fellowship__UpdateFellow_ID:
                 {
                     FellowshipUpdate message = FellowshipUpdate.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Fellowship__ChangeFellowOpeness_ID:
+                {
+                    FellowshipChangeOpenness message = FellowshipChangeOpenness.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -318,6 +328,47 @@ public class CM_Fellowship : MessageProcessor {
 
             rootNode.Nodes.Add("i_uiUpdateType = " + i_uiUpdateType);
 
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+    public class FellowshipChangeOpenness : Message
+    {
+        // NOTE: Client incorrectly spells this as "Openess" (only one "N")
+        public uint i_open;
+
+        public static FellowshipChangeOpenness read(BinaryReader binaryReader)
+        {
+            FellowshipChangeOpenness newObj = new FellowshipChangeOpenness();
+            newObj.i_open = binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_open = " + i_open);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+    public class UpdateRequest : Message
+    {
+        public uint i_on;
+
+        public static UpdateRequest read(BinaryReader binaryReader)
+        {
+            UpdateRequest newObj = new UpdateRequest();
+            newObj.i_on = binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_on = " + i_on);
             treeView.Nodes.Add(rootNode);
         }
     }
