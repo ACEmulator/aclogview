@@ -1,10 +1,6 @@
 ﻿using aclogview;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 public class CM_Fellowship : MessageProcessor {
@@ -161,7 +157,7 @@ public class CM_Fellowship : MessageProcessor {
         public uint _locked;
         public PackableHashTable<uint, int> _fellows_departed = new PackableHashTable<uint, int>();
 
-        // This is not unpacked or defined in the client.
+        // This is not unpacked or defined in the client. From server end, it might be acceptable to leave off or, to ensure compatability with aclogview, send an empty PackableHashTable
         public PackableHashTable<PStringChar, FellowshipLock__GuessedName> unk = new PackableHashTable<PStringChar, FellowshipLock__GuessedName>();
 
         public static FellowshipFullUpdate read(BinaryReader binaryReader)
@@ -210,7 +206,6 @@ public class CM_Fellowship : MessageProcessor {
                 element.Value.contributeToTreeNode(UnknownSubNode);
             }
 
-           // unk.contributeToTreeNode(UnknownNode);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -270,7 +265,6 @@ public class CM_Fellowship : MessageProcessor {
     /// </summary>
     public class FellowshipLock__GuessedName
     {
-        //public PStringChar _name;
         public uint unknown_1;
         public uint unknown_2;
         public uint unknown_3;
@@ -280,7 +274,6 @@ public class CM_Fellowship : MessageProcessor {
         public static FellowshipLock__GuessedName read(BinaryReader binaryReader)
         {
             FellowshipLock__GuessedName newObj = new FellowshipLock__GuessedName();
-            //newObj._name = PStringChar.read(binaryReader);
             newObj.unknown_1 = binaryReader.ReadUInt32();
             newObj.unknown_2 = binaryReader.ReadUInt32();
             newObj.unknown_3 = binaryReader.ReadUInt32();
@@ -291,7 +284,6 @@ public class CM_Fellowship : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-          //  node.Nodes.Add("_name = " + _name);
             node.Nodes.Add("unknown_1 = " + unknown_1);
             node.Nodes.Add("unknown_2 = " + unknown_2);
             node.Nodes.Add("unknown_3 = " + unknown_3);
@@ -372,6 +364,4 @@ public class CM_Fellowship : MessageProcessor {
             treeView.Nodes.Add(rootNode);
         }
     }
-
-
 }
