@@ -364,6 +364,7 @@
             this.textBox_Search.Name = "textBox_Search";
             this.textBox_Search.Size = new System.Drawing.Size(165, 20);
             this.textBox_Search.TabIndex = 5;
+            this.textBox_Search.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_Search_KeyPress);
             // 
             // pictureBox_Search
             // 

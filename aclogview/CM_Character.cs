@@ -309,11 +309,9 @@ public class CM_Character : MessageProcessor {
                 m_pPlayerOptionsData.contributeToTreeNode(playerOptionsDataNode);
 
             // DISABLED TREE NODE FORMATTING
-            // TreeNode colGameplayOptionsNode = node.Nodes.Add("m_colGameplayOptions = ");
-            // if ((header & (uint)PlayerModulePackHeader.PM_Packed_GameplayOptions) != 0)
-            //      m_colGameplayOptions.contributeToTreeNode(colGameplayOptionsNode);
-            TreeNode colGameplayOptionsNode = node.Nodes.Add("m_colGameplayOptions = // TODO");
-            // TODO: Lots more to read here!
+            TreeNode colGameplayOptionsNode = node.Nodes.Add("m_colGameplayOptions = ");
+            if ((header & (uint)PlayerModulePackHeader.PM_Packed_GameplayOptions) != 0)
+                  m_colGameplayOptions.contributeToTreeNode(colGameplayOptionsNode);
         }
     }
 
@@ -377,7 +375,11 @@ public class CM_Character : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("header = " + header);
-            //node.Nodes.Add("m_num_buckets = " + m_num_buckets);
+            TreeNode propertyCollectionNode = node.Nodes.Add("PropertyCollection");
+            for (int i = 0; i < PropertyCollection.Count; i++) {
+                TreeNode propertyNode = propertyCollectionNode.Nodes.Add("Property");
+                PropertyCollection[i].contributeToTreeNode(propertyNode);
+            }
             return;
         }
     }
@@ -477,7 +479,55 @@ public class CM_Character : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            //node.Nodes.Add("header = " + header);
+            node.Nodes.Add("key = " + key);
+            switch (key)
+            {
+                case OptionProperty.Option_ActiveOpacity_Property:
+                case OptionProperty.Option_DefaultOpacity_Property:
+                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
+                    node.Nodes.Add("floatPropertyValue = " + floatPropertyValue);
+                    break;
+                case OptionProperty.Option_Placement_X_Property:
+                case OptionProperty.Option_Placement_Y_Property:
+                case OptionProperty.Option_Placement_Width_Property:
+                case OptionProperty.Option_Placement_Height_Property:
+                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
+                    node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    break;
+                case OptionProperty.Option_Placement_Visibility_Property:
+                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
+                    node.Nodes.Add("boolPropertyValue = " + boolPropertyValue);
+                    break;
+                case OptionProperty.Option_Placement_Title_Property:
+                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
+                    node.Nodes.Add("strSourceType = " + strSourceType);
+                    node.Nodes.Add("strPropertyValue = " + strPropertyValue);
+                    node.Nodes.Add("strId = " + strId);
+                    node.Nodes.Add("strFileId = " + strFileId);
+                    node.Nodes.Add("strUnknown = " + strUnknown);
+                    break;
+                case OptionProperty.Option_TextType_Property:
+                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
+                    node.Nodes.Add("int64PropertyValue = " + int64PropertyValue);
+                    break;
+                case OptionProperty.Option_PlacementArray_Property:
+                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
+                    TreeNode PropertyCollectionValueNode = node.Nodes.Add("PropertyCollectionValue");
+                    for (int i = 0; i < PropertyCollectionValue.Count; i++)
+                    {
+                        TreeNode PropertyNode = node.Nodes.Add("Property");
+                        PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
+                    }
+                    break;
+                case OptionProperty.Option_Placement_Property:
+                    TreeNode PropertyPlacementValueNode = node.Nodes.Add("PropertyCollectionValue");
+                    for (int i = 0; i < PropertyCollectionValue.Count; i++)
+                    {
+                        TreeNode PropertyNode = node.Nodes.Add("Property");
+                        PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
+                    }
+                    break;
+            }
         }
     }
 

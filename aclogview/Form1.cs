@@ -964,6 +964,12 @@ namespace aclogview
         {
             loadPcap(pcapFilePath, true);
         }
+
+        private void textBox_Search_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13) // ENTER KEY
+                btnHighlight.PerformClick();
+        }
     }
 }
 
