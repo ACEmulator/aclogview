@@ -48,6 +48,8 @@ public class Util {
             readers.Add(typeof(CM_Vendor.ItemProfile), r => CM_Vendor.ItemProfile.read(r));
             readers.Add(typeof(CM_Fellowship.Fellow), r => CM_Fellowship.Fellow.read(r));
             readers.Add(typeof(CM_Fellowship.FellowshipLock__GuessedName), r => CM_Fellowship.FellowshipLock__GuessedName.read(r));
+            readers.Add(typeof(CM_Login.ContentProfile), r => CM_Login.ContentProfile.read(r));
+            readers.Add(typeof(CM_Login.InventoryPlacement), r => CM_Login.InventoryPlacement.read(r));
         }
     }
 
@@ -55,11 +57,33 @@ public class Util {
         return (ushort)(((value & 0x00FFU) << 8) | ((value & 0xFF00U) >> 8));
     }
 
-    public static void readToAlign(BinaryReader binaryReader) {
+    public static void readToAlign(BinaryReader binaryReader)
+    {
         long alignDelta = binaryReader.BaseStream.Position % 4;
-        if (alignDelta != 0) {
+        if (alignDelta != 0)
+        {
             binaryReader.ReadBytes((int)(4 - alignDelta));
         }
+    }
+
+    public static string readUnicodeString(BinaryReader binaryReader)
+    {
+        uint strLen = binaryReader.ReadByte(); 
+        if((strLen & 0x80) > 0) // PackedByte
+        {
+            byte lowbyte = binaryReader.ReadByte();
+            strLen = ((strLen & 0x7F) << 8) | lowbyte;
+        }
+        string str = "";
+        if (strLen != 0)
+        {
+            for (uint i = 0; i < strLen; i++)
+            {
+                str += Encoding.Unicode.GetString(binaryReader.ReadBytes(2));
+            }
+        }
+        readToAlign(binaryReader);
+        return str;
     }
 
     public static uint readDataIDOfKnownType(uint i_didFirstID, BinaryReader binaryReader) {
@@ -379,7 +403,7 @@ public class Skill {
     public SKILL_ADVANCEMENT_CLASS _sac;
     public uint _pp;
     public uint _init_level;
-    public double _resistance_of_last_check;
+    public uint _resistance_of_last_check;
     public double _last_used_time;
 
     public static Skill read(BinaryReader binaryReader) {
@@ -388,7 +412,8 @@ public class Skill {
         newObj._sac = (SKILL_ADVANCEMENT_CLASS)binaryReader.ReadUInt32();
         newObj._pp = binaryReader.ReadUInt32();
         newObj._init_level = binaryReader.ReadUInt32();
-        newObj._resistance_of_last_check = binaryReader.ReadDouble();
+        // newObj._resistance_of_last_check = binaryReader.ReadDouble();
+        newObj._resistance_of_last_check = binaryReader.ReadUInt32();
         newObj._last_used_time = binaryReader.ReadDouble();
         return newObj;
     }
