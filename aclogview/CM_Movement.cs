@@ -309,6 +309,7 @@ class CM_Movement : MessageProcessor {
         public float forward_speed = 1.0f;
         public float sidestep_speed = 1.0f;
         public float turn_speed = 1.0f;
+        public List<MovementAction> actions = new List<MovementAction>();
 
         public static InterpretedMotionState read(BinaryReader binaryReader) {
             InterpretedMotionState newObj = new InterpretedMotionState();
@@ -337,10 +338,7 @@ class CM_Movement : MessageProcessor {
 
             uint numActions = (newObj.bitfield >> 7) & 0x1F;
             for (int i = 0; i < numActions; ++i) {
-                // TODO: Do actual stuff here!
-                uint thing1 = command_ids[binaryReader.ReadUInt16()];
-                uint thing2 = binaryReader.ReadUInt16();
-                uint thing3 = binaryReader.ReadUInt32();
+                newObj.actions.Add(MovementAction.read(binaryReader));
             }
 
             Util.readToAlign(binaryReader);
@@ -348,7 +346,8 @@ class CM_Movement : MessageProcessor {
             return newObj;
         }
 
-        public void contributeToTreeNode(TreeNode node) {
+        public void contributeToTreeNode(TreeNode node)
+        {
             node.Nodes.Add("bitfield = " + bitfield);
             node.Nodes.Add("current_style = " + current_style);
             node.Nodes.Add("forward_command = " + forward_command);
@@ -357,6 +356,38 @@ class CM_Movement : MessageProcessor {
             node.Nodes.Add("forward_speed = " + forward_speed);
             node.Nodes.Add("sidestep_speed = " + sidestep_speed);
             node.Nodes.Add("turn_speed = " + turn_speed);
+
+            TreeNode actionsNode = node.Nodes.Add("Actions");
+            for (int i = 0; i < actions.Count; ++i)
+            {
+                TreeNode actionNode = actionsNode.Nodes.Add("action");
+                actions[i].contributeToTreeNode(actionNode);
+            }
+            actionsNode.ExpandAll();
+        }
+    }
+
+    public class MovementAction
+    {
+        public MotionStyle style;
+        public uint sequence;
+        public float speed;
+
+        public static MovementAction read(BinaryReader binaryReader)
+        {
+            MovementAction newObj = new MovementAction();
+            ushort command_id = binaryReader.ReadUInt16();
+            newObj.style = (MotionStyle)command_ids[command_id];
+            newObj.sequence = binaryReader.ReadUInt16();  // TODO - This is a packed word
+            newObj.speed = binaryReader.ReadSingle();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("style = " + style);
+            node.Nodes.Add("sequence = " + sequence);
+            node.Nodes.Add("speed = " + speed);
         }
     }
 
@@ -720,9 +751,9 @@ class CM_Movement : MessageProcessor {
     }
 
     static uint[] command_ids = {
-        2147483648,
-        2231369729,
-        2231369730,
+        2147483648, // Invalid
+        2231369729, // HoldRun
+        2231369730, // SideStep
         (uint)MotionStyle.Motion_Ready,
         (uint)MotionStyle.Motion_Stop,
         (uint)MotionStyle.Motion_WalkForward,
@@ -780,20 +811,20 @@ class CM_Movement : MessageProcessor {
         (uint)MotionStyle.Motion_MagicPray,
         (uint)MotionStyle.Motion_StopTurning,
         (uint)MotionStyle.Motion_Jump,
-        2147483708,
-        2147483709,
-        2147483710,
-        2147483711,
-        2147483712,
-        2147483713,
-        2147483714,
-        2147483715,
-        2147483716,
-        2147483717,
-        2147483718,
-        2147483719,
-        2147483720,
-        2147483721,
+        2147483708, // HandCombat
+        2147483709, // NonCombat
+        2147483710, // SwordCombat
+        2147483711, // BowCombat
+        2147483712, // SwordShieldCombat
+        2147483713, // CrossbowCombat
+        2147483714, // UnusedCombat
+        2147483715, // SlingCombat
+        2147483716, // TwoHandedSwordCombat
+        2147483717, // TwoHandedStaffCombat
+        2147483718, // DualWieldCombat
+        2147483719, // ThrownWeaponCombat
+        2147483720, // Graze
+        2147483721, // Magi
         (uint)MotionStyle.Motion_Hop,
         (uint)MotionStyle.Motion_Jumpup,
         (uint)MotionStyle.Motion_Cheer,
@@ -952,8 +983,8 @@ class CM_Movement : MessageProcessor {
         (uint)MotionStyle.Motion_TwitchSubstate2,
         (uint)MotionStyle.Motion_TwitchSubstate3,
         (uint)MotionStyle.Command_CaptureScreenshotToFile,
-        2147483880,
-        2147483881,
+        2147483880, // BowNoAmmo
+        2147483881, // CrossBowNoAmmo
         (uint)MotionStyle.Motion_ShakeFistState,
         (uint)MotionStyle.Motion_PrayState,
         (uint)MotionStyle.Motion_BowDeepState,

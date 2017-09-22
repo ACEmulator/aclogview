@@ -96,7 +96,7 @@ public class CM_Magic : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("i_target = " + Utility.FormatGuid(this.i_target));
-            rootNode.Nodes.Add("i_spell_id = " + Utility.FormatGuid((uint)this.i_spell_id));           
+            rootNode.Nodes.Add("i_spell_id = " + i_spell_id);           
             treeView.Nodes.Add(rootNode);
         }
     }
