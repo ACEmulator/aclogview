@@ -1,3 +1,7 @@
+### 2017-09-24
+[OptimShi]
+* Corrected the reading of PList<HousePayment> and added proper structure to the TreeView
+
 ### 2017-09-22
 [OptimShi]
 * Implemented "Actions" in the Movement Event (F74C)

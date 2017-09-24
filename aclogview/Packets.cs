@@ -50,6 +50,7 @@ public class Util {
             readers.Add(typeof(CM_Fellowship.FellowshipLock__GuessedName), r => CM_Fellowship.FellowshipLock__GuessedName.read(r));
             readers.Add(typeof(CM_Login.ContentProfile), r => CM_Login.ContentProfile.read(r));
             readers.Add(typeof(CM_Login.InventoryPlacement), r => CM_Login.InventoryPlacement.read(r));
+            readers.Add(typeof(CM_House.HousePayment), r => CM_House.HousePayment.read(r));
         }
     }
 

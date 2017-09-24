@@ -313,9 +313,19 @@ public class CM_House : MessageProcessor {
             node.Nodes.Add("m_type = " + m_type);
             node.Nodes.Add("m_maintenance_free = " + m_maintenance_free);
             TreeNode buyNode = node.Nodes.Add("m_buy = ");
-            m_buy.contributeToTreeNode(buyNode);
+            for (int i = 0; i<m_buy.list.Count; i++)
+            {
+                HousePayment ele = m_buy.list[i];
+                TreeNode subNode = buyNode.Nodes.Add(ele.ToString());
+                ele.contributeToTreeNode(subNode);
+            }
             TreeNode rentNode = node.Nodes.Add("m_rent = ");
-            m_rent.contributeToTreeNode(rentNode);
+            for (int i = 0; i < m_rent.list.Count; i++)
+            {
+                HousePayment ele = m_rent.list[i];
+                TreeNode subNode = rentNode.Nodes.Add(ele.ToString());
+                ele.contributeToTreeNode(subNode);
+            }
             TreeNode posNode = node.Nodes.Add("m_pos = ");
             m_pos.contributeToTreeNode(posNode);
         }
