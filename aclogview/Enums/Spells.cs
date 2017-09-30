@@ -40,7 +40,8 @@ public enum SpellIndex {
     FellowshipSpell_SpellIndex = (1 << 13),
     FastCast_SpellIndex = (1 << 14),
     IndoorLongRange_SpellIndex = (1 << 15),
-    DamageOverTime_SpellIndex = (1 << 16)
+    DamageOverTime_SpellIndex = (1 << 16),
+    UNKNOWN_SpellIndex = (1 << 17) // There are some spells with this index but its use is unknown
 }
 
 public enum SpellComponentType {
@@ -176,7 +177,27 @@ public enum SpellSetID {
     CloakShield_EquipmentSet_SpellSetID,
     CloakSneakAttack_EquipmentSet_SpellSetID,
     Ninja_New_EquipmentSet_SpellSetID,
-    CloakSummoning_EquipmentSet_SpellSetID
+    CloakSummoning_EquipmentSet_SpellSetID,
+    // Gleaned SpellSet IDs
+    ShroudedSoul_EquipmentSet_SpellSetID, // Shrouded Soul Shadow Armor
+    DarkenedMind_EquipmentSet_SpellSetID, // Darkened Mind Shadow Armor
+    CloudedSpirit_EquipmentSet_SpellSetID, // Clouded Spirit Shadow Armor
+    // Missing 94-119
+    EnhancedShroudedSoul_EquipmentSet_SpellSetID = 120, // Enhanced Shrouded Soul Shadow Armor
+    // Missing 121-125
+    EnhancedCloudedSpirit_EquipmentSet_SpellSetID = 126, // Enhanced Clouded Spirit Shadow Armor
+    // Missing 127-129
+    ShimmeringShadow_EquipmentSet_SpellSetID = 130, // Shimmering Shadow Prismatic Shadow Armor
+    BrownSocietyLocket_EquipmentSet_SpellSetID = 131, // Brown Society Locket
+    YellowSocietyLocket_EquipmentSet_SpellSetID = 132, // Yellow Society Locket
+    RedSocietyBand_EquipmentSet_SpellSetID = 133, // Red Society Band
+    GreenSocietyBand_EquipmentSet_SpellSetID = 134, // Green Society Band
+    PurpleSocietyBand_EquipmentSet_SpellSetID = 135, // Purple Society Band
+    BlueSocietyBand_EquipmentSet_SpellSetID = 136, // Blue Society Band
+    GauntletGarb_EquipmentSet_SpellSetID = 137, // Gauntlet Garb Set
+    UNKNOWN_138_EquipmentSet_SpellSetID = 138, // Unknown examples: Dark Frost Compound Crossbow, Dark Acid Bow, Dark Acid Crossbow, Spell Bound Crossbow
+    UNKNOWN_139_EquipmentSet_SpellSetID = 139, // Unknown examples: Gharu'ndim Wand, Soul Bound Staff
+    UNKNOWN_140_EquipmentSet_SpellSetID = 140 // Unknown examples: Nodachi, Purified Mouryou Katana, Frost Shashqa (Possibly cleaving two handed weapons?)
 }
 
 public enum SpellID {
@@ -6521,5 +6542,24 @@ public enum SpellID {
     GauntletVitalityI_SpellID,
     GauntletVitalityII_SpellID,
     GauntletVitalityIII_SpellID,
-    NumSpells_SpellID = 8192
+    NumSpells_SpellID = 8192,
+    // Gleaned cooldown spell IDs
+    DeckOfEyesCooldown_SpellID = 32769,
+    AsheronsBenedictionCooldown_SpellID = 32770,
+    BlackmoorsFavorCooldown_SpellID = 32771,
+    HealthElixirCooldown_SpellID = 32772,   // Health elixir's with a cooldown
+    ManaElixirCooldown_SpellID = 32773,     // Mana elixir's with a cooldown
+    CallOfLeadershipCooldown_SpellID = 32774,
+    AnswerOfLoyaltyStaminaCooldown_SpellID = 32775,
+    AnswerOfLoyaltyManaCooldown_SpellID = 32776,
+    VirindiEssenceCooldown_SpellID = 32777,
+    SurgingStrengthCooldown_SpellID = 32778,
+    ToweringDefenseCooldown_SpellID = 32779,
+    StrangeJewelCooldown_SpellID = 32818, // (Guardians of Mhoire Castle quest)
+    AlignedManaStoneCooldown_SpellID = 32819,
+    ContractForKillRynthidSlayersCooldown_SpellID = 32868,
+    SummonCreatureCooldown_SpellID = 32981,
+    FacilityHubPortalGemCooldown_SpellID = 32989,
+    ScryingRodCooldown_SpellID = 33268, // (Slave Master Quest)
+    CeldisethsPortalGemCooldown_SpellID = 33768
 }

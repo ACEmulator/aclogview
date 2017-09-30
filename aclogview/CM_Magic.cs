@@ -72,6 +72,12 @@ public class CM_Magic : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
+            case PacketOpcode.Evt_Magic__UpdateEnchantment_ID:
+                {
+                    UpdateEnchantment message = UpdateEnchantment.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             default: {
                     handled = false;
                     break;
@@ -153,69 +159,108 @@ public class CM_Magic : MessageProcessor {
     }
 
     public class StatMod {
-        public uint type;
+        public byte table;
+        public byte main_cat;
+        public byte sub_cat;
+        public byte effect;
         public uint key;
         public float val;
 
         public static StatMod read(BinaryReader binaryReader) {
             StatMod newObj = new StatMod();
-            newObj.type = binaryReader.ReadUInt32();
+            newObj.table = binaryReader.ReadByte();
+            newObj.main_cat = binaryReader.ReadByte();
+            newObj.sub_cat = binaryReader.ReadByte();
+            newObj.effect = binaryReader.ReadByte();
             newObj.key = binaryReader.ReadUInt32();
             newObj.val = binaryReader.ReadSingle();
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("type = " + type);
-            node.Nodes.Add("key = " + key);
+            node.Nodes.Add("table = " + (STables)table);
+            node.Nodes.Add("main_category = " + (SMainCat)main_cat);
+            node.Nodes.Add("sub_category = " + (SSubCat)sub_cat);
+            node.Nodes.Add("effect = " + (STypeEffect)effect);
+            switch (table)
+            {
+                case 0x01:
+                    node.Nodes.Add("key = " + (STypeAttribute)key);
+                    break;
+                case 0x02:
+                    node.Nodes.Add("key = " + (STypeAttribute2nd)key);
+                    break;
+                case 0x04:
+                    node.Nodes.Add("key = " + (STypeInt)key);
+                    break;
+                case 0x08:
+                    node.Nodes.Add("key = " + (STypeFloat)key);
+                    break;
+                case 0x10:
+                    node.Nodes.Add("key = " + (STypeSkill)key);
+                    break;
+                default:
+                    node.Nodes.Add("key = " + key);
+                    break;
+            }
             node.Nodes.Add("val = " + val);
         }
     }
 
     public class Enchantment {
-        public uint _id;
-        public uint _spell_category;
-        public uint _power_level;
-        public double _start_time;
-        public double _duration;
-        public uint _caster;
-        public float _degrade_modifier;
-        public float _degrade_limit;
-        public double _last_time_degraded;
-        public StatMod _smod;
-        public SpellSetID m_SpellSetID;
+        public ushort id;
+        public ushort layer;
+        public ushort spell_category;
+        public ushort has_spell_set_id;
+        public uint power_level;
+        public double start_time;
+        public double duration;
+        public uint caster;
+        public float degrade_modifier;
+        public float degrade_limit;
+        public double last_time_degraded;
+        public StatMod smod;
+        public uint spell_set_id;
 
         public static Enchantment read(BinaryReader binaryReader) {
             Enchantment newObj = new Enchantment();
-            newObj._id = binaryReader.ReadUInt32();
-            newObj._spell_category = binaryReader.ReadUInt32();
-            newObj._power_level = binaryReader.ReadUInt32();
-            newObj._start_time = binaryReader.ReadDouble();
-            newObj._duration = binaryReader.ReadDouble();
-            newObj._caster = binaryReader.ReadUInt32();
-            newObj._degrade_modifier = binaryReader.ReadSingle();
-            newObj._degrade_limit = binaryReader.ReadSingle();
-            newObj._last_time_degraded = binaryReader.ReadDouble();
-            newObj._smod = StatMod.read(binaryReader);
-            if ((newObj._spell_category >> 16) >= 1) {
-                newObj.m_SpellSetID = (SpellSetID)binaryReader.ReadUInt32();
-            }
+            newObj.id = binaryReader.ReadUInt16();
+            newObj.layer = binaryReader.ReadUInt16();
+            newObj.spell_category = binaryReader.ReadUInt16();
+            newObj.has_spell_set_id = binaryReader.ReadUInt16();
+            newObj.power_level = binaryReader.ReadUInt32();
+            newObj.start_time = binaryReader.ReadDouble();
+            newObj.duration = binaryReader.ReadDouble();
+            newObj.caster = binaryReader.ReadUInt32();
+            newObj.degrade_modifier = binaryReader.ReadSingle();
+            newObj.degrade_limit = binaryReader.ReadSingle();
+            newObj.last_time_degraded = binaryReader.ReadDouble();
+            newObj.smod = StatMod.read(binaryReader);
+            newObj.spell_set_id = binaryReader.ReadUInt32();
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("_id = " + _id);
-            node.Nodes.Add("_spell_category = " + _spell_category);
-            node.Nodes.Add("_power_level = " + _power_level);
-            node.Nodes.Add("_start_time = " + _start_time);
-            node.Nodes.Add("_duration = " + _duration);
-            node.Nodes.Add("_caster = " + _caster);
-            node.Nodes.Add("_degrade_modifier = " + _degrade_modifier);
-            node.Nodes.Add("_degrade_limit = " + _degrade_limit);
-            node.Nodes.Add("_last_time_degraded = " + _last_time_degraded);
-            TreeNode statModNode = node.Nodes.Add("_smod = ");
-            _smod.contributeToTreeNode(statModNode);
-            node.Nodes.Add("m_SpellSetID = " + m_SpellSetID);
+            node.Nodes.Add("id = " +  "(" + id + ") " + (SpellID)id);
+            node.Nodes.Add("layer = " + layer);
+            node.Nodes.Add("spell_category = " + Utility.FormatGuid(spell_category));
+            node.Nodes.Add("has_spell_set_id = " + has_spell_set_id);
+            node.Nodes.Add("power_level = " + power_level);
+            node.Nodes.Add("start_time = " + start_time);
+            if (duration == -1) {
+                node.Nodes.Add("duration = " + duration + " (indefinite)");
+            }
+            else
+            {
+                node.Nodes.Add("duration = " + duration + " seconds");
+            }
+            node.Nodes.Add("caster = " + Utility.FormatGuid(caster));
+            node.Nodes.Add("degrade_modifier = " + degrade_modifier);
+            node.Nodes.Add("degrade_limit = " + degrade_limit);
+            node.Nodes.Add("last_time_degraded = " + last_time_degraded);
+            TreeNode statModNode = node.Nodes.Add("statmod = ");
+            smod.contributeToTreeNode(statModNode);
+            node.Nodes.Add("spell_set_id = " + (SpellSetID)spell_set_id);
         }
     }
 
@@ -265,8 +310,9 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            TreeNode enchantmentNode = rootNode.Nodes.Add("enchant = ");
+            TreeNode enchantmentNode = rootNode.Nodes.Add("enchantment = ");
             enchant.contributeToTreeNode(enchantmentNode);
+            enchantmentNode.ExpandAll(); // TEST
             treeView.Nodes.Add(rootNode);
         }
     }
