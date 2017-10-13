@@ -26,9 +26,39 @@ public class CM_Communication : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
+            case PacketOpcode.Evt_Communication__SetAFKMode_ID: // 0x000F
+                {
+                    var message = SetAFKMode.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Communication__SetAFKMessage_ID: // 0x0010
+                {
+                    var message = SetAFKMessage.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             case PacketOpcode.Evt_Communication__TalkDirect_ID: // 0x0032
                 {
                     var message = TalkDirect.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Communication__ModifyCharacterSquelch_ID: // 0x0058
+                {
+                    var message = ModifyCharacterSquelch.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Communication__ModifyAccountSquelch_ID: // 0x0059
+                {
+                    var message = ModifyAccountSquelch.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Communication__ModifyGlobalSquelch_ID: // 0x005B
+                {
+                    var message = ModifyGlobalSquelch.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -44,12 +74,12 @@ public class CM_Communication : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
-            /*case PacketOpcode.Evt_Communication__SetSquelchDB_ID: // 0x01F4
+            case PacketOpcode.Evt_Communication__SetSquelchDB_ID: // 0x01F4
                 {
                     var message = SetSquelchDB.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
-                }*/
+                }
             case PacketOpcode.Evt_Communication__Emote_ID: // 0x01DF
                 {
                     var message = Emote.read(messageDataReader);
@@ -170,6 +200,44 @@ public class CM_Communication : MessageProcessor {
         }
     }
 
+    public class SetAFKMode : Message
+    {
+        public uint i_bAFK;
+        public static SetAFKMode read(BinaryReader binaryReader)
+        {
+            var newObj = new SetAFKMode();
+            newObj.i_bAFK = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_bAFK = " + i_bAFK);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class SetAFKMessage : Message
+    {
+        public PStringChar i_strMessage;
+        public static SetAFKMessage read(BinaryReader binaryReader)
+        {
+            var newObj = new SetAFKMessage();
+            newObj.i_strMessage = PStringChar.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_strMessage = " + i_strMessage.m_buffer);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
     public class TalkDirect : Message
     {
         public PStringChar MessageText;
@@ -189,6 +257,81 @@ public class CM_Communication : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
             rootNode.Nodes.Add("TargetID = " + Utility.FormatGuid(TargetID));
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class ModifyCharacterSquelch : Message
+    {
+        public uint i_add;
+        public uint i_character_id;
+        public PStringChar i_character_name;
+        public uint i_msg_type;
+
+        public static ModifyCharacterSquelch read(BinaryReader binaryReader)
+        {
+            var newObj = new ModifyCharacterSquelch();
+            newObj.i_add = binaryReader.ReadUInt32();
+            newObj.i_character_id = binaryReader.ReadUInt32();
+            newObj.i_character_name = PStringChar.read(binaryReader);
+            newObj.i_msg_type = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_add = " + i_add);
+            rootNode.Nodes.Add("i_character_id = " + Utility.FormatGuid(i_character_id));
+            rootNode.Nodes.Add("i_character_name = " + i_character_name.m_buffer);
+            rootNode.Nodes.Add("i_msg_type = " + (SquelchTypes)i_msg_type);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class ModifyAccountSquelch : Message
+    {
+        public uint i_add;
+        public PStringChar i_character_name;
+
+        public static ModifyAccountSquelch read(BinaryReader binaryReader)
+        {
+            var newObj = new ModifyAccountSquelch();
+            newObj.i_add = binaryReader.ReadUInt32();
+            newObj.i_character_name = PStringChar.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_add = " + i_add);
+            rootNode.Nodes.Add("i_character_name = " + i_character_name.m_buffer);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class ModifyGlobalSquelch : Message
+    {
+        public uint i_add;
+        public uint i_msg_type;
+
+        public static ModifyGlobalSquelch read(BinaryReader binaryReader)
+        {
+            var newObj = new ModifyGlobalSquelch();
+            newObj.i_add = binaryReader.ReadUInt32();
+            newObj.i_msg_type = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_add = " + i_add);
+            rootNode.Nodes.Add("i_msg_type = " + (SquelchTypes)i_msg_type);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -270,20 +413,101 @@ public class CM_Communication : MessageProcessor {
         }
     }
 
-    /*public class SetSquelchDB : Message
+    public class CharacterHash
     {
+        public uint i_character_id;
+        public SquelchInfo character_info;
+
+        public static CharacterHash read(BinaryReader binaryReader)
+        {
+            var newObj = new CharacterHash();
+            newObj.i_character_id = binaryReader.ReadUInt32();
+            newObj.character_info = SquelchInfo.read(binaryReader);
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("i_character_id = " + Utility.FormatGuid(i_character_id));
+            character_info.contributeToTreeNode(node);
+        }
+    }
+
+    public class SquelchInfo
+    {
+        public PList<uint> squelch_msgs;
+        public PStringChar name;
+        public uint is_zone_squelch;
+
+        public static SquelchInfo read(BinaryReader binaryReader)
+        {
+            var newObj = new SquelchInfo();
+            newObj.squelch_msgs = PList<uint>.read(binaryReader);
+            newObj.name = PStringChar.read(binaryReader);
+            newObj.is_zone_squelch = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            if (squelch_msgs.list.Count == 0) {
+                node.Nodes.Add("squelch_msgs = None");
+            }
+            for (int i = 0; i < squelch_msgs.list.Count; i++) {
+                node.Nodes.Add("squelch_msgs = " + (SquelchMasks)squelch_msgs.list[i]);
+            }
+            node.Nodes.Add("name = " + name);
+            node.Nodes.Add("is_zone_squelch = " + is_zone_squelch);
+        }
+    }
+
+    public class SetSquelchDB : Message
+    {
+        public ushort account_num_buckets;
+        public ushort account_table_size;
+        public ushort character_num_buckets;
+        public ushort character_table_size;
+        public List<CharacterHash> character_list = new List<CharacterHash>();
+        public SquelchInfo global_squelch;
+
         public static SetSquelchDB read(BinaryReader binaryReader)
         {
             var newObj = new SetSquelchDB();
-
+            // Note: Even if the user applies a squelch to an account using the ModifyAccountSquelch message (0x0059) it does not appear 
+            // in this account squelch info section but rather in the character squelch info section of the server response which comes next.
+            // It appears based on pcaps that the account squelch info will always be 0 and therefore will not need to be unpacked.
+            newObj.account_num_buckets = binaryReader.ReadUInt16();
+            newObj.account_table_size = binaryReader.ReadUInt16();
+            newObj.character_num_buckets = binaryReader.ReadUInt16();
+            newObj.character_table_size = binaryReader.ReadUInt16();
+            for (int i = 0; i < newObj.character_num_buckets; i++) {
+                newObj.character_list.Add(CharacterHash.read(binaryReader));
+            }
+            newObj.global_squelch = SquelchInfo.read(binaryReader);
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView)
         {
-            throw new NotImplementedException();
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            //rootNode.Expand();
+            TreeNode accountNode = rootNode.Nodes.Add("account_hash = ");
+            accountNode.Nodes.Add("num_buckets = " + account_num_buckets);
+            accountNode.Nodes.Add("table_size = " + account_table_size);
+            TreeNode characterhashNode = rootNode.Nodes.Add("character_hash = ");
+            characterhashNode.Nodes.Add("num_buckets = " + character_num_buckets);
+            characterhashNode.Nodes.Add("table_size = " + character_table_size);
+            // add character stuff here
+            for (int i = 0; i < character_list.Count; i++) {
+                TreeNode characterNode = characterhashNode.Nodes.Add($"character {i+1} = ");
+                character_list[i].contributeToTreeNode(characterNode);
+            }
+            TreeNode globalsquelchNode = rootNode.Nodes.Add("global_squelch = ");
+            global_squelch.contributeToTreeNode(globalsquelchNode);
+            treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
-    }*/
+    }
 
     public class Emote : Message
     {
