@@ -1,3 +1,10 @@
+### 2017-10-14
+[Slushnas]
+* Fixed parsing of CreateTinkeringTool and SalvageOperationsResultData messages.
+* Added support for InventoryServerSaysFailedEvent, ViewContentsEvent, and InventoryPutObjIn3DEvent messages.
+* Added GUID conversion and enums to many message variables.
+* Renamed UpdateStackSize variable from maxNumPages to ts to indicate it is a timestamp.
+
 ### 2017-10-13
 [Slushnas]
 * Added support for the following communication messages: SetAFKMode, SetAFKMessage, ModifyCharacterSquelch, ModifyAccountSquelch, ModifyGlobalSquelch, and SetSquelchDB.

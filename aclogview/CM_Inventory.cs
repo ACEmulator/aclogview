@@ -58,7 +58,6 @@ public class CM_Inventory : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
-            // TODO: Evt_Inventory__CommenceViewingContents_ID
             case PacketOpcode.CLOSE_GROUND_CONTAINER_EVENT: // 0x0052
                 {
                     CloseGroundContainer message = CloseGroundContainer.read(messageDataReader);
@@ -80,6 +79,12 @@ public class CM_Inventory : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
+            case PacketOpcode.INVENTORY_SERVER_SAYS_FAILED_EVENT: // 0x00A0
+                {
+                    InventoryServerSaysFailed message = InventoryServerSaysFailed.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             case PacketOpcode.Evt_Inventory__GiveObjectRequest_ID: {
                     GiveObjectRequest message = GiveObjectRequest.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
@@ -87,6 +92,12 @@ public class CM_Inventory : MessageProcessor {
                 }
             case PacketOpcode.Evt_Inventory__NoLongerViewingContents_ID: {
                     NoLongerViewingContents message = NoLongerViewingContents.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.VIEW_CONTENTS_EVENT: // 0x0196
+                {
+                    ViewContents message = ViewContents.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -107,6 +118,12 @@ public class CM_Inventory : MessageProcessor {
                 }
             case PacketOpcode.STACKABLE_SET_STACKSIZE_EVENT: {
                     UpdateStackSize message = UpdateStackSize.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.INVENTORY_PUT_OBJ_IN_3D_EVENT: // 0x019A
+                {
+                    InventoryPutObjIn3D message = InventoryPutObjIn3D.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -208,8 +225,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + i_item);
-            rootNode.Nodes.Add("i_container = " + i_container);
+            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
+            rootNode.Nodes.Add("i_container = " + Utility.FormatGuid(i_container));
             rootNode.Nodes.Add("i_loc = " + i_loc);
             treeView.Nodes.Add(rootNode);
         }
@@ -247,7 +264,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + i_item);
+            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -325,8 +342,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_mergeFromID = " + i_mergeFromID);
-            rootNode.Nodes.Add("i_mergeToID = " + i_mergeToID);
+            rootNode.Nodes.Add("i_mergeFromID = " + Utility.FormatGuid(i_mergeFromID));
+            rootNode.Nodes.Add("i_mergeToID = " + Utility.FormatGuid(i_mergeToID));
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
         }
@@ -350,8 +367,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_stackID = " + i_stackID);
-            rootNode.Nodes.Add("i_containerID = " + i_containerID);
+            rootNode.Nodes.Add("i_stackID = " + Utility.FormatGuid(i_stackID));
+            rootNode.Nodes.Add("i_containerID = " + Utility.FormatGuid(i_containerID));
             rootNode.Nodes.Add("i_place = " + i_place);
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
@@ -372,8 +389,30 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_stackID = " + i_stackID);
+            rootNode.Nodes.Add("i_stackID = " + Utility.FormatGuid(i_stackID));
             rootNode.Nodes.Add("i_amount = " + i_amount);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class InventoryServerSaysFailed : Message {
+        public uint i_objectID;
+        public WERROR etype;
+
+        public static InventoryServerSaysFailed read(BinaryReader binaryReader)
+        {
+            InventoryServerSaysFailed newObj = new InventoryServerSaysFailed();
+            newObj.i_objectID = binaryReader.ReadUInt32();
+            newObj.etype = (WERROR)binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatGuid(i_objectID));
+            rootNode.Nodes.Add("etype = " + etype);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -413,8 +452,48 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_container = " + i_container);
+            rootNode.Nodes.Add("i_container = " + Utility.FormatGuid(i_container));
             treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class ContentProfile {
+        public uint m_iid;
+        public uint m_uContainerProperties;
+
+        public static ContentProfile read(BinaryReader binaryReader) {
+            ContentProfile newObj = new ContentProfile();
+            newObj.m_iid = binaryReader.ReadUInt32();
+            newObj.m_uContainerProperties = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node) {
+            node.Nodes.Add("m_iid = " + Utility.FormatGuid(m_iid));
+            node.Nodes.Add("m_uContainerProperties = " + m_uContainerProperties);
+        }
+    }
+
+    public class ViewContents : Message {
+        public uint i_container;
+        public PList<ContentProfile> contents_list;
+
+        public static ViewContents read(BinaryReader binaryReader) {
+            ViewContents newObj = new ViewContents();
+            newObj.i_container = binaryReader.ReadUInt32();
+            newObj.contents_list = PList<ContentProfile>.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView) {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Nodes.Add("i_container = " + Utility.FormatGuid(i_container));
+            TreeNode contentsNode = rootNode.Nodes.Add("contents = ");
+            for (int i = 0; i < contents_list.list.Count; i++) {
+                contents_list.list[i].contributeToTreeNode(contentsNode);
+            }
+            treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -434,8 +513,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_stackID = " + i_stackID);
-            rootNode.Nodes.Add("i_loc = " + i_loc);
+            rootNode.Nodes.Add("i_stackID = " + Utility.FormatGuid(i_stackID));
+            rootNode.Nodes.Add("i_loc = " + (INVENTORY_LOC)i_loc);
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
         }
@@ -454,11 +533,14 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
-            rootNode.Nodes.Add("i_toolID = " + i_toolID);
+            rootNode.Nodes.Add("i_toolID = " + Utility.FormatGuid(i_toolID));
             TreeNode gemsNode = rootNode.Nodes.Add("i_gems = ");
-            i_gems.contributeToTreeNode(gemsNode);
+            for (int i = 0; i < i_gems.list.Count; i++) {
+                var gem = i_gems.list[i];
+                gemsNode.Nodes.Add(Utility.FormatGuid(gem));
+            }
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -482,7 +564,6 @@ public class CM_Inventory : MessageProcessor {
         }
     }
 
-    // TODO: Double-check that this is really supposed to just be a SalvageOperationsResultData
     public class SalvageOperationsResultData : Message {
         public uint m_skillUsed;
         public PList<uint> m_notSalvagable;
@@ -500,26 +581,31 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
-            rootNode.Nodes.Add("m_skillUsed = " + m_skillUsed);
+            rootNode.Nodes.Add("m_skillUsed = " + (STypeSkill)m_skillUsed);
             TreeNode notSalvageableNode = rootNode.Nodes.Add("m_notSalvagable = ");
-            m_notSalvagable.contributeToTreeNode(notSalvageableNode);
+            for (int i = 0; i < m_notSalvagable.list.Count; i++) {
+                var object_id = m_notSalvagable.list[i];
+                notSalvageableNode.Nodes.Add("object_id = " + Utility.FormatGuid(object_id));
+            }
             TreeNode salvageResultsNode = rootNode.Nodes.Add("m_salvageResults = ");
-            m_salvageResults.contributeToTreeNode(salvageResultsNode);
-            rootNode.Nodes.Add("m_augBonus = " + m_augBonus);
+            for (int i = 0; i < m_salvageResults.list.Count; i++) {
+                m_salvageResults.list[i].contributeToTreeNode(salvageResultsNode);
+            }
+            rootNode.Nodes.Add("m_augBonus = " + m_augBonus + "%");
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
     public class UpdateStackSize : Message {
-        public byte maxNumPages;
+        public byte ts;
         public uint item;
         public uint amount;
         public uint newValue;
 
         public static UpdateStackSize read(BinaryReader binaryReader) {
             UpdateStackSize newObj = new UpdateStackSize();
-            newObj.maxNumPages = binaryReader.ReadByte();
+            newObj.ts = binaryReader.ReadByte();
             newObj.item = binaryReader.ReadUInt32();
             newObj.amount = binaryReader.ReadUInt32();
             newObj.newValue = binaryReader.ReadUInt32();
@@ -529,10 +615,27 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("maxNumPages = " + maxNumPages);
-            rootNode.Nodes.Add("item = " + item);
+            rootNode.Nodes.Add("ts = " + ts);
+            rootNode.Nodes.Add("item = " + Utility.FormatGuid(item));
             rootNode.Nodes.Add("amount = " + amount);
             rootNode.Nodes.Add("newValue = " + newValue);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class InventoryPutObjIn3D : Message {
+        public uint ObjectID;
+
+        public static InventoryPutObjIn3D read(BinaryReader binaryReader) {
+            InventoryPutObjIn3D newObj = new InventoryPutObjIn3D();
+            newObj.ObjectID = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView) {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("ObjectID = " + Utility.FormatGuid(ObjectID));
             treeView.Nodes.Add(rootNode);
         }
     }
