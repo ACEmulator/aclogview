@@ -6557,7 +6557,7 @@ public enum SpellID {
     ToweringDefenseCooldown_SpellID = 32779,
     StrangeJewelCooldown_SpellID = 32818, // (Guardians of Mhoire Castle quest)
     AlignedManaStoneCooldown_SpellID = 32819,
-    ContractForKillRynthidSlayersCooldown_SpellID = 32868,
+    ContractCooldown_SpellID = 32868,
     SummonCreatureCooldown_SpellID = 32981,
     FacilityHubPortalGemCooldown_SpellID = 32989,
     ScryingRodCooldown_SpellID = 33268, // (Slave Master Quest)

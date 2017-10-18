@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview;
 
 public class CM_Trade : MessageProcessor {
 
@@ -105,7 +106,7 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_other = " + i_other);
+            rootNode.Nodes.Add("i_other = " + Utility.FormatGuid(i_other));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -126,7 +127,7 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + i_item);
+            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
             rootNode.Nodes.Add("i_loc = " + i_loc);
             treeView.Nodes.Add(rootNode);
         }
@@ -220,8 +221,8 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("initiator = " + initiator);
-            rootNode.Nodes.Add("partner = " + partner);
+            rootNode.Nodes.Add("initiator = " + Utility.FormatGuid(initiator));
+            rootNode.Nodes.Add("partner = " + Utility.FormatGuid(partner));
             rootNode.Nodes.Add("stamp = " + stamp);
             treeView.Nodes.Add(rootNode);
         }
@@ -256,7 +257,7 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("etype = " + etype);
+            rootNode.Nodes.Add("etype = " + (WERROR)etype);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -277,8 +278,8 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("item = " + item);
-            rootNode.Nodes.Add("id = " + id);
+            rootNode.Nodes.Add("item = " + Utility.FormatGuid(item));
+            rootNode.Nodes.Add("id = " + (TradeListIDEnum)id);
             rootNode.Nodes.Add("loc = " + loc);
             treeView.Nodes.Add(rootNode);
         }
@@ -316,7 +317,7 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("source = " + source);
+            rootNode.Nodes.Add("source = " + Utility.FormatGuid(source));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -333,7 +334,7 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("source = " + source);
+            rootNode.Nodes.Add("source = " + Utility.FormatGuid(source));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -350,7 +351,7 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("source = " + source);
+            rootNode.Nodes.Add("source = " + Utility.FormatGuid(source));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -369,8 +370,8 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_iidItem = " + i_iidItem);
-            rootNode.Nodes.Add("etype = " + etype);
+            rootNode.Nodes.Add("i_iidItem = " + Utility.FormatGuid(i_iidItem));
+            rootNode.Nodes.Add("etype = " + (WERROR)etype);
             treeView.Nodes.Add(rootNode);
         }
     }

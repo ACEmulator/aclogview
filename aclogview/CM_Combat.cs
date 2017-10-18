@@ -217,7 +217,7 @@ public class CM_Combat : MessageProcessor {
             rootNode.Nodes.Add("severity = " + severity);
             rootNode.Nodes.Add("damage = " + damage);
             rootNode.Nodes.Add("critical = " + critical);
-            rootNode.Nodes.Add("attackConditions = " + attack_conditions);
+            rootNode.Nodes.Add("attackConditions = " + (AttackConditions)attack_conditions);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -256,7 +256,7 @@ public class CM_Combat : MessageProcessor {
             rootNode.Nodes.Add("damage = " + damage);
             rootNode.Nodes.Add("part = " + (BodyPart)part);
             rootNode.Nodes.Add("critical = " + critical);
-            rootNode.Nodes.Add("attackConditions = " + attack_conditions);
+            rootNode.Nodes.Add("attackConditions = " + (AttackConditions)attack_conditions);
             treeView.Nodes.Add(rootNode);
         }
     }

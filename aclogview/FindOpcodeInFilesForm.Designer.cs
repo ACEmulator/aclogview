@@ -185,6 +185,7 @@
             this.txtOpcode.Size = new System.Drawing.Size(64, 20);
             this.txtOpcode.TabIndex = 7;
             this.txtOpcode.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.txtOpcode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtOpcode_KeyPress);
             // 
             // statusStrip1
             // 

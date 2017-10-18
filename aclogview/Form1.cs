@@ -80,7 +80,7 @@ namespace aclogview
                     opCodesToHighlight.Add(opcode);
             }
             if (args != null && args.Length >= 1) {
-                loadPcap(args[0], false);
+                loadPcap(args[0], true); // Default to "Open As Messages"
             } else
             {
                 toolStripStatus.Text = "AC Log View";
@@ -101,6 +101,14 @@ namespace aclogview
             Text = "AC Log View - " + Path.GetFileName(fileName);
             pcapFilePath = Path.GetFullPath(fileName);
             toolStripStatus.Text = pcapFilePath;
+            loadedAsMessages = asMessages; // This needs to be set as well or you will encounter some fragment issues with some messages.
+            if (asMessages) {
+                checkBox_useHighlighting.Checked = false;
+                checkBox_useHighlighting.Enabled = false;
+            } else {
+                checkBox_useHighlighting.Checked = true;
+                checkBox_useHighlighting.Enabled = true;
+            }
             btnHighlight.Enabled = true;
             menuItem_ReOpen.Enabled = true;
             menuItem_ReOpenAsMessages.Enabled = true;

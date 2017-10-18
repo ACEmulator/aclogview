@@ -187,3 +187,9 @@ public enum HeritageGroup {
     Olthoi_HeritageGroup,
     OlthoiAcid_HeritageGroup
 }
+
+public enum Gender
+{
+    Male,
+    Female
+}

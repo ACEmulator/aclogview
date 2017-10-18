@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview;
 
 public class CM_House : MessageProcessor {
 
@@ -160,11 +161,13 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
-            rootNode.Nodes.Add("i_slumlord = " + i_slumlord);
+            rootNode.Nodes.Add("i_slumlord = " + Utility.FormatGuid(i_slumlord));
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
-            i_stuff.contributeToTreeNode(stuffNode);
+            for (int i = 0; i < i_stuff.list.Count; i++) {
+                stuffNode.Nodes.Add(Utility.FormatGuid(i_stuff.list[i]));
+            }
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -227,7 +230,7 @@ public class CM_House : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("_id = " + _id);
-            node.Nodes.Add("_owner = " + _owner);
+            node.Nodes.Add("_owner = " + Utility.FormatGuid(_owner));
             node.Nodes.Add("_bitmask = " + _bitmask);
             node.Nodes.Add("_min_level = " + _min_level);
             node.Nodes.Add("_max_level = " + _max_level);
@@ -237,9 +240,15 @@ public class CM_House : MessageProcessor {
             node.Nodes.Add("_type = " + _type);
             node.Nodes.Add("_name = " + _name);
             TreeNode buyNode = node.Nodes.Add("_buy = ");
-            _buy.contributeToTreeNode(buyNode);
+            for (int i = 0; i < _buy.list.Count; i++) {
+                TreeNode itemNode = buyNode.Nodes.Add("_item = ");
+                _buy.list[i].contributeToTreeNode(itemNode);
+            }
             TreeNode rentNode = node.Nodes.Add("_rent = ");
-            _rent.contributeToTreeNode(rentNode);
+            for (int i = 0; i < _rent.list.Count; i++) {
+                TreeNode itemNode = rentNode.Nodes.Add("_item = ");
+                _rent.list[i].contributeToTreeNode(itemNode);
+            }
         }
     }
 
@@ -256,11 +265,11 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
-            rootNode.Nodes.Add("lord = " + lord);
+            rootNode.Nodes.Add("lord = " + Utility.FormatGuid(lord));
             TreeNode profNode = rootNode.Nodes.Add("prof = ");
             prof.contributeToTreeNode(profNode);
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -278,11 +287,13 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
-            rootNode.Nodes.Add("i_slumlord = " + i_slumlord);
+            rootNode.Nodes.Add("i_slumlord = " + Utility.FormatGuid(i_slumlord));
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
-            i_stuff.contributeToTreeNode(stuffNode);
+            for (int i = 0; i < i_stuff.list.Count; i++) {
+                stuffNode.Nodes.Add(Utility.FormatGuid(i_stuff.list[i]));
+            }
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -361,7 +372,7 @@ public class CM_House : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("etype = " + etype);
+            rootNode.Nodes.Add("etype = " + (WERROR)etype);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -394,10 +405,13 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
             TreeNode listNode = rootNode.Nodes.Add("list = ");
-            list.contributeToTreeNode(listNode);
+            for (int i = 0; i < list.list.Count; i++) {
+                TreeNode itemNode = listNode.Nodes.Add("_item = ");
+                list.list[i].contributeToTreeNode(itemNode);
+            }
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -504,7 +518,7 @@ public class CM_House : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_lord = " + i_lord);
+            rootNode.Nodes.Add("i_lord = " + Utility.FormatGuid(i_lord));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -521,7 +535,7 @@ public class CM_House : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("etype = " + etype);
+            rootNode.Nodes.Add("etype = " + (WERROR)etype);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -613,12 +627,14 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
             rootNode.Nodes.Add("i_houseType = " + i_houseType);
             TreeNode housesNode = rootNode.Nodes.Add("houses = ");
-            houses.contributeToTreeNode(housesNode);
+            for (int i = 0; i < houses.list.Count; i++) {
+                housesNode.Nodes.Add(Utility.FormatGuid(houses.list[i]));
+            }
             rootNode.Nodes.Add("nHouses = " + nHouses);
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 }

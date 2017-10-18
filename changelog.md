@@ -1,3 +1,21 @@
+### 2017-10-18
+[Slushnas]
+#### Interface Changes
+* The default method for opening files is now the "as messages" mode. This mainly affects opening files from the "Find Opcode In Files" dialog.
+* The "Use Highlighting" checkbox will be unchecked and disabled when viewing a file in "as messages" mode as it was not designed for use in this mode.
+* Fixed a bug where files opened in "as messages" mode could get highlighting applied when it shouldn't be. As a result, larger messages
+will now load faster in some cases.
+* You can now hit the Enter key in the Opcode box to start a search in the "Find Opcode In Files" dialog.
+
+#### Other Changes
+* Renamed Contract cooldown spell enum as it looks like it is shared for all contracts.
+* Added gender enum.
+* Renamed lock related weenie errors as they apply to both chests and doors.
+* Added enum and Guid conversions to lots of variables.
+* Added initial support for the AllegianceUpdate event (0x0020) and AllegianceInfoResponseEvent (0x027C). There is a chance that character nodes will not be grouped correctly 
+in the hierarchy but all data should be parsed.
+* Fixed several housing messages: BuyHouse, Recv_HouseProfile, RentHouse, Recv_UpdateRentPayment, and Recv_AvailableHouses.
+
 ### 2017-10-14
 [Slushnas]
 * Fixed parsing of CreateTinkeringTool and SalvageOperationsResultData messages.

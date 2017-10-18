@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview;
 
 public class CM_Death : MessageProcessor
 {
@@ -64,8 +65,8 @@ public class CM_Death : MessageProcessor
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("death_message = " + DeathMessageText);
-            rootNode.Nodes.Add("victim_id = " + VictimId);
-            rootNode.Nodes.Add("killer_id = " + KillerId);
+            rootNode.Nodes.Add("victim_id = " + Utility.FormatGuid(VictimId));
+            rootNode.Nodes.Add("killer_id = " + Utility.FormatGuid(KillerId));
             treeView.Nodes.Add(rootNode);
         }
     }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview;
 
 public class CM_Character : MessageProcessor {
 
@@ -164,20 +165,20 @@ public class CM_Character : MessageProcessor {
     public class ShortCutData {
         public int index_;
         public uint objectID_;
-        public SpellID spellID_;
+        public uint spellID_;
 
         public static ShortCutData read(BinaryReader binaryReader) {
             ShortCutData newObj = new ShortCutData();
             newObj.index_ = binaryReader.ReadInt32();
             newObj.objectID_ = binaryReader.ReadUInt32();
-            newObj.spellID_ = (SpellID)binaryReader.ReadUInt32();
+            newObj.spellID_ = binaryReader.ReadUInt32();
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("index_ = " + index_);
-            node.Nodes.Add("objectID_ = " + objectID_);
-            node.Nodes.Add("spellID_ = " + spellID_);
+            node.Nodes.Add("objectID_ = " + Utility.FormatGuid(objectID_));
+            node.Nodes.Add("spellID_ = " + "(" + spellID_ + ") " + (SpellID)spellID_);
         }
     }
 
@@ -560,10 +561,10 @@ public class CM_Character : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
             TreeNode shortcutNode = rootNode.Nodes.Add("shortcut = ");
             shortcut.contributeToTreeNode(shortcutNode);
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 

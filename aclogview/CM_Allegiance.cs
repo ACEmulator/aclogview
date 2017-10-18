@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview;
 
 public class CM_Allegiance : MessageProcessor {
 
@@ -173,7 +174,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_target = " + i_target);
+            rootNode.Nodes.Add("i_target = " + Utility.FormatGuid(i_target));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -191,7 +192,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_target = " + i_target);
+            rootNode.Nodes.Add("i_target = " + Utility.FormatGuid(i_target));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -255,37 +256,91 @@ public class CM_Allegiance : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("_id = " + _id);
+            node.Nodes.Add("_id = " + Utility.FormatGuid(_id));
             node.Nodes.Add("_cp_cached = " + _cp_cached);
             node.Nodes.Add("_cp_tithed = " + _cp_tithed);
             node.Nodes.Add("_bitfield = " + _bitfield);
-            node.Nodes.Add("_gender = " + _gender);
-            node.Nodes.Add("_hg = " + _hg);
+            node.Nodes.Add("_gender = " + (Gender)_gender);
+            node.Nodes.Add("_hg = " + (HeritageGroup)_hg);
             node.Nodes.Add("_rank = " + _rank);
             node.Nodes.Add("_level = " + _level);
             node.Nodes.Add("_loyalty = " + _loyalty);
             node.Nodes.Add("_leadership = " + _leadership);
-            node.Nodes.Add("_time_online__large = " + _time_online__large);
-            node.Nodes.Add("_time_online__small = " + _time_online__small);
-            node.Nodes.Add("_allegiance_age = " + _allegiance_age);
+            if ((_bitfield & 0x4) != 0) {
+                node.Nodes.Add("_time_online__small = " + _time_online__small);
+                node.Nodes.Add("_allegiance_age = " + _allegiance_age);
+            } else {
+                node.Nodes.Add("_time_online__large = " + _time_online__large);
+            }
             node.Nodes.Add("_name = " + _name);
         }
     }
 
     public class AllegianceNode
     {
+        public uint _parent_id;
+        public AllegianceData _monarch;
         public AllegianceNode _patron;
         public AllegianceNode _peer;
-        public AllegianceNode _vassal;
+        public List<AllegianceNode> vassalList;
         public AllegianceData _data;
 
-        // TODO: Read in all the stuff
+        // TODO: May need to pass the character Guid down to this procedure to check where our character is in the hierarchy.
+        // There is a chance that a node might get put in the wrong place in the hierarchy. We should be able to check
+        // each nodes parent ID and group them accordingly once the correct hierarchy is known.
+        // For example: if we are directly beneath the monarch does that make us a peer or a patron?
+        // If we are the monarch does that make us a monarch node or a peer node? Can vassals only be listed under a patron node?
+        public static AllegianceNode read(BinaryReader binaryReader, ushort packed_nodes) {
+            AllegianceNode newObj = new AllegianceNode();
+            newObj.vassalList = new List<AllegianceNode>();
+            for (int i = 0; i < packed_nodes; i++) {
+                if (i == 0) {
+                    newObj._monarch = AllegianceData.read(binaryReader);
+                }
+                else if (i == 1) {
+                    newObj._patron = new AllegianceNode();
+                    newObj._patron._parent_id = binaryReader.ReadUInt32();
+                    newObj._patron._data = AllegianceData.read(binaryReader);
+                }
+                else if (i == 2) {
+                    newObj._peer = new AllegianceNode();
+                    newObj._peer._parent_id = binaryReader.ReadUInt32();
+                    newObj._peer._data = AllegianceData.read(binaryReader);
+                }
+                else {
+                    var _vassal = new AllegianceNode();
+                    _vassal._parent_id = binaryReader.ReadUInt32();
+                    _vassal._data = AllegianceData.read(binaryReader);
+                    newObj.vassalList.Add(_vassal);
+                }
+            }
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node) {
+            TreeNode monarchNode = node.Nodes.Add("_monarch = ");
+            _monarch.contributeToTreeNode(monarchNode);
+            TreeNode patronNode = monarchNode.Nodes.Add("_patron = ");
+            patronNode.Nodes.Add("_parent_id = " + Utility.FormatGuid(_patron._parent_id));
+            _patron._data.contributeToTreeNode(patronNode);
+            if (_peer != null) {
+                TreeNode peerNode = patronNode.Nodes.Add("_peer = ");
+                peerNode.Nodes.Add("_parent_id = " + Utility.FormatGuid(_peer._parent_id));
+                _peer._data.contributeToTreeNode(peerNode);
+                for (int i = 0; i < vassalList.Count; i++)
+                {
+                    TreeNode vassalNode = peerNode.Nodes.Add($"_vassal {i + 1} = ");
+                    vassalNode.Nodes.Add("_parent_id = " + Utility.FormatGuid(vassalList[i]._parent_id));
+                    vassalList[i]._data.contributeToTreeNode(vassalNode);
+                }
+            }
+        }
     }
 
     public class AllegianceHierarchy
     {
+        public ushort packed_nodes;
         public AllegianceVersion m_oldVersion;
-        public uint m_total;
         public PackableHashTable<uint, uint> m_AllegianceOfficers;
         public PList<PStringChar> m_OfficerTitles;
         public int m_monarchBroadcastTime;
@@ -302,22 +357,55 @@ public class CM_Allegiance : MessageProcessor {
         public uint m_ApprovedVassal;
         public AllegianceNode m_pMonarch;
 
-        // TODO: Read in all the stuff
-
         public static AllegianceHierarchy read(BinaryReader binaryReader)
         {
             AllegianceHierarchy newObj = new AllegianceHierarchy();
-            newObj.m_oldVersion = (AllegianceVersion)binaryReader.ReadByte();
-            newObj.m_total = binaryReader.ReadUInt32();
-            // TODO: Read in profile
+            newObj.packed_nodes = binaryReader.ReadUInt16();
+            newObj.m_oldVersion = (AllegianceVersion)binaryReader.ReadUInt16();
+            newObj.m_AllegianceOfficers = PackableHashTable<uint,uint>.read(binaryReader);
+            newObj.m_OfficerTitles = PList<PStringChar>.read(binaryReader);
+            newObj.m_monarchBroadcastTime = binaryReader.ReadInt32();
+            newObj.m_monarchBroadcastsToday = binaryReader.ReadUInt32();
+            newObj.m_spokesBroadcastTime = binaryReader.ReadInt32();
+            newObj.m_spokesBroadcastsToday = binaryReader.ReadUInt32();
+            newObj.m_motd = PStringChar.read(binaryReader);
+            newObj.m_motdSetBy = PStringChar.read(binaryReader);
+            newObj.m_chatRoomID = binaryReader.ReadUInt32();
+            newObj.m_BindPoint = Position.read(binaryReader);
+            newObj.m_AllegianceName = PStringChar.read(binaryReader);
+            newObj.m_NameLastSetTime = binaryReader.ReadInt32();
+            newObj.m_isLocked = binaryReader.ReadUInt32();
+            newObj.m_ApprovedVassal = binaryReader.ReadUInt32();
+            if (newObj.packed_nodes > 0) {
+                newObj.m_pMonarch = AllegianceNode.read(binaryReader, newObj.packed_nodes);
+            }
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
+            node.Nodes.Add("packed_nodes = " + packed_nodes);
             node.Nodes.Add("m_oldVersion = " + m_oldVersion);
-            node.Nodes.Add("m_total = " + m_total);
-            // TODO: Read in profile
+            TreeNode officersNode = node.Nodes.Add("m_AllegianceOfficers = ");
+            m_AllegianceOfficers.contributeToTreeNode(officersNode);
+            TreeNode officerTitlesNode = node.Nodes.Add("m_OfficerTitles = ");
+            m_OfficerTitles.contributeToTreeNode(officerTitlesNode);
+            node.Nodes.Add("m_monarchBroadcastTime = " + m_monarchBroadcastTime);
+            node.Nodes.Add("m_monarchBroadcastsToday = " + m_monarchBroadcastsToday);
+            node.Nodes.Add("m_spokesBroadcastTime = " + m_spokesBroadcastTime);
+            node.Nodes.Add("m_spokesBroadcastsToday = " + m_spokesBroadcastsToday);
+            node.Nodes.Add("m_motd = " + m_motd);
+            node.Nodes.Add("m_motdSetBy = " + m_motdSetBy);
+            node.Nodes.Add("m_chatRoomID = " + m_chatRoomID);
+            TreeNode bindNode = node.Nodes.Add("m_BindPoint = ");
+            m_BindPoint.contributeToTreeNode(bindNode);
+            node.Nodes.Add("m_AllegianceName = " + m_AllegianceName);
+            node.Nodes.Add("m_NameLastSetTime = " + m_NameLastSetTime);
+            node.Nodes.Add("m_isLocked = " + m_isLocked);
+            node.Nodes.Add("m_ApprovedVassal = " + Utility.FormatGuid(m_ApprovedVassal));
+            if (packed_nodes > 0) {
+                m_pMonarch.contributeToTreeNode(node);
+            }
         }
     }
 
@@ -340,29 +428,29 @@ public class CM_Allegiance : MessageProcessor {
         {
             node.Nodes.Add("_total_members = " + _total_members);
             node.Nodes.Add("_total_vassals = " + _total_vassals);
-            TreeNode profileNode = node.Nodes.Add("allegianceProfile = ");
-            _allegiance.contributeToTreeNode(profileNode);
+            TreeNode hierarchyNode = node.Nodes.Add("allegianceHierarchy = ");
+            _allegiance.contributeToTreeNode(hierarchyNode);
         }
     }
 
     public class AllegianceUpdate : Message {
+        public uint _rank;
         public AllegianceProfile allegianceProfile;
-        public uint etype;
 
         public static AllegianceUpdate read(BinaryReader binaryReader) {
             AllegianceUpdate newObj = new AllegianceUpdate();
+            newObj._rank = binaryReader.ReadUInt32();
             newObj.allegianceProfile = AllegianceProfile.read(binaryReader);
-            newObj.etype = binaryReader.ReadUInt32();
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();
+            rootNode.Nodes.Add("_rank = " + _rank);
             TreeNode profileNode = rootNode.Nodes.Add("allegianceProfile = ");
             allegianceProfile.contributeToTreeNode(profileNode);
-            rootNode.Nodes.Add("etype = " + etype);
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -552,7 +640,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("member = " + member);
+            rootNode.Nodes.Add("member = " + Utility.FormatGuid(member));
             rootNode.Nodes.Add("bNowLoggedIn = " + bNowLoggedIn);
             treeView.Nodes.Add(rootNode);
         }
@@ -591,7 +679,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("target = " + target);
+            rootNode.Nodes.Add("target = " + Utility.FormatGuid(target));
             TreeNode profileNode = rootNode.Nodes.Add("prof = ");
             prof.contributeToTreeNode(profileNode);
             treeView.Nodes.Add(rootNode);

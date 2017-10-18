@@ -90,7 +90,7 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("etype = " + etype);
+            rootNode.Nodes.Add("etype = " + (WERROR)etype);
             treeView.Nodes.Add(rootNode);
         }
     }

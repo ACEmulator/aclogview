@@ -350,5 +350,14 @@ namespace aclogview
 
             System.Diagnostics.Process.Start(Application.ExecutablePath, '"' + fileName + '"' + " " + opCodeToSearchFor);
         }
+
+        private void txtOpcode_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                btnStartSearch.PerformClick();
+            }
+        }
     }
 }
