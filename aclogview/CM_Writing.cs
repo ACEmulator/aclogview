@@ -14,10 +14,27 @@ public class CM_Writing : MessageProcessor {
 
         PacketOpcode opcode = Util.readOpcode(messageDataReader);
         switch (opcode) {
-            // TODO: Add all BOOK_*_RESPONSE_EVENT
             case PacketOpcode.BOOK_DATA_RESPONSE_EVENT:
                 {
                     PageDataList message = PageDataList.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.BOOK_MODIFY_PAGE_RESPONSE_EVENT:
+                {
+                    BookModifyPageResponse message = BookModifyPageResponse.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.BOOK_ADD_PAGE_RESPONSE_EVENT:
+                {
+                    BookAddPageResponse message = BookAddPageResponse.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.BOOK_DELETE_PAGE_RESPONSE_EVENT:
+                {
+                    BookDeletePageResponse message = BookDeletePageResponse.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -171,13 +188,96 @@ public class CM_Writing : MessageProcessor {
             rootNode.Nodes.Add("authorID = " + Utility.FormatGuid(authorID));
             rootNode.Nodes.Add("authorName = " + authorName);
             rootNode.Nodes.Add("authorAccount = " + authorAccount);
-            rootNode.Nodes.Add("flags = " + flags);
+            rootNode.Nodes.Add("flags = " + Utility.FormatGuid(flags));
             rootNode.Nodes.Add("textIncluded = " + textIncluded);
             rootNode.Nodes.Add("ignoreAuthor = " + ignoreAuthor);
             if (textIncluded != 0)
                 rootNode.Nodes.Add("pageText = " + pageText);
 
             node.Nodes.Add(rootNode);
+        }
+    }
+
+    public class PageResponse
+    {
+        public uint i_bookID;
+        public int i_pageNum;
+        public int i_success;
+
+        public static PageResponse read(BinaryReader binaryReader)
+        {
+            PageResponse newObj = new PageResponse();
+            newObj.i_bookID = binaryReader.ReadUInt32();
+            newObj.i_pageNum = binaryReader.ReadInt32();
+            newObj.i_success = binaryReader.ReadInt32();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("i_bookID = " + Utility.FormatGuid(i_bookID));
+            node.Nodes.Add("i_pageNum = " + i_pageNum);
+            node.Nodes.Add("i_success = " + i_success);
+        }
+    }
+
+    public class BookModifyPageResponse : Message
+    {
+        public PageResponse pageResponse;
+
+        public static BookModifyPageResponse read(BinaryReader binaryReader)
+        {
+            BookModifyPageResponse newObj = new BookModifyPageResponse();
+            newObj.pageResponse = PageResponse.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            pageResponse.contributeToTreeNode(rootNode);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class BookAddPageResponse : Message
+    {
+        public PageResponse pageResponse;
+
+        public static BookAddPageResponse read(BinaryReader binaryReader)
+        {
+            BookAddPageResponse newObj = new BookAddPageResponse();
+            newObj.pageResponse = PageResponse.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            pageResponse.contributeToTreeNode(rootNode);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class BookDeletePageResponse : Message
+    {
+        public PageResponse pageResponse;
+
+        public static BookDeletePageResponse read(BinaryReader binaryReader)
+        {
+            BookDeletePageResponse newObj = new BookDeletePageResponse();
+            newObj.pageResponse = PageResponse.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            pageResponse.contributeToTreeNode(rootNode);
+            treeView.Nodes.Add(rootNode);
         }
     }
 
@@ -230,7 +330,7 @@ public class CM_Writing : MessageProcessor {
             rootNode.Nodes.Add("authorID = " + Utility.FormatGuid(authorID));
             rootNode.Nodes.Add("authorName = " + authorName);
             rootNode.Nodes.Add("authorAccount = " + authorAccount);
-            rootNode.Nodes.Add("flags = " + flags);
+            rootNode.Nodes.Add("flags = " + Utility.FormatGuid(flags));
             rootNode.Nodes.Add("textIncluded = " + textIncluded);
             rootNode.Nodes.Add("ignoreAuthor = " + ignoreAuthor);
             if (textIncluded != 0)

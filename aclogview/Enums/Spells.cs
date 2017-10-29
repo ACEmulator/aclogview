@@ -6544,7 +6544,7 @@ public enum SpellID {
     GauntletVitalityIII_SpellID,
     NumSpells_SpellID = 8192,
     // Gleaned cooldown spell IDs
-    DeckOfEyesCooldown_SpellID = 32769,
+    JesterDecksCooldown_SpellID = 32769, // Deck of Eyes, Deck of Hands
     AsheronsBenedictionCooldown_SpellID = 32770,
     BlackmoorsFavorCooldown_SpellID = 32771,
     HealthElixirCooldown_SpellID = 32772,   // Health elixir's with a cooldown
@@ -6555,11 +6555,17 @@ public enum SpellID {
     VirindiEssenceCooldown_SpellID = 32777,
     SurgingStrengthCooldown_SpellID = 32778,
     ToweringDefenseCooldown_SpellID = 32779,
-    StrangeJewelCooldown_SpellID = 32818, // (Guardians of Mhoire Castle quest)
-    AlignedManaStoneCooldown_SpellID = 32819,
-    ContractCooldown_SpellID = 32868,
-    SummonCreatureCooldown_SpellID = 32981,
-    FacilityHubPortalGemCooldown_SpellID = 32989,
+    // Skip 39
+    MhoireCastleItemsCooldown_SpellID = 32818, // (Strange Jewel and Crystal of Spectral Blood)
+    MiscTenSecondCooldown_SpellID = 32819, // Skull of One Thousand Torments, Enchanted Mana Stone, Aligned Mana Stone, Attuned Essence Gem
+    // Skip 49
+    ContractCooldown_SpellID = 32868, // 2 second cooldown
+    // Skip 113
+    SummonCreatureCooldown_SpellID = 32981, // 45 second cooldown
+    // Skip 8
+    FacilityHubPortalGemCooldown_SpellID = 32989, // 30 second cooldown
+    // Skip 279
     ScryingRodCooldown_SpellID = 33268, // (Slave Master Quest)
-    CeldisethsPortalGemCooldown_SpellID = 33768
+    // Skip 500
+    PortalGemCooldown_SpellID = 33768 // 15 second cooldown
 }

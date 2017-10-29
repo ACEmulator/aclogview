@@ -88,7 +88,12 @@ public class CM_Allegiance : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
-            // TODO: PacketOpcode.Evt_Allegiance__AllegianceUpdateDone_ID
+            case PacketOpcode.Evt_Allegiance__AllegianceUpdateDone_ID:
+                {
+                    AllegianceUpdateDone message = AllegianceUpdateDone.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             case PacketOpcode.Evt_Allegiance__SetMotd_ID: {
                     SetMotd message = SetMotd.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
@@ -584,6 +589,27 @@ public class CM_Allegiance : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("i_iAction = " + i_iAction);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class AllegianceUpdateDone : Message
+    {
+        public uint e;
+        // NOTE: The client doesn't appear to use any information from this message.
+        public static AllegianceUpdateDone read(BinaryReader binaryReader)
+        {
+            AllegianceUpdateDone newObj = new AllegianceUpdateDone();
+            newObj.e = binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("e = " + e);
             treeView.Nodes.Add(rootNode);
         }
     }

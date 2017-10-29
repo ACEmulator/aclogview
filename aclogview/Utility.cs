@@ -32,5 +32,15 @@ namespace aclogview
 
             return theValue.ToString();
         }
+
+        public static string FormatGuid(ulong theValue)
+        {
+            if (Globals.UseHex)
+            {
+                return "0x" + theValue.ToString("X");
+            }
+
+            return theValue.ToString();
+        }
     }
 }

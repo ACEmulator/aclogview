@@ -190,6 +190,29 @@ public enum HeritageGroup {
 
 public enum Gender
 {
+    Invalid,
     Male,
     Female
+}
+
+public enum UIElement
+{
+    Undef,
+    Main,
+    Floaty1,
+    Floaty2,
+    Floaty3,
+    Floaty4,
+    FloatyEnvPanel,
+    FloatyExamination,
+    FloatyMainChat,
+    FloatyPanel,
+    FloatyToolbar,
+    FloatyVitals,
+    FloatyIndicators,
+    FloatyPowerBar,
+    FloatyRadar,
+    FloatyCombatPanel,
+    SmartBox,
+    FloatySideVitals
 }

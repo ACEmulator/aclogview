@@ -273,23 +273,24 @@ public class CM_Character : MessageProcessor {
             }
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_GameplayOptions) != 0)
             {
-                // TODO: This is a mess of guess/hack work.
                 newObj.m_colGameplayOptions = PackObjPropertyCollection.read(binaryReader);
+                Util.readToAlign(binaryReader); // Align to dword boundary
             }
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("header = " + header);
-            node.Nodes.Add("options_ = " + options_);
+            node.Nodes.Add("header = " + Utility.FormatGuid(header));
+            node.Nodes.Add("options_ = " + Utility.FormatGuid(options_));
             TreeNode shortcutsNode = node.Nodes.Add("shortcuts_ = ");
             if (shortcuts_ != null) {
                 shortcuts_.contributeToTreeNode(shortcutsNode);
             }
             TreeNode favoritesNode = node.Nodes.Add("favorite_spells_ = ");
-            foreach (PList<SpellID> favoritesList in favorite_spells_) {
+            for (int i = 0; i < favorite_spells_.Count(); i++) {
+                PList<SpellID> favoritesList = favorite_spells_[i];
                 if (favoritesList != null) {
-                    TreeNode favoritesSubNode = favoritesNode.Nodes.Add("list = ");
+                    TreeNode favoritesSubNode = favoritesNode.Nodes.Add($"Spelltab {i+1} = ");
                     favoritesList.contributeToTreeNode(favoritesSubNode);
                 }
             }
@@ -301,8 +302,8 @@ public class CM_Character : MessageProcessor {
                     desiredCompsNode.Nodes.Add(element.Key + " = " + element.Value);
                 }
             }
-            node.Nodes.Add("spell_filters_ = " + spell_filters_);
-            node.Nodes.Add("options2 = " + options2);
+            node.Nodes.Add("spell_filters_ = " + Utility.FormatGuid(spell_filters_));
+            node.Nodes.Add("options2 = " + Utility.FormatGuid(options2));
             node.Nodes.Add("m_TimeStampFormat = " + m_TimeStampFormat);
 
             TreeNode playerOptionsDataNode = node.Nodes.Add("m_pPlayerOptionsData = ");
@@ -352,20 +353,19 @@ public class CM_Character : MessageProcessor {
         }
     }
 
-    // TODO: This is a hack to get the data read. Having issues figuring out "correct" structure from client code.
     public class PackObjPropertyCollection
     {
-        public uint header;
+        public uint i_iVersion; // AKA g_TurbineCorePackVersion: will always be 0x00000002.
         public List<BaseProperty> PropertyCollection = new List<BaseProperty>();
 
         public static PackObjPropertyCollection read(BinaryReader binaryReader)
         {
             PackObjPropertyCollection newObj = new PackObjPropertyCollection();
-            newObj.header = binaryReader.ReadUInt32();
+            newObj.i_iVersion = binaryReader.ReadUInt32();
 
-            byte m_num_buckets = binaryReader.ReadByte();
-            byte num_properties = binaryReader.ReadByte();
-            for (byte i = 0; i < num_properties; i++)
+            byte m_numBuckets = binaryReader.ReadByte();
+            byte m_numElements = binaryReader.ReadByte();
+            for (byte i = 0; i < m_numElements; i++)
             {
                 newObj.PropertyCollection.Add(BaseProperty.read(binaryReader));
             }
@@ -375,10 +375,9 @@ public class CM_Character : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("header = " + header);
-            TreeNode propertyCollectionNode = node.Nodes.Add("PropertyCollection");
+            node.Nodes.Add("i_iVersion = " + i_iVersion);
             for (int i = 0; i < PropertyCollection.Count; i++) {
-                TreeNode propertyNode = propertyCollectionNode.Nodes.Add("Property");
+                TreeNode propertyNode = node.Nodes.Add($"{PropertyCollection[i].key}");
                 PropertyCollection[i].contributeToTreeNode(propertyNode);
             }
             return;
@@ -400,6 +399,23 @@ public class CM_Character : MessageProcessor {
         Option_Placement_Title_Property = 0x1000008d,
     }
 
+    public enum ChatTextFilter : ulong
+    {
+        ID_ChatOption_TextFilter_Tells = 0x18,
+        ID_ChatOption_TextFilter_AreaSpeech = 0x1004,
+        ID_ChatOption_TextFilter_Magic = 0x20080,
+        ID_ChatOption_TextFilter_Allegience = 0x40C00,
+        ID_ChatOption_TextFilter_Fellowship = 0x80000,
+        ID_ChatOption_TextFilter_Combat = 0x600040,
+        ID_ChatOption_TextFilter_Error = 0x4000000,
+        ID_ChatOption_TextFilter_General = 0x8000000,
+        ID_ChatOption_TextFilter_Trade = 0x10000000,
+        ID_ChatOption_TextFilter_LFG = 0x20000000,
+        ID_ChatOption_TextFilter_Roleplay = 0x40000000,
+        ID_ChatOption_TextFilter_Gameplay = 0x83912021,
+        ID_ChatOption_TextFilter_Society = 0x100000000,
+    }
+
     public class BaseProperty
     {
         public OptionProperty key;
@@ -408,12 +424,15 @@ public class CM_Character : MessageProcessor {
         public byte bytePropertyValue;
         public uint intPropertyValue;
         public ulong int64PropertyValue;
-        public string strPropertyValue;
-        public byte strSourceType;
-        public uint strId;
-        public uint strFileId;
-        public uint strUnknown;
+        public string m_LiteralValue;
+        public byte m_Override;
+        public uint m_stringID;
+        public uint m_tableID;
+        public uint bHasStrings;
+        public byte m_numBuckets;
+        public byte m_numElements;
         public byte boolPropertyValue;
+        uint num_properties;
         public List<BaseProperty> PropertyCollectionValue;
 
         public static BaseProperty read(BinaryReader binaryReader)
@@ -423,13 +442,25 @@ public class CM_Character : MessageProcessor {
             switch (newObj.key)
             {
                 case OptionProperty.Option_ActiveOpacity_Property:
+                    newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
+                    newObj.floatPropertyValue = binaryReader.ReadSingle();
+                    break;
                 case OptionProperty.Option_DefaultOpacity_Property:
                     newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
                     newObj.floatPropertyValue = binaryReader.ReadSingle();
                     break;
                 case OptionProperty.Option_Placement_X_Property:
+                    newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
+                    newObj.intPropertyValue = binaryReader.ReadUInt32();
+                    break;
                 case OptionProperty.Option_Placement_Y_Property:
+                    newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
+                    newObj.intPropertyValue = binaryReader.ReadUInt32();
+                    break;
                 case OptionProperty.Option_Placement_Width_Property:
+                    newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
+                    newObj.intPropertyValue = binaryReader.ReadUInt32();
+                    break;
                 case OptionProperty.Option_Placement_Height_Property:
                     newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
                     newObj.intPropertyValue = binaryReader.ReadUInt32();
@@ -440,17 +471,21 @@ public class CM_Character : MessageProcessor {
                     break;
                 case OptionProperty.Option_Placement_Title_Property:
                     newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
-                    newObj.strSourceType = binaryReader.ReadByte();
-                    if (newObj.strSourceType == 1)
+                    newObj.m_Override = binaryReader.ReadByte();
+                    if (newObj.m_Override == 1)
                     {
-                        newObj.strPropertyValue = Util.readUnicodeString(binaryReader);
+                        newObj.m_LiteralValue = Util.readUnicodeString(binaryReader);
                     }
                     else
                     {
-                        newObj.strId = binaryReader.ReadUInt32();
-                        newObj.strFileId = binaryReader.ReadUInt32();
+                        newObj.m_stringID = binaryReader.ReadUInt32();
+                        newObj.m_tableID = binaryReader.ReadUInt32();
                     }
-                    newObj.strUnknown = binaryReader.ReadUInt32();
+                    // This variable is set in the StringInfo::Serialize function.
+                    newObj.bHasStrings = binaryReader.ReadUInt32();
+                    // These next two are set in the SerializeIntrusiveHashTable function.
+                    newObj.m_numBuckets = binaryReader.ReadByte();
+                    newObj.m_numElements = binaryReader.ReadByte();
                     break;
                 case OptionProperty.Option_TextType_Property:
                     newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
@@ -458,18 +493,18 @@ public class CM_Character : MessageProcessor {
                     break;
                 case OptionProperty.Option_PlacementArray_Property:
                     newObj.m_pcPropertyDesc = (OptionProperty)binaryReader.ReadUInt32();
-                    uint num_properties = binaryReader.ReadUInt32();
+                    newObj.num_properties = binaryReader.ReadUInt32();
                     newObj.PropertyCollectionValue = new List<BaseProperty>();
-                    for (uint i = 0; i < num_properties; i++)
+                    for (uint i = 0; i < newObj.num_properties; i++)
                     {
                         newObj.PropertyCollectionValue.Add(BaseProperty.read(binaryReader));
                     }
                     break;
                 case OptionProperty.Option_Placement_Property:
-                    byte m_num_buckets = binaryReader.ReadByte();
-                    byte num_props = binaryReader.ReadByte();
+                    byte m_numBuckets = binaryReader.ReadByte();
+                    byte m_numElements = binaryReader.ReadByte();
                     newObj.PropertyCollectionValue = new List<BaseProperty>();
-                    for (byte i = 0; i < num_props; i++)
+                    for (byte i = 0; i < m_numElements; i++)
                     {
                         newObj.PropertyCollectionValue.Add(BaseProperty.read(binaryReader));
                     }
@@ -480,51 +515,76 @@ public class CM_Character : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("key = " + key);
             switch (key)
             {
                 case OptionProperty.Option_ActiveOpacity_Property:
+                    node.Nodes.Add("floatPropertyValue = " + floatPropertyValue);
+                    break;
                 case OptionProperty.Option_DefaultOpacity_Property:
-                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
                     node.Nodes.Add("floatPropertyValue = " + floatPropertyValue);
                     break;
                 case OptionProperty.Option_Placement_X_Property:
+                    node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    break;
                 case OptionProperty.Option_Placement_Y_Property:
+                    node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    break;
                 case OptionProperty.Option_Placement_Width_Property:
+                    node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    break;
                 case OptionProperty.Option_Placement_Height_Property:
-                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
                     node.Nodes.Add("intPropertyValue = " + intPropertyValue);
                     break;
                 case OptionProperty.Option_Placement_Visibility_Property:
-                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
                     node.Nodes.Add("boolPropertyValue = " + boolPropertyValue);
                     break;
                 case OptionProperty.Option_Placement_Title_Property:
-                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
-                    node.Nodes.Add("strSourceType = " + strSourceType);
-                    node.Nodes.Add("strPropertyValue = " + strPropertyValue);
-                    node.Nodes.Add("strId = " + strId);
-                    node.Nodes.Add("strFileId = " + strFileId);
-                    node.Nodes.Add("strUnknown = " + strUnknown);
+                    node.Nodes.Add("m_Override = " + m_Override);
+                    if (m_Override == 1)
+                    {
+                        node.Nodes.Add("m_LiteralValue = " + m_LiteralValue);
+                    }
+                    else
+                    {
+                        node.Nodes.Add("m_stringID = " + Utility.FormatGuid(m_stringID));
+                        node.Nodes.Add("m_tableID = " + Utility.FormatGuid(m_tableID));
+                    }
+                    node.Nodes.Add("bHasStrings = " + bHasStrings);
+                    node.Nodes.Add("m_numBuckets = " + m_numBuckets);
+                    node.Nodes.Add("m_numElements = " + m_numElements);
                     break;
                 case OptionProperty.Option_TextType_Property:
-                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
-                    node.Nodes.Add("int64PropertyValue = " + int64PropertyValue);
+                    TreeNode chatMask = node.Nodes.Add("int64PropertyValue = " + Utility.FormatGuid(int64PropertyValue));
+                    foreach (ulong e in Enum.GetValues(typeof(ChatTextFilter)))
+                    {
+                        if ((int64PropertyValue & e) == e)
+                        {
+                            chatMask.Nodes.Add($"{Enum.GetName(typeof(ChatTextFilter),e)}");
+                        }
+                    }
                     break;
                 case OptionProperty.Option_PlacementArray_Property:
-                    node.Nodes.Add("m_pcPropertyDesc = " + m_pcPropertyDesc);
-                    TreeNode PropertyCollectionValueNode = node.Nodes.Add("PropertyCollectionValue");
+                    node.Nodes.Add("num_properties = " + num_properties);
                     for (int i = 0; i < PropertyCollectionValue.Count; i++)
                     {
-                        TreeNode PropertyNode = node.Nodes.Add("Property");
-                        PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
+                        // Note: num_properties SHOULD equal 17 for the number of client UI elements
+                        // but let's check just to be sure.
+                        if (num_properties == 17)
+                        {
+                            TreeNode PropertyNode = node.Nodes.Add($"{PropertyCollectionValue[i].key} (UIElement: {(UIElement)i+1})");
+                            PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
+                        }
+                        else
+                        {
+                            TreeNode PropertyNode = node.Nodes.Add($"{PropertyCollectionValue[i].key}");
+                            PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
+                        }
                     }
                     break;
                 case OptionProperty.Option_Placement_Property:
-                    TreeNode PropertyPlacementValueNode = node.Nodes.Add("PropertyCollectionValue");
                     for (int i = 0; i < PropertyCollectionValue.Count; i++)
                     {
-                        TreeNode PropertyNode = node.Nodes.Add("Property");
+                        TreeNode PropertyNode = node.Nodes.Add($"{PropertyCollectionValue[i].key}");
                         PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
                     }
                     break;
@@ -547,6 +607,7 @@ public class CM_Character : MessageProcessor {
             TreeNode playerModuleNode = rootNode.Nodes.Add("i_pMod = ");
             i_pMod.contributeToTreeNode(playerModuleNode);
             treeView.Nodes.Add(rootNode);
+            playerModuleNode.Expand();
         }
     }
 

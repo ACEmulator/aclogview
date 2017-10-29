@@ -1,3 +1,12 @@
+### 2017-10-29
+[Slushnas]
+* Added support for the Modify, Add, and Delete book response events and added hex conversions for book "flags" fields.
+* Added handler for the AllegianceUpdateDone message.
+* Fixed parsing of PlayerModule structure. This fixes parsing for messages like CharacterOptionsEvent and PlayerDescription.
+* Fixed gender enum and added a UIElement enum to support gameplay options in the PlayerModule structure.
+* Added ulong override for the Utility.FormatGuid function.
+* Fixed some gleaned cooldown spell IDs based on ACE DB.
+
 ### 2017-10-22
 [Slushnas]
 ##### Interface Changes
