@@ -318,7 +318,7 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             treeView.Nodes.Add(rootNode);
         }
     }

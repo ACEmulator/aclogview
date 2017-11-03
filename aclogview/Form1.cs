@@ -98,6 +98,7 @@ namespace aclogview
         List<ListViewItem> listItems = new List<ListViewItem>();
         
         private void loadPcap(string fileName, bool asMessages, bool dontList = false) {
+            Cursor.Current = Cursors.WaitCursor;
             Text = "AC Log View - " + Path.GetFileName(fileName);
             pcapFilePath = Path.GetFullPath(fileName);
             toolStripStatus.Text = pcapFilePath;
@@ -154,6 +155,7 @@ namespace aclogview
             {
                 listView_Packets.VirtualListSize = 0;
             }
+            Cursor.Current = Cursors.Default;
         }
 
         private void listView_Packets_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -500,6 +502,13 @@ namespace aclogview
                         }
                     }
                 }
+                // Give each treeview node a unique identifier
+                int i = 0;
+                foreach (var node in GetTreeNodes(treeView_ParsedData.Nodes))
+                {
+                    node.Tag = i;
+                    i++;
+                }
             }
         }
 
@@ -568,34 +577,61 @@ namespace aclogview
         {
             if (listView_Packets.TopItem == null)
                 return;
+            if (Text.Contains("Highlighted OpCodes") == false)
+                return;
+            if (listView_Packets.SelectedIndices.Count == 0)
+            {
+                listView_Packets.TopItem.Selected = true;
+                listView_Packets.TopItem.Focused = true;
+            }
+            else
+            {
+                listView_Packets.EnsureVisible(listView_Packets.SelectedIndices[0]);
+            }
 
-            for (int i = listView_Packets.TopItem.Index - 1; i >= 0; i--)
+            for (int i = listView_Packets.SelectedIndices[0] - 1; i >= 0; i--)
             {
                 if (listView_Packets.Items[i].BackColor != SystemColors.Window)
                 {
                     listView_Packets.TopItem = listView_Packets.Items[i];
-                    listView_Packets.TopItem.Selected = true;
-                    listView_Packets.TopItem.Focused = true;
+                    listView_Packets.Items[i].Selected = true;
+                    listView_Packets.Items[i].Focused = true;
+                    listView_Packets.Focus();
                     break;
                 }
             }
+            lblTracker.Text = "Viewing #" + listView_Packets.FocusedItem.Index;
         }
 
         private void mnuItem_EditNextHighlightedRow_Click(object sender, EventArgs e)
         {
             if (listView_Packets.TopItem == null)
                 return;
+            if (Text.Contains("Highlighted OpCodes") == false)
+                return;
 
-            for (int i = listView_Packets.TopItem.Index + 1; i < listView_Packets.Items.Count; i++)
+            if (listView_Packets.SelectedIndices.Count == 0)
+            { 
+                listView_Packets.TopItem.Selected = true;
+                listView_Packets.TopItem.Focused = true;
+            }
+            else
+            {
+                listView_Packets.EnsureVisible(listView_Packets.SelectedIndices[0]);
+            }
+
+            for (int i = listView_Packets.SelectedIndices[0] + 1; i < listView_Packets.Items.Count; i++)
             {
                 if (listView_Packets.Items[i].BackColor != SystemColors.Window)
                 {
                     listView_Packets.TopItem = listView_Packets.Items[i];
-                    listView_Packets.TopItem.Selected = true;
-                    listView_Packets.TopItem.Focused = true;
+                    listView_Packets.Items[i].Selected = true;
+                    listView_Packets.Items[i].Focused = true;
+                    listView_Packets.Focus();
                     break;
                 }
             }
+            lblTracker.Text = "Viewing #" + listView_Packets.FocusedItem.Index;
         }
 
 
@@ -860,10 +896,13 @@ namespace aclogview
         private void checkBoxUseHex_CheckedChanged(object sender, EventArgs e)
         {
             Globals.UseHex = checkBoxUseHex.Checked;
+            if (treeView_ParsedData.TopNode == null)
+                return;
+            Cursor.Current = Cursors.WaitCursor;
             var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
-            var savedTopNode = treeView_ParsedData.GetTopNode(); ;
+            var savedTopNode = treeView_ParsedData.GetTopNode();
             treeView_ParsedData.BeginUpdate();
-            updateData();
+            updateTree();
             treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
             treeView_ParsedData.SetTopNode(savedTopNode);
             treeView_ParsedData.EndUpdate();
@@ -871,6 +910,7 @@ namespace aclogview
             {
                  listView_Packets.Focus();
             }
+            Cursor.Current = Cursors.Default;
         }
 
 

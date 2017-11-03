@@ -87,7 +87,7 @@ public class CM_Social : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_friendID = " + Utility.FormatGuid(i_friendID));
+            rootNode.Nodes.Add("i_friendID = " + Utility.FormatHex(i_friendID));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -129,17 +129,17 @@ public class CM_Social : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("m_id = " + Utility.FormatGuid(m_id));
+            node.Nodes.Add("m_id = " + Utility.FormatHex(m_id));
             node.Nodes.Add("m_online = " + m_online);
             node.Nodes.Add("m_appearOffline = " + m_appearOffline);
             node.Nodes.Add("m_name = " + m_name);
             TreeNode friendsListNode = node.Nodes.Add("m_friendsList = ");
             for (int i = 0; i< m_friendsList.list.Count; i++) {
-                friendsListNode.Nodes.Add("m_id = " + Utility.FormatGuid(m_friendsList.list[i]));
+                friendsListNode.Nodes.Add("m_id = " + Utility.FormatHex(m_friendsList.list[i]));
             }
             TreeNode friendOfListNode = node.Nodes.Add("m_friendOfList = ");
             for (int i = 0; i < m_friendOfList.list.Count; i++) {
-                friendOfListNode.Nodes.Add("m_id = " + Utility.FormatGuid(m_friendOfList.list[i]));
+                friendOfListNode.Nodes.Add("m_id = " + Utility.FormatHex(m_friendOfList.list[i]));
             }
         }
     }
@@ -309,9 +309,9 @@ public class CM_Social : MessageProcessor {
             rootNode.Nodes.Add("bDeleteContract = " + bDeleteContract);
             rootNode.Nodes.Add("bSetAsDisplayContract = " + bSetAsDisplayContract);
             if (retailPcap == true) {
-                rootNode.Nodes.Add("unused1 = " + Utility.FormatGuid(unused1));
-                rootNode.Nodes.Add("unused2 = " + Utility.FormatGuid(unused2));
-                rootNode.Nodes.Add("unused3 = " + Utility.FormatGuid(unused3));
+                rootNode.Nodes.Add("unused1 = " + Utility.FormatHex(unused1));
+                rootNode.Nodes.Add("unused2 = " + Utility.FormatHex(unused2));
+                rootNode.Nodes.Add("unused3 = " + Utility.FormatHex(unused3));
             }
             treeView.Nodes.Add(rootNode);
             rootNode.ExpandAll();

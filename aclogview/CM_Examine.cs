@@ -102,7 +102,7 @@ public class CM_Examine : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("_header = " + _header);
+            node.Nodes.Add("_header = " + Utility.FormatHex(_header));
             node.Nodes.Add("_health = " + _health);
             node.Nodes.Add("_max_health = " + _max_health);
             if ((_header & (uint)CreatureAppraisalProfilePackHeader.Packed_Attributes) != 0)
@@ -120,7 +120,7 @@ public class CM_Examine : MessageProcessor {
             }
             if ((_header & (uint)CreatureAppraisalProfilePackHeader.Packed_Enchantments) != 0)
             {
-                node.Nodes.Add("enchantment_bitfield = " + enchantment_bitfield);
+                node.Nodes.Add("enchantment_bitfield = " + Utility.FormatHex(enchantment_bitfield));
             }
         }
     }
@@ -232,7 +232,7 @@ public class CM_Examine : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("_bitField = " + _bitField);
+            node.Nodes.Add("_bitField = " + Utility.FormatHex(_bitField));
             node.Nodes.Add("_validLocations = " + _validLocations);
             node.Nodes.Add("_ammoType = " + _ammoType);
             node.Nodes.Add("isInscribable = " + isInscribable);
@@ -385,7 +385,7 @@ public class CM_Examine : MessageProcessor {
         public PackableHashTable<STypeFloat, double> _floatStatsTable = new PackableHashTable<STypeFloat, double>();
         public PackableHashTable<STypeString, PStringChar> _strStatsTable = new PackableHashTable<STypeString, PStringChar>();
         public PackableHashTable<STypeDID, uint> _didStatsTable = new PackableHashTable<STypeDID, uint>();
-        public PList<SpellID> _spellsTable = new PList<SpellID>();
+        public PList<uint> _spellsTable = new PList<uint>();
         public ArmorProfile _armorProfileTable = new ArmorProfile();
         public CreatureAppraisalProfile _creatureProfileTable = new CreatureAppraisalProfile();
         public WeaponProfile _weaponProfileTable = new WeaponProfile();
@@ -419,7 +419,7 @@ public class CM_Examine : MessageProcessor {
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_SpellList) != 0)
             {
-                newObj._spellsTable = PList<SpellID>.read(binaryReader);
+                newObj._spellsTable = PList<uint>.read(binaryReader);
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_ArmorProfile) != 0)
             {
@@ -457,7 +457,7 @@ public class CM_Examine : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("header = " + header);
+            node.Nodes.Add("header = " + Utility.FormatHex(header));
             node.Nodes.Add("success_flag = " + success_flag);
             TreeNode intStatsNode = node.Nodes.Add("_intStatsTable = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_IntStats) != 0)
@@ -492,7 +492,20 @@ public class CM_Examine : MessageProcessor {
             TreeNode spellsNode = node.Nodes.Add("_spellBook = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_SpellList) != 0)
             {
-                _spellsTable.contributeToTreeNode(spellsNode);
+                for (int i = 0; i < _spellsTable.list.Count; i++)
+                {
+                    uint i_spell_id = _spellsTable.list[i] & 0x7FFFFFFF;
+                    uint enchantment_flag = _spellsTable.list[i] & 0x80000000;
+                    TreeNode spellIDNode = spellsNode.Nodes.Add($"({i_spell_id}) " + (SpellID)i_spell_id);
+                    if (enchantment_flag != 0)
+                    {
+                        spellIDNode.Nodes.Add("enchantment_flag = On");
+                    }
+                    else
+                    {
+                        spellIDNode.Nodes.Add("enchantment_flag = Off");
+                    }
+                }
             }
 
             TreeNode armorProfileNode = node.Nodes.Add("_armorProfile = ");
@@ -519,7 +532,7 @@ public class CM_Examine : MessageProcessor {
             TreeNode armorEnchantmentNode = node.Nodes.Add("_armorEnchantments = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_ArmorEnchant) != 0)
             {
-                armorEnchantmentNode.Nodes.Add("bitfield = " + _armorEnchantment);
+                armorEnchantmentNode.Nodes.Add("bitfield = " + Utility.FormatHex(_armorEnchantment));
                 // Loop over the enum types and add all the applicable ones
                 foreach (ArmorEnchantment_BFIndex armorEnchantmentType in Enum.GetValues(typeof(ArmorEnchantment_BFIndex)))
                 {
@@ -533,7 +546,7 @@ public class CM_Examine : MessageProcessor {
             TreeNode weaponEnchantmentNode = node.Nodes.Add("_weaponEnchanments = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_WeaponEnchant) != 0)
             {
-                weaponEnchantmentNode.Nodes.Add("bitfield = " + _weaponEnchantment);
+                weaponEnchantmentNode.Nodes.Add("bitfield = " + Utility.FormatHex(_weaponEnchantment));
                 // Loop over the enum types and add all the applicable ones
                 foreach (WeaponEnchantment_BFIndex weaponEnchantmentType in Enum.GetValues(typeof(WeaponEnchantment_BFIndex)))
                 {
@@ -547,7 +560,7 @@ public class CM_Examine : MessageProcessor {
             TreeNode resistEnchantmentNode = node.Nodes.Add("_resistEnchantments = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_ResistEnchant) != 0)
             {
-                resistEnchantmentNode.Nodes.Add("bitfield = " + _resistEnchantment);
+                resistEnchantmentNode.Nodes.Add("bitfield = " + Utility.FormatHex(_resistEnchantment));
                 // Loop over the enum types and add all the applicable ones
                 foreach (ResistanceEnchantment_BFIndex resistEnchantmentType in Enum.GetValues(typeof(ResistanceEnchantment_BFIndex)))
                 {
@@ -580,10 +593,11 @@ public class CM_Examine : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objid = " + Utility.FormatGuid(i_objid));
+            rootNode.Nodes.Add("i_objid = " + Utility.FormatHex(i_objid));
             TreeNode profileNode = rootNode.Nodes.Add("i_prof = ");
             i_prof.contributeToTreeNode(profileNode);
             treeView.Nodes.Add(rootNode);
+            profileNode.Expand();
         }
     }
 }

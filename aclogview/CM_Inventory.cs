@@ -157,10 +157,10 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectId = " + Utility.FormatGuid(i_objectId));
-            rootNode.Nodes.Add("i_container = " + Utility.FormatGuid(i_container));
+            rootNode.Nodes.Add("i_objectId = " + Utility.FormatHex(i_objectId));
+            rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
             rootNode.Nodes.Add("i_slot = " + i_slot);
-            rootNode.Nodes.Add("i_type = " + Utility.FormatGuid(i_type));
+            rootNode.Nodes.Add("i_type = " + Utility.FormatHex(i_type));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -183,7 +183,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
+            rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             rootNode.Nodes.Add("i_equipMask = " + (INVENTORY_LOC)i_equipMask);
             treeView.Nodes.Add(rootNode);
         }
@@ -204,7 +204,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
+            rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -225,8 +225,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
-            rootNode.Nodes.Add("i_container = " + Utility.FormatGuid(i_container));
+            rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
+            rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
             rootNode.Nodes.Add("i_loc = " + i_loc);
             treeView.Nodes.Add(rootNode);
         }
@@ -246,7 +246,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
+            rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             rootNode.Nodes.Add("i_equipMask = " + (INVENTORY_LOC)i_equipMask);
             treeView.Nodes.Add(rootNode);
         }
@@ -264,7 +264,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_item = " + Utility.FormatGuid(i_item));
+            rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -283,8 +283,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_object = " + Utility.FormatGuid(this.i_object));
-            rootNode.Nodes.Add("i_target = " + Utility.FormatGuid(this.i_target));
+            rootNode.Nodes.Add("i_object = " + Utility.FormatHex(this.i_object));
+            rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -301,7 +301,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_object = " + Utility.FormatGuid(i_object));
+            rootNode.Nodes.Add("i_object = " + Utility.FormatHex(i_object));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -321,7 +321,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("ObjectID = " + Utility.FormatGuid(ObjectID));
+            rootNode.Nodes.Add("ObjectID = " + Utility.FormatHex(ObjectID));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -342,8 +342,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_mergeFromID = " + Utility.FormatGuid(i_mergeFromID));
-            rootNode.Nodes.Add("i_mergeToID = " + Utility.FormatGuid(i_mergeToID));
+            rootNode.Nodes.Add("i_mergeFromID = " + Utility.FormatHex(i_mergeFromID));
+            rootNode.Nodes.Add("i_mergeToID = " + Utility.FormatHex(i_mergeToID));
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
         }
@@ -367,8 +367,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_stackID = " + Utility.FormatGuid(i_stackID));
-            rootNode.Nodes.Add("i_containerID = " + Utility.FormatGuid(i_containerID));
+            rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
+            rootNode.Nodes.Add("i_containerID = " + Utility.FormatHex(i_containerID));
             rootNode.Nodes.Add("i_place = " + i_place);
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
@@ -389,7 +389,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_stackID = " + Utility.FormatGuid(i_stackID));
+            rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
         }
@@ -411,7 +411,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatGuid(i_objectID));
+            rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatHex(i_objectID));
             rootNode.Nodes.Add("etype = " + etype);
             treeView.Nodes.Add(rootNode);
         }
@@ -433,8 +433,8 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_targetID = " + Utility.FormatGuid(this.i_targetID));
-            rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatGuid(this.i_objectID));
+            rootNode.Nodes.Add("i_targetID = " + Utility.FormatHex(this.i_targetID));
+            rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatHex(this.i_objectID));
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
         }
@@ -452,7 +452,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_container = " + Utility.FormatGuid(i_container));
+            rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -469,7 +469,7 @@ public class CM_Inventory : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("m_iid = " + Utility.FormatGuid(m_iid));
+            node.Nodes.Add("m_iid = " + Utility.FormatHex(m_iid));
             node.Nodes.Add("m_uContainerProperties = " + m_uContainerProperties);
         }
     }
@@ -487,7 +487,7 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Nodes.Add("i_container = " + Utility.FormatGuid(i_container));
+            rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
             TreeNode contentsNode = rootNode.Nodes.Add("contents = ");
             for (int i = 0; i < contents_list.list.Count; i++) {
                 contents_list.list[i].contributeToTreeNode(contentsNode);
@@ -513,7 +513,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_stackID = " + Utility.FormatGuid(i_stackID));
+            rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
             rootNode.Nodes.Add("i_loc = " + (INVENTORY_LOC)i_loc);
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
@@ -533,11 +533,11 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Nodes.Add("i_toolID = " + Utility.FormatGuid(i_toolID));
+            rootNode.Nodes.Add("i_toolID = " + Utility.FormatHex(i_toolID));
             TreeNode gemsNode = rootNode.Nodes.Add("i_gems = ");
             for (int i = 0; i < i_gems.list.Count; i++) {
                 var gem = i_gems.list[i];
-                gemsNode.Nodes.Add(Utility.FormatGuid(gem));
+                gemsNode.Nodes.Add(Utility.FormatHex(gem));
             }
             treeView.Nodes.Add(rootNode);
             rootNode.ExpandAll();
@@ -585,7 +585,7 @@ public class CM_Inventory : MessageProcessor {
             TreeNode notSalvageableNode = rootNode.Nodes.Add("m_notSalvagable = ");
             for (int i = 0; i < m_notSalvagable.list.Count; i++) {
                 var object_id = m_notSalvagable.list[i];
-                notSalvageableNode.Nodes.Add("object_id = " + Utility.FormatGuid(object_id));
+                notSalvageableNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
             }
             TreeNode salvageResultsNode = rootNode.Nodes.Add("m_salvageResults = ");
             for (int i = 0; i < m_salvageResults.list.Count; i++) {
@@ -616,7 +616,7 @@ public class CM_Inventory : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("ts = " + ts);
-            rootNode.Nodes.Add("item = " + Utility.FormatGuid(item));
+            rootNode.Nodes.Add("item = " + Utility.FormatHex(item));
             rootNode.Nodes.Add("amount = " + amount);
             rootNode.Nodes.Add("newValue = " + newValue);
             treeView.Nodes.Add(rootNode);
@@ -635,7 +635,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("ObjectID = " + Utility.FormatGuid(ObjectID));
+            rootNode.Nodes.Add("ObjectID = " + Utility.FormatHex(ObjectID));
             treeView.Nodes.Add(rootNode);
         }
     }

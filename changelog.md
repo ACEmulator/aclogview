@@ -1,3 +1,24 @@
+### 2017-11-03
+[Slushnas]
+##### Interface Change
+* Fixed bug when moving to next highlighted row where rows on the last page would not be selected.
+* Added double buffering to treeview class by using a custom override. This should prevent most flicker in the treeview when updating.
+I also had to set the build platform target to *any* instead of *x64* to avoid loading errors in the form designer. This is expected behavior that is explained here: https://support.microsoft.com/en-us/help/963017/cannot-add-controls-from-64-bit-assemblies-to-the-toolbox-or-use-in-de
+* Refactored treeview node expansion state and TopNode code.
+* Renamed the utility function Utility.FormatGuid to Utility.FormatHex and **_Display Guid as Hex_** to **_Display Data as Hex_** since it is used for more fields than just Guids. (Example: bitmasks)
+* Added wait cursor when loading a pcap and when toggling **_Display Data as Hex_**.
+* Fixed bug where the currently viewed line number was not being updated properly when moving between highlighted items.
+
+##### Other Changes
+* Fixed spellbook parsing in the AppraisalInfo message.
+* Added support for the House_Recv_UpdateRestrictions, and House_Recv_UpdateHAR messages and added an enum.
+* Added RadarColor, RDBBitmask, and CoverageMask enums.
+* Added RestrictionDB field to PublicWeenieDescription.
+* Fixed up multiple fields in PublicWeenieDescription.
+* Added enum conversion to VendorProfile.
+* Did some cleanup to the Login_CharacterSet message.
+* Added changelog to the solution.
+
 ### 2017-10-29
 [Slushnas]
 * Added support for the Modify, Add, and Delete book response events and added hex conversions for book "flags" fields.

@@ -429,10 +429,6 @@ public class CM_Physics : MessageProcessor {
         }
     }
 
-    public class RestrictionDB {
-        // TODO: wew this looks complicated...
-    }
-
     public class PublicWeenieDesc {
         public enum PublicWeenieDescPackHeader {
             PWD_Packed_None = 0,
@@ -545,10 +541,10 @@ public class CM_Physics : MessageProcessor {
         public ushort _burden;
         public ushort _spellID;
         public uint _house_owner_iid;
-        public RestrictionDB _db;
+        public CM_House.RestrictionDB _db;
         public uint _hook_item_types;
         public uint _monarch;
-        public ITEM_TYPE _hook_type;
+        public ushort _hook_type;
         public uint _iconOverlayID;
         public uint _iconUnderlayID;
         public MaterialType _material_type;
@@ -677,7 +673,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0) {
-                // TODO: Read here once you get RestrictedDB read finished
+                newObj._db = CM_House.RestrictionDB.read(binaryReader);
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0) {
@@ -689,7 +685,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0) {
-                newObj._hook_type = (ITEM_TYPE)binaryReader.ReadUInt16();
+                newObj._hook_type = binaryReader.ReadUInt16();
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0) {
@@ -722,14 +718,21 @@ public class CM_Physics : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("header = " + header);
+            node.Nodes.Add("header = " + Utility.FormatHex(header));
             node.Nodes.Add("_name = " + _name.m_buffer);
             node.Nodes.Add("_wcid = " + _wcid);
             node.Nodes.Add("_iconID = " + _iconID);
             node.Nodes.Add("_type = " + _type);
-            node.Nodes.Add("_bitfield = " + _bitfield);
+            TreeNode bitfieldNode = node.Nodes.Add("_bitfield = " + Utility.FormatHex(_bitfield));
+            foreach (BitfieldIndex e in Enum.GetValues(typeof(BitfieldIndex)))
+            {
+                if (((uint)_bitfield & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    bitfieldNode.Nodes.Add($"{Enum.GetName(typeof(BitfieldIndex), e)}");
+                }
+            }
             if ((_bitfield & (uint)BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0) {
-                node.Nodes.Add("header2 = " + header2);
+                node.Nodes.Add("header2 = " + Utility.FormatHex(header2));
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0) {
                 node.Nodes.Add("_plural_name = " + _plural_name);
@@ -753,13 +756,20 @@ public class CM_Physics : MessageProcessor {
                 node.Nodes.Add("_useRadius = " + _useRadius);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0) {
-                node.Nodes.Add("_targetType = " + _targetType);
+                TreeNode targetTypeNode = node.Nodes.Add("_targetType = " + Utility.FormatHex((uint)_targetType));
+                foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
+                {
+                    if (((uint)_targetType & (uint)e) == (uint)e && (uint)e != 0)
+                    {
+                        targetTypeNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                    }
+                }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0) {
-                node.Nodes.Add("_effects = " + _effects);
+                node.Nodes.Add("_effects = " + (UI_EFFECT_TYPE)_effects);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0) {
-                node.Nodes.Add("_combatUse = " + _combatUse);
+                node.Nodes.Add("_combatUse = " + (COMBAT_USE)_combatUse);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0) {
                 node.Nodes.Add("_structure = " + _structure);
@@ -774,28 +784,42 @@ public class CM_Physics : MessageProcessor {
                 node.Nodes.Add("_maxStackSize = " + _maxStackSize);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) {
-                node.Nodes.Add("_containerID = " + _containerID);
+                node.Nodes.Add("_containerID = " + Utility.FormatHex(_containerID));
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) {
-                node.Nodes.Add("_wielderID = " + _wielderID);
+                node.Nodes.Add("_wielderID = " + Utility.FormatHex( _wielderID));
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0) {
-                node.Nodes.Add("_valid_locations = " + _valid_locations);
+                TreeNode validLocationsNode = node.Nodes.Add("_valid_locations = " + Utility.FormatHex(_valid_locations));
+                foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+                {
+                    if ((_valid_locations & (uint)e) == (uint)e && (uint)e != 0)
+                    {
+                        validLocationsNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                    }
+                }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Location) != 0) {
-                node.Nodes.Add("_location = " + _location);
+                node.Nodes.Add("_location = " + (INVENTORY_LOC)_location);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0) {
-                node.Nodes.Add("_priority = " + _priority);
+                TreeNode priorityNode = node.Nodes.Add("_priority = " + Utility.FormatHex(_priority));
+                foreach (uint e in Enum.GetValues(typeof(CoverageMask)))
+                {
+                    if (((uint)_priority & e) == e)
+                    {
+                        priorityNode.Nodes.Add($"{Enum.GetName(typeof(CoverageMask), e)}");
+                    }
+                }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0) {
-                node.Nodes.Add("_blipColor = " + _blipColor);
+                node.Nodes.Add("_blipColor = " + (RadarColor)_blipColor);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0) {
                 node.Nodes.Add("_radar_enum = " + _radar_enum);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0) {
-                node.Nodes.Add("_pscript = " + _pscript);
+                node.Nodes.Add("_pscript = " + (PScriptType)_pscript);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0) {
                 node.Nodes.Add("_workmanship = " + _workmanship);
@@ -804,22 +828,37 @@ public class CM_Physics : MessageProcessor {
                 node.Nodes.Add("_burden = " + _burden);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0) {
-                node.Nodes.Add("_spellID = " + _spellID);
+                node.Nodes.Add("_spellID = " + $"({_spellID}) " + (SpellID)_spellID);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0) {
-                node.Nodes.Add("_house_owner_iid = " + _house_owner_iid);
+                node.Nodes.Add("_house_owner_iid = " + Utility.FormatHex(_house_owner_iid));
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0) {
-                //node.Nodes.Add("_db = " + _db); // TODO: Add once implemented
+                TreeNode dbNode = node.Nodes.Add("_db = ");
+                _db.contributeToTreeNode(dbNode);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0) {
-                node.Nodes.Add("_hook_item_types = " + _hook_item_types);
+                TreeNode hookItemTypesNode = node.Nodes.Add("_hook_item_types = " + Utility.FormatHex(_hook_item_types));
+                foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
+                {
+                    if ((_hook_item_types & (uint)e) == (uint)e && (uint)e != 0)
+                    {
+                        hookItemTypesNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                    }
+                }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0) {
-                node.Nodes.Add("_monarch = " + _monarch);
+                node.Nodes.Add("_monarch = " + Utility.FormatHex(_monarch));
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0) {
-                node.Nodes.Add("_hook_type = " + _hook_type);
+                TreeNode hookTypeNode = node.Nodes.Add("_hook_type = " + Utility.FormatHex(_hook_type));
+                foreach (HookTypeEnum e in Enum.GetValues(typeof(HookTypeEnum)))
+                {
+                    if ((_hook_type & (ushort)e) == (ushort)e && (ushort)e != 0)
+                    {
+                        hookTypeNode.Nodes.Add($"{Enum.GetName(typeof(HookTypeEnum), e)}");
+                    }
+                }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0) {
                 node.Nodes.Add("_iconOverlayID = " + _iconOverlayID);
@@ -837,7 +876,7 @@ public class CM_Physics : MessageProcessor {
                 node.Nodes.Add("_cooldown_duration = " + _cooldown_duration);
             }
             if ((header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0) {
-                node.Nodes.Add("_pet_owner = " + _pet_owner);
+                node.Nodes.Add("_pet_owner = " + Utility.FormatHex(_pet_owner));
             }
         }
     }
@@ -948,7 +987,7 @@ public class CM_Physics : MessageProcessor {
         public uint _vndwcid;
         public ushort _spellID;
         public uint _house_owner_iid;
-        public RestrictionDB _db;
+        public CM_House.RestrictionDB _db;
         public ushort _pscript;
         public ITEM_TYPE _hook_type;
         public uint _hook_item_types;
@@ -1303,7 +1342,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();            
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             TreeNode descNode = rootNode.Nodes.Add("desc = ");
             desc.contributeToTreeNode(descNode);
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
@@ -1330,7 +1369,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             TreeNode objdescNode = rootNode.Nodes.Add("objdesc = ");
             objdesc.contributeToTreeNode(objdescNode);
             TreeNode physicsdescNode = rootNode.Nodes.Add("physicsdesc = ");
@@ -1353,7 +1392,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1372,7 +1411,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
             treeView.Nodes.Add(rootNode);
         }
@@ -1398,8 +1437,8 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
-            rootNode.Nodes.Add("child_id = " + Utility.FormatGuid(this.child_id));          
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            rootNode.Nodes.Add("child_id = " + Utility.FormatHex(this.child_id));          
             rootNode.Nodes.Add("child_location = " + child_location);
             rootNode.Nodes.Add("placement_id = " + placement_id);
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
@@ -1422,7 +1461,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
             timestamps.contributeToTreeNode(timestampsNode);
             treeView.Nodes.Add(rootNode);
@@ -1445,7 +1484,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("new_state = " + new_state);
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
             timestamps.contributeToTreeNode(timestampsNode);
@@ -1471,7 +1510,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("velocity = " + velocity);
             rootNode.Nodes.Add("omega = " + omega);
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
@@ -1496,7 +1535,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("sound = " + "(" + sound + ") " + (SoundType)sound);
             rootNode.Nodes.Add("volume = " + volume);
             treeView.Nodes.Add(rootNode);
@@ -1534,7 +1573,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("script_id = " + script_id);
             treeView.Nodes.Add(rootNode);
         }
@@ -1556,7 +1595,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("script_type = " + script_type);
             rootNode.Nodes.Add("mod = " + mod);
             treeView.Nodes.Add(rootNode);
@@ -1581,7 +1620,7 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             TreeNode objdescNode = rootNode.Nodes.Add("objdesc = ");
             objdesc.contributeToTreeNode(objdescNode);
             TreeNode physicsdescNode = rootNode.Nodes.Add("physicsdesc = ");

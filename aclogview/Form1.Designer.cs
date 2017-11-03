@@ -36,7 +36,7 @@
             this.HexOpCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
-            this.treeView_ParsedData = new System.Windows.Forms.TreeView();
+            this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CollapseAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -437,9 +437,9 @@
             this.checkBoxUseHex.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxUseHex.Location = new System.Drawing.Point(897, 2);
             this.checkBoxUseHex.Name = "checkBoxUseHex";
-            this.checkBoxUseHex.Size = new System.Drawing.Size(121, 17);
+            this.checkBoxUseHex.Size = new System.Drawing.Size(122, 17);
             this.checkBoxUseHex.TabIndex = 8;
-            this.checkBoxUseHex.Text = "Display Guid as Hex";
+            this.checkBoxUseHex.Text = "Display Data as Hex";
             this.checkBoxUseHex.UseVisualStyleBackColor = true;
             this.checkBoxUseHex.CheckedChanged += new System.EventHandler(this.checkBoxUseHex_CheckedChanged);
             // 
@@ -557,7 +557,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ColumnHeader columnHeader7;
-        private System.Windows.Forms.TreeView treeView_ParsedData;
+        private BufferedTreeView treeView_ParsedData;
         private System.Windows.Forms.CheckBox checkBox_HideHeaderOnly;
         private System.Windows.Forms.CheckBox checkBox_useHighlighting;
         private System.Windows.Forms.MenuItem menuItem1;

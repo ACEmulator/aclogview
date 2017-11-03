@@ -60,7 +60,7 @@ public class CM_Vendor : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("shopVendorID = " + Utility.FormatGuid(shopVendorID));
+            rootNode.Nodes.Add("shopVendorID = " + Utility.FormatHex(shopVendorID));
             TreeNode shopVendorProfileNode = rootNode.Nodes.Add("shopVendorProfile = ");
             shopVendorProfile.contributeToTreeNode(shopVendorProfileNode);
             TreeNode shopItemProfilesNode = rootNode.Nodes.Add("shopItemProfileList = ");
@@ -104,7 +104,14 @@ public class CM_Vendor : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("item_types = " + item_types);
+            TreeNode itemTypeNode = node.Nodes.Add("item_types = " + Utility.FormatHex(item_types));
+            foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
+            {
+                if ( (item_types & (uint)e) == (uint)e && (uint)e != 0 )
+                {
+                    itemTypeNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                }
+            }
             node.Nodes.Add("min_value = " + min_value);
             node.Nodes.Add("max_value = " + max_value);
             node.Nodes.Add("magic = " + magic);
@@ -137,7 +144,7 @@ public class CM_Vendor : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("amount = " + amount);
-            node.Nodes.Add("iid = " + Utility.FormatGuid(iid));
+            node.Nodes.Add("iid = " + Utility.FormatHex(iid));
             if (pwd != null)
             {
                 TreeNode pwdNode = node.Nodes.Add("wdesc = ");
@@ -169,7 +176,7 @@ public class CM_Vendor : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_vendorID = " + Utility.FormatGuid(i_vendorID));
+            rootNode.Nodes.Add("i_vendorID = " + Utility.FormatHex(i_vendorID));
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
             for (int i = 0; i < i_stuff.list.Count; i++)
             {
@@ -177,7 +184,7 @@ public class CM_Vendor : MessageProcessor {
                 ItemProfile thisProfile = i_stuff.list[i];
                 thisProfile.contributeToTreeNode(itemProfileNode);
             }
-            rootNode.Nodes.Add("i_alternateCurrencyID = " + Utility.FormatGuid(i_alternateCurrencyID));
+            rootNode.Nodes.Add("i_alternateCurrencyID = " + Utility.FormatHex(i_alternateCurrencyID));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -198,7 +205,7 @@ public class CM_Vendor : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_vendorID = " + Utility.FormatGuid(i_vendorID));
+            rootNode.Nodes.Add("i_vendorID = " + Utility.FormatHex(i_vendorID));
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
             for (int i = 0; i < i_stuff.list.Count; i++)
             {

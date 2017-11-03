@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview;
 
 public class CM_Login : MessageProcessor {
 
@@ -53,7 +54,7 @@ public class CM_Login : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("gid_ = " + gid_);
+            node.Nodes.Add("gid_ = " + Utility.FormatHex(gid_));
             node.Nodes.Add("name_ = " + name_.m_buffer);
             node.Nodes.Add("secondsGreyedOut_ = " + secondsGreyedOut_);
         }
@@ -92,12 +93,15 @@ public class CM_Login : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("status_ = " + status_);
             TreeNode setNode = rootNode.Nodes.Add("set_ = ");
-            foreach (CharacterIdentity identity in set_) {
-                identity.contributeToTreeNode(setNode);
+            for (int i = 0; i < set_.Count; i++) {
+                TreeNode characterNode = setNode.Nodes.Add($"character {i+1} = ");
+                set_[i].contributeToTreeNode(characterNode);
             }
             TreeNode delSetNode = rootNode.Nodes.Add("delSet_ = ");
-            foreach (CharacterIdentity identity in delSet_) {
-                identity.contributeToTreeNode(delSetNode);
+            for (int i = 0; i < delSet_.Count; i++)
+            {
+                TreeNode characterNode = delSetNode.Nodes.Add($"character {i+1} = ");
+                delSet_[i].contributeToTreeNode(characterNode);
             }
             rootNode.Nodes.Add("numAllowedCharacters_ = " + numAllowedCharacters_);
             rootNode.Nodes.Add("account_ = " + account_.m_buffer);

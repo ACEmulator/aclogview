@@ -121,7 +121,7 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_bookID = " + Utility.FormatGuid(i_bookID));
+            rootNode.Nodes.Add("i_bookID = " + Utility.FormatHex(i_bookID));
             rootNode.Nodes.Add("i_maxNumPages = " + i_maxNumPages);
             rootNode.Nodes.Add("numPages = " + numPages);
             rootNode.Nodes.Add("maxNumCharsPerPage = " + maxNumCharsPerPage);
@@ -185,10 +185,10 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode("PageData");
             rootNode.Expand();
-            rootNode.Nodes.Add("authorID = " + Utility.FormatGuid(authorID));
+            rootNode.Nodes.Add("authorID = " + Utility.FormatHex(authorID));
             rootNode.Nodes.Add("authorName = " + authorName);
             rootNode.Nodes.Add("authorAccount = " + authorAccount);
-            rootNode.Nodes.Add("flags = " + Utility.FormatGuid(flags));
+            rootNode.Nodes.Add("flags = " + Utility.FormatHex(flags));
             rootNode.Nodes.Add("textIncluded = " + textIncluded);
             rootNode.Nodes.Add("ignoreAuthor = " + ignoreAuthor);
             if (textIncluded != 0)
@@ -215,7 +215,7 @@ public class CM_Writing : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("i_bookID = " + Utility.FormatGuid(i_bookID));
+            node.Nodes.Add("i_bookID = " + Utility.FormatHex(i_bookID));
             node.Nodes.Add("i_pageNum = " + i_pageNum);
             node.Nodes.Add("i_success = " + i_success);
         }
@@ -325,12 +325,12 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("bookID = " + Utility.FormatGuid(bookID));
+            rootNode.Nodes.Add("bookID = " + Utility.FormatHex(bookID));
             rootNode.Nodes.Add("page = " + page);
-            rootNode.Nodes.Add("authorID = " + Utility.FormatGuid(authorID));
+            rootNode.Nodes.Add("authorID = " + Utility.FormatHex(authorID));
             rootNode.Nodes.Add("authorName = " + authorName);
             rootNode.Nodes.Add("authorAccount = " + authorAccount);
-            rootNode.Nodes.Add("flags = " + Utility.FormatGuid(flags));
+            rootNode.Nodes.Add("flags = " + Utility.FormatHex(flags));
             rootNode.Nodes.Add("textIncluded = " + textIncluded);
             rootNode.Nodes.Add("ignoreAuthor = " + ignoreAuthor);
             if (textIncluded != 0)
@@ -351,7 +351,7 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectid = " + Utility.FormatGuid(i_objectid));
+            rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -372,7 +372,7 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectid = " + Utility.FormatGuid(i_objectid));
+            rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
             rootNode.Nodes.Add("i_pageNum = " + i_pageNum);
             rootNode.Nodes.Add("i_pageText = " + i_pageText);
             treeView.Nodes.Add(rootNode);
@@ -391,7 +391,7 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectid = " + Utility.FormatGuid(i_objectid));
+            rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -410,7 +410,7 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectid = " + Utility.FormatGuid(i_objectid));
+            rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
             rootNode.Nodes.Add("i_pageNum = " + i_pageNum);
             treeView.Nodes.Add(rootNode);
         }
@@ -430,7 +430,7 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectid = " + Utility.FormatGuid(i_objectid));
+            rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
             rootNode.Nodes.Add("i_pageNum = " + i_pageNum);
             treeView.Nodes.Add(rootNode);
         }
@@ -450,7 +450,7 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectid = " + Utility.FormatGuid(i_objectid));
+            rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
             rootNode.Nodes.Add("i_inscription = " + i_inscription);
             treeView.Nodes.Add(rootNode);
         }

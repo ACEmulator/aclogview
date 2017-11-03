@@ -62,7 +62,7 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("target = " + Utility.FormatGuid(this.target));                   
+            rootNode.Nodes.Add("target = " + Utility.FormatHex(this.target));                   
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -79,7 +79,7 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_objectID = " + Utility.FormatGuid(i_objectID));
+            rootNode.Nodes.Add("i_objectID = " + Utility.FormatHex(i_objectID));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -137,7 +137,7 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("target = " + Utility.FormatGuid(this.target));
+            rootNode.Nodes.Add("target = " + Utility.FormatHex(this.target));
             rootNode.Nodes.Add("mana = " + mana);
             rootNode.Nodes.Add("fSuccess = " + fSuccess);
             treeView.Nodes.Add(rootNode);

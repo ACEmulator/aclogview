@@ -120,7 +120,7 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("player_id = " + Utility.FormatGuid(player_id));
+            rootNode.Nodes.Add("player_id = " + Utility.FormatHex(player_id));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -141,7 +141,7 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("player_id = " + Utility.FormatGuid(player_id));
+            rootNode.Nodes.Add("player_id = " + Utility.FormatHex(player_id));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -188,7 +188,7 @@ public class CM_Fellowship : MessageProcessor {
             }
 
             rootNode.Nodes.Add("_name = " + _name);
-            rootNode.Nodes.Add("_leader = " + Utility.FormatGuid(_leader));
+            rootNode.Nodes.Add("_leader = " + Utility.FormatHex(_leader));
             rootNode.Nodes.Add("_share_xp = " + _share_xp);
             rootNode.Nodes.Add("_even_xp_split = " + _even_xp_split);
             rootNode.Nodes.Add("_open_fellow = " + _open_fellow);
@@ -196,7 +196,7 @@ public class CM_Fellowship : MessageProcessor {
             TreeNode FellowsDepartedNode = rootNode.Nodes.Add("_fellows_departed");
             foreach (KeyValuePair<uint, int> element in _fellows_departed.hashTable)
             {
-                TreeNode FellowNode = FellowsDepartedNode.Nodes.Add(Utility.FormatGuid(element.Key) + " = " + element.Value);
+                TreeNode FellowNode = FellowsDepartedNode.Nodes.Add(Utility.FormatHex(element.Key) + " = " + element.Value);
             }
 
             TreeNode UnknownNode = rootNode.Nodes.Add("FellowshipLock__GuessedName");
@@ -312,7 +312,7 @@ public class CM_Fellowship : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
 
-            rootNode.Nodes.Add("i_iidPlayer = " + Utility.FormatGuid(i_iidPlayer));
+            rootNode.Nodes.Add("i_iidPlayer = " + Utility.FormatHex(i_iidPlayer));
 
             TreeNode FellowNode = rootNode.Nodes.Add("Fellow");
             FellowNode.Expand();

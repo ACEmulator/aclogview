@@ -65,8 +65,8 @@ public class CM_Death : MessageProcessor
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("death_message = " + DeathMessageText);
-            rootNode.Nodes.Add("victim_id = " + Utility.FormatGuid(VictimId));
-            rootNode.Nodes.Add("killer_id = " + Utility.FormatGuid(KillerId));
+            rootNode.Nodes.Add("victim_id = " + Utility.FormatHex(VictimId));
+            rootNode.Nodes.Add("killer_id = " + Utility.FormatHex(KillerId));
             treeView.Nodes.Add(rootNode);
         }
     }

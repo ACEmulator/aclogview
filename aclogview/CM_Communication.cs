@@ -256,7 +256,7 @@ public class CM_Communication : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
-            rootNode.Nodes.Add("TargetID = " + Utility.FormatGuid(TargetID));
+            rootNode.Nodes.Add("TargetID = " + Utility.FormatHex(TargetID));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -283,7 +283,7 @@ public class CM_Communication : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("i_add = " + i_add);
-            rootNode.Nodes.Add("i_character_id = " + Utility.FormatGuid(i_character_id));
+            rootNode.Nodes.Add("i_character_id = " + Utility.FormatHex(i_character_id));
             rootNode.Nodes.Add("i_character_name = " + i_character_name.m_buffer);
             rootNode.Nodes.Add("i_msg_type = " + (SquelchTypes)i_msg_type);
             treeView.Nodes.Add(rootNode);
@@ -428,7 +428,7 @@ public class CM_Communication : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("i_character_id = " + Utility.FormatGuid(i_character_id));
+            node.Nodes.Add("i_character_id = " + Utility.FormatHex(i_character_id));
             character_info.contributeToTreeNode(node);
         }
     }
@@ -548,7 +548,7 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("SenderID = " + Utility.FormatGuid(this.SenderID));
+            rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
             rootNode.Nodes.Add("EmoteMessage = " + EmoteMessage.m_buffer);
             treeView.Nodes.Add(rootNode);
@@ -592,7 +592,7 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("SenderID = " + Utility.FormatGuid(this.SenderID));
+            rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
             rootNode.Nodes.Add("EmoteMessage = " + EmoteMessage.m_buffer);
             treeView.Nodes.Add(rootNode);
@@ -706,7 +706,7 @@ public class CM_Communication : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
-            rootNode.Nodes.Add("SenderID = " + Utility.FormatGuid(this.SenderID));                        
+            rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));                        
             rootNode.Nodes.Add("ChatMessageType = " + (eChatTypes)ChatMessageType);
             treeView.Nodes.Add(rootNode);
         }
@@ -737,7 +737,7 @@ public class CM_Communication : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
-            rootNode.Nodes.Add("SenderID = " +Utility.FormatGuid(this.SenderID));
+            rootNode.Nodes.Add("SenderID = " +Utility.FormatHex(this.SenderID));
             rootNode.Nodes.Add("Range = " + Range);
             rootNode.Nodes.Add("ChatMessageType = " + (eChatTypes)ChatMessageType);
             treeView.Nodes.Add(rootNode);
@@ -771,8 +771,8 @@ public class CM_Communication : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
-            rootNode.Nodes.Add("SenderID = " + Utility.FormatGuid(this.SenderID));
-            rootNode.Nodes.Add("TargetID = " + Utility.FormatGuid(this.TargetID));                    
+            rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));
+            rootNode.Nodes.Add("TargetID = " + Utility.FormatHex(this.TargetID));                    
             rootNode.Nodes.Add("ChatMessageType = " + (eChatTypes)ChatMessageType);
             rootNode.Nodes.Add("secretFlags = " + secretFlags);
             treeView.Nodes.Add(rootNode);

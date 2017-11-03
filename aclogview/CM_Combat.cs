@@ -103,7 +103,7 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_targetID = " + Utility.FormatGuid(this.i_targetID));            
+            rootNode.Nodes.Add("i_targetID = " + Utility.FormatHex(this.i_targetID));            
             
             rootNode.Nodes.Add("i_ah = " + i_ah);
             rootNode.Nodes.Add("i_power_level = " + i_power_level);
@@ -128,7 +128,7 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_target_id = " + Utility.FormatGuid(this.i_targetID));
+            rootNode.Nodes.Add("i_target_id = " + Utility.FormatHex(this.i_targetID));
             rootNode.Nodes.Add("i_ah = " + i_ah);
             rootNode.Nodes.Add("i_accuracy_level = " + i_accuracy_level);
             treeView.Nodes.Add(rootNode);
@@ -187,7 +187,7 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_target_ = " + Utility.FormatGuid(this.i_target));
+            rootNode.Nodes.Add("i_target_ = " + Utility.FormatHex(this.i_target));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -207,7 +207,7 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("target = " +Utility.FormatGuid(this.target));
+            rootNode.Nodes.Add("target = " +Utility.FormatHex(this.target));
             rootNode.Nodes.Add("health = " + health);
             treeView.Nodes.Add(rootNode);
         }

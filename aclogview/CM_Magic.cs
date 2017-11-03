@@ -119,7 +119,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_target = " + Utility.FormatGuid(this.i_target));
+            rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);       
             treeView.Nodes.Add(rootNode);
         }
@@ -261,7 +261,7 @@ public class CM_Magic : MessageProcessor {
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("i_spell_id = " +  "(" + i_spell_id + ") " + (SpellID)i_spell_id);
             node.Nodes.Add("layer = " + layer);
-            node.Nodes.Add("spell_category = " + Utility.FormatGuid(spell_category));
+            node.Nodes.Add("spell_category = " + Utility.FormatHex(spell_category));
             node.Nodes.Add("has_spell_set_id = " + has_spell_set_id);
             node.Nodes.Add("power_level = " + power_level);
             node.Nodes.Add("start_time = " + start_time);
@@ -271,7 +271,7 @@ public class CM_Magic : MessageProcessor {
             else {
                 node.Nodes.Add("duration = " + duration + " seconds");
             }
-            node.Nodes.Add("caster = " + Utility.FormatGuid(caster));
+            node.Nodes.Add("caster = " + Utility.FormatHex(caster));
             node.Nodes.Add("degrade_modifier = " + degrade_modifier);
             node.Nodes.Add("degrade_limit = " + degrade_limit);
             node.Nodes.Add("last_time_degraded = " + last_time_degraded);

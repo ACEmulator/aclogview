@@ -179,7 +179,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_target = " + Utility.FormatGuid(i_target));
+            rootNode.Nodes.Add("i_target = " + Utility.FormatHex(i_target));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -197,7 +197,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_target = " + Utility.FormatGuid(i_target));
+            rootNode.Nodes.Add("i_target = " + Utility.FormatHex(i_target));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -261,7 +261,7 @@ public class CM_Allegiance : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("_id = " + Utility.FormatGuid(_id));
+            node.Nodes.Add("_id = " + Utility.FormatHex(_id));
             node.Nodes.Add("_cp_cached = " + _cp_cached);
             node.Nodes.Add("_cp_tithed = " + _cp_tithed);
             node.Nodes.Add("_bitfield = " + _bitfield);
@@ -326,16 +326,16 @@ public class CM_Allegiance : MessageProcessor {
             TreeNode monarchNode = node.Nodes.Add("_monarch = ");
             _monarch.contributeToTreeNode(monarchNode);
             TreeNode patronNode = monarchNode.Nodes.Add("_patron = ");
-            patronNode.Nodes.Add("_parent_id = " + Utility.FormatGuid(_patron._parent_id));
+            patronNode.Nodes.Add("_parent_id = " + Utility.FormatHex(_patron._parent_id));
             _patron._data.contributeToTreeNode(patronNode);
             if (_peer != null) {
                 TreeNode peerNode = patronNode.Nodes.Add("_peer = ");
-                peerNode.Nodes.Add("_parent_id = " + Utility.FormatGuid(_peer._parent_id));
+                peerNode.Nodes.Add("_parent_id = " + Utility.FormatHex(_peer._parent_id));
                 _peer._data.contributeToTreeNode(peerNode);
                 for (int i = 0; i < vassalList.Count; i++)
                 {
                     TreeNode vassalNode = peerNode.Nodes.Add($"_vassal {i + 1} = ");
-                    vassalNode.Nodes.Add("_parent_id = " + Utility.FormatGuid(vassalList[i]._parent_id));
+                    vassalNode.Nodes.Add("_parent_id = " + Utility.FormatHex(vassalList[i]._parent_id));
                     vassalList[i]._data.contributeToTreeNode(vassalNode);
                 }
             }
@@ -407,7 +407,7 @@ public class CM_Allegiance : MessageProcessor {
             node.Nodes.Add("m_AllegianceName = " + m_AllegianceName);
             node.Nodes.Add("m_NameLastSetTime = " + m_NameLastSetTime);
             node.Nodes.Add("m_isLocked = " + m_isLocked);
-            node.Nodes.Add("m_ApprovedVassal = " + Utility.FormatGuid(m_ApprovedVassal));
+            node.Nodes.Add("m_ApprovedVassal = " + Utility.FormatHex(m_ApprovedVassal));
             if (packed_nodes > 0) {
                 m_pMonarch.contributeToTreeNode(node);
             }
@@ -454,8 +454,8 @@ public class CM_Allegiance : MessageProcessor {
             rootNode.Nodes.Add("_rank = " + _rank);
             TreeNode profileNode = rootNode.Nodes.Add("allegianceProfile = ");
             allegianceProfile.contributeToTreeNode(profileNode);
-            treeView.Nodes.Add(rootNode);
             rootNode.ExpandAll();
+            treeView.Nodes.Add(rootNode);
         }
     }
 
@@ -666,7 +666,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("member = " + Utility.FormatGuid(member));
+            rootNode.Nodes.Add("member = " + Utility.FormatHex(member));
             rootNode.Nodes.Add("bNowLoggedIn = " + bNowLoggedIn);
             treeView.Nodes.Add(rootNode);
         }
@@ -705,7 +705,7 @@ public class CM_Allegiance : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("target = " + Utility.FormatGuid(target));
+            rootNode.Nodes.Add("target = " + Utility.FormatHex(target));
             TreeNode profileNode = rootNode.Nodes.Add("prof = ");
             prof.contributeToTreeNode(profileNode);
             treeView.Nodes.Add(rootNode);

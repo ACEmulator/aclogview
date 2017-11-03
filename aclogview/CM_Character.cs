@@ -177,7 +177,7 @@ public class CM_Character : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("index_ = " + index_);
-            node.Nodes.Add("objectID_ = " + Utility.FormatGuid(objectID_));
+            node.Nodes.Add("objectID_ = " + Utility.FormatHex(objectID_));
             node.Nodes.Add("spellID_ = " + "(" + spellID_ + ") " + (SpellID)spellID_);
         }
     }
@@ -280,8 +280,8 @@ public class CM_Character : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("header = " + Utility.FormatGuid(header));
-            node.Nodes.Add("options_ = " + Utility.FormatGuid(options_));
+            node.Nodes.Add("header = " + Utility.FormatHex(header));
+            node.Nodes.Add("options_ = " + Utility.FormatHex(options_));
             TreeNode shortcutsNode = node.Nodes.Add("shortcuts_ = ");
             if (shortcuts_ != null) {
                 shortcuts_.contributeToTreeNode(shortcutsNode);
@@ -302,8 +302,8 @@ public class CM_Character : MessageProcessor {
                     desiredCompsNode.Nodes.Add(element.Key + " = " + element.Value);
                 }
             }
-            node.Nodes.Add("spell_filters_ = " + Utility.FormatGuid(spell_filters_));
-            node.Nodes.Add("options2 = " + Utility.FormatGuid(options2));
+            node.Nodes.Add("spell_filters_ = " + Utility.FormatHex(spell_filters_));
+            node.Nodes.Add("options2 = " + Utility.FormatHex(options2));
             node.Nodes.Add("m_TimeStampFormat = " + m_TimeStampFormat);
 
             TreeNode playerOptionsDataNode = node.Nodes.Add("m_pPlayerOptionsData = ");
@@ -546,15 +546,15 @@ public class CM_Character : MessageProcessor {
                     }
                     else
                     {
-                        node.Nodes.Add("m_stringID = " + Utility.FormatGuid(m_stringID));
-                        node.Nodes.Add("m_tableID = " + Utility.FormatGuid(m_tableID));
+                        node.Nodes.Add("m_stringID = " + Utility.FormatHex(m_stringID));
+                        node.Nodes.Add("m_tableID = " + Utility.FormatHex(m_tableID));
                     }
                     node.Nodes.Add("bHasStrings = " + bHasStrings);
                     node.Nodes.Add("m_numBuckets = " + m_numBuckets);
                     node.Nodes.Add("m_numElements = " + m_numElements);
                     break;
                 case OptionProperty.Option_TextType_Property:
-                    TreeNode chatMask = node.Nodes.Add("int64PropertyValue = " + Utility.FormatGuid(int64PropertyValue));
+                    TreeNode chatMask = node.Nodes.Add("int64PropertyValue = " + Utility.FormatHex(int64PropertyValue));
                     foreach (ulong e in Enum.GetValues(typeof(ChatTextFilter)))
                     {
                         if ((int64PropertyValue & e) == e)

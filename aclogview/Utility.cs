@@ -15,7 +15,7 @@ namespace aclogview
     public class Utility
     {
         /// <summary>
-        /// The format guid method returns a number as either hex or decimal depending on a setting on the main form.
+        /// The format hex method returns a number as either hex or decimal depending on a setting on the main form.
         /// </summary>
         /// <param name="theValue">
         /// The the value.
@@ -23,7 +23,7 @@ namespace aclogview
         /// <returns>
         /// The <see cref="string"/>.
         /// </returns>
-        public static string FormatGuid(uint theValue)
+        public static string FormatHex(uint theValue)
         {
             if (Globals.UseHex)
             {
@@ -33,7 +33,7 @@ namespace aclogview
             return theValue.ToString();
         }
 
-        public static string FormatGuid(ulong theValue)
+        public static string FormatHex(ulong theValue)
         {
             if (Globals.UseHex)
             {

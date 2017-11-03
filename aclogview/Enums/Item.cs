@@ -28,49 +28,49 @@ public enum AMMO_TYPE {
 
 public enum ITEM_TYPE {
     TYPE_UNDEF = 0,
+    //TYPE_SELF = 0, This is a duplicate of TYPE_UNDEF
     TYPE_MELEE_WEAPON = (1 << 0),
     TYPE_ARMOR = (1 << 1),
     TYPE_CLOTHING = (1 << 2),
+    TYPE_VESTEMENTS = 6,
     TYPE_JEWELRY = (1 << 3),
     TYPE_CREATURE = (1 << 4),
     TYPE_FOOD = (1 << 5),
     TYPE_MONEY = (1 << 6),
     TYPE_MISC = (1 << 7),
     TYPE_MISSILE_WEAPON = (1 << 8),
+    TYPE_WEAPON = 0x101,
     TYPE_CONTAINER = (1 << 9),
+    TYPE_LOCKABLE_MAGIC_TARGET = 0x280,
     TYPE_USELESS = (1 << 10),
     TYPE_GEM = (1 << 11),
     TYPE_SPELL_COMPONENTS = (1 << 12),
     TYPE_WRITABLE = (1 << 13),
     TYPE_KEY = (1 << 14),
     TYPE_CASTER = (1 << 15),
+    TYPE_WEAPON_OR_CASTER = 0x8101,
+    TYPE_REDIRECTABLE_ITEM_ENCHANTMENT_TARGET = 0x8107,
     TYPE_PORTAL = (1 << 16),
     TYPE_LOCKABLE = (1 << 17),
     TYPE_PROMISSORY_NOTE = (1 << 18),
     TYPE_MANASTONE = (1 << 19),
+    TYPE_ITEM_ENCHANTABLE_TARGET = 0x88B8F,
     TYPE_SERVICE = (1 << 20),
     TYPE_MAGIC_WIELDABLE = (1 << 21),
+    TYPE_ITEM = 0x2DFBEF,
     TYPE_CRAFT_COOKING_BASE = (1 << 22),
+    TYPE_VENDOR_GROCER = 0x446220,
     TYPE_CRAFT_ALCHEMY_BASE = (1 << 23),
-    // NOTE: Skip 1
-    TYPE_CRAFT_FLETCHING_BASE = (1 << 25),
+    TYPE_CRAFT_FLETCHING_BASE = (1 << 24),
+    // Skip 1
     TYPE_CRAFT_ALCHEMY_INTERMEDIATE = (1 << 26),
     TYPE_CRAFT_FLETCHING_INTERMEDIATE = (1 << 27),
     TYPE_LIFESTONE = (1 << 28),
+    TYPE_PORTAL_MAGIC_TARGET = 0x10010000,
     TYPE_TINKERING_TOOL = (1 << 29),
     TYPE_TINKERING_MATERIAL = (1 << 30),
+    TYPE_VENDOR_SHOPKEEP = 0x480467A7,
     TYPE_GAMEBOARD = (1 << 31),
-    TYPE_PORTAL_MAGIC_TARGET = 268500992,
-    TYPE_LOCKABLE_MAGIC_TARGET = 640,
-    TYPE_VESTEMENTS = 6,
-    TYPE_WEAPON = 257,
-    TYPE_WEAPON_OR_CASTER = 33025,
-    TYPE_ITEM = 3013615,
-    TYPE_REDIRECTABLE_ITEM_ENCHANTMENT_TARGET = 33031,
-    TYPE_ITEM_ENCHANTABLE_TARGET = 560015,
-    //TYPE_SELF = 0, This is a duplicate of TYPE_UNDEF
-    TYPE_VENDOR_SHOPKEEP = 1208248231,
-    TYPE_VENDOR_GROCER = 4481568
 }
 
 public enum ITEM_USEABLE {
@@ -242,4 +242,23 @@ public enum EquipmentSet {
     ShadowMissileFireBlackfire_EquipmentSet,
     ShadowMissileFrostBlackfire_EquipmentSet,
     ShadowPrismatic_EquipmentSet
+}
+
+public enum CoverageMask : uint
+{
+    UnderwearUpperLegs = 0x00000002,
+    UnderwearLowerLegs = 0x00000004,
+    UnderwearChest     = 0x00000008,
+    UnderwearAbdomen   = 0x00000010,
+    UnderwearUpperArms = 0x00000020,
+    UnderwearLowerArms = 0x00000040,
+    OuterwearUpperLegs = 0x00000100,
+    OuterwearLowerLegs = 0x00000200,
+    OuterwearChest     = 0x00000400,
+    OuterwearAbdomen   = 0x00000800,
+    OuterwearUpperArms = 0x00001000,
+    OuterwearLowerArms = 0x00002000,
+    Head               = 0x00004000,
+    Hands              = 0x00008000,
+    Feet               = 0x00010000,
 }

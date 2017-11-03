@@ -81,7 +81,12 @@ public class CM_House : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
-            // TODO: PacketOpcode.Evt_House__Recv_UpdateRestrictions_ID
+            case PacketOpcode.Evt_House__Recv_UpdateRestrictions_ID:
+                {
+                    Recv_UpdateRestrictions message = Recv_UpdateRestrictions.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             case PacketOpcode.Evt_House__ChangeStoragePermission_Event_ID: {
                     ChangeStoragePermission_Event message = ChangeStoragePermission_Event.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
@@ -96,7 +101,12 @@ public class CM_House : MessageProcessor {
             // TODO: PacketOpcode.Evt_House__RentPay_ID
             // TODO: PacketOpcode.Evt_House__RentWarn_ID
             // TODO: PacketOpcode.Evt_House__RentDue_ID
-            // TODO: PacketOpcode.Evt_House__Recv_UpdateHAR_ID
+            case PacketOpcode.Evt_House__Recv_UpdateHAR_ID:
+                {
+                    Recv_UpdateHAR message = Recv_UpdateHAR.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             case PacketOpcode.Evt_House__QueryLord_ID: {
                     QueryLord message = QueryLord.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
@@ -161,10 +171,10 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Nodes.Add("i_slumlord = " + Utility.FormatGuid(i_slumlord));
+            rootNode.Nodes.Add("i_slumlord = " + Utility.FormatHex(i_slumlord));
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
             for (int i = 0; i < i_stuff.list.Count; i++) {
-                stuffNode.Nodes.Add(Utility.FormatGuid(i_stuff.list[i]));
+                stuffNode.Nodes.Add(Utility.FormatHex(i_stuff.list[i]));
             }
             treeView.Nodes.Add(rootNode);
             rootNode.ExpandAll();
@@ -230,7 +240,7 @@ public class CM_House : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("_id = " + _id);
-            node.Nodes.Add("_owner = " + Utility.FormatGuid(_owner));
+            node.Nodes.Add("_owner = " + Utility.FormatHex(_owner));
             node.Nodes.Add("_bitmask = " + _bitmask);
             node.Nodes.Add("_min_level = " + _min_level);
             node.Nodes.Add("_max_level = " + _max_level);
@@ -265,7 +275,7 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Nodes.Add("lord = " + Utility.FormatGuid(lord));
+            rootNode.Nodes.Add("lord = " + Utility.FormatHex(lord));
             TreeNode profNode = rootNode.Nodes.Add("prof = ");
             prof.contributeToTreeNode(profNode);
             treeView.Nodes.Add(rootNode);
@@ -287,10 +297,10 @@ public class CM_House : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Nodes.Add("i_slumlord = " + Utility.FormatGuid(i_slumlord));
+            rootNode.Nodes.Add("i_slumlord = " + Utility.FormatHex(i_slumlord));
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
             for (int i = 0; i < i_stuff.list.Count; i++) {
-                stuffNode.Nodes.Add(Utility.FormatGuid(i_stuff.list[i]));
+                stuffNode.Nodes.Add(Utility.FormatHex(i_stuff.list[i]));
             }
             treeView.Nodes.Add(rootNode);
             rootNode.ExpandAll();
@@ -449,6 +459,172 @@ public class CM_House : MessageProcessor {
         }
     }
 
+    public class RestrictionDB {
+        // This is the PackableHashTable version of the GuestInfo table. The latest client and server used 0x10000002 for this variable.
+        public uint version;
+        public uint _bitmask;
+        public uint _monarch_iid;
+        public ushort _buckets;
+        public ushort _table_size;
+        public List<RestrictionDBTable> _table;
+
+        public static RestrictionDB read(BinaryReader binaryReader)
+        {
+            RestrictionDB newObj = new RestrictionDB();
+            newObj.version = binaryReader.ReadUInt32();
+            newObj._bitmask = binaryReader.ReadUInt32();
+            newObj._monarch_iid = binaryReader.ReadUInt32();
+            newObj._buckets = binaryReader.ReadUInt16();
+            newObj._table_size = binaryReader.ReadUInt16();
+            newObj._table = new List<RestrictionDBTable>();
+            for (int i = 0; i < newObj._buckets; i++)
+            {
+                newObj._table.Add(RestrictionDBTable.read(binaryReader));
+            }
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("version = " + Utility.FormatHex(version));
+            node.Nodes.Add("_bitmask = " + (RDBBitmask)_bitmask);
+            node.Nodes.Add("_monarch_iid = " + Utility.FormatHex(_monarch_iid));
+            TreeNode tableNode = node.Nodes.Add("_table = ");
+            tableNode.Nodes.Add("_buckets = " + _buckets);
+            tableNode.Nodes.Add("_table_size = " + _table_size);
+            for (int i = 0; i < _buckets; i++)
+            {
+                TreeNode guestNode = tableNode.Nodes.Add($"guest {i+1} = ");
+                _table[i].contributeToTreeNode(guestNode);
+            }
+        }
+    }
+
+    public class RestrictionDBTable {
+        public uint char_object_id;
+        public int _item_storage_permission;
+
+        public static RestrictionDBTable read(BinaryReader binaryReader)
+        {
+            RestrictionDBTable newObj = new RestrictionDBTable();
+
+            newObj.char_object_id = binaryReader.ReadUInt32();
+            newObj._item_storage_permission = binaryReader.ReadInt32();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+
+            node.Nodes.Add("char_object_id = " + Utility.FormatHex(char_object_id));
+            node.Nodes.Add("_item_storage_permission = " + _item_storage_permission);
+        }
+    }
+
+    public class GuestInfo
+    {
+        public uint char_object_id;
+        public int _item_storage_permission;
+        PStringChar _char_name;
+
+        public static GuestInfo read(BinaryReader binaryReader)
+        {
+            GuestInfo newObj = new GuestInfo();
+
+            newObj.char_object_id = binaryReader.ReadUInt32();
+            newObj._item_storage_permission = binaryReader.ReadInt32();
+            newObj._char_name = PStringChar.read(binaryReader);
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+
+            node.Nodes.Add("char_object_id = " + Utility.FormatHex(char_object_id));
+            node.Nodes.Add("_item_storage_permission = " + _item_storage_permission);
+            node.Nodes.Add("_char_name = " + _char_name);
+        }
+    }
+
+    public class HAR {
+        public uint _bitmask;
+        public uint _monarch_iid;
+        public ushort _buckets;
+        public ushort _table_size;
+        public List<GuestInfo> _guest_table;
+        // Note: the _roommate_list is a list of object IDs of other characters on your account.
+        public PList<uint> _roommate_list;
+
+        public static HAR read(BinaryReader binaryReader)
+        {
+            HAR newObj = new HAR();
+            newObj._bitmask = binaryReader.ReadUInt32();
+            newObj._monarch_iid = binaryReader.ReadUInt32();
+            newObj._buckets = binaryReader.ReadUInt16();
+            newObj._table_size = binaryReader.ReadUInt16();
+            newObj._guest_table = new List<GuestInfo>();
+            for (int i = 0; i < newObj._buckets; i++)
+            {
+                newObj._guest_table.Add(GuestInfo.read(binaryReader));
+            }
+            newObj._roommate_list = new PList<uint>();
+            newObj._roommate_list = PList<uint>.read(binaryReader);
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            TreeNode bitmaskNode = node.Nodes.Add("_bitmask = " + Utility.FormatHex(_bitmask));
+            foreach (HARBitmask e in Enum.GetValues(typeof(HARBitmask)))
+            {
+                if ((_bitmask & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    bitmaskNode.Nodes.Add($"{Enum.GetName(typeof(HARBitmask), e)}");
+                }
+            }
+            node.Nodes.Add("_monarch_iid = " + Utility.FormatHex(_monarch_iid));
+            TreeNode guestTableNode = node.Nodes.Add("_guest_table = ");
+            guestTableNode.Nodes.Add("_buckets = " + _buckets);
+            guestTableNode.Nodes.Add("_table_size = " + _table_size);
+            for (int i = 0; i < _buckets; i++)
+            {
+                TreeNode guestNode = guestTableNode.Nodes.Add($"guest {i + 1} = ");
+                _guest_table[i].contributeToTreeNode(guestNode);
+            }
+            TreeNode roommateNode = node.Nodes.Add("_roommate_list = ");
+            for (int i = 0; i < _roommate_list.list.Count; i++)
+            {
+                roommateNode.Nodes.Add("_char_object_id = " + Utility.FormatHex(_roommate_list.list[i]));
+            }
+        }
+    }
+
+    public class Recv_UpdateRestrictions : Message {
+        public byte _house_ts;
+        public uint object_id;
+        public RestrictionDB db;
+
+        public static Recv_UpdateRestrictions read(BinaryReader binaryReader)
+        {
+            Recv_UpdateRestrictions newObj = new Recv_UpdateRestrictions();
+            newObj._house_ts = binaryReader.ReadByte();
+            newObj.object_id = binaryReader.ReadUInt32();
+            newObj.db = RestrictionDB.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("_house_ts = " + _house_ts);
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            TreeNode dbNode = rootNode.Nodes.Add("db = ");
+            db.contributeToTreeNode(dbNode);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
     public class SetOpenHouseStatus_Event : Message {
         public int i_open_house;
 
@@ -505,6 +681,28 @@ public class CM_House : MessageProcessor {
         }
     }
 
+    public class Recv_UpdateHAR : Message
+    {
+        public uint version;
+        public HAR har;
+        public static Recv_UpdateHAR read(BinaryReader binaryReader)
+        {
+            Recv_UpdateHAR newObj = new Recv_UpdateHAR();
+            newObj.version = binaryReader.ReadUInt32();
+            newObj.har = HAR.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("version = " + Utility.FormatHex(version));
+            har.contributeToTreeNode(rootNode);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
     public class QueryLord : Message {
         public uint i_lord;
 
@@ -518,7 +716,7 @@ public class CM_House : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_lord = " + Utility.FormatGuid(i_lord));
+            rootNode.Nodes.Add("i_lord = " + Utility.FormatHex(i_lord));
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -630,7 +828,7 @@ public class CM_House : MessageProcessor {
             rootNode.Nodes.Add("i_houseType = " + i_houseType);
             TreeNode housesNode = rootNode.Nodes.Add("houses = ");
             for (int i = 0; i < houses.list.Count; i++) {
-                housesNode.Nodes.Add(Utility.FormatGuid(houses.list[i]));
+                housesNode.Nodes.Add(Utility.FormatHex(houses.list[i]));
             }
             rootNode.Nodes.Add("nHouses = " + nHouses);
             treeView.Nodes.Add(rootNode);

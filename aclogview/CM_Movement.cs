@@ -270,8 +270,8 @@ class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
-            rootNode.Nodes.Add("flags = " + Utility.FormatGuid(this.flags));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            rootNode.Nodes.Add("flags = " + Utility.FormatHex(this.flags));
         
             TreeNode positionNode = rootNode.Nodes.Add("position = ");
             position.contributeToTreeNode(positionNode);
@@ -512,7 +512,7 @@ class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatGuid(this.object_id));
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
             rootNode.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
             rootNode.Nodes.Add("movement_timestamp = " + movement_timestamp);
@@ -523,8 +523,8 @@ class CM_Movement : MessageProcessor {
             rootNode.Nodes.Add("style = " + style);
             TreeNode motionStateNode = rootNode.Nodes.Add("motionState__guessedname = ");
             motionState__guessedname.contributeToTreeNode(motionStateNode);
-            rootNode.Nodes.Add("stickToObject = " + Utility.FormatGuid(stickToObject));
-            rootNode.Nodes.Add("moveToObject = " + Utility.FormatGuid(moveToObject));
+            rootNode.Nodes.Add("stickToObject = " + Utility.FormatHex(stickToObject));
+            rootNode.Nodes.Add("moveToObject = " + Utility.FormatHex(moveToObject));
             TreeNode posNode = rootNode.Nodes.Add("moveToPos = ");
             moveToPos.contributeToTreeNode(posNode);
             rootNode.Nodes.Add("my_run_rate = " + my_run_rate);

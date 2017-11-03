@@ -16,6 +16,12 @@ public enum HouseBitmask {
     RequiresMonarch_HouseBitmask = (1 << 1)
 }
 
+enum RDBBitmask
+{
+    Undef_RDBBitmask,
+    OpenHouse_RDBBitmask,
+}
+
 public enum HARBitmask {
     Undef_HARBitmask = 0,
     OpenHouse_HARBitmask = (1 << 0),
