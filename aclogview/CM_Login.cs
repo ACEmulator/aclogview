@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using aclogview;
+using static CM_Inventory;
 
 public class CM_Login : MessageProcessor {
 
@@ -166,15 +167,22 @@ public class CM_Login : MessageProcessor {
             foreach (ContentProfile element in clist.list)
             {
                 TreeNode clistItemNode = ContentProfileNode.Nodes.Add("item");
-                TreeNode clistIIDNode = clistItemNode.Nodes.Add("m_iid = " + element.m_iid);
-                TreeNode clistContainerNode = clistItemNode.Nodes.Add("m_uContainerProperties = " + element.m_uContainerProperties);
+                TreeNode clistIIDNode = clistItemNode.Nodes.Add("m_iid = " + Utility.FormatHex(element.m_iid));
+                TreeNode clistContainerNode = clistItemNode.Nodes.Add("m_uContainerProperties = " + (ContainerProperties)element.m_uContainerProperties);
             }
             TreeNode InventoryPlacementProfileNode = rootNode.Nodes.Add("ilist = ");
             foreach (InventoryPlacement element in ilist.list)
             {
                 TreeNode ilistItemNode = InventoryPlacementProfileNode.Nodes.Add("item");
-                TreeNode ilistIIDNode = ilistItemNode.Nodes.Add("iid_ = " + element.iid_);
-                TreeNode ilistLocNode = ilistItemNode.Nodes.Add("loc_ = " + element.loc_);
+                TreeNode ilistIIDNode = ilistItemNode.Nodes.Add("iid_ = " + Utility.FormatHex(element.iid_));
+                TreeNode ilistLocNode = ilistItemNode.Nodes.Add("loc_ = " + Utility.FormatHex(element.loc_));
+                foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+                {
+                    if ((element.loc_ & (uint)e) == (uint)e && (uint)e != 0)
+                    {
+                        ilistLocNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                    }
+                }
                 TreeNode ilistPriorityNode = ilistItemNode.Nodes.Add("priority_ = " + element.priority_);
             }
             
@@ -206,8 +214,9 @@ public class CM_Login : MessageProcessor {
         public WeenieType _weenie_type;
         public AttributeCache _attribCache;
         public PackableHashTable<STypeSkill, Skill> _skillStatsTable = new PackableHashTable<STypeSkill, Skill>();
-        public PackableHashTable<SpellID, float> _spell_book = new PackableHashTable<SpellID, float>();
+        public PackableHashTable<uint, float> _spell_book = new PackableHashTable<uint, float>();
         public EnchantmentRegistry _enchantment_reg;
+        public List<string> packedItems = new List<string>(); // Display purposes
 
         public static CACQualities read(BinaryReader binaryReader)
         {
@@ -218,19 +227,22 @@ public class CM_Login : MessageProcessor {
             if ((newObj.header & (uint)QualitiesPackHeader.Packed_AttributeCache) != 0)
             {
                 newObj._attribCache = AttributeCache.read(binaryReader);
+                newObj.packedItems.Add(QualitiesPackHeader.Packed_AttributeCache.ToString());
             }
             if ((newObj.header & (uint)QualitiesPackHeader.Packed_SkillHashTable) != 0)
             {
                 newObj._skillStatsTable = PackableHashTable<STypeSkill, Skill>.read(binaryReader);
+                newObj.packedItems.Add(QualitiesPackHeader.Packed_SkillHashTable.ToString());
             }
             if ((newObj.header & (uint)QualitiesPackHeader.Packed_SpellBook) != 0)
             {
-                // the float value represents a SpellBookPage which appears to be "_casting_likelihood".
-                newObj._spell_book = PackableHashTable<SpellID, float>.read(binaryReader);
+                newObj._spell_book = PackableHashTable<uint, float>.read(binaryReader);
+                newObj.packedItems.Add(QualitiesPackHeader.Packed_SpellBook.ToString());
             }
             if ((newObj.header & (uint)QualitiesPackHeader.Packed_EnchantmentRegistry) != 0)
             {
                 newObj._enchantment_reg = EnchantmentRegistry.read(binaryReader);
+                newObj.packedItems.Add(QualitiesPackHeader.Packed_EnchantmentRegistry.ToString());
             }
             return newObj;
         }
@@ -241,7 +253,11 @@ public class CM_Login : MessageProcessor {
             TreeNode CBaseQualitiesNode = node.Nodes.Add("CBaseQualities = ");
             CBaseQualities.contributeToTreeNode(CBaseQualitiesNode);
 
-            node.Nodes.Add("header = " + header);
+            TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+            }
             node.Nodes.Add("_weenie_type = " + _weenie_type);
 
             TreeNode attribCacheNode = node.Nodes.Add("_attribCache = ");
@@ -258,14 +274,17 @@ public class CM_Login : MessageProcessor {
                     TreeNode thisStatNode = skillStatsNode.Nodes.Add(element.Key + " = ");
                     Skill thisSkill = element.Value;
                     thisSkill.contributeToTreeNode(thisStatNode);
-                    //node.Nodes.Add(element.Key + " -> " + element.Value);
                 }
             }
 
             TreeNode spellBookNode = node.Nodes.Add("_spell_book = ");
             if ((header & (uint)QualitiesPackHeader.Packed_SpellBook) != 0)
             {
-                _spell_book.contributeToTreeNode(spellBookNode);
+                foreach (KeyValuePair<uint, float> element in _spell_book.hashTable)
+                {
+                    TreeNode spellNode = spellBookNode.Nodes.Add($"({element.Key}) {(SpellID)element.Key} = ");
+                    spellNode.Nodes.Add("_casting_likelihood = " + element.Value);
+                }
             }
             TreeNode enchantmentRegNode = node.Nodes.Add("_enchantment_reg = ");
             if ((header & (uint)QualitiesPackHeader.Packed_EnchantmentRegistry) != 0)
@@ -300,6 +319,7 @@ public class CM_Login : MessageProcessor {
         public PackableHashTable<STypeDID, uint> _didStatsTable = new PackableHashTable<STypeDID, uint>();
         public PackableHashTable<STypeIID, uint> _iidStatsTable = new PackableHashTable<STypeIID, uint>();
         public PackableHashTable<STypePosition, Position> _posStatsTable = new PackableHashTable<STypePosition, Position>();
+        public List<string> packedItems = new List<string>(); // Display purposes
 
         public static CBaseQualities read(BinaryReader binaryReader)
         {
@@ -309,34 +329,42 @@ public class CM_Login : MessageProcessor {
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_IntStats) != 0)
             {
                 newObj._intStatsTable = PackableHashTable<STypeInt, int>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_IntStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_Int64Stats) != 0)
             {
                 newObj._int64StatsTable = PackableHashTable<STypeInt64, long>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_Int64Stats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_BoolStats) != 0)
             {
                 newObj._boolStatsTable = PackableHashTable<STypeBool, int>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_BoolStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_FloatStats) != 0)
             {
                 newObj._floatStatsTable = PackableHashTable<STypeFloat, double>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_FloatStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_StringStats) != 0)
             {
                 newObj._strStatsTable = PackableHashTable<STypeString, PStringChar>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_StringStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_DataIDStats) != 0)
             {
                 newObj._didStatsTable = PackableHashTable<STypeDID, uint>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_DataIDStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_IIDStats) != 0)
             {
                 newObj._iidStatsTable = PackableHashTable<STypeIID, uint>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_IIDStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_PositionHashTable) != 0)
             {
                 newObj._posStatsTable = PackableHashTable<STypePosition, Position>.read(binaryReader);
+                newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_PositionHashTable.ToString());
             }
 
             return newObj;
@@ -344,7 +372,11 @@ public class CM_Login : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("header = " + header);
+            TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+            }
             node.Nodes.Add("_weenie_type = " + _weenie_type);
 
             TreeNode intStatsNode = node.Nodes.Add("_intStatsTable = ");
@@ -375,12 +407,18 @@ public class CM_Login : MessageProcessor {
             TreeNode didStatsNode = node.Nodes.Add("_didStatsTable = ");
             if ((header & (uint)BaseQualitiesPackHeader.Packed_DataIDStats) != 0)
             {
-                _didStatsTable.contributeToTreeNode(didStatsNode);
+                foreach (KeyValuePair<STypeDID, uint> element in _didStatsTable.hashTable)
+                {
+                    didStatsNode.Nodes.Add(element.Key + " = " + Utility.FormatHex(element.Value));
+                }
             }
             TreeNode iidStatsNode = node.Nodes.Add("_iidStatsTable = ");
             if ((header & (uint)BaseQualitiesPackHeader.Packed_IIDStats) != 0)
             {
-                _iidStatsTable.contributeToTreeNode(iidStatsNode);
+                foreach (KeyValuePair<STypeIID, uint> element in _iidStatsTable.hashTable)
+                {
+                    iidStatsNode.Nodes.Add(element.Key + " = " + Utility.FormatHex(element.Value));
+                }
             }
             TreeNode posStatsNode = node.Nodes.Add("_posStatsTable = ");
             if ((header & (uint)BaseQualitiesPackHeader.Packed_PositionHashTable) != 0)
@@ -426,7 +464,13 @@ public class CM_Login : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("header = " + header);
+            TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            foreach (ATTRIBUTE_CACHE_MASK element in Enum.GetValues(typeof(ATTRIBUTE_CACHE_MASK))) {
+                if ((header & (uint)element) != 0)
+                {
+                    headerNode.Nodes.Add(Enum.GetName(typeof(ATTRIBUTE_CACHE_MASK), element));
+                }
+            }
             TreeNode strengthNode = node.Nodes.Add("_strength = ");
             _strength.contributeToTreeNode(strengthNode);
             TreeNode enduranceNode = node.Nodes.Add("_endurance = ");
@@ -455,6 +499,7 @@ public class CM_Login : MessageProcessor {
         public PList<CM_Magic.Enchantment> _add_list = new PList<CM_Magic.Enchantment>();
         public PList<CM_Magic.Enchantment> _cooldown_list = new PList<CM_Magic.Enchantment>();
         public CM_Magic.Enchantment _vitae = new CM_Magic.Enchantment();
+        public List<string> packedItems = new List<string>(); // Display purposes
 
         public static EnchantmentRegistry read(BinaryReader binaryReader)
         {
@@ -463,18 +508,22 @@ public class CM_Login : MessageProcessor {
             if ((newObj.header & (uint)EnchantmentRegistryPackHeader.Packed_MultList) != 0)
             {
                 newObj._mult_list = PList<CM_Magic.Enchantment>.read(binaryReader);
+                newObj.packedItems.Add(EnchantmentRegistryPackHeader.Packed_MultList.ToString());
             }
             if ((newObj.header & (uint)EnchantmentRegistryPackHeader.Packed_AddList) != 0)
             {
                 newObj._add_list = PList<CM_Magic.Enchantment>.read(binaryReader);
+                newObj.packedItems.Add(EnchantmentRegistryPackHeader.Packed_AddList.ToString());
             }
             if ((newObj.header & (uint)EnchantmentRegistryPackHeader.Packed_Cooldown) != 0)
             {
                 newObj._cooldown_list = PList<CM_Magic.Enchantment>.read(binaryReader);
+                newObj.packedItems.Add(EnchantmentRegistryPackHeader.Packed_Cooldown.ToString());
             }
             if ((newObj.header & (uint)EnchantmentRegistryPackHeader.Packed_Vitae) != 0)
             {
                 newObj._vitae = CM_Magic.Enchantment.read(binaryReader);
+                newObj.packedItems.Add(EnchantmentRegistryPackHeader.Packed_Vitae.ToString());
             }
 
             return newObj;
@@ -482,7 +531,11 @@ public class CM_Login : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("header = " + header);
+            TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+            }
 
             TreeNode multListNode = node.Nodes.Add("_mult_list = ");
             if ((header & (uint)EnchantmentRegistryPackHeader.Packed_MultList) != 0)
@@ -523,26 +576,6 @@ public class CM_Login : MessageProcessor {
                 _vitae.contributeToTreeNode(vitaeNode);
             }
 
-        }
-    }
-
-    public class ContentProfile
-    {
-        public uint m_iid;
-        public uint m_uContainerProperties;
-
-        public static ContentProfile read(BinaryReader binaryReader)
-        {
-            ContentProfile newObj = new ContentProfile();
-            newObj.m_iid = binaryReader.ReadUInt32();
-            newObj.m_uContainerProperties = binaryReader.ReadUInt32();
-            return newObj;
-        }
-
-        public void contributeToTreeNode(TreeNode node)
-        {
-            node.Nodes.Add("m_iid = " + m_iid);
-            node.Nodes.Add("m_uContainerProperties = " + m_uContainerProperties);
         }
     }
 

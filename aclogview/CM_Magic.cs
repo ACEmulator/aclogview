@@ -177,50 +177,111 @@ public class CM_Magic : MessageProcessor {
     }
 
     public class StatMod {
-        public byte table;
-        public byte main_cat;
-        public byte sub_cat;
-        public byte effect;
+        public uint type;
         public uint key;
         public float val;
 
         public static StatMod read(BinaryReader binaryReader) {
             StatMod newObj = new StatMod();
-            newObj.table = binaryReader.ReadByte();
-            newObj.main_cat = binaryReader.ReadByte();
-            newObj.sub_cat = binaryReader.ReadByte();
-            newObj.effect = binaryReader.ReadByte();
+            newObj.type = binaryReader.ReadUInt32();
             newObj.key = binaryReader.ReadUInt32();
             newObj.val = binaryReader.ReadSingle();
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("table = " + (STables)table);
-            node.Nodes.Add("main_category = " + (SMainCat)main_cat);
-            node.Nodes.Add("sub_category = " + (SSubCat)sub_cat);
-            node.Nodes.Add("effect = " + (STypeEffect)effect);
-            switch (table)
+            TreeNode typeNode = node.Nodes.Add("type = " + Utility.FormatHex(type));
+            // First get the type of enum that our key uses if any.
+            // Note that Vitae is a special case that uses two enchantment types so we have to check for that.
+            if ((type & (uint)EnchantmentTypeEnum.SecondAtt_EnchantmentType) != 0 && (type & (uint)EnchantmentTypeEnum.Skill_EnchantmentType) != 0)
             {
-                case 0x01:
-                    node.Nodes.Add("key = " + (STypeAttribute)key);
-                    break;
-                case 0x02:
-                    node.Nodes.Add("key = " + (STypeAttribute2nd)key);
-                    break;
-                case 0x04:
-                    node.Nodes.Add("key = " + (STypeInt)key);
-                    break;
-                case 0x08:
-                    node.Nodes.Add("key = " + (STypeFloat)key);
-                    break;
-                case 0x10:
-                    node.Nodes.Add("key = " + (STypeSkill)key);
-                    break;
-                default:
-                    node.Nodes.Add("key = " + key);
-                    break;
+                node.Nodes.Add("key = " + key);
+                typeNode.Nodes.Add(EnchantmentTypeEnum.SecondAtt_EnchantmentType.ToString());
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Skill_EnchantmentType.ToString());
             }
+            else if ((type & (uint)EnchantmentTypeEnum.Attribute_EnchantmentType) != 0) {
+                node.Nodes.Add("key = " + (STypeAttribute)key);
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Attribute_EnchantmentType.ToString());
+            }
+            else if ((type & (uint)EnchantmentTypeEnum.SecondAtt_EnchantmentType) != 0) {
+                node.Nodes.Add("key = " + (STypeAttribute2nd)key);
+                typeNode.Nodes.Add(EnchantmentTypeEnum.SecondAtt_EnchantmentType.ToString());
+            }
+            else if ((type & (uint)EnchantmentTypeEnum.Int_EnchantmentType) != 0) {
+                node.Nodes.Add("key = " + (STypeInt)key);
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Int_EnchantmentType.ToString());
+            }
+            else if ((type & (uint)EnchantmentTypeEnum.Float_EnchantmentType) != 0) {
+                node.Nodes.Add("key = " + (STypeFloat)key);
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Float_EnchantmentType.ToString());
+            }
+            else if ((type & (uint)EnchantmentTypeEnum.Skill_EnchantmentType) != 0) {
+                node.Nodes.Add("key = " + (STypeSkill)key);
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Skill_EnchantmentType.ToString());
+            }
+            // Some enchantment types don't use an enum table for the key (key == 0).
+            else
+            {
+                node.Nodes.Add("key = " + key);
+            }
+            // Process the rest of the type bitfield.
+            if ((type & (uint)EnchantmentTypeEnum.BodyDamageValue_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.BodyDamageValue_EnchantmentType.ToString());
+            }     
+            if ((type & (uint)EnchantmentTypeEnum.BodyDamageVariance_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.BodyDamageVariance_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.BodyArmorValue_EnchantmentType) != 0) // Natural Armor
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.BodyArmorValue_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.SingleStat_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.SingleStat_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.MultipleStat_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.MultipleStat_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.Multiplicative_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Multiplicative_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.Additive_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Additive_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.AttackSkills_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.AttackSkills_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.DefenseSkills_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.DefenseSkills_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.Multiplicative_Degrade_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Multiplicative_Degrade_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.Additive_Degrade_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Additive_Degrade_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.Vitae_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Vitae_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.Cooldown_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Cooldown_EnchantmentType.ToString());
+            }
+            if ((type & (uint)EnchantmentTypeEnum.Beneficial_EnchantmentType) != 0)
+            {
+                typeNode.Nodes.Add(EnchantmentTypeEnum.Beneficial_EnchantmentType.ToString());
+            }
+
             node.Nodes.Add("val = " + val);
         }
     }

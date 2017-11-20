@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using aclogview;
+using static CM_Inventory;
 
 public class CM_Trade : MessageProcessor {
 
@@ -133,23 +134,6 @@ public class CM_Trade : MessageProcessor {
         }
     }
 
-    public class ContentProfile {
-        public uint m_iid;
-        public uint m_uContainerProperties;
-
-        public static ContentProfile read(BinaryReader binaryReader) {
-            ContentProfile newObj = new ContentProfile();
-            newObj.m_iid = binaryReader.ReadUInt32();
-            newObj.m_uContainerProperties = binaryReader.ReadUInt32();
-            return newObj;
-        }
-
-        public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("m_iid = " + m_iid);
-            node.Nodes.Add("m_uContainerProperties = " + m_uContainerProperties);
-        }
-    }
-
     public class Trade {
         public uint _partner;
         public double _stamp;
@@ -174,16 +158,24 @@ public class CM_Trade : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("_partner = " + _partner);
+            node.Nodes.Add("_partner = " + Utility.FormatHex(_partner));
             node.Nodes.Add("_stamp = " + _stamp);
-            node.Nodes.Add("_status = " + _status);
+            node.Nodes.Add("_status = " + (TradeStatusEnum)_status);
             node.Nodes.Add("_initiator = " + _initiator);
             node.Nodes.Add("_accepted = " + _accepted);
             node.Nodes.Add("_p_accepted = " + _p_accepted);
             TreeNode selfListNode = node.Nodes.Add("_self_list = ");
-            _self_list.contributeToTreeNode(selfListNode);
+            for (int i = 0; i < _self_list.list.Count; i++)
+            {
+                TreeNode itemNode = selfListNode.Nodes.Add($"item {i+1} = ");
+                _self_list.list[i].contributeToTreeNode(itemNode);
+            }
             TreeNode partnerListNode = node.Nodes.Add("_partner_list = ");
-            _partner_list.contributeToTreeNode(partnerListNode);
+            for (int i = 0; i < _partner_list.list.Count; i++)
+            {
+                TreeNode itemNode = partnerListNode.Nodes.Add($"item {i+1} = ");
+                _partner_list.list[i].contributeToTreeNode(itemNode);
+            }
         }
     }
 
@@ -201,6 +193,7 @@ public class CM_Trade : MessageProcessor {
             rootNode.Expand();
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
             i_stuff.contributeToTreeNode(stuffNode);
+            stuffNode.Expand();
             treeView.Nodes.Add(rootNode);
         }
     }

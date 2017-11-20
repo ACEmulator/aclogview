@@ -125,22 +125,22 @@ public class CM_Qualities : MessageProcessor {
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateFloat_ID: {
-                    PrivateUpdateQualityEvent<STypeFloat, float> message = PrivateUpdateQualityEvent<STypeFloat, float>.read(opcode, messageDataReader);
+                    PrivateUpdateQualityEvent<STypeFloat, double> message = PrivateUpdateQualityEvent<STypeFloat, double>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateFloat_ID: {
-                    UpdateQualityEvent<STypeFloat, float> message = UpdateQualityEvent<STypeFloat, float>.read(opcode, messageDataReader);
+                    UpdateQualityEvent<STypeFloat, double> message = UpdateQualityEvent<STypeFloat, double>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateString_ID: {
-                    PrivateUpdateQualityEvent<STypeString, PStringChar> message = PrivateUpdateQualityEvent<STypeString, PStringChar>.read(opcode, messageDataReader);
+                    PrivateUpdateStringEvent message = PrivateUpdateStringEvent.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateString_ID: {
-                    UpdateQualityEvent<STypeString, PStringChar> message = UpdateQualityEvent<STypeString, PStringChar>.read(opcode, messageDataReader);
+                    UpdateStringEvent message = UpdateStringEvent.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -323,7 +323,15 @@ public class CM_Qualities : MessageProcessor {
             rootNode.Nodes.Add("opcode = " + opcode);
             rootNode.Nodes.Add("wts = " + wts);
             rootNode.Nodes.Add("stype = " + stype);
-            rootNode.Nodes.Add("val = " + val); // TODO: Need to contribute to this node for types that are capable of doing so
+            // TODO: Need to contribute to this node for types that are capable of doing so
+            if (val is uint)
+            {
+                rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)(object)val));
+            }
+            else
+            {
+                rootNode.Nodes.Add("val = " + val); 
+            }
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -350,9 +358,81 @@ public class CM_Qualities : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("opcode = " + opcode);
             rootNode.Nodes.Add("wts = " + wts);
-            rootNode.Nodes.Add("sender = " + sender);
+            rootNode.Nodes.Add("sender = " + Utility.FormatHex(sender));
             rootNode.Nodes.Add("stype = " + stype);
-            rootNode.Nodes.Add("val = " + val); // TODO: Need to contribute to this node for types that are capable of doing so
+            // TODO: Need to contribute to this node for types that are capable of doing so
+            if (val is uint)
+            {
+                rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)(object)val));
+            }
+            else
+            {
+                rootNode.Nodes.Add("val = " + val);
+            }
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    // Note: I could not find this message in any pcaps but this code should parse the message based on the client code structure.
+    public class PrivateUpdateStringEvent : Message
+    {
+        public PacketOpcode opcode;
+        public byte wts;
+        public STypeString stype;
+        public PStringChar val;
+
+        public static PrivateUpdateStringEvent read(PacketOpcode opcode, BinaryReader binaryReader)
+        {
+            PrivateUpdateStringEvent newObj = new PrivateUpdateStringEvent();
+            newObj.opcode = opcode;
+            newObj.wts = binaryReader.ReadByte();
+            newObj.stype = (STypeString)binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            newObj.val = PStringChar.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("opcode = " + opcode);
+            rootNode.Nodes.Add("wts = " + wts);
+            rootNode.Nodes.Add("stype = " + stype);
+            rootNode.Nodes.Add("val = " + val);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class UpdateStringEvent : Message
+    {
+        public PacketOpcode opcode;
+        public byte wts;
+        public STypeString stype;
+        public uint sender;
+        public PStringChar val;
+
+        public static UpdateStringEvent read(PacketOpcode opcode, BinaryReader binaryReader)
+        {
+            UpdateStringEvent newObj = new UpdateStringEvent();
+            newObj.opcode = opcode;
+            newObj.wts = binaryReader.ReadByte();
+            newObj.stype = (STypeString)binaryReader.ReadUInt32();
+            newObj.sender = binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            newObj.val = PStringChar.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("opcode = " + opcode);
+            rootNode.Nodes.Add("wts = " + wts);
+            rootNode.Nodes.Add("stype = " + stype);
+            rootNode.Nodes.Add("sender = " + Utility.FormatHex(sender));
+            rootNode.Nodes.Add("val = " + val);
             treeView.Nodes.Add(rootNode);
         }
     }

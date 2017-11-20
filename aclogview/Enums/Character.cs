@@ -216,3 +216,28 @@ public enum UIElement
     SmartBox,
     FloatySideVitals
 }
+
+// Note: This enum was modified to start at -1 so that it
+// lines up properly with the values sent from the client.
+// gmCGTownPage::ETown
+public enum CG_Town
+{
+    ECG_TOWN_INVALID = -1,
+    ECG_TOWN_HOLTBURG,
+    ECG_TOWN_SHOUSHI,
+    ECG_TOWN_YARAQ,
+    ECG_TOWN_SANAMAR,
+    ECG_TOWN_OLTHOILAIR, // Guessed name
+};
+
+// gmCGProfessionPage::EProfession
+enum CG_Profession
+{
+    ECG_CUSTOM=0,
+    ECG_BOWHUNTER=1,
+    ECG_SWASHBUCKLER=2,
+    ECG_LIFECASTER=3,
+    ECG_WARMAGE=4,
+    ECG_WAYFARER=5,
+    ECG_SOLDIER=6
+};

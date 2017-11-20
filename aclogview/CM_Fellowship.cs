@@ -65,6 +65,12 @@ public class CM_Fellowship : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
+            case PacketOpcode.Evt_Fellowship__AssignNewLeader_ID:
+                {
+                    AssignNewLeader message = AssignNewLeader.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             case PacketOpcode.Evt_Fellowship__ChangeFellowOpeness_ID:
                 {
                     FellowshipChangeOpenness message = FellowshipChangeOpenness.read(messageDataReader);
@@ -158,7 +164,7 @@ public class CM_Fellowship : MessageProcessor {
         public PackableHashTable<uint, int> _fellows_departed = new PackableHashTable<uint, int>();
 
         // This is not unpacked or defined in the client. From server end, it might be acceptable to leave off or, to ensure compatability with aclogview, send an empty PackableHashTable
-        public PackableHashTable<PStringChar, FellowshipLock__GuessedName> unk = new PackableHashTable<PStringChar, FellowshipLock__GuessedName>();
+        public PackableHashTable<PStringChar, LockedFellowshipList> unk = new PackableHashTable<PStringChar, LockedFellowshipList>();
 
         public static FellowshipFullUpdate read(BinaryReader binaryReader)
         {
@@ -171,7 +177,7 @@ public class CM_Fellowship : MessageProcessor {
             newObj._open_fellow = binaryReader.ReadUInt32();
             newObj._locked = binaryReader.ReadUInt32();
             newObj._fellows_departed = PackableHashTable<uint, int>.read(binaryReader);
-            newObj.unk = PackableHashTable<PStringChar, FellowshipLock__GuessedName>.read(binaryReader);
+            newObj.unk = PackableHashTable<PStringChar, LockedFellowshipList>.read(binaryReader);
             return newObj;
         }
 
@@ -183,7 +189,7 @@ public class CM_Fellowship : MessageProcessor {
             TreeNode FellowshipTableNode = rootNode.Nodes.Add("_fellowship_table");
             foreach (KeyValuePair<uint, Fellow> element in _fellowship_table.hashTable)
             {
-                TreeNode FellowNode = FellowshipTableNode.Nodes.Add("Fellow");
+                TreeNode FellowNode = FellowshipTableNode.Nodes.Add("fellow = ");
                 element.Value.contributeToTreeNode(FellowNode);
             }
 
@@ -193,14 +199,16 @@ public class CM_Fellowship : MessageProcessor {
             rootNode.Nodes.Add("_even_xp_split = " + _even_xp_split);
             rootNode.Nodes.Add("_open_fellow = " + _open_fellow);
             rootNode.Nodes.Add("_locked = " + _locked);
-            TreeNode FellowsDepartedNode = rootNode.Nodes.Add("_fellows_departed");
+            TreeNode FellowsDepartedNode = rootNode.Nodes.Add("_fellows_departed = ");
             foreach (KeyValuePair<uint, int> element in _fellows_departed.hashTable)
             {
-                TreeNode FellowNode = FellowsDepartedNode.Nodes.Add(Utility.FormatHex(element.Key) + " = " + element.Value);
+                TreeNode FellowNode = FellowsDepartedNode.Nodes.Add("fellow = ");
+                FellowNode.Nodes.Add("fellow_id = " + Utility.FormatHex(element.Key));
+                FellowNode.Nodes.Add("return_time = " + element.Value);
             }
 
-            TreeNode UnknownNode = rootNode.Nodes.Add("FellowshipLock__GuessedName");
-            foreach (KeyValuePair<PStringChar, FellowshipLock__GuessedName> element in unk.hashTable)
+            TreeNode UnknownNode = rootNode.Nodes.Add("LockedFellowshipList = ");
+            foreach (KeyValuePair<PStringChar, LockedFellowshipList> element in unk.hashTable)
             {
                 TreeNode UnknownSubNode = UnknownNode.Nodes.Add(element.Key.ToString());
                 element.Value.contributeToTreeNode(UnknownSubNode);
@@ -261,9 +269,9 @@ public class CM_Fellowship : MessageProcessor {
     }
 
     /// <summary>
-    /// This is not unpacked in the client. Values/structures are gusses.
+    /// This is not unpacked in the client. Values/structures are guesses.
     /// </summary>
-    public class FellowshipLock__GuessedName
+    public class LockedFellowshipList
     {
         public uint unknown_1;
         public uint unknown_2;
@@ -271,9 +279,9 @@ public class CM_Fellowship : MessageProcessor {
         public uint timestamp;
         public uint unknown_4;
 
-        public static FellowshipLock__GuessedName read(BinaryReader binaryReader)
+        public static LockedFellowshipList read(BinaryReader binaryReader)
         {
-            FellowshipLock__GuessedName newObj = new FellowshipLock__GuessedName();
+            LockedFellowshipList newObj = new LockedFellowshipList();
             newObj.unknown_1 = binaryReader.ReadUInt32();
             newObj.unknown_2 = binaryReader.ReadUInt32();
             newObj.unknown_3 = binaryReader.ReadUInt32();
@@ -290,6 +298,14 @@ public class CM_Fellowship : MessageProcessor {
             node.Nodes.Add("timestamp__guessedname = " + timestamp);
             node.Nodes.Add("unknown_4 = " + unknown_4);
         }
+    }
+
+    public enum FellowshipUpdateType
+    {
+        UNDEF,
+        FELLOWSHIP_UPDATE_FULL,
+        FELLOWSHIP_UPDATE_STATS,
+        FELLOWSHIP_UPDATE_VITALS,
     }
 
     public class FellowshipUpdate : Message
@@ -318,11 +334,32 @@ public class CM_Fellowship : MessageProcessor {
             FellowNode.Expand();
             fellow.contributeToTreeNode(FellowNode);
 
-            rootNode.Nodes.Add("i_uiUpdateType = " + i_uiUpdateType);
+            rootNode.Nodes.Add("i_uiUpdateType = " + (FellowshipUpdateType)i_uiUpdateType);
 
             treeView.Nodes.Add(rootNode);
         }
     }
+    public class AssignNewLeader : Message
+    {
+        public uint i_target;
+
+        public static AssignNewLeader read(BinaryReader binaryReader)
+        {
+            AssignNewLeader newObj = new AssignNewLeader();
+            newObj.i_target = binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("i_target = " + Utility.FormatHex(i_target));
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
     public class FellowshipChangeOpenness : Message
     {
         // NOTE: Client incorrectly spells this as "Openess" (only one "N")

@@ -175,30 +175,30 @@ public enum BondedStatusEnum {
 }
 
 public enum EnchantmentTypeEnum {
-    Undef_EnchantmentType = 0,
-    Attribute_EnchantmentType = (1 << 0),
-    SecondAtt_EnchantmentType = (1 << 1),
-    Int_EnchantmentType = (1 << 2),
-    Float_EnchantmentType = (1 << 3),
-    Skill_EnchantmentType = (1 << 4),
-    BodyDamageValue_EnchantmentType = (1 << 5),
-    BodyDamageVariance_EnchantmentType = (1 << 6),
-    BodyArmorValue_EnchantmentType = (1 << 7),
-    // NOTE: Skip 3
-    SingleStat_EnchantmentType = (1 << 11),
-    MultipleStat_EnchantmentType = (1 << 12),
-    Multiplicative_EnchantmentType = (1 << 13),
-    Additive_EnchantmentType = (1 << 14),
-    AttackSkills_EnchantmentType = (1 << 15),
-    DefenseSkills_EnchantmentType = (1 << 16),
+    Undef_EnchantmentType                  = 0,
+    Attribute_EnchantmentType              = (1 << 0),
+    SecondAtt_EnchantmentType              = (1 << 1),
+    Int_EnchantmentType                    = (1 << 2),
+    Float_EnchantmentType                  = (1 << 3),
+    Skill_EnchantmentType                  = (1 << 4),
+    BodyDamageValue_EnchantmentType        = (1 << 5),
+    BodyDamageVariance_EnchantmentType     = (1 << 6),
+    BodyArmorValue_EnchantmentType         = (1 << 7), // Natural Armor
+    // NOTE: Skip 4
+    SingleStat_EnchantmentType             = (1 << 12),
+    MultipleStat_EnchantmentType           = (1 << 13),
+    Multiplicative_EnchantmentType         = (1 << 14),
+    Additive_EnchantmentType               = (1 << 15),
+    AttackSkills_EnchantmentType           = (1 << 16),
+    DefenseSkills_EnchantmentType          = (1 << 17),
     // NOTE: Skip 3
     Multiplicative_Degrade_EnchantmentType = (1 << 20),
-    Additive_Degrade_EnchantmentType = (1 << 21),
+    Additive_Degrade_EnchantmentType       = (1 << 21),
     // NOTE: Skip 1
-    Vitae_EnchantmentType = (1 << 23),
-    Cooldown_EnchantmentType = (1 << 24),
-    Beneficial_EnchantmentType = (1 << 25),
-    StatTypes_EnchantmentType = 255
+    Vitae_EnchantmentType                  = (1 << 23),
+    Cooldown_EnchantmentType               = (1 << 24),
+    Beneficial_EnchantmentType             = (1 << 25),
+    StatTypes_EnchantmentType              = 255
 }
 
 public enum EquipmentSet {
@@ -261,4 +261,12 @@ public enum CoverageMask : uint
     Head               = 0x00004000,
     Hands              = 0x00008000,
     Feet               = 0x00010000,
+}
+
+// This enum is not found in the client.
+public enum ContainerProperties
+{
+    None,
+    Container,
+    Foci
 }

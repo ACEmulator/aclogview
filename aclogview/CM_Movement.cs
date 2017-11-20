@@ -8,16 +8,16 @@ using System.Windows.Forms;
 
 using aclogview;
 
-class CM_Movement : MessageProcessor {
+public class CM_Movement : MessageProcessor {
 
     public override bool acceptMessageData(BinaryReader messageDataReader, TreeView outputTreeView) {
         bool handled = true;
 
         PacketOpcode opcode = Util.readOpcode(messageDataReader);
         switch (opcode) {
-            case PacketOpcode.LIFESTONE_MATERIALIZE:
+            case PacketOpcode.Evt_Movement__PositionAndMovement:
                 {
-                    LifestoneMaterialize message = LifestoneMaterialize.read(messageDataReader);
+                    PositionAndMovement message = PositionAndMovement.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -78,7 +78,9 @@ class CM_Movement : MessageProcessor {
     }
 
     public class JumpPack {
+        public float extent;
         public Vector3 velocity;
+        public Position position;
         public ushort instance_timestamp;
         public ushort server_control_timestamp;
         public ushort teleport_timestamp;
@@ -86,7 +88,9 @@ class CM_Movement : MessageProcessor {
 
         public static JumpPack read(BinaryReader binaryReader) {
             JumpPack newObj = new JumpPack();
+            newObj.extent = binaryReader.ReadSingle();
             newObj.velocity = Vector3.read(binaryReader);
+            newObj.position = Position.read(binaryReader);
             newObj.instance_timestamp = binaryReader.ReadUInt16();
             newObj.server_control_timestamp = binaryReader.ReadUInt16();
             newObj.teleport_timestamp = binaryReader.ReadUInt16();
@@ -96,7 +100,10 @@ class CM_Movement : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
+            node.Nodes.Add("extent = " + extent);
             node.Nodes.Add("velocity = " + velocity);
+            TreeNode positionNode = node.Nodes.Add("position = ");
+            position.contributeToTreeNode(positionNode);
             node.Nodes.Add("instance_timestamp = " + instance_timestamp);
             node.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
             node.Nodes.Add("teleport_timestamp = " + teleport_timestamp);
@@ -118,6 +125,7 @@ class CM_Movement : MessageProcessor {
             rootNode.Expand();
             TreeNode jumpNode = rootNode.Nodes.Add("i_jp = ");
             i_jp.contributeToTreeNode(jumpNode);
+            jumpNode.Expand();
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -216,9 +224,20 @@ class CM_Movement : MessageProcessor {
         }
     }
 
-    public class UpdatePosition : Message {
-        public uint object_id;
-        public uint flags;
+    public class PositionPack
+    {
+        public enum PackBitfield
+        {
+            HasVelocity       = 0x1,
+            HasPlacementID    = 0x2,
+            IsGrounded        = 0x4,
+            OrientationHasNoW = 0x8,
+            OrientationHasNoX = 0x10,
+            OrientationHasNoY = 0x20,
+            OrientationHasNoZ = 0x40,
+        }
+
+        public uint bitfield;
         public Position position;
         public Vector3 velocity;
         public uint placement_id;
@@ -227,43 +246,107 @@ class CM_Movement : MessageProcessor {
         public ushort position_timestamp;
         public ushort teleport_timestamp;
         public ushort force_position_timestamp;
+        public List<string> packedItems; // For display purposes
 
-        public static UpdatePosition read(BinaryReader binaryReader) {
-            UpdatePosition newObj = new UpdatePosition();
-            newObj.object_id = binaryReader.ReadUInt32();
-            newObj.flags = binaryReader.ReadUInt32();
+        public static PositionPack read(BinaryReader binaryReader)
+        {
+            PositionPack newObj = new PositionPack();
+            newObj.packedItems = new List<string>();
+            newObj.bitfield = binaryReader.ReadUInt32();
             newObj.position = Position.readOrigin(binaryReader);
 
-            if ((newObj.flags & 0x8) == 0) {
+            if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoW) == 0)
+            {
                 newObj.position.frame.qw = binaryReader.ReadSingle();
             }
-            if ((newObj.flags & 0x10) == 0) {
+            else
+            {
+                newObj.packedItems.Add(PackBitfield.OrientationHasNoW.ToString());
+            }
+            if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoX) == 0)
+            {
                 newObj.position.frame.qx = binaryReader.ReadSingle();
             }
-            if ((newObj.flags & 0x20) == 0) {
+            else
+            {
+                newObj.packedItems.Add(PackBitfield.OrientationHasNoX.ToString());
+            }
+            if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoY) == 0)
+            {
                 newObj.position.frame.qy = binaryReader.ReadSingle();
             }
-            if ((newObj.flags & 0x40) == 0) {
+            else
+            {
+                newObj.packedItems.Add(PackBitfield.OrientationHasNoY.ToString());
+            }
+            if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoZ) == 0)
+            {
                 newObj.position.frame.qz = binaryReader.ReadSingle();
+            }
+            else
+            {
+                newObj.packedItems.Add(PackBitfield.OrientationHasNoZ.ToString());
             }
 
             newObj.position.frame.cache();
 
-            if ((newObj.flags & 0x1) != 0) {
+            if ((newObj.bitfield & (uint)PackBitfield.HasVelocity) != 0)
+            {
                 newObj.velocity = Vector3.read(binaryReader);
+                newObj.packedItems.Add(PackBitfield.HasVelocity.ToString());
             }
 
-            if ((newObj.flags & 0x2) != 0) {
+            if ((newObj.bitfield & (uint)PackBitfield.HasPlacementID) != 0)
+            {
                 newObj.placement_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.HasPlacementID.ToString());
             }
 
-            newObj.has_contact = (newObj.flags & 0x4) != 0;
+            newObj.has_contact = (newObj.bitfield & (uint)PackBitfield.IsGrounded) != 0;
+            if (newObj.has_contact)
+                newObj.packedItems.Add(PackBitfield.IsGrounded.ToString());
 
             newObj.instance_timestamp = binaryReader.ReadUInt16();
             newObj.position_timestamp = binaryReader.ReadUInt16();
             newObj.teleport_timestamp = binaryReader.ReadUInt16();
             newObj.force_position_timestamp = binaryReader.ReadUInt16();
+            return newObj;
+        }
 
+        public void contributeToTreeNode(TreeNode node)
+        {
+            TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(this.bitfield));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                bitfieldNode.Nodes.Add(packedItems[i]);
+            }
+
+            TreeNode positionNode = node.Nodes.Add("position = ");
+            position.contributeToTreeNode(positionNode);
+            if ((bitfield & (uint)PackBitfield.HasVelocity) != 0)
+            {
+                node.Nodes.Add("velocity = " + velocity);
+            }
+            if ((bitfield & (uint)PackBitfield.HasPlacementID) != 0)
+            {
+                node.Nodes.Add("placement_id = " + placement_id);
+            }
+            node.Nodes.Add("has_contact = " + has_contact);
+            node.Nodes.Add("instance_timestamp = " + instance_timestamp);
+            node.Nodes.Add("position_timestamp = " + position_timestamp);
+            node.Nodes.Add("teleport_timestamp = " + teleport_timestamp);
+            node.Nodes.Add("force_position_timestamp = " + force_position_timestamp);
+        }
+    }
+
+    public class UpdatePosition : Message {
+        public uint object_id;
+        public PositionPack positionPack;
+
+        public static UpdatePosition read(BinaryReader binaryReader) {
+            UpdatePosition newObj = new UpdatePosition();
+            newObj.object_id = binaryReader.ReadUInt32();
+            newObj.positionPack = PositionPack.read(binaryReader);
             return newObj;
         }
 
@@ -271,21 +354,9 @@ class CM_Movement : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
-            rootNode.Nodes.Add("flags = " + Utility.FormatHex(this.flags));
-        
-            TreeNode positionNode = rootNode.Nodes.Add("position = ");
-            position.contributeToTreeNode(positionNode);
-            if ((flags & 0x1) != 0) {
-                rootNode.Nodes.Add("velocity = " + velocity);
-            }
-            if ((flags & 0x2) != 0) {
-                rootNode.Nodes.Add("placement_id = " + placement_id);
-            }
-            rootNode.Nodes.Add("has_contact = " + has_contact);
-            rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
-            rootNode.Nodes.Add("position_timestamp = " + position_timestamp);
-            rootNode.Nodes.Add("teleport_timestamp = " + teleport_timestamp);
-            rootNode.Nodes.Add("force_position_timestamp = " + force_position_timestamp);
+            TreeNode positionPackNode = rootNode.Nodes.Add("PositionPack = ");
+            positionPack.contributeToTreeNode(positionPackNode);
+            positionPackNode.Expand();
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -309,36 +380,45 @@ class CM_Movement : MessageProcessor {
         public float forward_speed = 1.0f;
         public float sidestep_speed = 1.0f;
         public float turn_speed = 1.0f;
-        public List<MovementAction> actions = new List<MovementAction>();
+        public List<ActionNode> actions = new List<ActionNode>();
+        public List<string> packedItems = new List<string>(); // For display purposes
 
         public static InterpretedMotionState read(BinaryReader binaryReader) {
             InterpretedMotionState newObj = new InterpretedMotionState();
             newObj.bitfield = binaryReader.ReadUInt32();
             if ((newObj.bitfield & (uint)PackBitfield.current_style) != 0) {
                 newObj.current_style = (MotionStyle)command_ids[binaryReader.ReadUInt16()];
+                newObj.packedItems.Add(PackBitfield.current_style.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.forward_command) != 0) {
                 newObj.forward_command = (MotionStyle)command_ids[binaryReader.ReadUInt16()];
+                newObj.packedItems.Add(PackBitfield.forward_command.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.sidestep_command) != 0) {
                 newObj.sidestep_command = (MotionStyle)command_ids[binaryReader.ReadUInt16()];
+                newObj.packedItems.Add(PackBitfield.sidestep_command.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.turn_command) != 0) {
                 newObj.turn_command = (MotionStyle)command_ids[binaryReader.ReadUInt16()];
+                newObj.packedItems.Add(PackBitfield.turn_command.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.forward_speed) != 0) {
                 newObj.forward_speed = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PackBitfield.forward_speed.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.sidestep_speed) != 0) {
                 newObj.sidestep_speed = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PackBitfield.sidestep_speed.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.turn_speed) != 0) {
                 newObj.turn_speed = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PackBitfield.turn_speed.ToString());
             }
 
-            uint numActions = (newObj.bitfield >> 7) & 0x1F;
-            for (int i = 0; i < numActions; ++i) {
-                newObj.actions.Add(MovementAction.read(binaryReader));
+            uint num_actions = (newObj.bitfield >> 7) & 0x1F;
+            newObj.packedItems.Add("num_actions = " + num_actions);
+            for (int i = 0; i < num_actions; ++i) {
+                newObj.actions.Add(ActionNode.read(binaryReader));
             }
 
             Util.readToAlign(binaryReader);
@@ -348,7 +428,11 @@ class CM_Movement : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("bitfield = " + bitfield);
+            TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                bitfieldNode.Nodes.Add(packedItems[i]);
+            }
             node.Nodes.Add("current_style = " + current_style);
             node.Nodes.Add("forward_command = " + forward_command);
             node.Nodes.Add("sidestep_command = " + sidestep_command);
@@ -356,42 +440,69 @@ class CM_Movement : MessageProcessor {
             node.Nodes.Add("forward_speed = " + forward_speed);
             node.Nodes.Add("sidestep_speed = " + sidestep_speed);
             node.Nodes.Add("turn_speed = " + turn_speed);
-
-            TreeNode actionsNode = node.Nodes.Add("Actions");
-            for (int i = 0; i < actions.Count; ++i)
+            if (actions.Count > 0)
             {
-                TreeNode actionNode = actionsNode.Nodes.Add("action");
-                actions[i].contributeToTreeNode(actionNode);
-            }
-            actionsNode.ExpandAll();
+                TreeNode actionsNode = node.Nodes.Add("actions = ");
+                for (int i = 0; i < actions.Count; ++i)
+                {
+                    TreeNode actionNode = actionsNode.Nodes.Add($"action {i + 1}");
+                    actions[i].contributeToTreeNode(actionNode);
+                }
+            } 
         }
     }
 
-    public class MovementAction
+    public class ActionNode
     {
-        public MotionStyle style;
-        public uint sequence;
+        public uint action;
+        public uint stamp;
+        public int autonomous;
         public float speed;
 
-        public static MovementAction read(BinaryReader binaryReader)
+        public static ActionNode read(BinaryReader binaryReader)
         {
-            MovementAction newObj = new MovementAction();
-            ushort command_id = binaryReader.ReadUInt16();
-            newObj.style = (MotionStyle)command_ids[command_id];
-            newObj.sequence = binaryReader.ReadUInt16();  // TODO - This is a packed word
+            ActionNode newObj = new ActionNode();
+            newObj.action = command_ids[binaryReader.ReadUInt16()];
+            uint packedSequence = binaryReader.ReadUInt16();
+            newObj.stamp = packedSequence & 0x7FFF;
+            newObj.autonomous = (int)((packedSequence >> 15) & 1);
             newObj.speed = binaryReader.ReadSingle();
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("style = " + style);
-            node.Nodes.Add("sequence = " + sequence);
+            // TODO: Change this to display useful information for command_ids entries that are not in the MotionStyle enum.
+            node.Nodes.Add("action = " + (MotionStyle)action);
+            node.Nodes.Add("stamp = " + stamp);
+            node.Nodes.Add("autonomous = " + autonomous);
             node.Nodes.Add("speed = " + speed);
         }
     }
 
     public class MovementParameters {
+        public enum PackBitfield
+        {
+            can_walk = (1 << 0),
+            can_run = (1 << 1),
+            can_sidestep = (1 << 2),
+            can_walk_backwards = (1 << 3),
+            can_charge = (1 << 4),
+            fail_walk = (1 << 5),
+            use_final_heading = (1 << 6),
+            sticky = (1 << 7),
+            move_away = (1 << 8),
+            move_towards = (1 << 9),
+            use_spheres = (1 << 10),
+            set_hold_key = (1 << 11),
+            autonomous = (1 << 12),
+            modify_raw_state = (1 << 13),
+            modify_interpreted_state = (1 << 14),
+            cancel_moveto = (1 << 15),
+            stop_completely = (1 << 16),
+            disable_jump_during_link = (1 << 17),
+        }
+
         public uint bitfield;
         public float distance_to_object;
         public float min_distance;
@@ -429,7 +540,14 @@ class CM_Movement : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("bitfield = " + bitfield);
+            TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            foreach (PackBitfield e in Enum.GetValues(typeof(PackBitfield)))
+            {
+                if (((uint)bitfield & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    bitfieldNode.Nodes.Add($"{Enum.GetName(typeof(PackBitfield), e)}");
+                }
+            }
             node.Nodes.Add("distance_to_object = " + distance_to_object);
             node.Nodes.Add("min_distance = " + min_distance);
             node.Nodes.Add("fail_distance = " + fail_distance);
@@ -438,73 +556,167 @@ class CM_Movement : MessageProcessor {
             node.Nodes.Add("desired_heading = " + desired_heading);
         }
     }
-
-    public class MovementEvent : Message {
-        public uint object_id;
-        public ushort instance_timestamp;
+    // This class does not appear in the client but is added for convenience
+    public class MovementData
+    {
         public ushort server_control_timestamp;
         public ushort movement_timestamp;
         public byte autonomous;
-        public MovementTypes.Type movementType__guessedname;
-        public MovementParameters movementParams__guessedname = new MovementParameters();
-        public MotionStyle style;
-        public InterpretedMotionState motionState__guessedname = new InterpretedMotionState();
-        public uint stickToObject;
-        public uint moveToObject;
-        public Position moveToPos = new Position();
-        public float my_run_rate;
-        public uint turnToObject;
-        public float turnToHeading;
+        public MovementDataUnpack movementData_Unpack;
 
-        public static MovementEvent read(BinaryReader binaryReader) {
-            MovementEvent newObj = new MovementEvent();
-            newObj.object_id = binaryReader.ReadUInt32();
-            newObj.instance_timestamp = binaryReader.ReadUInt16();
+        public static MovementData read(BinaryReader binaryReader)
+        {
+            MovementData newObj = new MovementData();
             newObj.server_control_timestamp = binaryReader.ReadUInt16();
             newObj.movement_timestamp = binaryReader.ReadUInt16();
             newObj.autonomous = binaryReader.ReadByte();
 
             Util.readToAlign(binaryReader);
 
-            newObj.movementType__guessedname = (MovementTypes.Type)binaryReader.ReadUInt16();
-            newObj.style = (MotionStyle)command_ids[binaryReader.ReadUInt16()];
+            newObj.movementData_Unpack = MovementDataUnpack.read(binaryReader);
+            return newObj;
+        }
 
-            switch (newObj.movementType__guessedname) {
-                // TODO: This now needs to mimic the rest of MovementManager::unpack_movement here
-                case MovementTypes.Type.Invalid: {
-                        newObj.motionState__guessedname = InterpretedMotionState.read(binaryReader);
-                        if (((ushort)newObj.movementType__guessedname & 0x100) != 0) { // TODO: Double check that this is the correct mask here
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
+            node.Nodes.Add("movement_timestamp = " + movement_timestamp);
+            node.Nodes.Add("autonomous = " + autonomous);
+            movementData_Unpack.contributeToTreeNode(node);
+        }
+    }
+
+    // A class that mimics MovementManager::unpack_movement
+    public class MovementDataUnpack
+    {
+        public MovementTypes.Type movement_type;
+        public ushort movement_options;
+        public MovementParameters movement_params = new MovementParameters();
+        public MotionStyle style;
+        public InterpretedMotionState interpretedMotionState = new InterpretedMotionState();
+        public uint stickToObject;
+        public bool standing_longjump = false;
+        public uint moveToObject;
+        public Position moveToPos = new Position();
+        public float my_run_rate;
+        public uint turnToObject;
+        public float desiredHeading;
+
+        public static MovementDataUnpack read(BinaryReader binaryReader)
+        {
+            MovementDataUnpack newObj = new MovementDataUnpack();
+            ushort pack_word = binaryReader.ReadUInt16();
+            newObj.movement_options = (ushort)(pack_word & 0xFF00);
+            newObj.movement_type = (MovementTypes.Type)((ushort)(pack_word & 0x00FF));
+            newObj.style = (MotionStyle)command_ids[binaryReader.ReadUInt16()];
+            switch (newObj.movement_type)
+            {
+                case MovementTypes.Type.Invalid:
+                    {
+                        newObj.interpretedMotionState = InterpretedMotionState.read(binaryReader);
+                        if ((newObj.movement_options & 0x100) != 0)
+                        {
                             newObj.stickToObject = binaryReader.ReadUInt32();
+                        }
+                        if ((newObj.movement_options & 0x200) != 0)
+                        {
+                            newObj.standing_longjump = true;
                         }
                         break;
                     }
-                case MovementTypes.Type.MoveToObject: {
+                case MovementTypes.Type.MoveToObject:
+                    {
                         newObj.moveToObject = binaryReader.ReadUInt32();
                         newObj.moveToPos = Position.readOrigin(binaryReader);
-                        newObj.movementParams__guessedname = MovementParameters.read(newObj.movementType__guessedname, binaryReader);
+                        newObj.movement_params = MovementParameters.read(newObj.movement_type, binaryReader);
                         newObj.my_run_rate = binaryReader.ReadSingle();
                         break;
                     }
-                case MovementTypes.Type.MoveToPosition: {
+                case MovementTypes.Type.MoveToPosition:
+                    {
                         newObj.moveToPos = Position.readOrigin(binaryReader);
-                        newObj.movementParams__guessedname = MovementParameters.read(newObj.movementType__guessedname, binaryReader);
+                        newObj.movement_params = MovementParameters.read(newObj.movement_type, binaryReader);
                         newObj.my_run_rate = binaryReader.ReadSingle();
                         break;
                     }
-                case MovementTypes.Type.TurnToObject: {
+                case MovementTypes.Type.TurnToObject:
+                    {
                         newObj.turnToObject = binaryReader.ReadUInt32();
-                        newObj.turnToHeading = binaryReader.ReadSingle();
-                        newObj.movementParams__guessedname = MovementParameters.read(newObj.movementType__guessedname, binaryReader);
+                        newObj.desiredHeading = binaryReader.ReadSingle();
+                        newObj.movement_params = MovementParameters.read(newObj.movement_type, binaryReader);
                         break;
                     }
-                case MovementTypes.Type.TurnToHeading: {
-                        newObj.movementParams__guessedname = MovementParameters.read(newObj.movementType__guessedname, binaryReader);
+                case MovementTypes.Type.TurnToHeading:
+                    {
+                        newObj.movement_params = MovementParameters.read(newObj.movement_type, binaryReader);
                         break;
                     }
-                default: {
+                default:
+                    {
                         break;
                     }
             }
+
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("movement_type = " + movement_type);
+            node.Nodes.Add("style = " + style);
+            if (movement_type == MovementTypes.Type.Invalid)
+            {
+                TreeNode optionsNode = node.Nodes.Add("movement_options = " + Utility.FormatHex(movement_options));
+                if ((movement_options & 0x100) != 0)
+                {
+                    optionsNode.Nodes.Add("stickToObject = " + Utility.FormatHex(stickToObject));
+                }
+                optionsNode.Nodes.Add("standing_longjump = " + standing_longjump);
+                TreeNode motionStateNode = node.Nodes.Add("interpretedMotionState = ");
+                interpretedMotionState.contributeToTreeNode(motionStateNode);
+            }
+            else if (movement_type == MovementTypes.Type.MoveToObject)
+            {
+                node.Nodes.Add("moveToObject = " + Utility.FormatHex(moveToObject));
+                TreeNode posNode = node.Nodes.Add("moveToPos = ");
+                moveToPos.contributeToTreeNode(posNode);
+                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
+                movement_params.contributeToTreeNode(moveParamsNode);
+                node.Nodes.Add("my_run_rate = " + my_run_rate);
+            }
+            else if (movement_type == MovementTypes.Type.MoveToPosition)
+            {
+                TreeNode posNode = node.Nodes.Add("moveToPos = ");
+                moveToPos.contributeToTreeNode(posNode);
+                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
+                movement_params.contributeToTreeNode(moveParamsNode);
+                node.Nodes.Add("my_run_rate = " + my_run_rate);
+            }
+            else if (movement_type == MovementTypes.Type.TurnToObject)
+            {
+                node.Nodes.Add("turnToObject = " + Utility.FormatHex(turnToObject));
+                node.Nodes.Add("desiredHeading = " + desiredHeading);
+                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
+                movement_params.contributeToTreeNode(moveParamsNode);
+            }
+            else if (movement_type == MovementTypes.Type.TurnToHeading)
+            {
+                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
+                movement_params.contributeToTreeNode(moveParamsNode);
+            }
+        }
+    }
+
+    public class MovementEvent : Message {
+        public uint object_id;
+        public ushort instance_timestamp;
+        public MovementData movement_data;
+
+        public static MovementEvent read(BinaryReader binaryReader) {
+            MovementEvent newObj = new MovementEvent();
+            newObj.object_id = binaryReader.ReadUInt32();
+            newObj.instance_timestamp = binaryReader.ReadUInt16();
+            newObj.movement_data = MovementData.read(binaryReader);
 
             return newObj;
         }
@@ -514,22 +726,7 @@ class CM_Movement : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
             rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
-            rootNode.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
-            rootNode.Nodes.Add("movement_timestamp = " + movement_timestamp);
-            rootNode.Nodes.Add("autonomous = " + autonomous);
-            rootNode.Nodes.Add("movementType__guessedname = " + movementType__guessedname);
-            TreeNode moveParamsNode = rootNode.Nodes.Add("movementParams__guessedname = ");
-            movementParams__guessedname.contributeToTreeNode(moveParamsNode);
-            rootNode.Nodes.Add("style = " + style);
-            TreeNode motionStateNode = rootNode.Nodes.Add("motionState__guessedname = ");
-            motionState__guessedname.contributeToTreeNode(motionStateNode);
-            rootNode.Nodes.Add("stickToObject = " + Utility.FormatHex(stickToObject));
-            rootNode.Nodes.Add("moveToObject = " + Utility.FormatHex(moveToObject));
-            TreeNode posNode = rootNode.Nodes.Add("moveToPos = ");
-            moveToPos.contributeToTreeNode(posNode);
-            rootNode.Nodes.Add("my_run_rate = " + my_run_rate);
-            rootNode.Nodes.Add("turnToObject = " + turnToObject);
-            rootNode.Nodes.Add("turnToHeading = " + turnToHeading);
+            movement_data.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -568,6 +765,7 @@ class CM_Movement : MessageProcessor {
         }
 
         public uint bitfield;
+        public List<string> packedItems; // For display purposes
         public HoldKey current_holdkey;
         public MotionStyle current_style = MotionStyle.Motion_NonCombat;
         public MotionStyle forward_command = MotionStyle.Motion_Ready;
@@ -579,50 +777,62 @@ class CM_Movement : MessageProcessor {
         public MotionStyle turn_command;
         public HoldKey turn_holdkey;
         public float turn_speed = 1.0f;
+        public List<ActionNode> actions;
 
         public static RawMotionState read(BinaryReader binaryReader) {
             RawMotionState newObj = new RawMotionState();
+            newObj.packedItems = new List<string>();
             newObj.bitfield = binaryReader.ReadUInt32();
             if ((newObj.bitfield & (uint)PackBitfield.current_holdkey) != 0) {
                 newObj.current_holdkey = (HoldKey)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.current_holdkey.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.current_style) != 0) {
                 newObj.current_style = (MotionStyle)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.current_style.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.forward_command) != 0) {
                 newObj.forward_command = (MotionStyle)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.forward_command.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.forward_holdkey) != 0) {
                 newObj.forward_holdkey = (HoldKey)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.forward_holdkey.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.forward_speed) != 0) {
                 newObj.forward_speed = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PackBitfield.forward_speed.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.sidestep_command) != 0) {
                 newObj.sidestep_command = (MotionStyle)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.sidestep_command.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.sidestep_holdkey) != 0) {
                 newObj.sidestep_holdkey = (HoldKey)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.sidestep_holdkey.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.sidestep_speed) != 0) {
                 newObj.sidestep_speed = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PackBitfield.sidestep_speed.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.turn_command) != 0) {
                 newObj.turn_command = (MotionStyle)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.turn_command.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.turn_holdkey) != 0) {
                 newObj.turn_holdkey = (HoldKey)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PackBitfield.turn_holdkey.ToString());
             }
             if ((newObj.bitfield & (uint)PackBitfield.turn_speed) != 0) {
                 newObj.turn_speed = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PackBitfield.turn_speed.ToString());
             }
 
-            uint numActions = (newObj.bitfield >> 11);
-            for (int i = 0; i < numActions; ++i) {
-                // TODO: Do actual stuff here!
-                uint thing1 = command_ids[binaryReader.ReadUInt16()];
-                uint thing2 = binaryReader.ReadUInt16();
-                uint thing3 = binaryReader.ReadUInt32();
+            uint num_actions = (newObj.bitfield >> 11);
+            newObj.packedItems.Add("num_actions = " + num_actions);
+            newObj.actions = new List<ActionNode>();
+            for (int i = 0; i < num_actions; ++i) {
+                newObj.actions.Add(ActionNode.read(binaryReader));
             }
 
             Util.readToAlign(binaryReader);
@@ -631,7 +841,11 @@ class CM_Movement : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("bitfield = " + bitfield);
+            TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                bitfieldNode.Nodes.Add(packedItems[i]);
+            }
             node.Nodes.Add("current_holdkey = " + current_holdkey);
             node.Nodes.Add("current_style = " + current_style);
             node.Nodes.Add("forward_command = " + forward_command);
@@ -643,6 +857,15 @@ class CM_Movement : MessageProcessor {
             node.Nodes.Add("turn_command = " + turn_command);
             node.Nodes.Add("turn_holdkey = " + turn_holdkey);
             node.Nodes.Add("turn_speed = " + turn_speed);
+            if (actions.Count > 0)
+            {
+                TreeNode actionsNode = node.Nodes.Add("actions = ");
+                for (int i = 0; i < actions.Count; i++)
+                {
+                    TreeNode actionNode = actionsNode.Nodes.Add($"action {i+1}");
+                    actions[i].contributeToTreeNode(actionNode);
+                }
+            }
         }
     }
 
@@ -703,30 +926,18 @@ class CM_Movement : MessageProcessor {
         }
     }
 
-    public class LifestoneMaterialize : Message
+    public class PositionAndMovement : Message
     {
-        public uint ObjectId;
-        public int unknown1;
-        public Position Position;
-        public int unknown2;
-        public int unknown3;
-        public int unknown4;
-        public int unknown5;
-        public int unknown6;
-        public int unknown7;
+        public uint object_id;
+        public PositionPack positionPack;
+        public MovementData movementData;
 
-        public static LifestoneMaterialize read(BinaryReader binaryReader)
+        public static PositionAndMovement read(BinaryReader binaryReader)
         {
-            LifestoneMaterialize newObj = new LifestoneMaterialize();
-            newObj.ObjectId = binaryReader.ReadUInt32();
-            newObj.unknown1 = binaryReader.ReadInt32();
-            newObj.Position = Position.read(binaryReader);
-            newObj.unknown2 = binaryReader.ReadInt32();
-            newObj.unknown3 = binaryReader.ReadInt32();
-            newObj.unknown4 = binaryReader.ReadInt32();
-            newObj.unknown5 = binaryReader.ReadInt32();
-            newObj.unknown6 = binaryReader.ReadInt32();
-            newObj.unknown7 = binaryReader.ReadInt32();
+            PositionAndMovement newObj = new PositionAndMovement();
+            newObj.object_id = binaryReader.ReadUInt32();
+            newObj.positionPack = PositionPack.read(binaryReader);
+            newObj.movementData = MovementData.read(binaryReader);
 
             return newObj;
         }
@@ -735,17 +946,11 @@ class CM_Movement : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("player_id = " + ObjectId);
-            rootNode.Nodes.Add("unknown1 = " + unknown1);
-            TreeNode posNode = rootNode.Nodes.Add("position = ");
-            Position.contributeToTreeNode(posNode);
-            posNode.ExpandAll();
-            rootNode.Nodes.Add("unknown2 = " + unknown2);
-            rootNode.Nodes.Add("unknown3 = " + unknown3);
-            rootNode.Nodes.Add("unknown4 = " + unknown4);
-            rootNode.Nodes.Add("unknown5 = " + unknown5);
-            rootNode.Nodes.Add("unknown6 = " + unknown6);
-            rootNode.Nodes.Add("unknown7 = " + unknown7);
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            TreeNode positionPackNode = rootNode.Nodes.Add("PositionPack = ");
+            positionPack.contributeToTreeNode(positionPackNode);
+            TreeNode movementDataNode = rootNode.Nodes.Add("MovementData = ");
+            movementData.contributeToTreeNode(movementDataNode);
             treeView.Nodes.Add(rootNode);
         }
     }

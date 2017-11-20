@@ -131,6 +131,12 @@ public class CM_Character : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
+            case PacketOpcode.CHARACTER_ERROR_EVENT:
+                {
+                    CharacterErrorEvent message = CharacterErrorEvent.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             default: {
                     handled = false;
                     break;
@@ -228,13 +234,16 @@ public class CM_Character : MessageProcessor {
         public PStringChar m_TimeStampFormat;
         public GenericQualitiesData m_pPlayerOptionsData;
         public PackObjPropertyCollection m_colGameplayOptions;
+        public List<string> packedItems; // For display purposes
 
         public static PlayerModule read(BinaryReader binaryReader) {
             PlayerModule newObj = new PlayerModule();
+            newObj.packedItems = new List<string>();
             newObj.header = binaryReader.ReadUInt32();
             newObj.options_ = binaryReader.ReadUInt32();
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_ShortCutManager) != 0) {
                 newObj.shortcuts_ = ShortCutManager.read(binaryReader);
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_ShortCutManager.ToString());
             }
 
             newObj.favorite_spells_[0] = PList<SpellID>.read(binaryReader);
@@ -242,45 +251,58 @@ public class CM_Character : MessageProcessor {
                 for (int i = 1; i < 5; ++i) {
                     newObj.favorite_spells_[i] = PList<SpellID>.read(binaryReader);
                 }
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_MultiSpellLists.ToString());
             } else if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_ExtendedMultiSpellLists) != 0) {
                 for (int i = 1; i < 7; ++i) {
                     newObj.favorite_spells_[i] = PList<SpellID>.read(binaryReader);
                 }
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_ExtendedMultiSpellLists.ToString());
             } else if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_8_SpellLists) != 0) {
                 for (int i = 1; i < 8; ++i) {
                     newObj.favorite_spells_[i] = PList<SpellID>.read(binaryReader);
                 }
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_8_SpellLists.ToString());
             }
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_DesiredComps) != 0) {
                 newObj.desired_comps_ = PackableHashTable<uint, int>.read(binaryReader);
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_DesiredComps.ToString());
             }
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_SpellbookFilters) != 0) {
                 newObj.spell_filters_ = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_SpellbookFilters.ToString());
             } else {
                 newObj.spell_filters_ = 0x3FFF;
             }
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_2ndCharacterOptions) != 0) {
                 newObj.options2 = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_2ndCharacterOptions.ToString());
             } else {
                 newObj.options2 = 0x948700;
             }
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_TimeStampFormat) != 0) {
                 newObj.m_TimeStampFormat = PStringChar.read(binaryReader);
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_TimeStampFormat.ToString());
             }
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_GenericQualitiesData) != 0)
             {
                 newObj.m_pPlayerOptionsData = GenericQualitiesData.read(binaryReader);
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_GenericQualitiesData.ToString());
             }
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_GameplayOptions) != 0)
             {
                 newObj.m_colGameplayOptions = PackObjPropertyCollection.read(binaryReader);
                 Util.readToAlign(binaryReader); // Align to dword boundary
+                newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_GameplayOptions.ToString());
             }
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("header = " + Utility.FormatHex(header));
+            TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+            }
             node.Nodes.Add("options_ = " + Utility.FormatHex(options_));
             TreeNode shortcutsNode = node.Nodes.Add("shortcuts_ = ");
             if (shortcuts_ != null) {
@@ -668,7 +690,7 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_confirmType = " + i_confirmType);
+            rootNode.Nodes.Add("i_confirmType = " + (ConfirmationType)i_confirmType);
             rootNode.Nodes.Add("i_context = " + i_context);
             rootNode.Nodes.Add("i_bAccepted = " + i_bAccepted);
             treeView.Nodes.Add(rootNode);
@@ -805,20 +827,20 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_base_palette = " + i_base_palette);
-            rootNode.Nodes.Add("i_head_object = " + i_head_object);
-            rootNode.Nodes.Add("i_head_texture = " + i_head_texture);
-            rootNode.Nodes.Add("i_default_head_texture = " + i_default_head_texture);
-            rootNode.Nodes.Add("i_eyes_texture = " + i_eyes_texture);
-            rootNode.Nodes.Add("i_default_eyes_texture = " + i_default_eyes_texture);
-            rootNode.Nodes.Add("i_nose_texture = " + i_nose_texture);
-            rootNode.Nodes.Add("i_default_nose_texture = " + i_default_nose_texture);
-            rootNode.Nodes.Add("i_mouth_texture = " + i_mouth_texture);
-            rootNode.Nodes.Add("i_default_mouth_texture = " + i_default_mouth_texture);
-            rootNode.Nodes.Add("i_skin_palette = " + i_skin_palette);
-            rootNode.Nodes.Add("i_hair_palette = " + i_hair_palette);
-            rootNode.Nodes.Add("i_eyes_palette = " + i_eyes_palette);
-            rootNode.Nodes.Add("i_setup_id = " + i_setup_id);
+            rootNode.Nodes.Add("i_base_palette = " + Utility.FormatHex(i_base_palette));
+            rootNode.Nodes.Add("i_head_object = " + Utility.FormatHex(i_head_object));
+            rootNode.Nodes.Add("i_head_texture = " + Utility.FormatHex(i_head_texture));
+            rootNode.Nodes.Add("i_default_head_texture = " + Utility.FormatHex(i_default_head_texture));
+            rootNode.Nodes.Add("i_eyes_texture = " + Utility.FormatHex(i_eyes_texture));
+            rootNode.Nodes.Add("i_default_eyes_texture = " + Utility.FormatHex(i_default_eyes_texture));
+            rootNode.Nodes.Add("i_nose_texture = " + Utility.FormatHex(i_nose_texture));
+            rootNode.Nodes.Add("i_default_nose_texture = " + Utility.FormatHex(i_default_nose_texture));
+            rootNode.Nodes.Add("i_mouth_texture = " + Utility.FormatHex(i_mouth_texture));
+            rootNode.Nodes.Add("i_default_mouth_texture = " + Utility.FormatHex(i_default_mouth_texture));
+            rootNode.Nodes.Add("i_skin_palette = " + Utility.FormatHex(i_skin_palette));
+            rootNode.Nodes.Add("i_hair_palette = " + Utility.FormatHex(i_hair_palette));
+            rootNode.Nodes.Add("i_eyes_palette = " + Utility.FormatHex(i_eyes_palette));
+            rootNode.Nodes.Add("i_setup_id = " + Utility.FormatHex(i_setup_id));
             rootNode.Nodes.Add("i_option1 = " + i_option1);
             rootNode.Nodes.Add("i_option2 = " + i_option2);
             treeView.Nodes.Add(rootNode);
@@ -1003,20 +1025,20 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("_base_palette = " + _base_palette);
-            rootNode.Nodes.Add("_head_object = " + _head_object);
-            rootNode.Nodes.Add("_head_texture = " + _head_texture);
-            rootNode.Nodes.Add("_default_head_texture = " + _default_head_texture);
-            rootNode.Nodes.Add("_eyes_texture = " + _eyes_texture);
-            rootNode.Nodes.Add("_default_eyes_texture = " + _default_eyes_texture);
-            rootNode.Nodes.Add("_nose_texture = " + _nose_texture);
-            rootNode.Nodes.Add("_default_nose_texture = " + _default_nose_texture);
-            rootNode.Nodes.Add("_mouth_texture = " + _mouth_texture);
-            rootNode.Nodes.Add("_default_mouth_texture = " + _default_mouth_texture);
-            rootNode.Nodes.Add("_skin_palette = " + _skin_palette);
-            rootNode.Nodes.Add("_hair_palette = " + _hair_palette);
-            rootNode.Nodes.Add("_eyes_palette = " + _eyes_palette);
-            rootNode.Nodes.Add("_setup_id = " + _setup_id);
+            rootNode.Nodes.Add("_base_palette = " + Utility.FormatHex(_base_palette));
+            rootNode.Nodes.Add("_head_object = " + Utility.FormatHex(_head_object));
+            rootNode.Nodes.Add("_head_texture = " + Utility.FormatHex(_head_texture));
+            rootNode.Nodes.Add("_default_head_texture = " + Utility.FormatHex(_default_head_texture));
+            rootNode.Nodes.Add("_eyes_texture = " + Utility.FormatHex(_eyes_texture));
+            rootNode.Nodes.Add("_default_eyes_texture = " + Utility.FormatHex(_default_eyes_texture));
+            rootNode.Nodes.Add("_nose_texture = " + Utility.FormatHex(_nose_texture));
+            rootNode.Nodes.Add("_default_nose_texture = " + Utility.FormatHex(_default_nose_texture));
+            rootNode.Nodes.Add("_mouth_texture = " + Utility.FormatHex(_mouth_texture));
+            rootNode.Nodes.Add("_default_mouth_texture = " + Utility.FormatHex(_default_mouth_texture));
+            rootNode.Nodes.Add("_skin_palette = " + Utility.FormatHex(_skin_palette));
+            rootNode.Nodes.Add("_hair_palette = " + Utility.FormatHex(_hair_palette));
+            rootNode.Nodes.Add("_eyes_palette = " + Utility.FormatHex(_eyes_palette));
+            rootNode.Nodes.Add("_setup_id = " + Utility.FormatHex(_setup_id));
             rootNode.Nodes.Add("option1 = " + option1);
             rootNode.Nodes.Add("option2 = " + option2);
             treeView.Nodes.Add(rootNode);
@@ -1042,6 +1064,26 @@ public class CM_Character : MessageProcessor {
             rootNode.Nodes.Add("confirm = " + confirm);
             rootNode.Nodes.Add("context = " + context);
             rootNode.Nodes.Add("userData = " + userData);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class CharacterErrorEvent : Message
+    {
+        public uint _error;
+
+        public static CharacterErrorEvent read(BinaryReader binaryReader)
+        {
+            CharacterErrorEvent newObj = new CharacterErrorEvent();
+            newObj._error = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("_error = " + (charError)_error);
             treeView.Nodes.Add(rootNode);
         }
     }

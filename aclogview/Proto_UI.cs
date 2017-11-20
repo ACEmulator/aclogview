@@ -62,6 +62,12 @@ public class Proto_UI : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
+            case PacketOpcode.ACCOUNT_BOOTED_EVENT:
+                {
+                    AccountBootedEvent message = AccountBootedEvent.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             default: {
                     handled = false;
                     break;
@@ -100,62 +106,84 @@ public class Proto_UI : MessageProcessor {
         }
     }
 
-    // TODO: This is bidirectional: client-to-sever has a gid; server-to-client does not
+    // This is bidirectional: client-to-sever has a gid; server-to-client does not
     public class LogOff : Message {
         public uint gid;
+        public bool clientMessage = true;
 
         public static LogOff read(BinaryReader binaryReader) {
             LogOff newObj = new LogOff();
-            newObj.gid = binaryReader.ReadUInt32();
+            if (binaryReader.BaseStream.Length == 8) // Client message
+            {
+                newObj.gid = binaryReader.ReadUInt32();
+            }
+            else // Server message
+            {
+                newObj.clientMessage = false;
+            }   
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("gid = " + gid);
+            if (clientMessage)
+                rootNode.Nodes.Add("gid = " + Utility.FormatHex(gid));
             treeView.Nodes.Add(rootNode);
         }
     }
 
-    // TODO: This is bidirectional: client-to-sever has a slot; server-to-client does not
+    // This is bidirectional: client-to-sever has an account and a slot; server-to-client does not
     public class CharacterDelete : Message {
         public PStringChar account;
         public int slot;
+        public bool clientMessage = true;
 
         public static CharacterDelete read(BinaryReader binaryReader) {
             CharacterDelete newObj = new CharacterDelete();
-            newObj.account = PStringChar.read(binaryReader);
-            newObj.slot = binaryReader.ReadInt32();
+            // Client message length seems to always be 36 but just in case the string is of a 
+            // different length we will check against the server message length.
+            if (binaryReader.BaseStream.Length > 4) // Client message
+            {
+                newObj.account = PStringChar.read(binaryReader);
+                newObj.slot = binaryReader.ReadInt32();
+            }
+            else // Server message
+            {
+                newObj.clientMessage = false;
+            }
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("account = " + account);
-            rootNode.Nodes.Add("slot = " + slot);
+            if (clientMessage)
+            {
+                rootNode.Nodes.Add("account = " + account);
+                rootNode.Nodes.Add("slot = " + slot);
+            }
             treeView.Nodes.Add(rootNode);
         }
     }
 
     public class ACCharGenResult {
-        public uint unkConstOne;
+        public uint packVersion__guessedname;
         public HeritageGroup heritageGroup;
         public uint gender;
-        public uint eyesStrip;
-        public uint noseStrip;
-        public uint mouthStrip;
-        public uint hairColor;
-        public uint eyeColor;
-        public uint hairStyle;
-        public uint headgearStyle;
+        public int eyesStrip;
+        public int noseStrip;
+        public int mouthStrip;
+        public int hairColor;
+        public int eyeColor;
+        public int hairStyle;
+        public int headgearStyle;
         public uint headgearColor;
-        public uint shirtStyle;
+        public int shirtStyle;
         public uint shirtColor;
-        public uint trousersStyle;
+        public int trousersStyle;
         public uint trousersColor;
-        public uint footwearStyle;
+        public int footwearStyle;
         public uint footwearColor;
         public double skinShade;
         public double hairShade;
@@ -163,40 +191,42 @@ public class Proto_UI : MessageProcessor {
         public double shirtShade;
         public double trousersShade;
         public double footwearShade;
-        public uint templateNum;
-        public uint strength;
-        public uint endurance;
-        public uint coordination;
-        public uint quickness;
-        public uint focus;
-        public uint self;
-        public uint slot;
+        public int templateNum;
+        public int strength;
+        public int endurance;
+        public int coordination;
+        public int quickness;
+        public int focus;
+        public int self;
+        public int slot;
         public uint classID;
-        public PList<SKILL_ADVANCEMENT_CLASS> sacs__guessedname;
+        public PList<SKILL_ADVANCEMENT_CLASS> skillAdvancementClasses;
         public PStringChar name;
         public uint startArea;
-        public uint isAdmin;
-        public uint isEnvoy;
-        public uint totalSkillPts__guessedname;
+        public int isAdmin;
+        public int isEnvoy;
+        // Note: The following field is the sum of the following fields: heritageGroup, gender, eyesStrip, noseStrip, mouthStrip, hairColor, eyeColor,
+        // hairStyle, headgearStyle, shirtStyle, trousersStyle, footwearStyle, templateNum, strength, endurance, coordination, quickness, focus, and self
+        public int validationChecksum__guessedname;
 
         public static ACCharGenResult read(BinaryReader binaryReader) {
             ACCharGenResult newObj = new ACCharGenResult();
-            newObj.unkConstOne = binaryReader.ReadUInt32();
+            newObj.packVersion__guessedname = binaryReader.ReadUInt32();
             newObj.heritageGroup = (HeritageGroup)binaryReader.ReadUInt32();
             newObj.gender = binaryReader.ReadUInt32();
-            newObj.eyesStrip = binaryReader.ReadUInt32();
-            newObj.noseStrip = binaryReader.ReadUInt32();
-            newObj.mouthStrip = binaryReader.ReadUInt32();
-            newObj.hairColor = binaryReader.ReadUInt32();
-            newObj.eyeColor = binaryReader.ReadUInt32();
-            newObj.hairStyle = binaryReader.ReadUInt32();
-            newObj.headgearStyle = binaryReader.ReadUInt32();
+            newObj.eyesStrip = binaryReader.ReadInt32();
+            newObj.noseStrip = binaryReader.ReadInt32();
+            newObj.mouthStrip = binaryReader.ReadInt32();
+            newObj.hairColor = binaryReader.ReadInt32();
+            newObj.eyeColor = binaryReader.ReadInt32();
+            newObj.hairStyle = binaryReader.ReadInt32();
+            newObj.headgearStyle = binaryReader.ReadInt32();
             newObj.headgearColor = binaryReader.ReadUInt32();
-            newObj.shirtStyle = binaryReader.ReadUInt32();
+            newObj.shirtStyle = binaryReader.ReadInt32();
             newObj.shirtColor = binaryReader.ReadUInt32();
-            newObj.trousersStyle = binaryReader.ReadUInt32();
+            newObj.trousersStyle = binaryReader.ReadInt32();
             newObj.trousersColor = binaryReader.ReadUInt32();
-            newObj.footwearStyle = binaryReader.ReadUInt32();
+            newObj.footwearStyle = binaryReader.ReadInt32();
             newObj.footwearColor = binaryReader.ReadUInt32();
             newObj.skinShade = binaryReader.ReadDouble();
             newObj.hairShade = binaryReader.ReadDouble();
@@ -204,28 +234,28 @@ public class Proto_UI : MessageProcessor {
             newObj.shirtShade = binaryReader.ReadDouble();
             newObj.trousersShade = binaryReader.ReadDouble();
             newObj.footwearShade = binaryReader.ReadDouble();
-            newObj.templateNum = binaryReader.ReadUInt32();
-            newObj.strength = binaryReader.ReadUInt32();
-            newObj.endurance = binaryReader.ReadUInt32();
-            newObj.coordination = binaryReader.ReadUInt32();
-            newObj.quickness = binaryReader.ReadUInt32();
-            newObj.focus = binaryReader.ReadUInt32();
-            newObj.self = binaryReader.ReadUInt32();
-            newObj.slot = binaryReader.ReadUInt32();
+            newObj.templateNum = binaryReader.ReadInt32();
+            newObj.strength = binaryReader.ReadInt32();
+            newObj.endurance = binaryReader.ReadInt32();
+            newObj.coordination = binaryReader.ReadInt32();
+            newObj.quickness = binaryReader.ReadInt32();
+            newObj.focus = binaryReader.ReadInt32();
+            newObj.self = binaryReader.ReadInt32();
+            newObj.slot = binaryReader.ReadInt32();
             newObj.classID = binaryReader.ReadUInt32();
-            newObj.sacs__guessedname = PList<SKILL_ADVANCEMENT_CLASS>.read(binaryReader);
+            newObj.skillAdvancementClasses = PList<SKILL_ADVANCEMENT_CLASS>.read(binaryReader);
             newObj.name = PStringChar.read(binaryReader);
             newObj.startArea = binaryReader.ReadUInt32();
-            newObj.isAdmin = binaryReader.ReadUInt32();
-            newObj.isEnvoy = binaryReader.ReadUInt32();
-            newObj.totalSkillPts__guessedname = binaryReader.ReadUInt32();
+            newObj.isAdmin = binaryReader.ReadInt32();
+            newObj.isEnvoy = binaryReader.ReadInt32();
+            newObj.validationChecksum__guessedname = binaryReader.ReadInt32();
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("unkConstOne = " + unkConstOne);
+            node.Nodes.Add("packVersion__guessedname = " + packVersion__guessedname);
             node.Nodes.Add("heritageGroup = " + heritageGroup);
-            node.Nodes.Add("gender = " + gender);
+            node.Nodes.Add("gender = " + (Gender)gender);
             node.Nodes.Add("eyesStrip = " + eyesStrip);
             node.Nodes.Add("noseStrip = " + noseStrip);
             node.Nodes.Add("mouthStrip = " + mouthStrip);
@@ -246,7 +276,7 @@ public class Proto_UI : MessageProcessor {
             node.Nodes.Add("shirtShade = " + shirtShade);
             node.Nodes.Add("trousersShade = " + trousersShade);
             node.Nodes.Add("footwearShade = " + footwearShade);
-            node.Nodes.Add("templateNum = " + templateNum);
+            node.Nodes.Add("templateNum = " + (CG_Profession)templateNum);
             node.Nodes.Add("strength = " + strength);
             node.Nodes.Add("endurance = " + endurance);
             node.Nodes.Add("coordination = " + coordination);
@@ -254,14 +284,17 @@ public class Proto_UI : MessageProcessor {
             node.Nodes.Add("focus = " + focus);
             node.Nodes.Add("self = " + self);
             node.Nodes.Add("slot = " + slot);
-            node.Nodes.Add("classID = " + classID);
-            TreeNode sacsNode = node.Nodes.Add("sacs__guessedname = ");
-            sacs__guessedname.contributeToTreeNode(sacsNode);
+            node.Nodes.Add("classID = " + (WCLASSID)classID);
+            TreeNode sacsNode = node.Nodes.Add("skillAdvancementClasses = ");
+            for (int i = 0; i < skillAdvancementClasses.list.Count; i++)
+            {
+                sacsNode.Nodes.Add($"{(STypeSkill)i} = " + skillAdvancementClasses.list[i]);
+            }
             node.Nodes.Add("name = " + name);
-            node.Nodes.Add("startArea = " + startArea);
+            node.Nodes.Add("startArea = " + (CG_Town)startArea);
             node.Nodes.Add("isAdmin = " + isAdmin);
             node.Nodes.Add("isEnvoy = " + isEnvoy);
-            node.Nodes.Add("totalSkillPts__guessedname = " + totalSkillPts__guessedname);
+            node.Nodes.Add("validationChecksum__guessedname = " + validationChecksum__guessedname);
         }
     }
 
@@ -300,7 +333,7 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("gid = " + gid);
+            rootNode.Nodes.Add("gid = " + Utility.FormatHex(gid));
             rootNode.Nodes.Add("account = " + account.m_buffer);
             treeView.Nodes.Add(rootNode);
         }
@@ -362,6 +395,26 @@ public class Proto_UI : MessageProcessor {
             rootNode.Nodes.Add("iid = " + iid);
             rootNode.Nodes.Add("i_restoredCharName = " + i_restoredCharName);
             rootNode.Nodes.Add("i_acctToRestoreTo = " + i_acctToRestoreTo);
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class AccountBootedEvent : Message
+    {
+        public PStringChar additionalReasonText;
+
+        public static AccountBootedEvent read(BinaryReader binaryReader)
+        {
+            AccountBootedEvent newObj = new AccountBootedEvent();
+            newObj.additionalReasonText = PStringChar.read(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            rootNode.Nodes.Add("additionalReasonText = " + additionalReasonText);
             treeView.Nodes.Add(rootNode);
         }
     }

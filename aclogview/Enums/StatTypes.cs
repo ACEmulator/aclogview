@@ -807,7 +807,18 @@ public enum STypeInt {
     GEAR_HEALING_BOOST_INT,
     GEAR_NETHER_RESIST_INT,
     GEAR_LIFE_RESIST_INT,
-    GEAR_MAX_HEALTH_INT
+    GEAR_MAX_HEALTH_INT,
+    UNKNOWN380_INT,
+    PK_DAMAGE_RATING_INT,
+    PK_DAMAGE_RESIST_RATING_INT,
+    GEAR_PK_DAMAGE_RATING_INT,
+    GEAR_PK_DAMAGE_RESIST_RATING_INT,
+    UNKNOWN385_INT,
+    OVERPOWER_INT,
+    OVERPOWER_RESIST_INT,
+    GEAR_OVERPOWER_INT,
+    GEAR_OVERPOWER_RESIST_INT,
+    ENLIGHTENMENT_INT,
 }
 
 public enum STypeInt64 {
@@ -1014,41 +1025,4 @@ public enum STypeString {
     KILL_QUEST_3_STRING,
     USE_SENDS_SIGNAL_STRING,
     GEAR_PLATING_NAME_STRING
-}
-
-public enum STables
-{
-    Cooldown_Table = 0x00,      // No lookup table used
-    Attribute_Table = 0x01,     // Uses STypeAttribute enum
-    Attribute2nd_Table = 0x02,  // Uses STypeAttribute2nd enum
-    Int_Table = 0x04,           // Uses STypeInt enum
-    Float_Table = 0x08,         // Uses STypeFloat enum
-    Skill_Table = 0x10,         // Uses STypeSkill enum
-    Vitae_Table = 0x12,         // No lookup table used
-    NaturalArmor_Table = 0x80   // No lookup table used
-}
-
-public enum SMainCat
-{
-    Cooldown_Category = 0x00,
-    Life_Magic_Non_Natural_Armor_Category = 0x50,   // All Life spells except those which affect natural armor like Armor Self I etc.
-    All_Skills_And_Vitals_Reduction_Category = 0x60, // Vitae and other stat reduction spells
-    Dirty_Fighting_Debuff_Category = 0x80,
-    War_Item_Creature_Void_Magic_Category = 0x90,   // Seems to be a catch all
-    Natural_Armor_Category = 0xa0
-}
-
-public enum SSubCat
-{
-    Default_Category = 0x00,    // Almost all spells end up here
-    Dirty_Fighting_Attack_Debuff_Category = 0x01,
-    Dirty_Fighting_Defense_Debuff_Category = 0x02,
-    Vitae_Category = 0xa0
-}
-
-public enum STypeEffect
-{
-    Negative,
-    Cooldown,
-    Positive
 }

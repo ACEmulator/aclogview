@@ -1,3 +1,33 @@
+### 2017-11-20
+[Slushnas]
+* Added multiple hex and enum conversions to multiple messages.
+* Fixed support for UpdateString and UpdateFloat messages.
+* Fixed some issues with the Trade class and AcceptTrade message.
+* Added support for the CharacterError message and added some info to the enum for it.
+* Fixed up LogOff and CharacterDelete messages.
+* Changed data types in ACCharGenResult and added some enum conversions.
+* Added support for the AccountBooted message.
+* Added support for Fellowship AssignNewLeader message and added some fixes to the FellowshipFullUpdate message.
+* Fixed alignment issue with PlayerTeleport and DeleteObject messages.
+* Fixed some issues with the CharacterCreate message and added some supporting enums.
+* Renamed LifestoneMaterialize message to PositionAndMovement.
+* Added PositionPack class and converted UpdatePosition message to use the PositionPack class.
+* Added MovementData and MovementDataUnpack classes and did some refactoring so that the MovementEvent and PositionAndMovement messages as well as the PhysicsDesc class parse movement data correctly.
+* Renamed MovementAction class to ActionNode because it is named that way in the client and also corrected parsing of the data.
+* Fixed JumpPack class parsing and by extension the Jump message.
+* Added the display of packed bitfield items and hex conversions to PhysicsDesc and PublicWeenieDesc classes.
+* Added the display of PhysicsState items to the SetState message.
+* Fixed parsing of the ChatServerData message and added some supporting enums.
+* Made the CM_Movement class public.
+* Added support for the Join, Quit, Stalemate, Recv_JoinGameResponse, and Recv_GameOver chess messages and added some related enums.
+* Reworked the StatMod class to use the EnchantmentTypeEnum and fixed an issue with the enum order.
+* Removed the ContentProfile class from CM_Login and CM_Trade as they are duplicates of CM_Inventory.ContentProfile.
+* Added ContainerProperties enum and added it to ContentProfile display.
+* Fixed display of some messages that use the INVENTORY_LOC enum.
+* Added some int properties to the STypeInt enum.
+* Added bitfield items and hex conversion to many fields in the PlayerDescription class.
+* Added Weenie class IDs enum (WCLASSID) with data from the client_portal.dat file.
+
 ### 2017-11-03
 [Slushnas]
 ##### Interface Change

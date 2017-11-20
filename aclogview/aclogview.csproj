@@ -67,6 +67,7 @@
     <Compile Include="CM_Vendor.cs" />
     <Compile Include="CM_Writing.cs" />
     <Compile Include="Enums\Account.cs" />
+    <Compile Include="Enums\Admin.cs" />
     <Compile Include="Enums\Allegiance.cs" />
     <Compile Include="Enums\Animation.cs" />
     <Compile Include="Enums\Appraisal.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="Enums\Sound.cs" />
     <Compile Include="Enums\Trade.cs" />
     <Compile Include="Enums\UI.cs" />
+    <Compile Include="Enums\WeenieClasses.cs" />
     <Compile Include="Enums\WeenieError.cs" />
     <Compile Include="FindOpcodeInFilesForm.cs">
       <SubType>Form</SubType>

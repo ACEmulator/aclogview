@@ -184,7 +184,14 @@ public class CM_Inventory : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
-            rootNode.Nodes.Add("i_equipMask = " + (INVENTORY_LOC)i_equipMask);
+            TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
+            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+            {
+                if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    equipMaskNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                }
+            }
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -247,7 +254,14 @@ public class CM_Inventory : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
-            rootNode.Nodes.Add("i_equipMask = " + (INVENTORY_LOC)i_equipMask);
+            TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
+            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+            {
+                if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    equipMaskNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                }
+            }
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -470,7 +484,7 @@ public class CM_Inventory : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("m_iid = " + Utility.FormatHex(m_iid));
-            node.Nodes.Add("m_uContainerProperties = " + m_uContainerProperties);
+            node.Nodes.Add("m_uContainerProperties = " + (ContainerProperties)m_uContainerProperties);
         }
     }
 
@@ -514,7 +528,14 @@ public class CM_Inventory : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
-            rootNode.Nodes.Add("i_loc = " + (INVENTORY_LOC)i_loc);
+            TreeNode locationNode = rootNode.Nodes.Add("i_loc = " + Utility.FormatHex(i_loc));
+            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+            {
+                if ((i_loc & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    locationNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                }
+            }
             rootNode.Nodes.Add("i_amount = " + i_amount);
             treeView.Nodes.Add(rootNode);
         }

@@ -497,7 +497,7 @@ public enum PacketOpcode {
     Evt_Social__SendClientContractTracker_ID = 789,
     Evt_Social__AbandonContract_ID = 790,
     Evt_Admin__Environs_ID = 60000,
-    LIFESTONE_MATERIALIZE = 63001,
+    Evt_Movement__PositionAndMovement = 63001,
     Evt_Movement__Jump_ID = 63003,
     Evt_Movement__MoveToState_ID = 63004,
     Evt_Movement__DoMovementCommand_ID = 63006,

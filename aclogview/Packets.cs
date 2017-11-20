@@ -49,8 +49,7 @@ public class Util {
             readers.Add(typeof(SpellID), r => (SpellID)r.ReadUInt32());
             readers.Add(typeof(CM_Vendor.ItemProfile), r => CM_Vendor.ItemProfile.read(r));
             readers.Add(typeof(CM_Fellowship.Fellow), r => CM_Fellowship.Fellow.read(r));
-            readers.Add(typeof(CM_Fellowship.FellowshipLock__GuessedName), r => CM_Fellowship.FellowshipLock__GuessedName.read(r));
-            readers.Add(typeof(CM_Login.ContentProfile), r => CM_Login.ContentProfile.read(r));
+            readers.Add(typeof(CM_Fellowship.LockedFellowshipList), r => CM_Fellowship.LockedFellowshipList.read(r));
             readers.Add(typeof(CM_Inventory.ContentProfile), r => CM_Inventory.ContentProfile.read(r));
             readers.Add(typeof(CM_Login.InventoryPlacement), r => CM_Login.InventoryPlacement.read(r));
             readers.Add(typeof(CM_House.HousePayment), r => CM_House.HousePayment.read(r));

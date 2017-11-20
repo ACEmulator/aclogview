@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using aclogview;
+
 public class CM_Admin : MessageProcessor {
 
     public override bool acceptMessageData(BinaryReader messageDataReader, TreeView outputTreeView) {
@@ -28,97 +30,183 @@ public class CM_Admin : MessageProcessor {
         return handled;
     }
 
+    public class Request
+    {
+        public AsyncMethodID m_blobDispatchType;
+        public uint cbSize;
+        public uint m_contextID;
+        public uint dwRequestID;
+        public uint m_methodID; 
+        public string m_roomName; // By Name variable only
+        public uint m_roomID; // By ID variable only
+        public string m_text;
+        public TurbineChatBlob extraInfoBlob;
+
+        public static Request read(BinaryReader binaryReader, AsyncMethodID m_blobDispatchType)
+        {
+            Request newObj = new Request();
+            newObj.m_blobDispatchType = m_blobDispatchType;
+            newObj.cbSize = binaryReader.ReadUInt32();
+            newObj.m_contextID = binaryReader.ReadUInt32(); // Seems to be incremented every time the client makes a request.
+            newObj.dwRequestID = binaryReader.ReadUInt32();
+            newObj.m_methodID = binaryReader.ReadUInt32();
+            if (m_blobDispatchType == AsyncMethodID.ASYNCMETHOD_SENDTOROOMBYNAME)
+            {
+                newObj.m_roomName = Util.readUnicodeString(binaryReader);
+            }
+            else if (m_blobDispatchType == AsyncMethodID.ASYNCMETHOD_SENDTOROOMBYID)
+            {
+                newObj.m_roomID = binaryReader.ReadUInt32();
+            }
+            newObj.m_text = Util.readUnicodeString(binaryReader);
+            newObj.extraInfoBlob = TurbineChatBlob.read(binaryReader);
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("cbSize = " + cbSize);
+            node.Nodes.Add("m_contextID = " + m_contextID);
+            node.Nodes.Add("dwRequestID = " + dwRequestID);
+            node.Nodes.Add("m_methodID = " + m_methodID);
+            if (m_blobDispatchType == AsyncMethodID.ASYNCMETHOD_SENDTOROOMBYNAME)
+            {
+                node.Nodes.Add("m_roomName = " + m_roomName);
+            }
+            else if (m_blobDispatchType == AsyncMethodID.ASYNCMETHOD_SENDTOROOMBYID)
+            {
+                node.Nodes.Add("m_roomID = " + m_roomID);
+            }
+            node.Nodes.Add("m_text = " + m_text);
+            TreeNode extraInfoNode = node.Nodes.Add("extraInfoBlob = ");
+            extraInfoBlob.contributeToTreeNode(extraInfoNode);
+        }
+    }
+
+    // Note: Technically the ByID and ByName methods have different response classes but the data returned remains the same.
+    public class Response
+    {
+        public uint cbSize;
+        public uint m_contextID;
+        public uint dwResponseID;
+        public uint m_methodID;
+        public uint m_hResult;
+
+        public static Response read(BinaryReader binaryReader)
+        {
+            Response newObj = new Response();
+            newObj.cbSize = binaryReader.ReadUInt32();
+            newObj.m_contextID = binaryReader.ReadUInt32();
+            newObj.dwResponseID = binaryReader.ReadUInt32();
+            newObj.m_methodID = binaryReader.ReadUInt32();
+            newObj.m_hResult = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("cbSize = " + cbSize);
+            node.Nodes.Add("m_contextID = " + m_contextID);
+            node.Nodes.Add("dwResponseID = " + dwResponseID);
+            node.Nodes.Add("m_methodID = " + m_methodID);
+            node.Nodes.Add("m_hResult = " + Utility.FormatHex(m_hResult));
+        }
+    }
+
+    public class TurbineChatBlob
+    {
+        public uint cbSize;
+        public uint speakerID;
+        public uint hResult;
+        public uint chatType;
+
+        public static TurbineChatBlob read(BinaryReader binaryReader)
+        {
+            TurbineChatBlob newObj = new TurbineChatBlob();
+            newObj.cbSize = binaryReader.ReadUInt32();
+            newObj.speakerID = binaryReader.ReadUInt32();
+            newObj.hResult = binaryReader.ReadUInt32();
+            newObj.chatType = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("cbSize = " + cbSize);
+            node.Nodes.Add("speakerID = " + Utility.FormatHex(speakerID));
+            node.Nodes.Add("hResult = " + Utility.FormatHex(hResult));
+            node.Nodes.Add("chatType = " + (ChatTypeEnum)chatType);
+        }
+    }
+
+    // See gmCCommunicationSystem::uiChatInterfaceProvider::OnSendToRoom
+    public class SendToRoomChatEvent
+    {
+        public uint cbSize;
+        public uint dwRoomID;
+        public string pwszDisplayName;
+        public string pwszText;
+        public TurbineChatBlob extraInfoBlob;
+
+        public static SendToRoomChatEvent read(BinaryReader binaryReader)
+        {
+            SendToRoomChatEvent newObj = new SendToRoomChatEvent();
+            newObj.cbSize = binaryReader.ReadUInt32();
+            newObj.dwRoomID = binaryReader.ReadUInt32();
+            newObj.pwszDisplayName = Util.readUnicodeString(binaryReader);
+            newObj.pwszText = Util.readUnicodeString(binaryReader);
+            newObj.extraInfoBlob = TurbineChatBlob.read(binaryReader);
+            return newObj;
+        }
+
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("cbSize = " + cbSize);
+            node.Nodes.Add("dwRoomID = " + dwRoomID);
+            node.Nodes.Add("pwszDisplayName = " + pwszDisplayName);
+            node.Nodes.Add("pwszText = " + pwszText);
+            TreeNode extraInfoNode = node.Nodes.Add("extraInfoBlob = ");
+            extraInfoBlob.contributeToTreeNode(extraInfoNode);
+        }
+    }
+
     public class ChatServerData : Message
     {
-        public uint Size;
-        public uint TurbineChatType;
-        public uint Unknown_1;
-        public uint Unknown_2;
-        public uint Unknown_3;
-        public uint Unknown_4;
-        public uint Unknown_5;
-        public uint Unknown_6;
-        public uint PayloadSize;
-
-        // 0x01
-        public uint Channel;
-        public string SenderName;
-        public string Message;
-        public uint Unknown01_1;
-        public uint Sender;
-        public uint Unknown01_2;
-        public uint Unknown01_3;
-
-        // 0x03
-        public uint Unknown03_1;
-        public uint Unknown03_2;
-        public uint Unknown03_3;
-        public uint OutChannel;
-        public string OutText;
-        public uint Unknown03_4;
-        public uint OutSender;
-        public uint Unknown03_5;
-        public uint Unknown03_6;
-
-        // 0x05
-        public uint Unknown05_1;
-        public uint Unknown05_2;
-        public uint Unknown05_3;
-        public uint Unknown05_4;
+        public uint cbSize;
+        public ChatNetworkBlobType m_blobType;
+        public AsyncMethodID m_blobDispatchType;
+        public uint m_targetType;
+        public uint m_targetID;
+        public uint m_transportType;
+        public uint m_transportID;
+        public uint m_cookie;
+        public SendToRoomChatEvent sendToRoomChatEvent;
+        public Request request;
+        public Response response;
 
         public static ChatServerData read(BinaryReader binaryReader)
         {
             var newObj = new ChatServerData();
-            newObj.Size = binaryReader.ReadUInt32();
-            newObj.TurbineChatType = binaryReader.ReadUInt32();
-            newObj.Unknown_1 = binaryReader.ReadUInt32();
-            newObj.Unknown_2 = binaryReader.ReadUInt32();
-            newObj.Unknown_3 = binaryReader.ReadUInt32();
-            newObj.Unknown_4 = binaryReader.ReadUInt32();
-            newObj.Unknown_5 = binaryReader.ReadUInt32();
-            newObj.Unknown_6 = binaryReader.ReadUInt32();
-            newObj.PayloadSize = binaryReader.ReadUInt32();
+            newObj.cbSize = binaryReader.ReadUInt32();
+            newObj.m_blobType = (ChatNetworkBlobType)binaryReader.ReadUInt32();
+            newObj.m_blobDispatchType = (AsyncMethodID)binaryReader.ReadUInt32();
+            newObj.m_targetType = binaryReader.ReadUInt32();        // Always 1 in pcaps
+            newObj.m_targetID = binaryReader.ReadUInt32();
+            newObj.m_transportType = binaryReader.ReadUInt32();     // Pcaps contain either a 0 or a 1 (Perhaps ChatEventType?)
+            newObj.m_transportID = binaryReader.ReadUInt32();
+            newObj.m_cookie = binaryReader.ReadUInt32();            // Always 0 in pcaps
 
-            if (newObj.TurbineChatType == 0x01)
+            if (newObj.m_blobType == ChatNetworkBlobType.NETBLOB_EVENT_BINARY) // Server to client
             {
-                newObj.Channel = binaryReader.ReadUInt32();
-
-                var messageLen = binaryReader.ReadByte();
-                var messageBytes = binaryReader.ReadBytes(messageLen * 2);
-                newObj.SenderName = Encoding.Unicode.GetString(messageBytes);
-
-                messageLen = binaryReader.ReadByte();
-                messageBytes = binaryReader.ReadBytes(messageLen * 2);
-                newObj.Message = Encoding.Unicode.GetString(messageBytes);
-
-                newObj.Unknown01_1 = binaryReader.ReadUInt32();
-                newObj.Sender = binaryReader.ReadUInt32();
-                newObj.Unknown01_2 = binaryReader.ReadUInt32();
-                newObj.Unknown01_3 = binaryReader.ReadUInt32();
+                newObj.sendToRoomChatEvent = SendToRoomChatEvent.read(binaryReader);
             }
-            else if (newObj.TurbineChatType == 0x03)
+            else if (newObj.m_blobType == ChatNetworkBlobType.NETBLOB_REQUEST_BINARY) // Client to server
             {
-                newObj.Unknown03_1 = binaryReader.ReadUInt32();
-                newObj.Unknown03_2 = binaryReader.ReadUInt32();
-                newObj.Unknown03_3 = binaryReader.ReadUInt32();
-                newObj.OutChannel = binaryReader.ReadUInt32();
-
-                var messageLen = binaryReader.ReadByte();
-                var messageBytes = binaryReader.ReadBytes(messageLen * 2);
-                newObj.OutText = Encoding.Unicode.GetString(messageBytes);
-
-                newObj.Unknown03_4 = binaryReader.ReadUInt32();
-                newObj.OutSender = binaryReader.ReadUInt32();
-                newObj.Unknown03_5 = binaryReader.ReadUInt32();
-                newObj.Unknown03_6 = binaryReader.ReadUInt32();
-
+                newObj.request = Request.read(binaryReader, newObj.m_blobDispatchType);
             }
-            else if (newObj.TurbineChatType == 0x05)
+            else if (newObj.m_blobType == ChatNetworkBlobType.NETBLOB_RESPONSE_BINARY) // Server to client acknowledgement
             {
-                newObj.Unknown05_1 = binaryReader.ReadUInt32();
-                newObj.Unknown05_2 = binaryReader.ReadUInt32();
-                newObj.Unknown05_3 = binaryReader.ReadUInt32();
-                newObj.Unknown05_4 = binaryReader.ReadUInt32();
+                newObj.response = Response.read(binaryReader);
             }
 
             return newObj;
@@ -128,46 +216,31 @@ public class CM_Admin : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("Size = " + Size);
-            rootNode.Nodes.Add("TurbineChatType = " + TurbineChatType);
-            rootNode.Nodes.Add("Unknown_1 = " + Unknown_1);
-            rootNode.Nodes.Add("Unknown_2 = " + Unknown_2);
-            rootNode.Nodes.Add("Unknown_3 = " + Unknown_3);
-            rootNode.Nodes.Add("Unknown_4 = " + Unknown_4);
-            rootNode.Nodes.Add("Unknown_5 = " + Unknown_5);
-            rootNode.Nodes.Add("Unknown_6 = " + Unknown_6);
-            rootNode.Nodes.Add("PayloadSize = " + PayloadSize);
+            rootNode.Nodes.Add("cbSize = " + cbSize);
+            rootNode.Nodes.Add("m_blobType = " + m_blobType);
+            rootNode.Nodes.Add("m_blobDispatchType = " + m_blobDispatchType);
+            rootNode.Nodes.Add("m_targetType = " + m_targetType);
+            rootNode.Nodes.Add("m_targetID = " + m_targetID);
+            rootNode.Nodes.Add("m_transportType = " + m_transportType);
+            rootNode.Nodes.Add("m_transportID = " + m_transportID);
+            rootNode.Nodes.Add("m_cookie = " + m_cookie);
 
-            if (TurbineChatType == 0x01)
+            if (m_blobType == ChatNetworkBlobType.NETBLOB_EVENT_BINARY)
             {
-                rootNode.Nodes.Add("Channel = " + Channel);
-                rootNode.Nodes.Add("SenderName = " + SenderName);
-                rootNode.Nodes.Add("Message = " + Message);
-                rootNode.Nodes.Add("Unknown01_1 = " + Unknown01_1);
-                rootNode.Nodes.Add("Sender = " + Sender);
-                rootNode.Nodes.Add("Unknown01_2 = " + Unknown01_2);
-                rootNode.Nodes.Add("Unknown01_3 = " + Unknown01_3);
+                TreeNode chatEventNode = rootNode.Nodes.Add("sendToRoomChatEvent = ");
+                sendToRoomChatEvent.contributeToTreeNode(chatEventNode);
             }
-            else if (TurbineChatType == 0x03)
+            else if (m_blobType == ChatNetworkBlobType.NETBLOB_REQUEST_BINARY)
             {
-                rootNode.Nodes.Add("Unknown03_1 = " + Unknown03_1);
-                rootNode.Nodes.Add("Unknown03_2 = " + Unknown03_2);
-                rootNode.Nodes.Add("Unknown03_3 = " + Unknown03_3);
-                rootNode.Nodes.Add("OutChannel = " + OutChannel);
-                rootNode.Nodes.Add("OutText = " + OutText);
-                rootNode.Nodes.Add("Unknown03_4 = " + Unknown03_4);
-                rootNode.Nodes.Add("OutSender = " + OutSender);
-                rootNode.Nodes.Add("Unknown03_5 = " + Unknown03_5);
-                rootNode.Nodes.Add("Unknown03_6 = " + Unknown03_6);
+                TreeNode requestNode = rootNode.Nodes.Add("request = ");
+                request.contributeToTreeNode(requestNode);
             }
-            else if (TurbineChatType == 0x05)
+            else if (m_blobType == ChatNetworkBlobType.NETBLOB_RESPONSE_BINARY)
             {
-                rootNode.Nodes.Add("Unknown05_1 = " + Unknown05_1);
-                rootNode.Nodes.Add("Unknown05_2 = " + Unknown05_2);
-                rootNode.Nodes.Add("Unknown05_3 = " + Unknown05_3);
-                rootNode.Nodes.Add("Unknown05_4 = " + Unknown05_4);
+                TreeNode requestNode = rootNode.Nodes.Add("response = ");
+                response.contributeToTreeNode(requestNode);
             }
-
+            rootNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
         }
     }

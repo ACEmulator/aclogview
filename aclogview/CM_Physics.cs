@@ -103,7 +103,7 @@ public class CM_Physics : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("subID = " + subID);
+            node.Nodes.Add("subID = " + Utility.FormatHex(subID));
             node.Nodes.Add("offset = " + offset);
             node.Nodes.Add("numcolors = " + numcolors);
         }
@@ -124,8 +124,8 @@ public class CM_Physics : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("part_index = " + part_index);
-            node.Nodes.Add("old_tex_id = " + old_tex_id);
-            node.Nodes.Add("new_tex_id = " + new_tex_id);
+            node.Nodes.Add("old_tex_id = " + Utility.FormatHex(old_tex_id));
+            node.Nodes.Add("new_tex_id = " + Utility.FormatHex(new_tex_id));
         }
     }
 
@@ -142,7 +142,7 @@ public class CM_Physics : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("part_index = " + part_index);
-            node.Nodes.Add("part_id = " + part_id);
+            node.Nodes.Add("part_id = " + Utility.FormatHex(part_id));
         }
     }
 
@@ -212,7 +212,7 @@ public class CM_Physics : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("id = " + id);
+            node.Nodes.Add("id = " + Utility.FormatHex(id));
             node.Nodes.Add("location_id = " + location_id);
         }
     }
@@ -241,15 +241,16 @@ public class CM_Physics : MessageProcessor {
         }
 
         public uint bitfield;
-        public PhysicsState state;
-        public byte[] movement_buffer;
-        public uint autonomous_movement;
+        public uint state;
+        public uint buff_length;
+        public CM_Movement.MovementDataUnpack movement_buffer;
+        public int autonomous_movement;
         public uint animframe_id;
         public Position pos = new Position();
-        public uint mtable_id; // These are tag ids like animpartchange
-        public uint stable_id;
-        public uint phstable_id;
-        public uint setup_id;
+        public uint mtable_id;      // Motion table. These are tag ids like animpartchange
+        public uint stable_id;      // Sound table
+        public uint phstable_id;    // Physics script table
+        public uint setup_id;       // Model setup table
         public uint parent_id;
         public uint location_id;
         public List<ChildInfo> children = new List<ChildInfo>();
@@ -263,43 +264,55 @@ public class CM_Physics : MessageProcessor {
         public PScriptType default_script;
         public float default_script_intensity;
         public ushort[] timestamps = new ushort[9];
+        public List<string> packedItems; // For display purposes
 
         public static PhysicsDesc read(BinaryReader binaryReader) {
             PhysicsDesc newObj = new PhysicsDesc();
+            newObj.packedItems = new List<string>();
             newObj.bitfield = binaryReader.ReadUInt32();
-            newObj.state = (PhysicsState)binaryReader.ReadUInt32();
+            newObj.state = binaryReader.ReadUInt32();
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.MOVEMENT) != 0) {
-                uint buff_length = binaryReader.ReadUInt32();
-                newObj.movement_buffer = binaryReader.ReadBytes((int)buff_length);
-                newObj.autonomous_movement = binaryReader.ReadUInt32();
+                // Note: the client uses the MOVEMENT_TS and SERVER_CONTROLLED_MOVE_TS from the timestamps array
+                // in addition to the following movement data. See SmartBox::HandleCreateObject.
+                newObj.buff_length = binaryReader.ReadUInt32();
+                newObj.movement_buffer = CM_Movement.MovementDataUnpack.read(binaryReader);
+                newObj.autonomous_movement = binaryReader.ReadInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.MOVEMENT.ToString());
             } else if ((newObj.bitfield & (uint)PhysicsDescInfo.ANIMFRAME_ID) != 0) {
                 newObj.animframe_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.ANIMFRAME_ID.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.POSITION) != 0) {
                 newObj.pos = Position.read(binaryReader);
+                newObj.packedItems.Add(PhysicsDescInfo.POSITION.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.MTABLE) != 0) {
                 newObj.mtable_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.MTABLE.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.STABLE) != 0) {
                 newObj.stable_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.STABLE.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.PETABLE) != 0) {
                 newObj.phstable_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.PETABLE.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.CSetup) != 0) {
                 newObj.setup_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.CSetup.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.PARENT) != 0) {
                 newObj.parent_id = binaryReader.ReadUInt32();
                 newObj.location_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.PARENT.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.CHILDREN) != 0) {
@@ -307,48 +320,58 @@ public class CM_Physics : MessageProcessor {
                 for (int i = 0; i < num_children; ++i) {
                     newObj.children.Add(ChildInfo.read(binaryReader));
                 }
+                newObj.packedItems.Add(PhysicsDescInfo.CHILDREN.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.OBJSCALE) != 0) {
                 newObj.object_scale = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.OBJSCALE.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.FRICTION) != 0) {
                 newObj.friction = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.FRICTION.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.ELASTICITY) != 0) {
                 newObj.elasticity = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.ELASTICITY.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.TRANSLUCENCY) != 0) {
                 newObj.translucency = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.TRANSLUCENCY.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.VELOCITY) != 0) {
                 newObj.velocity.x = binaryReader.ReadSingle();
                 newObj.velocity.y = binaryReader.ReadSingle();
                 newObj.velocity.z = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.VELOCITY.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.ACCELERATION) != 0) {
                 newObj.acceleration.x = binaryReader.ReadSingle();
                 newObj.acceleration.y = binaryReader.ReadSingle();
                 newObj.acceleration.z = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.ACCELERATION.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.OMEGA) != 0) {
                 newObj.omega.x = binaryReader.ReadSingle();
                 newObj.omega.y = binaryReader.ReadSingle();
                 newObj.omega.z = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.OMEGA.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.DEFAULT_SCRIPT) != 0) {
                 newObj.default_script = (PScriptType)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PhysicsDescInfo.DEFAULT_SCRIPT.ToString());
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0) {
                 newObj.default_script_intensity = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY.ToString());
             }
 
             for (int i = 0; i < newObj.timestamps.Length; ++i) {
@@ -361,10 +384,23 @@ public class CM_Physics : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("bitfield = " + bitfield);
-            node.Nodes.Add("state = " + state);
+            TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                bitfieldNode.Nodes.Add(packedItems[i]);
+            }
+            TreeNode stateNode = node.Nodes.Add("state = " + Utility.FormatHex(state));
+            foreach (PhysicsState e in Enum.GetValues(typeof(PhysicsState)))
+            {
+                if (((uint)state & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    stateNode.Nodes.Add($"{Enum.GetName(typeof(PhysicsState), e)}");
+                }
+            }
+            
             if ((bitfield & (uint)PhysicsDescInfo.MOVEMENT) != 0) {
-                node.Nodes.Add("movement_buffer = " + movement_buffer);
+                TreeNode movementNode = node.Nodes.Add($"movement_buffer (length: {buff_length}) = ");
+                movement_buffer.contributeToTreeNode(movementNode);
                 node.Nodes.Add("autonomous_movement = " + autonomous_movement);
             } else if ((bitfield & (uint)PhysicsDescInfo.ANIMFRAME_ID) != 0) {
                 node.Nodes.Add("animframe_id = " + animframe_id);
@@ -374,19 +410,19 @@ public class CM_Physics : MessageProcessor {
                 pos.contributeToTreeNode(posNode);
             }
             if ((bitfield & (uint)PhysicsDescInfo.MTABLE) != 0) {
-                node.Nodes.Add("mtable_id = " + mtable_id);
+                node.Nodes.Add("mtable_id = " + Utility.FormatHex(mtable_id));
             }
             if ((bitfield & (uint)PhysicsDescInfo.STABLE) != 0) {
-                node.Nodes.Add("stable_id = " + stable_id);
+                node.Nodes.Add("stable_id = " + Utility.FormatHex(stable_id));
             }
             if ((bitfield & (uint)PhysicsDescInfo.PETABLE) != 0) {
-                node.Nodes.Add("phstable_id = " + phstable_id);
+                node.Nodes.Add("phstable_id = " + Utility.FormatHex(phstable_id));
             }
             if ((bitfield & (uint)PhysicsDescInfo.CSetup) != 0) {
-                node.Nodes.Add("setup_id = " + setup_id);
+                node.Nodes.Add("setup_id = " + Utility.FormatHex(setup_id));
             }
             if ((bitfield & (uint)PhysicsDescInfo.PARENT) != 0) {
-                node.Nodes.Add("parent_id = " + parent_id);
+                node.Nodes.Add("parent_id = " + Utility.FormatHex(parent_id));
                 node.Nodes.Add("location_id = " + location_id);
             }
             if ((bitfield & (uint)PhysicsDescInfo.CHILDREN) != 0) {
@@ -424,7 +460,7 @@ public class CM_Physics : MessageProcessor {
             }
             TreeNode timestampsNode = node.Nodes.Add("timestamps = ");
             for (int i = 0; i < timestamps.Length; ++i) {
-                timestampsNode.Nodes.Add("[" + i + "] = " + timestamps[i]);
+                timestampsNode.Nodes.Add("[" + (PhysicsTimeStamp)i + "] = " + timestamps[i]);
             }
         }
     }
@@ -551,9 +587,11 @@ public class CM_Physics : MessageProcessor {
         public uint _cooldown_id;
         public double _cooldown_duration;
         public uint _pet_owner;
+        public List<string> packedItems; // For display purposes
 
         public static PublicWeenieDesc read(BinaryReader binaryReader) {
             PublicWeenieDesc newObj = new PublicWeenieDesc();
+            newObj.packedItems = new List<string>();
             newObj.header = binaryReader.ReadUInt32();
             newObj._name = PStringChar.read(binaryReader);
             newObj._wcid = Util.readWClassIDCompressed(binaryReader);
@@ -570,146 +608,182 @@ public class CM_Physics : MessageProcessor {
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0) {
                 newObj._plural_name = PStringChar.read(binaryReader);
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_PluralName.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0) {
                 newObj._itemsCapacity = binaryReader.ReadByte();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0) {
                 newObj._containersCapacity = binaryReader.ReadByte();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0) {
                 newObj._ammoType = (AMMO_TYPE)binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_AmmoType.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Value) != 0) {
                 newObj._value = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Value.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0) {
                 newObj._useability = (ITEM_USEABLE)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Useability.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0) {
                 newObj._useRadius = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_UseRadius.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0) {
                 newObj._targetType = (ITEM_TYPE)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_TargetType.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0) {
                 newObj._effects = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_UIEffects.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0) {
                 newObj._combatUse = binaryReader.ReadByte();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_CombatUse.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0) {
                 newObj._structure = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Structure.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0) {
                 newObj._maxStructure = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_MaxStructure.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0) {
                 newObj._stackSize = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_StackSize.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0) {
                 newObj._maxStackSize = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) {
                 newObj._containerID = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_ContainerID.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) {
                 newObj._wielderID = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_WielderID.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0) {
                 newObj._valid_locations = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_ValidLocations.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Location) != 0) {
                 newObj._location = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Location.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0) {
                 newObj._priority = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Priority.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0) {
                 newObj._blipColor = binaryReader.ReadByte();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_BlipColor.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0) {
                 newObj._radar_enum = (RadarEnum)binaryReader.ReadByte();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_RadarEnum.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0) {
                 newObj._pscript = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_PScript.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0) {
                 newObj._workmanship = binaryReader.ReadSingle();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Workmanship.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0) {
                 newObj._burden = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Burden.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0) {
                 newObj._spellID = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_SpellID.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0) {
                 newObj._house_owner_iid = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_HouseOwner.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0) {
                 newObj._db = CM_House.RestrictionDB.read(binaryReader);
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0) {
                 newObj._hook_item_types = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0) {
                 newObj._monarch = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Monarch.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0) {
                 newObj._hook_type = binaryReader.ReadUInt16();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_HookType.ToString());
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0) {
                 newObj._iconOverlayID = Util.readDataIDOfKnownType(0x6000000, binaryReader);
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_IconOverlay.ToString());
             }
 
             if ((newObj.header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0) {
                 newObj._iconUnderlayID = Util.readDataIDOfKnownType(0x6000000, binaryReader);
+                newObj.packedItems.Add(PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay.ToString());
             }
 
             if ((newObj.header & unchecked((uint)PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0) {
                 newObj._material_type = (MaterialType)binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_MaterialType.ToString());
             }
 
             if ((newObj.header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0) {
                 newObj._cooldown_id = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID.ToString());
             }
 
             if ((newObj.header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0) {
                 newObj._cooldown_duration = binaryReader.ReadDouble();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration.ToString());
             }
 
             if ((newObj.header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0) {
                 newObj._pet_owner = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner.ToString());
             }
 
             Util.readToAlign(binaryReader);
@@ -718,10 +792,14 @@ public class CM_Physics : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("header = " + Utility.FormatHex(header));
+            TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+            }
             node.Nodes.Add("_name = " + _name.m_buffer);
             node.Nodes.Add("_wcid = " + _wcid);
-            node.Nodes.Add("_iconID = " + _iconID);
+            node.Nodes.Add("_iconID = " + Utility.FormatHex(_iconID));
             node.Nodes.Add("_type = " + _type);
             TreeNode bitfieldNode = node.Nodes.Add("_bitfield = " + Utility.FormatHex(_bitfield));
             foreach (BitfieldIndex e in Enum.GetValues(typeof(BitfieldIndex)))
@@ -861,10 +939,10 @@ public class CM_Physics : MessageProcessor {
                 }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0) {
-                node.Nodes.Add("_iconOverlayID = " + _iconOverlayID);
+                node.Nodes.Add("_iconOverlayID = " + Utility.FormatHex(_iconOverlayID));
             }
             if ((header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0) {
-                node.Nodes.Add("_iconUnderlayID = " + _iconUnderlayID);
+                node.Nodes.Add("_iconUnderlayID = " + Utility.FormatHex(_iconUnderlayID));
             }
             if ((header & unchecked((uint)PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0) {
                 node.Nodes.Add("_material_type = " + _material_type);
@@ -1405,6 +1483,7 @@ public class CM_Physics : MessageProcessor {
             DeleteObject newObj = new DeleteObject();
             newObj.object_id = binaryReader.ReadUInt32();
             newObj.instance_timestamp = binaryReader.ReadUInt16();
+            Util.readToAlign(binaryReader);
             return newObj;
         }
 
@@ -1470,13 +1549,13 @@ public class CM_Physics : MessageProcessor {
 
     public class SetState : Message {
         public uint object_id;
-        public PhysicsState new_state;
+        public uint new_state;
         public PhysicsTimestampPack timestamps;
 
         public static SetState read(BinaryReader binaryReader) {
             SetState newObj = new SetState();
             newObj.object_id = binaryReader.ReadUInt32();
-            newObj.new_state = (PhysicsState)binaryReader.ReadUInt32();
+            newObj.new_state = binaryReader.ReadUInt32();
             newObj.timestamps = PhysicsTimestampPack.read(binaryReader);
             return newObj;
         }
@@ -1485,7 +1564,14 @@ public class CM_Physics : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
-            rootNode.Nodes.Add("new_state = " + new_state);
+            TreeNode stateNode = rootNode.Nodes.Add("new_state = " + Utility.FormatHex(new_state));
+            foreach (PhysicsState e in Enum.GetValues(typeof(PhysicsState)))
+            {
+                if (((uint)new_state & (uint)e) == (uint)e && (uint)e != 0)
+                {
+                    stateNode.Nodes.Add($"{Enum.GetName(typeof(PhysicsState), e)}");
+                }
+            }
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
             timestamps.contributeToTreeNode(timestampsNode);
             treeView.Nodes.Add(rootNode);
@@ -1548,6 +1634,7 @@ public class CM_Physics : MessageProcessor {
         public static PlayerTeleport read(BinaryReader binaryReader) {
             PlayerTeleport newObj = new PlayerTeleport();
             newObj.physics_timestamp = binaryReader.ReadUInt16();
+            Util.readToAlign(binaryReader);
             return newObj;
         }
 
