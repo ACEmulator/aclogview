@@ -83,7 +83,7 @@ public class CM_Admin : MessageProcessor {
         }
     }
 
-    // Note: Technically the ByID and ByName methods have different response classes but the data returned remains the same.
+    // Note: Technically the ByID and ByName methods have different response classes in the DLL but the structure returned remains the same.
     public class Response
     {
         public uint cbSize;
