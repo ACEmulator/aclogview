@@ -183,7 +183,7 @@ namespace aclogview
             int hits = 0;
             int exceptions = 0;
 
-            var records = PCapReader.LoadPcap(fileName, false, ref searchAborted);
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted);
 
             foreach (var record in records)
             {

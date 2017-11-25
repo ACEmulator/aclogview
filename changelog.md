@@ -1,3 +1,7 @@
+### 2017-11-25
+[Slushnas]
+* Changed **_Find Opcode In Files_** to process files in "as messages" mode which fixes some cases where messages being searched for would not be found.
+
 ### 2017-11-20
 [Slushnas]
 * Added multiple hex and enum conversions to multiple messages.
