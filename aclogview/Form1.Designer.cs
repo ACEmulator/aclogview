@@ -25,6 +25,7 @@
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
             this.splitContainer_Main = new System.Windows.Forms.SplitContainer();
+            this.splitContainer_Top = new System.Windows.Forms.SplitContainer();
             this.listView_Packets = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -34,6 +35,11 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.HexOpCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.listView_CreatedObjects = new System.Windows.Forms.ListView();
+            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
             this.treeView_ParsedData = new BufferedTreeView();
@@ -72,10 +78,16 @@
             this.cmdbackward = new System.Windows.Forms.Button();
             this.lblTracker = new System.Windows.Forms.Label();
             this.btnHighlight = new System.Windows.Forms.Button();
+            this.checkBox_ShowObjects = new System.Windows.Forms.CheckBox();
+            this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
             this.splitContainer_Main.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Top)).BeginInit();
+            this.splitContainer_Top.Panel1.SuspendLayout();
+            this.splitContainer_Top.Panel2.SuspendLayout();
+            this.splitContainer_Top.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Bottom)).BeginInit();
             this.splitContainer_Bottom.Panel1.SuspendLayout();
             this.splitContainer_Bottom.Panel2.SuspendLayout();
@@ -96,7 +108,7 @@
             // 
             // splitContainer_Main.Panel1
             // 
-            this.splitContainer_Main.Panel1.Controls.Add(this.listView_Packets);
+            this.splitContainer_Main.Panel1.Controls.Add(this.splitContainer_Top);
             this.splitContainer_Main.Panel1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             // 
             // splitContainer_Main.Panel2
@@ -106,6 +118,25 @@
             this.splitContainer_Main.Size = new System.Drawing.Size(1520, 785);
             this.splitContainer_Main.SplitterDistance = 367;
             this.splitContainer_Main.TabIndex = 0;
+            // 
+            // splitContainer_Top
+            // 
+            this.splitContainer_Top.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.splitContainer_Top.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer_Top.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_Top.Name = "splitContainer_Top";
+            // 
+            // splitContainer_Top.Panel1
+            // 
+            this.splitContainer_Top.Panel1.Controls.Add(this.listView_Packets);
+            // 
+            // splitContainer_Top.Panel2
+            // 
+            this.splitContainer_Top.Panel2.Controls.Add(this.listView_CreatedObjects);
+            this.splitContainer_Top.Panel2Collapsed = true;
+            this.splitContainer_Top.Size = new System.Drawing.Size(1520, 367);
+            this.splitContainer_Top.SplitterDistance = 1074;
+            this.splitContainer_Top.TabIndex = 1;
             // 
             // listView_Packets
             // 
@@ -171,6 +202,46 @@
             // 
             this.HexOpCode.Text = "OpCode";
             this.HexOpCode.Width = 66;
+            // 
+            // listView_CreatedObjects
+            // 
+            this.listView_CreatedObjects.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader8,
+            this.columnHeader9,
+            this.columnHeader10,
+            this.columnHeader11,
+            this.columnHeader12});
+            this.listView_CreatedObjects.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_CreatedObjects.FullRowSelect = true;
+            this.listView_CreatedObjects.HideSelection = false;
+            this.listView_CreatedObjects.Location = new System.Drawing.Point(0, 0);
+            this.listView_CreatedObjects.MultiSelect = false;
+            this.listView_CreatedObjects.Name = "listView_CreatedObjects";
+            this.listView_CreatedObjects.Size = new System.Drawing.Size(438, 363);
+            this.listView_CreatedObjects.TabIndex = 0;
+            this.listView_CreatedObjects.UseCompatibleStateImageBehavior = false;
+            this.listView_CreatedObjects.View = System.Windows.Forms.View.Details;
+            this.listView_CreatedObjects.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_CreatedObjects_ColumnClick);
+            // 
+            // columnHeader8
+            // 
+            this.columnHeader8.Text = "#";
+            this.columnHeader8.Width = 50;
+            // 
+            // columnHeader9
+            // 
+            this.columnHeader9.Text = "Object ID";
+            this.columnHeader9.Width = 80;
+            // 
+            // columnHeader10
+            // 
+            this.columnHeader10.Text = "Name";
+            this.columnHeader10.Width = 90;
+            // 
+            // columnHeader11
+            // 
+            this.columnHeader11.Text = "Weenie Class ID";
+            this.columnHeader11.Width = 100;
             // 
             // splitContainer_Bottom
             // 
@@ -435,7 +506,7 @@
             this.checkBoxUseHex.AutoSize = true;
             this.checkBoxUseHex.Checked = true;
             this.checkBoxUseHex.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxUseHex.Location = new System.Drawing.Point(897, 2);
+            this.checkBoxUseHex.Location = new System.Drawing.Point(897, 3);
             this.checkBoxUseHex.Name = "checkBoxUseHex";
             this.checkBoxUseHex.Size = new System.Drawing.Size(122, 17);
             this.checkBoxUseHex.TabIndex = 8;
@@ -494,11 +565,27 @@
             this.btnHighlight.UseVisualStyleBackColor = true;
             this.btnHighlight.Click += new System.EventHandler(this.btnHighlight_Click);
             // 
+            // checkBox_ShowObjects
+            // 
+            this.checkBox_ShowObjects.AutoSize = true;
+            this.checkBox_ShowObjects.Location = new System.Drawing.Point(1195, 3);
+            this.checkBox_ShowObjects.Name = "checkBox_ShowObjects";
+            this.checkBox_ShowObjects.Size = new System.Drawing.Size(139, 17);
+            this.checkBox_ShowObjects.TabIndex = 10;
+            this.checkBox_ShowObjects.Text = "Display Created Objects";
+            this.checkBox_ShowObjects.UseVisualStyleBackColor = true;
+            this.checkBox_ShowObjects.CheckedChanged += new System.EventHandler(this.checkBox_ShowObjects_CheckedChanged);
+            // 
+            // columnHeader12
+            // 
+            this.columnHeader12.Text = "Type";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1520, 831);
+            this.Controls.Add(this.checkBox_ShowObjects);
             this.Controls.Add(this.btnHighlight);
             this.Controls.Add(this.checkBoxUseHex);
             this.Controls.Add(this.lblTracker);
@@ -521,6 +608,10 @@
             this.splitContainer_Main.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).EndInit();
             this.splitContainer_Main.ResumeLayout(false);
+            this.splitContainer_Top.Panel1.ResumeLayout(false);
+            this.splitContainer_Top.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Top)).EndInit();
+            this.splitContainer_Top.ResumeLayout(false);
             this.splitContainer_Bottom.Panel1.ResumeLayout(false);
             this.splitContainer_Bottom.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Bottom)).EndInit();
@@ -584,6 +675,14 @@
         private System.Windows.Forms.MenuItem menuItem_ReOpenAsMessages;
         private System.Windows.Forms.ToolStripMenuItem ExpandAll;
         private System.Windows.Forms.ToolStripMenuItem CollapseAll;
+        private System.Windows.Forms.SplitContainer splitContainer_Top;
+        private System.Windows.Forms.ListView listView_CreatedObjects;
+        private System.Windows.Forms.ColumnHeader columnHeader8;
+        private System.Windows.Forms.ColumnHeader columnHeader9;
+        private System.Windows.Forms.ColumnHeader columnHeader10;
+        private System.Windows.Forms.ColumnHeader columnHeader11;
+        private System.Windows.Forms.CheckBox checkBox_ShowObjects;
+        private System.Windows.Forms.ColumnHeader columnHeader12;
     }
 }
 

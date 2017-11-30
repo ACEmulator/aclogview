@@ -1049,6 +1049,65 @@ namespace aclogview
             if (e.KeyChar == (char)13) // ENTER KEY
                 btnHighlight.PerformClick();
         }
+
+        private void checkBox_ShowObjects_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_ShowObjects.Checked == true)
+            {
+                splitContainer_Top.Panel2Collapsed = false;
+                ProcessFile(pcapFilePath);
+            }
+            else
+            {
+                listView_CreatedObjects.Items.Clear();
+                splitContainer_Top.Panel2Collapsed = true;
+            }
+        }
+
+        private void ProcessFile(string fileName)
+        {
+            int exceptions = 0;
+            bool searchAborted = false;
+
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted);
+
+            foreach (PacketRecord record in records)
+            {
+                try
+                {
+                    if (record.data.Length <= 4)
+                        continue;
+
+                    BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
+
+                    var messageCode = fragDataReader.ReadUInt32();
+
+                    if (messageCode == 0xF745) // Create Object
+                    {
+                        var parsed = CM_Physics.CreateObject.read(fragDataReader);
+                        ListViewItem lvi = new ListViewItem();
+                        lvi.Text = record.index.ToString();
+                        lvi.SubItems.Add(Utility.FormatHex(parsed.object_id));
+                        lvi.SubItems.Add(parsed.wdesc._name.ToString());
+                        lvi.SubItems.Add(parsed.wdesc._wcid.ToString());
+                        lvi.SubItems.Add(parsed.wdesc._type.ToString());
+                        listView_CreatedObjects.Items.Add(lvi);
+                    }
+                }
+                catch
+                {
+                    // Do something with the exception maybe
+                    exceptions++;
+
+                    //Interlocked.Increment(ref totalExceptions);
+                }
+            }
+        }
+
+        private void listView_CreatedObjects_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+
+        }
     }
 }
 
