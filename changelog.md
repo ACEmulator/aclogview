@@ -1,3 +1,10 @@
+### 2017-12-09
+[Slushnas]
+* Fixed an issue with **_Find Opcode In Files_** where pcaps were not being fully processed in "as messages" mode. This should only have affected parsing for the special output tab.
+* Converted special output to use the StringBuilder class and AppendText which results in much better performance.
+* Changed the special output RichTextBox to read only so that the user can't accidentally alter the output.
+* Fixed some typos.
+
 ### 2017-11-27
 [Slushnas]
 * Renamed MotionStyle enum to MotionCommand and modified it to support the values from the latest client version.

@@ -216,8 +216,8 @@
             // 
             this.toolStripStatusLabel3.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(92, 17);
-            this.toolStripStatusLabel3.Text = "Frag Exceptions:";
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(115, 17);
+            this.toolStripStatusLabel3.Text = "Message Exceptions:";
             // 
             // timer1
             // 
@@ -265,6 +265,7 @@
             this.richTextBox1.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.richTextBox1.Location = new System.Drawing.Point(3, 3);
             this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.ReadOnly = true;
             this.richTextBox1.Size = new System.Drawing.Size(764, 425);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";

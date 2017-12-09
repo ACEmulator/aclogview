@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview.Properties;
+using System.Text;
 
 namespace aclogview
 {
@@ -79,14 +80,14 @@ namespace aclogview
         private int totalExceptions;
         private bool searchAborted;
 
-        private class ProcessFileResut
+        private class ProcessFileResult
         {
             public string FileName;
             public int Hits;
             public int Exceptions;
         }
 
-        private readonly ConcurrentBag<ProcessFileResut> processFileResuts = new ConcurrentBag<ProcessFileResut>();
+        private readonly ConcurrentBag<ProcessFileResult> processFileResults = new ConcurrentBag<ProcessFileResult>();
         
         private readonly ConcurrentDictionary<string, int> specialOutputHits = new ConcurrentDictionary<string, int>();
         private readonly ConcurrentQueue<string> specialOutputHitsQueue = new ConcurrentQueue<string>();
@@ -106,9 +107,9 @@ namespace aclogview
                 totalExceptions = 0;
                 searchAborted = false;
 
-                ProcessFileResut result;
-                while (!processFileResuts.IsEmpty)
-                    processFileResuts.TryTake(out result);
+                ProcessFileResult result;
+                while (!processFileResults.IsEmpty)
+                    processFileResults.TryTake(out result);
 
 
                 specialOutputHits.Clear();
@@ -185,7 +186,7 @@ namespace aclogview
 
             var records = PCapReader.LoadPcap(fileName, true, ref searchAborted);
 
-            foreach (var record in records)
+            foreach (PacketRecord record in records)
             {
                 if (searchAborted || Disposing || IsDisposed)
                     return;
@@ -202,92 +203,59 @@ namespace aclogview
                 // ********************************************************************
                 // Custom search code that can output information to Special Output
                 // Below are several commented out examples on how you can search through bulk pcaps for targeted data, and output detailed information to the output tab.
-                foreach (BlobFrag frag in record.frags)
+
+                try
                 {
-                    try
+                    if (record.data.Length <= 4)
+                        continue;
+
+                    BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data));
+
+                    var messageCode = messageDataReader.ReadUInt32();
+
+                    /*if (messageCode == 0x02BB) // Creature Message
                     {
-                        if (frag.dat_.Length <= 4)
-                            continue;
+                        var parsed = CM_Communication.HearSpeech.read(messageDataReader);
 
-                        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
+                        //if (parsed.ChatMessageType != 0x0C)
+                        //    continue;
 
-                        var messageCode = fragDataReader.ReadUInt32();
+                        var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText;
 
-                        /*if (messageCode == 0x02BB) // Creature Message
+                        if (!specialOutputHits.ContainsKey(output))
                         {
-                            var parsed = CM_Communication.HearSpeech.read(fragDataReader);
+                            if (specialOutputHits.TryAdd(output, 0))
+                                specialOutputHitsQueue.Enqueue(output);
+                        }
+                    }*/
 
-                            //if (parsed.ChatMessageType != 0x0C)
-                            //    continue;
+                    /*if (messageCode == 0xF745) // Create Object
+                    {
+                        var parsed = CM_Physics.CreateObject.read(messageDataReader);
+                    }*/
 
-                            var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText;
+                    /*if (messageCode == 0xF7B0) // Game Event
+                    {
+                        var character = messageDataReader.ReadUInt32(); // Character
+                        var sequence = messageDataReader.ReadUInt32(); // Sequence
+                        var _event = messageDataReader.ReadUInt32(); // Event
 
+                        if (_event == 0x0147) // Group Chat
+                        {
+                            var parsed = CM_Communication.ChannelBroadcast.read(messageDataReader);
+
+                            var output = parsed.GroupChatType.ToString("X4");
                             if (!specialOutputHits.ContainsKey(output))
                             {
                                 if (specialOutputHits.TryAdd(output, 0))
                                     specialOutputHitsQueue.Enqueue(output);
                             }
-                        }*/
+                        }
 
-                        /*if (messageCode == 0xF745) // Create Object
+                        if (_event == 0x02BD) // Tell
                         {
-                            var parsed = CM_Physics.CreateObject.read(fragDataReader);
-                        }*/
+                            var parsed = CM_Communication.HearDirectSpeech.read(messageDataReader);
 
-                        /*if (messageCode == 0xF7B0) // Game Event
-                        {
-                            var character = fragDataReader.ReadUInt32(); // Character
-                            var sequence = fragDataReader.ReadUInt32(); // Sequence
-                            var _event = fragDataReader.ReadUInt32(); // Event
-
-                            if (_event == 0x0147) // Group Chat
-                            {
-                                var parsed = CM_Communication.ChannelBroadcast.read(fragDataReader);
-
-                                var output = parsed.GroupChatType.ToString("X4");
-                                if (!specialOutputHits.ContainsKey(output))
-                                {
-                                    if (specialOutputHits.TryAdd(output, 0))
-                                        specialOutputHitsQueue.Enqueue(output);
-                                }
-                            }
-
-                            if (_event == 0x02BD) // Tell
-                            {
-                                var parsed = CM_Communication.HearDirectSpeech.read(fragDataReader);
-
-                                var output = parsed.ChatMessageType.ToString("X4");
-
-                                if (!specialOutputHits.ContainsKey(output))
-                                {
-                                    if (specialOutputHits.TryAdd(output, 0))
-                                        specialOutputHitsQueue.Enqueue(output);
-                                }
-                            }
-                        }*/
-
-                        /*if (messageCode == 0xF7B1) // Game Action
-                        {
-                        }*/
-
-                        /*if (messageCode == 0xF7DE) // TurbineChat
-                        {
-                            var parsed = CM_Admin.ChatServerData.read(fragDataReader);
-
-                            string output = parsed.TurbineChatType.ToString("X2");
-
-                            if (!specialOutputHits.ContainsKey(output))
-                            {
-                                if (specialOutputHits.TryAdd(output, 0))
-                                    specialOutputHitsQueue.Enqueue(output);
-                            }
-                        }*/
-
-                        /*if (messageCode == 0xF7E0) // Server Message
-                        {
-                            var parsed = CM_Communication.TextBoxString.read(fragDataReader);
-
-                            //var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText + ",";
                             var output = parsed.ChatMessageType.ToString("X4");
 
                             if (!specialOutputHits.ContainsKey(output))
@@ -295,29 +263,60 @@ namespace aclogview
                                 if (specialOutputHits.TryAdd(output, 0))
                                     specialOutputHitsQueue.Enqueue(output);
                             }
-                        }*/
-                    }
-                    catch
-                    {
-                        // Do something with the exception maybe
-                        exceptions++;
+                        }
+                    }*/
 
-                        Interlocked.Increment(ref totalExceptions);
-                    }
+                    /*if (messageCode == 0xF7B1) // Game Action
+                    {
+                    }*/
+
+                    /*if (messageCode == 0xF7DE) // TurbineChat
+                    {
+                        var parsed = CM_Admin.ChatServerData.read(messageDataReader);
+
+                        string output = parsed.TurbineChatType.ToString("X2");
+
+                        if (!specialOutputHits.ContainsKey(output))
+                        {
+                            if (specialOutputHits.TryAdd(output, 0))
+                                specialOutputHitsQueue.Enqueue(output);
+                        }
+                    }*/
+
+                    /*if (messageCode == 0xF7E0) // Server Message
+                    {
+                        var parsed = CM_Communication.TextBoxString.read(messageDataReader);
+
+                        //var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText + ",";
+                        var output = parsed.ChatMessageType.ToString("X4");
+
+                        if (!specialOutputHits.ContainsKey(output))
+                        {
+                            if (specialOutputHits.TryAdd(output, 0))
+                                specialOutputHitsQueue.Enqueue(output);
+                        }
+                    }*/
+                }
+                catch
+                {
+                    // Do something with the exception maybe
+                    exceptions++;
+
+                    Interlocked.Increment(ref totalExceptions);
                 }
             }
 
             Interlocked.Increment(ref filesProcessed);
 
-            processFileResuts.Add(new ProcessFileResut() { FileName = fileName, Hits = hits, Exceptions = exceptions });
+            processFileResults.Add(new ProcessFileResult() { FileName = fileName, Hits = hits, Exceptions = exceptions });
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            ProcessFileResut result;
-            while (!processFileResuts.IsEmpty)
+            ProcessFileResult result;
+            while (!processFileResults.IsEmpty)
             {
-                if (processFileResuts.TryTake(out result))
+                if (processFileResults.TryTake(out result))
                 {
                     var length = new FileInfo(result.FileName).Length;
 
@@ -327,17 +326,19 @@ namespace aclogview
             }
 
             string specialOutputHitsQueueResult;
+            StringBuilder specialOutput = new StringBuilder();
             while (!specialOutputHitsQueue.IsEmpty)
             {
                 if (specialOutputHitsQueue.TryDequeue(out specialOutputHitsQueueResult))
-                    richTextBox1.Text += specialOutputHitsQueueResult + Environment.NewLine;
+                    specialOutput.AppendLine(specialOutputHitsQueueResult);
             }
+            richTextBox1.AppendText(specialOutput.ToString());
 
             toolStripStatusLabel1.Text = "Files Processed: " + filesProcessed.ToString("N0") + " of " + filesToProcess.Count.ToString("N0");
 
             toolStripStatusLabel2.Text = "Total Hits: " + totalHits.ToString("N0");
 
-            toolStripStatusLabel3.Text = "Frag Exceptions: " + totalExceptions.ToString("N0");
+            toolStripStatusLabel3.Text = "Message Exceptions: " + totalExceptions.ToString("N0");
         }
 
 
