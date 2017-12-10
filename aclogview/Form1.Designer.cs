@@ -40,6 +40,7 @@
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
             this.treeView_ParsedData = new BufferedTreeView();
@@ -79,7 +80,6 @@
             this.lblTracker = new System.Windows.Forms.Label();
             this.btnHighlight = new System.Windows.Forms.Button();
             this.checkBox_ShowObjects = new System.Windows.Forms.CheckBox();
-            this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -217,7 +217,7 @@
             this.listView_CreatedObjects.Location = new System.Drawing.Point(0, 0);
             this.listView_CreatedObjects.MultiSelect = false;
             this.listView_CreatedObjects.Name = "listView_CreatedObjects";
-            this.listView_CreatedObjects.Size = new System.Drawing.Size(438, 363);
+            this.listView_CreatedObjects.Size = new System.Drawing.Size(92, 96);
             this.listView_CreatedObjects.TabIndex = 0;
             this.listView_CreatedObjects.UseCompatibleStateImageBehavior = false;
             this.listView_CreatedObjects.View = System.Windows.Forms.View.Details;
@@ -242,6 +242,10 @@
             // 
             this.columnHeader11.Text = "Weenie Class ID";
             this.columnHeader11.Width = 100;
+            // 
+            // columnHeader12
+            // 
+            this.columnHeader12.Text = "Type";
             // 
             // splitContainer_Bottom
             // 
@@ -446,7 +450,7 @@
             // 
             // textBox_Search
             // 
-            this.textBox_Search.Location = new System.Drawing.Point(435, 0);
+            this.textBox_Search.Location = new System.Drawing.Point(617, 0);
             this.textBox_Search.MaxLength = 6;
             this.textBox_Search.Name = "textBox_Search";
             this.textBox_Search.Size = new System.Drawing.Size(165, 20);
@@ -455,7 +459,7 @@
             // 
             // pictureBox_Search
             // 
-            this.pictureBox_Search.Location = new System.Drawing.Point(711, -1);
+            this.pictureBox_Search.Location = new System.Drawing.Point(893, -1);
             this.pictureBox_Search.Name = "pictureBox_Search";
             this.pictureBox_Search.Size = new System.Drawing.Size(20, 20);
             this.pictureBox_Search.TabIndex = 3;
@@ -480,7 +484,7 @@
             // 
             // checkBox_HideHeaderOnly
             // 
-            this.checkBox_HideHeaderOnly.Location = new System.Drawing.Point(737, 3);
+            this.checkBox_HideHeaderOnly.Location = new System.Drawing.Point(919, 3);
             this.checkBox_HideHeaderOnly.Name = "checkBox_HideHeaderOnly";
             this.checkBox_HideHeaderOnly.Size = new System.Drawing.Size(154, 17);
             this.checkBox_HideHeaderOnly.TabIndex = 7;
@@ -493,7 +497,7 @@
             // 
             this.checkBox_useHighlighting.Checked = true;
             this.checkBox_useHighlighting.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_useHighlighting.Location = new System.Drawing.Point(1024, 3);
+            this.checkBox_useHighlighting.Location = new System.Drawing.Point(1206, 3);
             this.checkBox_useHighlighting.Name = "checkBox_useHighlighting";
             this.checkBox_useHighlighting.Size = new System.Drawing.Size(165, 17);
             this.checkBox_useHighlighting.TabIndex = 9;
@@ -506,7 +510,7 @@
             this.checkBoxUseHex.AutoSize = true;
             this.checkBoxUseHex.Checked = true;
             this.checkBoxUseHex.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxUseHex.Location = new System.Drawing.Point(897, 3);
+            this.checkBoxUseHex.Location = new System.Drawing.Point(1079, 3);
             this.checkBoxUseHex.Name = "checkBoxUseHex";
             this.checkBoxUseHex.Size = new System.Drawing.Size(122, 17);
             this.checkBoxUseHex.TabIndex = 8;
@@ -557,7 +561,7 @@
             // btnHighlight
             // 
             this.btnHighlight.Enabled = false;
-            this.btnHighlight.Location = new System.Drawing.Point(606, 0);
+            this.btnHighlight.Location = new System.Drawing.Point(788, 0);
             this.btnHighlight.Name = "btnHighlight";
             this.btnHighlight.Size = new System.Drawing.Size(75, 22);
             this.btnHighlight.TabIndex = 6;
@@ -568,17 +572,13 @@
             // checkBox_ShowObjects
             // 
             this.checkBox_ShowObjects.AutoSize = true;
-            this.checkBox_ShowObjects.Location = new System.Drawing.Point(1195, 3);
+            this.checkBox_ShowObjects.Location = new System.Drawing.Point(1377, 3);
             this.checkBox_ShowObjects.Name = "checkBox_ShowObjects";
             this.checkBox_ShowObjects.Size = new System.Drawing.Size(139, 17);
             this.checkBox_ShowObjects.TabIndex = 10;
             this.checkBox_ShowObjects.Text = "Display Created Objects";
             this.checkBox_ShowObjects.UseVisualStyleBackColor = true;
             this.checkBox_ShowObjects.CheckedChanged += new System.EventHandler(this.checkBox_ShowObjects_CheckedChanged);
-            // 
-            // columnHeader12
-            // 
-            this.columnHeader12.Text = "Type";
             // 
             // Form1
             // 
