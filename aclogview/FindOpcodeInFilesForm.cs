@@ -349,7 +349,7 @@ namespace aclogview
 
             var fileName = (string)dataGridView1.Rows[e.RowIndex].Cells[3].Value;
 
-            System.Diagnostics.Process.Start(Application.ExecutablePath, '"' + fileName + '"' + " " + opCodeToSearchFor);
+            System.Diagnostics.Process.Start(Application.ExecutablePath, "-f" + '"' + fileName + '"' + " -o " + opCodeToSearchFor);
         }
 
         private void txtOpcode_KeyPress(object sender, KeyPressEventArgs e)

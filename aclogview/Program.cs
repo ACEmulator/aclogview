@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CommandLine;
+using CommandLine.Text;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,7 +28,39 @@ namespace aclogview {
         }
     }
 
-  
+    public class Options
+    {
+        [Option('f', "file",
+          HelpText = "Input file to be processed.")]
+        public string InputFile { get; set; }
+
+        [Option('o', "opcode",
+          HelpText = "The message opcode to search for.")]
+        public int Opcode { get; set; }
+
+        [Option('m', "asmessages", DefaultValue = true,
+          HelpText = "Process the file in 'as messages' mode.")]
+        public bool AsMessages { get; set; }
+
+        [Option("cst",
+          HelpText = "A case-sensitive text search.")]
+        public string CSTextToSearch { get; set; }
+
+        [Option("cit",
+          HelpText = "A case-insensitive text search.")]
+        public string CITextToSearch { get; set; }
+
+        [ParserState]
+        public IParserState LastParserState { get; set; }
+
+        [HelpOption]
+        public string GetUsage()
+        {
+            return HelpText.AutoBuild(this,
+              (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
+        }
+    }
+
     static class Program {
         /// <summary>
         /// The main entry point for the application.

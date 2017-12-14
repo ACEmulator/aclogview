@@ -80,6 +80,8 @@
             this.lblTracker = new System.Windows.Forms.Label();
             this.btnHighlight = new System.Windows.Forms.Button();
             this.checkBox_ShowObjects = new System.Windows.Forms.CheckBox();
+            this.HighlightMode_comboBox = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -135,7 +137,7 @@
             this.splitContainer_Top.Panel2.Controls.Add(this.listView_CreatedObjects);
             this.splitContainer_Top.Panel2Collapsed = true;
             this.splitContainer_Top.Size = new System.Drawing.Size(1520, 367);
-            this.splitContainer_Top.SplitterDistance = 1074;
+            this.splitContainer_Top.SplitterDistance = 993;
             this.splitContainer_Top.TabIndex = 1;
             // 
             // listView_Packets
@@ -187,7 +189,7 @@
             // columnHeader3
             // 
             this.columnHeader3.Text = "Type";
-            this.columnHeader3.Width = 391;
+            this.columnHeader3.Width = 362;
             // 
             // columnHeader4
             // 
@@ -236,16 +238,17 @@
             // columnHeader10
             // 
             this.columnHeader10.Text = "Name";
-            this.columnHeader10.Width = 90;
+            this.columnHeader10.Width = 165;
             // 
             // columnHeader11
             // 
-            this.columnHeader11.Text = "Weenie Class ID";
-            this.columnHeader11.Width = 100;
+            this.columnHeader11.Text = "WCID";
+            this.columnHeader11.Width = 56;
             // 
             // columnHeader12
             // 
             this.columnHeader12.Text = "Type";
+            this.columnHeader12.Width = 156;
             // 
             // splitContainer_Bottom
             // 
@@ -497,6 +500,7 @@
             // 
             this.checkBox_useHighlighting.Checked = true;
             this.checkBox_useHighlighting.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_useHighlighting.Enabled = false;
             this.checkBox_useHighlighting.Location = new System.Drawing.Point(1206, 3);
             this.checkBox_useHighlighting.Name = "checkBox_useHighlighting";
             this.checkBox_useHighlighting.Size = new System.Drawing.Size(165, 17);
@@ -510,6 +514,7 @@
             this.checkBoxUseHex.AutoSize = true;
             this.checkBoxUseHex.Checked = true;
             this.checkBoxUseHex.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxUseHex.Enabled = false;
             this.checkBoxUseHex.Location = new System.Drawing.Point(1079, 3);
             this.checkBoxUseHex.Name = "checkBoxUseHex";
             this.checkBoxUseHex.Size = new System.Drawing.Size(122, 17);
@@ -572,6 +577,7 @@
             // checkBox_ShowObjects
             // 
             this.checkBox_ShowObjects.AutoSize = true;
+            this.checkBox_ShowObjects.Enabled = false;
             this.checkBox_ShowObjects.Location = new System.Drawing.Point(1377, 3);
             this.checkBox_ShowObjects.Name = "checkBox_ShowObjects";
             this.checkBox_ShowObjects.Size = new System.Drawing.Size(139, 17);
@@ -580,11 +586,31 @@
             this.checkBox_ShowObjects.UseVisualStyleBackColor = true;
             this.checkBox_ShowObjects.CheckedChanged += new System.EventHandler(this.checkBox_ShowObjects_CheckedChanged);
             // 
+            // HighlightMode_comboBox
+            // 
+            this.HighlightMode_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.HighlightMode_comboBox.Location = new System.Drawing.Point(473, 0);
+            this.HighlightMode_comboBox.Name = "HighlightMode_comboBox";
+            this.HighlightMode_comboBox.Size = new System.Drawing.Size(138, 21);
+            this.HighlightMode_comboBox.TabIndex = 0;
+            this.HighlightMode_comboBox.SelectedIndexChanged += new System.EventHandler(this.HighlightMode_comboBox_SelectedIndexChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(392, 4);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(81, 13);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "Highlight Mode:";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1520, 831);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.HighlightMode_comboBox);
             this.Controls.Add(this.checkBox_ShowObjects);
             this.Controls.Add(this.btnHighlight);
             this.Controls.Add(this.checkBoxUseHex);
@@ -683,6 +709,8 @@
         private System.Windows.Forms.ColumnHeader columnHeader11;
         private System.Windows.Forms.CheckBox checkBox_ShowObjects;
         private System.Windows.Forms.ColumnHeader columnHeader12;
+        private System.Windows.Forms.ComboBox HighlightMode_comboBox;
+        private System.Windows.Forms.Label label1;
     }
 }
 
