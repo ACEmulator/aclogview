@@ -18,6 +18,7 @@ namespace aclogview
     public partial class Form1 : Form
     {
         private ListViewItemComparer comparer = new ListViewItemComparer();
+        private ListViewItemComparer comparer2 = new ListViewItemComparer();
         public List<MessageProcessor> messageProcessors = new List<MessageProcessor>();
         private long curPacket;
         private bool loadedAsMessages;
@@ -42,6 +43,8 @@ namespace aclogview
         private string textModeCS = "Text (Case-Sensitive)";
         private string textModeCI = "Text (Case-Insensitive)";
 
+        static private string sortTypeUInt = "UInt";
+        static private string sortTypeString = "String";
 
         public Form1(string[] args)
         {
@@ -127,7 +130,9 @@ namespace aclogview
 
         List<PacketRecord> records = new List<PacketRecord>();
         List<ListViewItem> listItems = new List<ListViewItem>();
-        
+        // For the created objects listview
+        List<ListViewItem> CreatedListItems = new List<ListViewItem>();
+
         private void loadPcap(string fileName, bool asMessages, bool dontList = false) {
             Cursor.Current = Cursors.WaitCursor;
             Text = "AC Log View - " + Path.GetFileName(fileName);
@@ -231,6 +236,14 @@ namespace aclogview
 
         private void listView_Packets_ColumnClick(object sender, ColumnClickEventArgs e)
         {
+            if (e.Column == 0 || e.Column == 2 || e.Column == 5)
+            {
+                comparer.sortType = sortTypeUInt;
+            }
+            else
+            {
+                comparer.sortType = sortTypeString;
+            }
             if (comparer.col == e.Column)
             {
                 comparer.reverse = !comparer.reverse;
@@ -246,11 +259,12 @@ namespace aclogview
         {
             public int col;
             public bool reverse;
+            public string sortType;
 
             public int Compare(ListViewItem x, ListViewItem y)
             {
                 int result = 0;
-                if (col == 0 || col == 2 || col == 5)
+                if (sortType == sortTypeUInt)
                 {
                     result = CompareUInt(x.SubItems[col].Text, y.SubItems[col].Text);
                 }
@@ -1150,6 +1164,7 @@ namespace aclogview
             }
             else
             {
+                listView_CreatedObjects.VirtualListSize = 0;
                 listView_CreatedObjects.Items.Clear();
                 splitContainer_Top.Panel2Collapsed = true;
             }
@@ -1157,6 +1172,7 @@ namespace aclogview
 
         private void ProcessCreatedObjects(string fileName)
         {
+            int hits = 0;
             int exceptions = 0;
             bool searchAborted = false;
 
@@ -1175,6 +1191,7 @@ namespace aclogview
 
                     if (messageCode == 0xF745) // Create Object
                     {
+                        hits++;
                         var parsed = CM_Physics.CreateObject.read(fragDataReader);
                         ListViewItem lvi = new ListViewItem();
                         lvi.Text = record.index.ToString();
@@ -1182,7 +1199,7 @@ namespace aclogview
                         lvi.SubItems.Add(parsed.wdesc._name.ToString());
                         lvi.SubItems.Add(parsed.wdesc._wcid.ToString());
                         lvi.SubItems.Add(parsed.wdesc._type.ToString());
-                        listView_CreatedObjects.Items.Add(lvi);
+                        CreatedListItems.Add(lvi);
                     }
                 }
                 catch
@@ -1193,11 +1210,29 @@ namespace aclogview
                     //Interlocked.Increment(ref totalExceptions);
                 }
             }
+            listView_CreatedObjects.VirtualListSize = hits;
+            if (hits > 0)
+                listView_CreatedObjects.RedrawItems(0, hits - 1, false);
         }
 
         private void listView_CreatedObjects_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-
+            if (e.Column == 0 || e.Column == 3)
+            {
+                comparer2.sortType = sortTypeUInt;
+            }
+            else
+            {
+                comparer2.sortType = sortTypeString;
+            }
+            if (comparer2.col == e.Column)
+            {
+                comparer2.reverse = !comparer2.reverse;
+            }
+            comparer2.col = e.Column;
+            CreatedListItems.Sort(comparer2);
+            if (listView_CreatedObjects.VirtualListSize > 0)
+                listView_CreatedObjects.RedrawItems(0, listView_CreatedObjects.VirtualListSize - 1, false);
         }
 
         private void HighlightMode_comboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -1310,6 +1345,14 @@ namespace aclogview
         {
             var form = new FindTextInFilesForm();
             form.Show(this);
+        }
+
+        private void listView_CreatedObjects_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
+        {
+            if (e.ItemIndex < CreatedListItems.Count)
+            {
+                e.Item = CreatedListItems[e.ItemIndex];
+            }
         }
     }
 }
