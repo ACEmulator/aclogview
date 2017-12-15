@@ -41,6 +41,8 @@
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader11 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.objectsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.jumpToMessageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
             this.treeView_ParsedData = new BufferedTreeView();
@@ -91,6 +93,7 @@
             this.splitContainer_Top.Panel1.SuspendLayout();
             this.splitContainer_Top.Panel2.SuspendLayout();
             this.splitContainer_Top.SuspendLayout();
+            this.objectsContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Bottom)).BeginInit();
             this.splitContainer_Bottom.Panel1.SuspendLayout();
             this.splitContainer_Bottom.Panel2.SuspendLayout();
@@ -214,6 +217,7 @@
             this.columnHeader10,
             this.columnHeader11,
             this.columnHeader12});
+            this.listView_CreatedObjects.ContextMenuStrip = this.objectsContextMenu;
             this.listView_CreatedObjects.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_CreatedObjects.FullRowSelect = true;
             this.listView_CreatedObjects.HideSelection = false;
@@ -252,6 +256,20 @@
             // 
             this.columnHeader12.Text = "Type";
             this.columnHeader12.Width = 156;
+            // 
+            // objectsContextMenu
+            // 
+            this.objectsContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.jumpToMessageMenuItem});
+            this.objectsContextMenu.Name = "objectsContextMenu";
+            this.objectsContextMenu.Size = new System.Drawing.Size(189, 26);
+            this.objectsContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.objectsContextMenu_ItemClicked);
+            // 
+            // jumpToMessageMenuItem
+            // 
+            this.jumpToMessageMenuItem.Name = "jumpToMessageMenuItem";
+            this.jumpToMessageMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.jumpToMessageMenuItem.Text = "&Jump to this message";
             // 
             // splitContainer_Bottom
             // 
@@ -648,6 +666,7 @@
             this.splitContainer_Top.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Top)).EndInit();
             this.splitContainer_Top.ResumeLayout(false);
+            this.objectsContextMenu.ResumeLayout(false);
             this.splitContainer_Bottom.Panel1.ResumeLayout(false);
             this.splitContainer_Bottom.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Bottom)).EndInit();
@@ -722,6 +741,8 @@
         private System.Windows.Forms.ComboBox HighlightMode_comboBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.MenuItem menuItem_ToolFindTextInFiles;
+        private System.Windows.Forms.ContextMenuStrip objectsContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem jumpToMessageMenuItem;
     }
 }
 

@@ -7,6 +7,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -119,6 +120,11 @@ namespace aclogview
                 if (options.InputFile != null)
                     loadPcap(options.InputFile, options.AsMessages);
             }
+            // Turn on listview double buffering to prevent flickering
+            var prop = listView_Packets.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+            prop.SetValue(listView_Packets, true, null);
+            prop = listView_CreatedObjects.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
+            prop.SetValue(listView_CreatedObjects, true, null);
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -153,6 +159,10 @@ namespace aclogview
             checkBox_ShowObjects.Enabled = true;
             records.Clear();
             listItems.Clear();
+            splitContainer_Top.Panel2Collapsed = true;
+            checkBox_ShowObjects.Checked = false;
+            CreatedListItems.Clear();
+            listView_CreatedObjects.VirtualListSize = 0;
 
             bool abort = false;
             records = PCapReader.LoadPcap(fileName, asMessages, ref abort);
@@ -984,20 +994,40 @@ namespace aclogview
         private void checkBoxUseHex_CheckedChanged(object sender, EventArgs e)
         {
             Globals.UseHex = checkBoxUseHex.Checked;
-            if (treeView_ParsedData.TopNode == null)
-                return;
+            
             Cursor.Current = Cursors.WaitCursor;
-            var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
-            var savedTopNode = treeView_ParsedData.GetTopNode();
-            treeView_ParsedData.BeginUpdate();
-            updateTree();
-            treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
-            treeView_ParsedData.SetTopNode(savedTopNode);
-            treeView_ParsedData.EndUpdate();
+            if (treeView_ParsedData.TopNode != null)
+            {
+                var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
+                var savedTopNode = treeView_ParsedData.GetTopNode();
+                treeView_ParsedData.BeginUpdate();
+                updateTree();
+                treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
+                treeView_ParsedData.SetTopNode(savedTopNode);
+                treeView_ParsedData.EndUpdate();
+            }
             if (listView_Packets.FocusedItem != null)
             {
                  listView_Packets.Focus();
             }
+            if (splitContainer_Top.Panel2Collapsed == false)
+            {
+                for (int i = 0; i < listView_CreatedObjects.VirtualListSize; i++)
+                {
+                    if (Globals.UseHex == false)
+                    {
+                        string temp = CreatedListItems[i].SubItems[1].Text;
+                        CreatedListItems[i].SubItems[1].Text = UInt32.Parse(temp.Remove(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier).ToString();
+                    }
+                    else
+                    {
+                        uint temp = UInt32.Parse(CreatedListItems[i].SubItems[1].Text);
+                        CreatedListItems[i].SubItems[1].Text = "0x" + temp.ToString("X");
+                    }
+                }
+                listView_CreatedObjects.RedrawItems(0, listView_CreatedObjects.VirtualListSize - 1, false);
+            }
+
             Cursor.Current = Cursors.Default;
         }
 
@@ -1160,7 +1190,9 @@ namespace aclogview
             if (checkBox_ShowObjects.Checked == true)
             {
                 splitContainer_Top.Panel2Collapsed = false;
+                Cursor.Current = Cursors.WaitCursor;
                 ProcessCreatedObjects(pcapFilePath);
+                Cursor.Current = Cursors.Default;
             }
             else
             {
@@ -1352,6 +1384,16 @@ namespace aclogview
             if (e.ItemIndex < CreatedListItems.Count)
             {
                 e.Item = CreatedListItems[e.ItemIndex];
+            }
+        }
+
+        private void objectsContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (e.ClickedItem == jumpToMessageMenuItem)
+            {
+                var selected = Int32.Parse(CreatedListItems[listView_CreatedObjects.SelectedIndices[0]].Text);
+                listView_Packets.TopItem = listView_Packets.Items[selected];
+                listView_Packets.Items[selected].Selected = true;
             }
         }
     }
