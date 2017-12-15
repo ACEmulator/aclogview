@@ -878,7 +878,14 @@ public class CM_Physics : MessageProcessor {
                 }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Location) != 0) {
-                node.Nodes.Add("_location = " + (INVENTORY_LOC)_location);
+                TreeNode locationNode = node.Nodes.Add("_location = " + Utility.FormatHex(_location));
+                foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+                {
+                    if ((_location & (uint)e) == (uint)e && (uint)e != 0)
+                    {
+                        locationNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                    }
+                }
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0) {
                 TreeNode priorityNode = node.Nodes.Add("_priority = " + Utility.FormatHex(_priority));
