@@ -159,10 +159,6 @@ namespace aclogview
             checkBox_ShowObjects.Enabled = true;
             records.Clear();
             listItems.Clear();
-            splitContainer_Top.Panel2Collapsed = true;
-            checkBox_ShowObjects.Checked = false;
-            CreatedListItems.Clear();
-            listView_CreatedObjects.VirtualListSize = 0;
 
             bool abort = false;
             records = PCapReader.LoadPcap(fileName, asMessages, ref abort);
@@ -652,7 +648,7 @@ namespace aclogview
 
             if (openFile.ShowDialog() != DialogResult.OK)
                 return;
-
+            checkBox_ShowObjects.Checked = false;
             loadedAsMessages = asMessages;
 
             loadPcap(openFile.FileName, asMessages);
@@ -1171,11 +1167,13 @@ namespace aclogview
 
         private void menuItem_ReOpen_Click(object sender, EventArgs e)
         {
+            checkBox_ShowObjects.Checked = false;
             loadPcap(pcapFilePath, false);
         }
 
         private void menuItem_ReOpenAsMessages_Click(object sender, EventArgs e)
         {
+            checkBox_ShowObjects.Checked = false;
             loadPcap(pcapFilePath, true);
         }
 
@@ -1196,9 +1194,10 @@ namespace aclogview
             }
             else
             {
-                listView_CreatedObjects.VirtualListSize = 0;
-                listView_CreatedObjects.Items.Clear();
                 splitContainer_Top.Panel2Collapsed = true;
+                listView_CreatedObjects.VirtualListSize = 0;
+                CreatedListItems.Clear();
+
             }
         }
 
@@ -1269,18 +1268,18 @@ namespace aclogview
 
         private void HighlightMode_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (currentHighlightMode == HighlightMode_comboBox.SelectedItem)
+            if (currentHighlightMode == (string)HighlightMode_comboBox.SelectedItem)
                 return;
 
-            if (HighlightMode_comboBox.SelectedItem == opcodeMode)
+            if ((string)HighlightMode_comboBox.SelectedItem == opcodeMode)
             {
                 currentHighlightMode = opcodeMode;
-                Text = Text = "AC Log View - " + Path.GetFileName(pcapFilePath);
+                Text = "AC Log View - " + Path.GetFileName(pcapFilePath);
                 textBox_Search.Clear();
                 ClearHighlighting();
                 textBox_Search.MaxLength = 6;
             }
-            else if (HighlightMode_comboBox.SelectedItem == textModeCS)
+            else if ((string)HighlightMode_comboBox.SelectedItem == textModeCS)
             {
                 currentHighlightMode = textModeCS;
                 Text = "AC Log View - " + Path.GetFileName(pcapFilePath);
@@ -1289,7 +1288,7 @@ namespace aclogview
                 ClearHighlighting();
                 textBox_Search.MaxLength = 256;
             }
-            else if (HighlightMode_comboBox.SelectedItem == textModeCI)
+            else if ((string)HighlightMode_comboBox.SelectedItem == textModeCI)
             {
                 currentHighlightMode = textModeCI;
                 Text = "AC Log View - " + Path.GetFileName(pcapFilePath);

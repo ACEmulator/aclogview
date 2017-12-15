@@ -141,7 +141,7 @@
             this.splitContainer_Top.Panel2.Controls.Add(this.listView_CreatedObjects);
             this.splitContainer_Top.Panel2Collapsed = true;
             this.splitContainer_Top.Size = new System.Drawing.Size(1520, 367);
-            this.splitContainer_Top.SplitterDistance = 993;
+            this.splitContainer_Top.SplitterDistance = 931;
             this.splitContainer_Top.TabIndex = 1;
             // 
             // listView_Packets
@@ -193,7 +193,7 @@
             // columnHeader3
             // 
             this.columnHeader3.Text = "Type";
-            this.columnHeader3.Width = 362;
+            this.columnHeader3.Width = 309;
             // 
             // columnHeader4
             // 
@@ -245,7 +245,7 @@
             // columnHeader10
             // 
             this.columnHeader10.Text = "Name";
-            this.columnHeader10.Width = 165;
+            this.columnHeader10.Width = 184;
             // 
             // columnHeader11
             // 
@@ -255,7 +255,7 @@
             // columnHeader12
             // 
             this.columnHeader12.Text = "Type";
-            this.columnHeader12.Width = 156;
+            this.columnHeader12.Width = 186;
             // 
             // objectsContextMenu
             // 
@@ -510,8 +510,8 @@
             // toolStripStatus
             // 
             this.toolStripStatus.Name = "toolStripStatus";
-            this.toolStripStatus.Size = new System.Drawing.Size(94, 17);
-            this.toolStripStatus.Text = "toolStripFilePath";
+            this.toolStripStatus.Size = new System.Drawing.Size(74, 17);
+            this.toolStripStatus.Text = "AC Log View";
             // 
             // checkBox_HideHeaderOnly
             // 
@@ -573,7 +573,7 @@
             // 
             // cmdbackward
             // 
-            this.cmdbackward.Location = new System.Drawing.Point(164, 2);
+            this.cmdbackward.Location = new System.Drawing.Point(164, 1);
             this.cmdbackward.Name = "cmdbackward";
             this.cmdbackward.Size = new System.Drawing.Size(75, 23);
             this.cmdbackward.TabIndex = 3;
