@@ -43,7 +43,6 @@
             this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
-            this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CollapseAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,6 +62,7 @@
             this.menuItem_ToolHeatmap = new System.Windows.Forms.MenuItem();
             this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.mnuItem_ToolFindOpcodeInFiles = new System.Windows.Forms.MenuItem();
+            this.menuItem_ToolFindTextInFiles = new System.Windows.Forms.MenuItem();
             this.mnuItem_ToolFragDatListTool = new System.Windows.Forms.MenuItem();
             this.menuItem_Help = new System.Windows.Forms.MenuItem();
             this.menuItem_About = new System.Windows.Forms.MenuItem();
@@ -82,6 +82,7 @@
             this.checkBox_ShowObjects = new System.Windows.Forms.CheckBox();
             this.HighlightMode_comboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.treeView_ParsedData = new BufferedTreeView();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -278,16 +279,6 @@
             this.textBox_PacketData.TabIndex = 0;
             this.textBox_PacketData.Text = "";
             // 
-            // treeView_ParsedData
-            // 
-            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
-            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
-            this.treeView_ParsedData.Name = "treeView_ParsedData";
-            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
-            this.treeView_ParsedData.TabIndex = 0;
-            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
-            // 
             // parsedContextMenu
             // 
             this.parsedContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -392,6 +383,7 @@
             this.menuItem_ToolHeatmap,
             this.menuItem2,
             this.mnuItem_ToolFindOpcodeInFiles,
+            this.menuItem_ToolFindTextInFiles,
             this.mnuItem_ToolFragDatListTool});
             this.menuItem1.Text = "Tools";
             // 
@@ -424,9 +416,15 @@
             this.mnuItem_ToolFindOpcodeInFiles.Text = "Find Opcode In Files";
             this.mnuItem_ToolFindOpcodeInFiles.Click += new System.EventHandler(this.mnuItem_ToolFindOpcodeInFiles_Click);
             // 
+            // menuItem_ToolFindTextInFiles
+            // 
+            this.menuItem_ToolFindTextInFiles.Index = 5;
+            this.menuItem_ToolFindTextInFiles.Text = "Find Text In Files";
+            this.menuItem_ToolFindTextInFiles.Click += new System.EventHandler(this.menuItem_ToolFindTextInFiles_Click);
+            // 
             // mnuItem_ToolFragDatListTool
             // 
-            this.mnuItem_ToolFragDatListTool.Index = 5;
+            this.mnuItem_ToolFragDatListTool.Index = 6;
             this.mnuItem_ToolFragDatListTool.Text = "Frag Dat List Tool";
             this.mnuItem_ToolFragDatListTool.Click += new System.EventHandler(this.mnuItem_ToolFragDatListTool_Click);
             // 
@@ -604,6 +602,16 @@
             this.label1.TabIndex = 11;
             this.label1.Text = "Highlight Mode:";
             // 
+            // treeView_ParsedData
+            // 
+            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
+            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
+            this.treeView_ParsedData.Name = "treeView_ParsedData";
+            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
+            this.treeView_ParsedData.TabIndex = 0;
+            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -711,6 +719,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader12;
         private System.Windows.Forms.ComboBox HighlightMode_comboBox;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.MenuItem menuItem_ToolFindTextInFiles;
     }
 }
 

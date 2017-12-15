@@ -70,5 +70,17 @@ namespace aclogview.Properties {
                 this["FragDatFileOutputFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FindTextInFilesRoot {
+            get {
+                return ((string)(this["FindTextInFilesRoot"]));
+            }
+            set {
+                this["FindTextInFilesRoot"] = value;
+            }
+        }
     }
 }

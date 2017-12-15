@@ -1220,7 +1220,7 @@ namespace aclogview
                 textBox_Search.Clear();
                 opCodesToHighlight.Clear();
                 ClearHighlighting();
-                textBox_Search.MaxLength = 128;
+                textBox_Search.MaxLength = 256;
             }
             else if (HighlightMode_comboBox.SelectedItem == textModeCI)
             {
@@ -1229,7 +1229,7 @@ namespace aclogview
                 textBox_Search.Clear();
                 opCodesToHighlight.Clear();
                 ClearHighlighting();
-                textBox_Search.MaxLength = 128;
+                textBox_Search.MaxLength = 256;
             }
         }
 
@@ -1248,7 +1248,7 @@ namespace aclogview
 
             try
             {
-                if (record.data.Length <= 4)
+                if (record.data.Length <= 4 || (textToSearch.Length > record.data.Length) )
                     return hits;
 
                 BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
@@ -1304,6 +1304,12 @@ namespace aclogview
                 }
             }
             return matches;
+        }
+
+        private void menuItem_ToolFindTextInFiles_Click(object sender, EventArgs e)
+        {
+            var form = new FindTextInFilesForm();
+            form.Show(this);
         }
     }
 }

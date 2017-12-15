@@ -55,21 +55,27 @@
     <Compile Include="BufferedTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="CM_Admin.cs" />
-    <Compile Include="CM_Advocate.cs" />
-    <Compile Include="CM_Allegiance.cs" />
-    <Compile Include="CM_Combat.cs" />
-    <Compile Include="CM_Fellowship.cs" />
-    <Compile Include="CM_Death.cs" />
-    <Compile Include="CM_Game.cs" />
-    <Compile Include="CM_House.cs" />
-    <Compile Include="CM_Magic.cs" />
-    <Compile Include="CM_Misc.cs" />
-    <Compile Include="CM_Movement.cs" />
-    <Compile Include="CM_Trade.cs" />
-    <Compile Include="CM_Train.cs" />
-    <Compile Include="CM_Vendor.cs" />
-    <Compile Include="CM_Writing.cs" />
+    <Compile Include="Tools\FindTextInFilesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\FindTextInFilesForm.Designer.cs">
+      <DependentUpon>FindTextInFilesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Message Processors\CM_Admin.cs" />
+    <Compile Include="Message Processors\CM_Advocate.cs" />
+    <Compile Include="Message Processors\CM_Allegiance.cs" />
+    <Compile Include="Message Processors\CM_Combat.cs" />
+    <Compile Include="Message Processors\CM_Fellowship.cs" />
+    <Compile Include="Message Processors\CM_Death.cs" />
+    <Compile Include="Message Processors\CM_Game.cs" />
+    <Compile Include="Message Processors\CM_House.cs" />
+    <Compile Include="Message Processors\CM_Magic.cs" />
+    <Compile Include="Message Processors\CM_Misc.cs" />
+    <Compile Include="Message Processors\CM_Movement.cs" />
+    <Compile Include="Message Processors\CM_Trade.cs" />
+    <Compile Include="Message Processors\CM_Train.cs" />
+    <Compile Include="Message Processors\CM_Vendor.cs" />
+    <Compile Include="Message Processors\CM_Writing.cs" />
     <Compile Include="Enums\Account.cs" />
     <Compile Include="Enums\Admin.cs" />
     <Compile Include="Enums\Allegiance.cs" />
@@ -77,15 +83,15 @@
     <Compile Include="Enums\Appraisal.cs" />
     <Compile Include="Enums\Character.cs" />
     <Compile Include="Enums\CharacterTitles.cs" />
-    <Compile Include="CM_Character.cs" />
-    <Compile Include="CM_Communication.cs" />
-    <Compile Include="CM_Examine.cs" />
-    <Compile Include="CM_Inventory.cs" />
-    <Compile Include="CM_Item.cs" />
-    <Compile Include="CM_Login.cs" />
-    <Compile Include="CM_Physics.cs" />
-    <Compile Include="CM_Qualities.cs" />
-    <Compile Include="CM_Social.cs" />
+    <Compile Include="Message Processors\CM_Character.cs" />
+    <Compile Include="Message Processors\CM_Communication.cs" />
+    <Compile Include="Message Processors\CM_Examine.cs" />
+    <Compile Include="Message Processors\CM_Inventory.cs" />
+    <Compile Include="Message Processors\CM_Item.cs" />
+    <Compile Include="Message Processors\CM_Login.cs" />
+    <Compile Include="Message Processors\CM_Physics.cs" />
+    <Compile Include="Message Processors\CM_Qualities.cs" />
+    <Compile Include="Message Processors\CM_Social.cs" />
     <Compile Include="Enums\Chat.cs" />
     <Compile Include="Enums\Chess.cs" />
     <Compile Include="Enums\Combat.cs" />
@@ -109,10 +115,10 @@
     <Compile Include="Enums\UI.cs" />
     <Compile Include="Enums\WeenieClasses.cs" />
     <Compile Include="Enums\WeenieError.cs" />
-    <Compile Include="FindOpcodeInFilesForm.cs">
+    <Compile Include="Tools\FindOpcodeInFilesForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FindOpcodeInFilesForm.Designer.cs">
+    <Compile Include="Tools\FindOpcodeInFilesForm.Designer.cs">
       <DependentUpon>FindOpcodeInFilesForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Form1.cs">
@@ -121,17 +127,17 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="FragDatListFile.cs" />
-    <Compile Include="FragDatListToolForm.cs">
+    <Compile Include="Tools\FragDatListFile.cs" />
+    <Compile Include="Tools\FragDatListToolForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FragDatListToolForm.Designer.cs">
+    <Compile Include="Tools\FragDatListToolForm.Designer.cs">
       <DependentUpon>FragDatListToolForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ImagePopup.cs">
+    <Compile Include="Tools\ImagePopup.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ImagePopup.Designer.cs">
+    <Compile Include="Tools\ImagePopup.Designer.cs">
       <DependentUpon>ImagePopup.cs</DependentUpon>
     </Compile>
     <Compile Include="PacketHeaders.cs" />
@@ -142,27 +148,30 @@
     <Compile Include="PCapReader.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Proto_UI.cs" />
+    <Compile Include="Message Processors\Proto_UI.cs" />
     <Compile Include="Enums\Spells.cs" />
     <Compile Include="Enums\StatTypes.cs" />
     <Compile Include="TreeviewState.cs" />
-    <Compile Include="TextPopup.cs">
+    <Compile Include="Tools\TextPopup.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="TextPopup.Designer.cs">
+    <Compile Include="Tools\TextPopup.Designer.cs">
       <DependentUpon>TextPopup.cs</DependentUpon>
     </Compile>
     <Compile Include="Utility.cs" />
-    <EmbeddedResource Include="FindOpcodeInFilesForm.resx">
+    <EmbeddedResource Include="Tools\FindOpcodeInFilesForm.resx">
       <DependentUpon>FindOpcodeInFilesForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\FindTextInFilesForm.resx">
+      <DependentUpon>FindTextInFilesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FragDatListToolForm.resx">
+    <EmbeddedResource Include="Tools\FragDatListToolForm.resx">
       <DependentUpon>FragDatListToolForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ImagePopup.resx">
+    <EmbeddedResource Include="Tools\ImagePopup.resx">
       <DependentUpon>ImagePopup.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -175,7 +184,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="TextPopup.resx">
+    <EmbeddedResource Include="Tools\TextPopup.resx">
       <DependentUpon>TextPopup.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
@@ -195,8 +204,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="map.png" />
+    <EmbeddedResource Include="Tools\map.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
