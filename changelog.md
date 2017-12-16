@@ -1,3 +1,17 @@
+### 2017-12-16
+[Slushnas]
+* Migrated to .NET framework 4.6.1 to keep in line with the ACEmulator/ACE project.
+* Added Command Line Parser NuGet package and refactored command line argument parsing to use it.
+* Fixed display of the weenie description location field.
+* Changed some of the folder structure of the project.
+##### Interface Changes and New Features
+* Added text search functionality to open pcaps and groups of pcaps via the **_Find Text In Files_** feature. This feature supports searching for case-sensitive and case-insensitive ASCII and Unicode (UTF-16) strings.
+* Added a **_Created Objects_** listview that will display information from Physics__CreateObject__ID messages in a pcap to hopefully make identification of object IDs easier. 
+    You can right-click on an item in this new listview and jump to that message in the main packet listview. 
+    There is also a new context menu option in the parsed data treeview that allows you to search for a selected object ID in the objects listview.
+* Added double buffering to main form list views to prevent flickering.
+* Made a few small changes to the interface to make it more intuitive and consistent. (Showing wait cursors, showing number of highlighted opcode messages, fixing a case where the top row would not be selected when using "Next Highlighted Row" etc.)
+
 ### 2017-12-09
 [Slushnas]
 * Fixed an issue with **_Find Opcode In Files_** where pcaps were not being fully processed in "as messages" mode. This should only have affected parsing for the special output tab.
