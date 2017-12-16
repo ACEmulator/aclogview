@@ -135,9 +135,9 @@ namespace aclogview
         }
 
         List<PacketRecord> records = new List<PacketRecord>();
-        List<ListViewItem> listItems = new List<ListViewItem>();
+        List<ListViewItem> packetListItems = new List<ListViewItem>();
         // For the created objects listview
-        List<ListViewItem> CreatedListItems = new List<ListViewItem>();
+        List<ListViewItem> createdListItems = new List<ListViewItem>();
 
         private void loadPcap(string fileName, bool asMessages, bool dontList = false) {
             Cursor.Current = Cursors.WaitCursor;
@@ -158,7 +158,7 @@ namespace aclogview
             checkBoxUseHex.Enabled = true;
             checkBox_ShowObjects.Enabled = true;
             records.Clear();
-            listItems.Clear();
+            packetListItems.Clear();
 
             bool abort = false;
             records = PCapReader.LoadPcap(fileName, asMessages, ref abort);
@@ -207,7 +207,7 @@ namespace aclogview
                             hits++;
                         }
                     }
-                    listItems.Add(newItem);
+                    packetListItems.Add(newItem);
                 }
                 if (hits > 0 && (currentHighlightMode == textModeCS || currentHighlightMode == textModeCI) )
                 {
@@ -255,7 +255,7 @@ namespace aclogview
                 comparer.reverse = !comparer.reverse;
             }
             comparer.col = e.Column;
-            listItems.Sort(comparer);
+            packetListItems.Sort(comparer);
             if (records.Count>0)
                 listView_Packets.RedrawItems(0, records.Count - 1, false);
             updateData();
@@ -314,7 +314,7 @@ namespace aclogview
 
             if (listView_Packets.SelectedIndices.Count > 0)
             {
-                PacketRecord record = records[Int32.Parse(listItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
+                PacketRecord record = records[Int32.Parse(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
                 byte[] data = record.data;
 
                 if (checkBox_useHighlighting.Checked && !loadedAsMessages) {
@@ -525,7 +525,7 @@ namespace aclogview
             treeView_ParsedData.Nodes.Clear();
 
             if (listView_Packets.SelectedIndices.Count > 0) {
-                PacketRecord record = records[Int32.Parse(listItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
+                PacketRecord record = records[Int32.Parse(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
 
                 if (loadedAsMessages)
                 {
@@ -610,8 +610,8 @@ namespace aclogview
 
         private void listView_Packets_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
         {
-            if (e.ItemIndex < listItems.Count) {
-                e.Item = listItems[e.ItemIndex];
+            if (e.ItemIndex < packetListItems.Count) {
+                e.Item = packetListItems[e.ItemIndex];
 
                 // Apply highlights here
                 if ( (currentHighlightMode == opcodeMode) && (opCodesToHighlight.Count > 0) )
@@ -974,13 +974,13 @@ namespace aclogview
                             break;
                         }
                     case "FindID":
-                        foreach (ListViewItem lvi in CreatedListItems)
+                        foreach (ListViewItem lvi in createdListItems)
                         {
                             if (treeView_ParsedData.SelectedNode.Text.Contains(lvi.SubItems[1].Text))
                             {
                                 listView_CreatedObjects.TopItem = lvi;
-                                listView_CreatedObjects.Items[CreatedListItems[lvi.Index].Index].Selected = true;
-                                System.Media.SystemSounds.Hand.Play();
+                                listView_CreatedObjects.Items[createdListItems[lvi.Index].Index].Selected = true;
+                                System.Media.SystemSounds.Asterisk.Play();
                                 break;
                             }
                         }
@@ -1026,13 +1026,13 @@ namespace aclogview
                     {
                         if (Globals.UseHex == false)
                         {
-                            string temp = CreatedListItems[i].SubItems[1].Text;
-                            CreatedListItems[i].SubItems[1].Text = UInt32.Parse(temp.Remove(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier).ToString();
+                            string temp = createdListItems[i].SubItems[1].Text;
+                            createdListItems[i].SubItems[1].Text = UInt32.Parse(temp.Remove(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier).ToString();
                         }
                         else
                         {
-                            uint temp = UInt32.Parse(CreatedListItems[i].SubItems[1].Text);
-                            CreatedListItems[i].SubItems[1].Text = "0x" + temp.ToString("X");
+                            uint temp = UInt32.Parse(createdListItems[i].SubItems[1].Text);
+                            createdListItems[i].SubItems[1].Text = "0x" + temp.ToString("X");
                         }
                     }
                     listView_CreatedObjects.RedrawItems(0, listView_CreatedObjects.VirtualListSize - 1, false);
@@ -1203,7 +1203,7 @@ namespace aclogview
             {
                 splitContainer_Top.Panel2Collapsed = false;
                 Cursor.Current = Cursors.WaitCursor;
-                if (listItems.Count > 0)
+                if (packetListItems.Count > 0)
                     ProcessCreatedObjects(pcapFilePath);
                 Cursor.Current = Cursors.Default;
             }
@@ -1211,7 +1211,7 @@ namespace aclogview
             {
                 splitContainer_Top.Panel2Collapsed = true;
                 listView_CreatedObjects.VirtualListSize = 0;
-                CreatedListItems.Clear();
+                createdListItems.Clear();
             }
         }
 
@@ -1244,7 +1244,7 @@ namespace aclogview
                         lvi.SubItems.Add(parsed.wdesc._name.ToString());
                         lvi.SubItems.Add(parsed.wdesc._wcid.ToString());
                         lvi.SubItems.Add(parsed.wdesc._type.ToString());
-                        CreatedListItems.Add(lvi);
+                        createdListItems.Add(lvi);
                     }
                 }
                 catch
@@ -1275,7 +1275,7 @@ namespace aclogview
                 comparer2.reverse = !comparer2.reverse;
             }
             comparer2.col = e.Column;
-            CreatedListItems.Sort(comparer2);
+            createdListItems.Sort(comparer2);
             if (listView_CreatedObjects.VirtualListSize > 0)
                 listView_CreatedObjects.RedrawItems(0, listView_CreatedObjects.VirtualListSize - 1, false);
         }
@@ -1394,9 +1394,9 @@ namespace aclogview
 
         private void listView_CreatedObjects_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
         {
-            if (e.ItemIndex < CreatedListItems.Count)
+            if (e.ItemIndex < createdListItems.Count)
             {
-                e.Item = CreatedListItems[e.ItemIndex];
+                e.Item = createdListItems[e.ItemIndex];
             }
         }
 
@@ -1404,7 +1404,7 @@ namespace aclogview
         {
             if (e.ClickedItem == jumpToMessageMenuItem)
             {
-                var selected = Int32.Parse(CreatedListItems[listView_CreatedObjects.SelectedIndices[0]].Text);
+                var selected = Int32.Parse(createdListItems[listView_CreatedObjects.SelectedIndices[0]].Text);
                 listView_Packets.TopItem = listView_Packets.Items[selected];
                 listView_Packets.Items[selected].Selected = true;
             }
@@ -1418,7 +1418,7 @@ namespace aclogview
 
         private void parsedContextMenu_Opening(object sender, CancelEventArgs e)
         {
-            if (treeView_ParsedData.SelectedNode != null && CreatedListItems.Count > 0)
+            if (treeView_ParsedData.SelectedNode != null && createdListItems.Count > 0)
             {
                 parsedContextMenu.Items[3].Visible = true;
             }
