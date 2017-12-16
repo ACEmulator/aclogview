@@ -973,6 +973,18 @@ namespace aclogview
                             Clipboard.SetText(strbuilder.ToString());
                             break;
                         }
+                    case "FindID":
+                        foreach (ListViewItem lvi in CreatedListItems)
+                        {
+                            if (treeView_ParsedData.SelectedNode.Text.Contains(lvi.SubItems[1].Text))
+                            {
+                                listView_CreatedObjects.TopItem = lvi;
+                                listView_CreatedObjects.Items[CreatedListItems[lvi.Index].Index].Selected = true;
+                                System.Media.SystemSounds.Hand.Play();
+                                break;
+                            }
+                        }
+                        break;
                 }
             }
         }
@@ -1008,22 +1020,24 @@ namespace aclogview
             }
             if (splitContainer_Top.Panel2Collapsed == false)
             {
-                for (int i = 0; i < listView_CreatedObjects.VirtualListSize; i++)
+                if (listView_CreatedObjects.VirtualListSize != 0)
                 {
-                    if (Globals.UseHex == false)
+                    for (int i = 0; i < listView_CreatedObjects.VirtualListSize; i++)
                     {
-                        string temp = CreatedListItems[i].SubItems[1].Text;
-                        CreatedListItems[i].SubItems[1].Text = UInt32.Parse(temp.Remove(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier).ToString();
+                        if (Globals.UseHex == false)
+                        {
+                            string temp = CreatedListItems[i].SubItems[1].Text;
+                            CreatedListItems[i].SubItems[1].Text = UInt32.Parse(temp.Remove(0, 2), System.Globalization.NumberStyles.AllowHexSpecifier).ToString();
+                        }
+                        else
+                        {
+                            uint temp = UInt32.Parse(CreatedListItems[i].SubItems[1].Text);
+                            CreatedListItems[i].SubItems[1].Text = "0x" + temp.ToString("X");
+                        }
                     }
-                    else
-                    {
-                        uint temp = UInt32.Parse(CreatedListItems[i].SubItems[1].Text);
-                        CreatedListItems[i].SubItems[1].Text = "0x" + temp.ToString("X");
-                    }
+                    listView_CreatedObjects.RedrawItems(0, listView_CreatedObjects.VirtualListSize - 1, false);
                 }
-                listView_CreatedObjects.RedrawItems(0, listView_CreatedObjects.VirtualListSize - 1, false);
             }
-
             Cursor.Current = Cursors.Default;
         }
 
@@ -1189,7 +1203,8 @@ namespace aclogview
             {
                 splitContainer_Top.Panel2Collapsed = false;
                 Cursor.Current = Cursors.WaitCursor;
-                ProcessCreatedObjects(pcapFilePath);
+                if (listItems.Count > 0)
+                    ProcessCreatedObjects(pcapFilePath);
                 Cursor.Current = Cursors.Default;
             }
             else
@@ -1197,7 +1212,6 @@ namespace aclogview
                 splitContainer_Top.Panel2Collapsed = true;
                 listView_CreatedObjects.VirtualListSize = 0;
                 CreatedListItems.Clear();
-
             }
         }
 
@@ -1393,6 +1407,24 @@ namespace aclogview
                 var selected = Int32.Parse(CreatedListItems[listView_CreatedObjects.SelectedIndices[0]].Text);
                 listView_Packets.TopItem = listView_Packets.Items[selected];
                 listView_Packets.Items[selected].Selected = true;
+            }
+        }
+
+        private void treeView_ParsedData_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+                treeView_ParsedData.SelectedNode = e.Node;
+        }
+
+        private void parsedContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            if (treeView_ParsedData.SelectedNode != null && CreatedListItems.Count > 0)
+            {
+                parsedContextMenu.Items[3].Visible = true;
+            }
+            else
+            {
+                parsedContextMenu.Items[3].Visible = false;
             }
         }
     }

@@ -50,6 +50,7 @@
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CollapseAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CopyCmd = new System.Windows.Forms.ToolStripMenuItem();
+            this.FindID = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuItem_File = new System.Windows.Forms.MenuItem();
             this.menuItem_Open = new System.Windows.Forms.MenuItem();
@@ -308,35 +309,44 @@
             this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
             this.treeView_ParsedData.TabIndex = 0;
             this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
+            this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
             // 
             // parsedContextMenu
             // 
             this.parsedContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ExpandAll,
             this.CollapseAll,
-            this.CopyCmd});
+            this.CopyCmd,
+            this.FindID});
             this.parsedContextMenu.Name = "parsedContextMenu";
-            this.parsedContextMenu.Size = new System.Drawing.Size(137, 70);
+            this.parsedContextMenu.Size = new System.Drawing.Size(184, 92);
+            this.parsedContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.parsedContextMenu_Opening);
             this.parsedContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.parsedContextMenu_ItemClicked);
             // 
             // ExpandAll
             // 
             this.ExpandAll.Name = "ExpandAll";
-            this.ExpandAll.Size = new System.Drawing.Size(136, 22);
+            this.ExpandAll.Size = new System.Drawing.Size(183, 22);
             this.ExpandAll.Text = "&Expand All";
             // 
             // CollapseAll
             // 
             this.CollapseAll.Name = "CollapseAll";
-            this.CollapseAll.Size = new System.Drawing.Size(136, 22);
+            this.CollapseAll.Size = new System.Drawing.Size(183, 22);
             this.CollapseAll.Text = "C&ollapse All";
             // 
             // CopyCmd
             // 
             this.CopyCmd.Name = "CopyCmd";
             this.CopyCmd.ShowShortcutKeys = false;
-            this.CopyCmd.Size = new System.Drawing.Size(136, 22);
+            this.CopyCmd.Size = new System.Drawing.Size(183, 22);
             this.CopyCmd.Text = "&Copy";
+            // 
+            // FindID
+            // 
+            this.FindID.Name = "FindID";
+            this.FindID.Size = new System.Drawing.Size(183, 22);
+            this.FindID.Text = "&Find ID In Object List";
             // 
             // mainMenu
             // 
@@ -743,6 +753,7 @@
         private System.Windows.Forms.MenuItem menuItem_ToolFindTextInFiles;
         private System.Windows.Forms.ContextMenuStrip objectsContextMenu;
         private System.Windows.Forms.ToolStripMenuItem jumpToMessageMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem FindID;
     }
 }
 
