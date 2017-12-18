@@ -43,6 +43,7 @@
             this.columnHeader12 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.objectsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.jumpToMessageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.highlightObjectIDMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
             this.treeView_ParsedData = new BufferedTreeView();
@@ -261,9 +262,11 @@
             // objectsContextMenu
             // 
             this.objectsContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.jumpToMessageMenuItem});
+            this.jumpToMessageMenuItem,
+            this.highlightObjectIDMenuItem});
             this.objectsContextMenu.Name = "objectsContextMenu";
-            this.objectsContextMenu.Size = new System.Drawing.Size(189, 26);
+            this.objectsContextMenu.Size = new System.Drawing.Size(189, 70);
+            this.objectsContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.objectsContextMenu_Opening);
             this.objectsContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.objectsContextMenu_ItemClicked);
             // 
             // jumpToMessageMenuItem
@@ -271,6 +274,12 @@
             this.jumpToMessageMenuItem.Name = "jumpToMessageMenuItem";
             this.jumpToMessageMenuItem.Size = new System.Drawing.Size(188, 22);
             this.jumpToMessageMenuItem.Text = "&Jump to this message";
+            // 
+            // highlightObjectIDMenuItem
+            // 
+            this.highlightObjectIDMenuItem.Name = "highlightObjectIDMenuItem";
+            this.highlightObjectIDMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.highlightObjectIDMenuItem.Text = "&Highlight Object ID";
             // 
             // splitContainer_Bottom
             // 
@@ -754,6 +763,7 @@
         private System.Windows.Forms.ContextMenuStrip objectsContextMenu;
         private System.Windows.Forms.ToolStripMenuItem jumpToMessageMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FindID;
+        private System.Windows.Forms.ToolStripMenuItem highlightObjectIDMenuItem;
     }
 }
 

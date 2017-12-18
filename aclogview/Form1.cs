@@ -36,6 +36,7 @@ namespace aclogview
 
         private string pcapFilePath;
         private int currentOpcode;
+        private uint currentUint;
         private string currentHighlightMode;
         private string currentCSText;
         private string currentCIText;
@@ -43,6 +44,7 @@ namespace aclogview
         private string opcodeMode = "Opcode";
         private string textModeCS = "Text (Case-Sensitive)";
         private string textModeCI = "Text (Case-Insensitive)";
+        private string uintMode = "UINT (Object ID etc.)";
 
         static private string sortTypeUInt = "UInt";
         static private string sortTypeString = "String";
@@ -88,6 +90,7 @@ namespace aclogview
             HighlightMode_comboBox.Items.Add(opcodeMode);
             HighlightMode_comboBox.Items.Add(textModeCS);
             HighlightMode_comboBox.Items.Add(textModeCI);
+            HighlightMode_comboBox.Items.Add(uintMode);
 
             var options = new Options();
             if (CommandLine.Parser.Default.ParseArguments(args, options))
@@ -189,7 +192,7 @@ namespace aclogview
                             // Opcode highlighting is applied in listView_Packets_RetrieveVirtualItem
                         }
                     }
-                    else if (currentHighlightMode == textModeCS)
+                    else if (currentHighlightMode == textModeCS && textBox_Search.Text.Length != 0)
                     {
                         var result = SearchForText(record, currentCSText, caseSensitive: true);
                         if (result > 0)
@@ -198,9 +201,19 @@ namespace aclogview
                             hits++;
                         }
                     }
-                    else if (currentHighlightMode == textModeCI)
+                    else if (currentHighlightMode == textModeCI && textBox_Search.Text.Length != 0)
                     {
                         var result = SearchForText(record, currentCIText, caseSensitive: false);
+                        if (result > 0)
+                        {
+                            newItem.BackColor = Color.LightBlue;
+                            hits++;
+                        }
+                    }
+                    else if (currentHighlightMode == uintMode && textBox_Search.Text.Length != 0)
+                    {
+                        byte[] bytes = BitConverter.GetBytes(currentUint);
+                        int result = SearchBytePattern(bytes, record.data);
                         if (result > 0)
                         {
                             newItem.BackColor = Color.LightBlue;
@@ -223,6 +236,10 @@ namespace aclogview
                     Text += $"              Highlighted {hits} message(s) containing Opcode: ";
                     foreach (var opcode in opCodesToHighlight)
                         Text += " 0x" + opcode.ToString("X4") + " (" + opcode + ")";
+                }
+                else if (hits > 0 && currentHighlightMode == uintMode)
+                {
+                    Text = Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              Highlighted {hits} message(s) containing UINT: {textBox_Search.Text}";
                 }
             }
 
@@ -678,6 +695,7 @@ namespace aclogview
             else
             {
                 listView_Packets.EnsureVisible(listView_Packets.SelectedIndices[0]);
+                listView_Packets.Items[listView_Packets.SelectedIndices[0]].Focused = true;
             }
 
             for (int i = listView_Packets.SelectedIndices[0] - 1; i >= 0; i--)
@@ -712,6 +730,7 @@ namespace aclogview
             else
             {
                 listView_Packets.EnsureVisible(listView_Packets.SelectedIndices[0]);
+                listView_Packets.Items[listView_Packets.SelectedIndices[0]].Focused = true;
             }
 
             for (int i = listView_Packets.SelectedIndices[0] + 1; i < listView_Packets.Items.Count; i++)
@@ -974,12 +993,12 @@ namespace aclogview
                             break;
                         }
                     case "FindID":
-                        foreach (ListViewItem lvi in createdListItems)
+                        for (int i = 0; i < createdListItems.Count; i++)
                         {
-                            if (treeView_ParsedData.SelectedNode.Text.Contains(lvi.SubItems[1].Text))
+                            if (treeView_ParsedData.SelectedNode.Text.Contains(createdListItems[i].SubItems[1].Text))
                             {
-                                listView_CreatedObjects.TopItem = lvi;
-                                listView_CreatedObjects.Items[createdListItems[lvi.Index].Index].Selected = true;
+                                listView_CreatedObjects.Items[i].Selected = true;
+                                listView_CreatedObjects.TopItem = createdListItems[i];
                                 System.Media.SystemSounds.Asterisk.Play();
                                 break;
                             }
@@ -1167,6 +1186,44 @@ namespace aclogview
                 ClearHighlighting();
                 loadPcap(pcapFilePath, loadedAsMessages);
             }
+            else if ((string)HighlightMode_comboBox.SelectedItem == uintMode)
+            {
+                // decimal
+                if (uint.TryParse(searchString, out currentUint))
+                {
+                    // do nothing currently, currentObjectID should be set
+                }
+                // hex
+                else if (HexTest(searchString))
+                {
+                    currentUint = UInt32.Parse(searchString, System.Globalization.NumberStyles.HexNumber);
+                }
+                // c-style hex check
+                else if (CHexTest(searchString))
+                {
+                    currentUint = UInt32.Parse(searchString.Remove(0, 2), System.Globalization.NumberStyles.HexNumber);
+                }
+                // reset
+                else
+                {
+                    textBox_Search.Clear();
+                }
+
+                if (currentUint != 0)
+                {
+                    textBox_Search.Text = "0x";
+                    for (int i = currentUint.ToString("X").Length; i < 8; i++)
+                    {
+                        textBox_Search.Text += "0";
+                    }
+                    textBox_Search.Text += currentUint.ToString("X");
+                    loadPcap(pcapFilePath, loadedAsMessages);
+                }
+                else
+                {
+                    toolStripStatus.Text = "Invalid hex code.";
+                }
+            }
         }
 
         public bool CHexTest(string test)
@@ -1311,6 +1368,15 @@ namespace aclogview
                 ClearHighlighting();
                 textBox_Search.MaxLength = 256;
             }
+            else if ((string)HighlightMode_comboBox.SelectedItem == uintMode)
+            {
+                currentHighlightMode = uintMode;
+                Text = "AC Log View - " + Path.GetFileName(pcapFilePath);
+                textBox_Search.Clear();
+                opCodesToHighlight.Clear();
+                ClearHighlighting();
+                textBox_Search.MaxLength = 10;
+            }
         }
 
         private void ClearHighlighting()
@@ -1407,6 +1473,19 @@ namespace aclogview
                 var selected = Int32.Parse(createdListItems[listView_CreatedObjects.SelectedIndices[0]].Text);
                 listView_Packets.TopItem = listView_Packets.Items[selected];
                 listView_Packets.Items[selected].Selected = true;
+                lblTracker.Text = "Viewing #" + listView_Packets.Items[selected].Index;
+            }
+            else if (e.ClickedItem == highlightObjectIDMenuItem)
+            {
+                if (currentHighlightMode != uintMode)
+                {
+                    // Set highlight mode so we don't need to wait on the event handler 
+                    // HighlightMode_comboBox_SelectedIndexChanged to finish
+                    currentHighlightMode = uintMode;
+                    HighlightMode_comboBox.SelectedItem = uintMode;
+                }
+                textBox_Search.Text = createdListItems[listView_CreatedObjects.SelectedIndices[0]].SubItems[1].Text;
+                btnHighlight.PerformClick();
             }
         }
 
@@ -1418,6 +1497,7 @@ namespace aclogview
 
         private void parsedContextMenu_Opening(object sender, CancelEventArgs e)
         {
+            e.Cancel = (treeView_ParsedData.Nodes.Count == 0);
             if (treeView_ParsedData.SelectedNode != null && createdListItems.Count > 0)
             {
                 parsedContextMenu.Items[3].Visible = true;
@@ -1426,6 +1506,11 @@ namespace aclogview
             {
                 parsedContextMenu.Items[3].Visible = false;
             }
+        }
+
+        private void objectsContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            e.Cancel = (createdListItems.Count == 0);
         }
     }
 }
