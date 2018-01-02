@@ -44,7 +44,7 @@ namespace aclogview
         private string opcodeMode = "Opcode";
         private string textModeCS = "Text (Case-Sensitive)";
         private string textModeCI = "Text (Case-Insensitive)";
-        private string uintMode = "UINT (Object ID etc.)";
+        private string uintMode = "UINT32";
 
         static private string sortTypeUInt = "UInt";
         static private string sortTypeString = "String";
@@ -239,7 +239,7 @@ namespace aclogview
                 }
                 else if (hits > 0 && currentHighlightMode == uintMode)
                 {
-                    Text = Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              Highlighted {hits} message(s) containing UINT: {textBox_Search.Text}";
+                    Text = Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              Highlighted {hits} message(s) containing UINT32: {textBox_Search.Text}";
                 }
             }
 

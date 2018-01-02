@@ -1,3 +1,12 @@
+### 2018-01-02
+[Slushnas]
+* Added a simple highlight UINT32 feature for currently opened files. This can be used to search for Object IDs, DIDs, etc.
+* Added a _Highlight Object ID_ function to the created objects list context menu.
+* Fixed a case where an exception could be thrown.
+* Small refactor of the _Find ID In Object List_ option.
+* Prevent context menus from opening when there are no items present.
+* When jumping to a message from the objects listview context menu the currently viewed packet number is now updated properly.
+
 ### 2017-12-16
 [Slushnas]
 * Migrated to .NET framework 4.6.1 to keep in line with the ACEmulator/ACE project.
