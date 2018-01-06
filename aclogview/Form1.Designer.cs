@@ -45,6 +45,8 @@
             this.jumpToMessageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.highlightObjectIDMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabHexView = new System.Windows.Forms.TabPage();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
             this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
@@ -100,6 +102,8 @@
             this.splitContainer_Bottom.Panel1.SuspendLayout();
             this.splitContainer_Bottom.Panel2.SuspendLayout();
             this.splitContainer_Bottom.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabHexView.SuspendLayout();
             this.parsedContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).BeginInit();
             this.statusStrip.SuspendLayout();
@@ -265,7 +269,7 @@
             this.jumpToMessageMenuItem,
             this.highlightObjectIDMenuItem});
             this.objectsContextMenu.Name = "objectsContextMenu";
-            this.objectsContextMenu.Size = new System.Drawing.Size(189, 70);
+            this.objectsContextMenu.Size = new System.Drawing.Size(189, 48);
             this.objectsContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.objectsContextMenu_Opening);
             this.objectsContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.objectsContextMenu_ItemClicked);
             // 
@@ -290,7 +294,7 @@
             // 
             // splitContainer_Bottom.Panel1
             // 
-            this.splitContainer_Bottom.Panel1.Controls.Add(this.textBox_PacketData);
+            this.splitContainer_Bottom.Panel1.Controls.Add(this.tabControl1);
             // 
             // splitContainer_Bottom.Panel2
             // 
@@ -299,13 +303,35 @@
             this.splitContainer_Bottom.SplitterDistance = 1074;
             this.splitContainer_Bottom.TabIndex = 0;
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.tabHexView);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(1070, 410);
+            this.tabControl1.TabIndex = 0;
+            // 
+            // tabHexView
+            // 
+            this.tabHexView.Controls.Add(this.textBox_PacketData);
+            this.tabHexView.Location = new System.Drawing.Point(4, 22);
+            this.tabHexView.Name = "tabHexView";
+            this.tabHexView.Padding = new System.Windows.Forms.Padding(3);
+            this.tabHexView.Size = new System.Drawing.Size(1062, 384);
+            this.tabHexView.TabIndex = 0;
+            this.tabHexView.Text = "Hex View";
+            this.tabHexView.UseVisualStyleBackColor = true;
+            // 
             // textBox_PacketData
             // 
+            this.textBox_PacketData.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_PacketData.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_PacketData.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_PacketData.Location = new System.Drawing.Point(0, 0);
+            this.textBox_PacketData.Location = new System.Drawing.Point(3, 3);
             this.textBox_PacketData.Name = "textBox_PacketData";
-            this.textBox_PacketData.Size = new System.Drawing.Size(1070, 410);
+            this.textBox_PacketData.Size = new System.Drawing.Size(1056, 378);
             this.textBox_PacketData.TabIndex = 0;
             this.textBox_PacketData.Text = "";
             // 
@@ -690,6 +716,8 @@
             this.splitContainer_Bottom.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Bottom)).EndInit();
             this.splitContainer_Bottom.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.tabHexView.ResumeLayout(false);
             this.parsedContextMenu.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).EndInit();
             this.statusStrip.ResumeLayout(false);
@@ -764,6 +792,8 @@
         private System.Windows.Forms.ToolStripMenuItem jumpToMessageMenuItem;
         private System.Windows.Forms.ToolStripMenuItem FindID;
         private System.Windows.Forms.ToolStripMenuItem highlightObjectIDMenuItem;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabHexView;
     }
 }
 
