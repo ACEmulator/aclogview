@@ -47,7 +47,7 @@
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabHexView = new System.Windows.Forms.TabPage();
-            this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
+            this.hexBox1 = new Be.Windows.Forms.HexBox();
             this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -315,7 +315,7 @@
             // 
             // tabHexView
             // 
-            this.tabHexView.Controls.Add(this.textBox_PacketData);
+            this.tabHexView.Controls.Add(this.hexBox1);
             this.tabHexView.Location = new System.Drawing.Point(4, 22);
             this.tabHexView.Name = "tabHexView";
             this.tabHexView.Padding = new System.Windows.Forms.Padding(3);
@@ -324,16 +324,29 @@
             this.tabHexView.Text = "Hex View";
             this.tabHexView.UseVisualStyleBackColor = true;
             // 
-            // textBox_PacketData
+            // hexBox1
             // 
-            this.textBox_PacketData.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_PacketData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_PacketData.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_PacketData.Location = new System.Drawing.Point(3, 3);
-            this.textBox_PacketData.Name = "textBox_PacketData";
-            this.textBox_PacketData.Size = new System.Drawing.Size(1056, 378);
-            this.textBox_PacketData.TabIndex = 0;
-            this.textBox_PacketData.Text = "";
+            this.hexBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.hexBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            // 
+            // 
+            // 
+            this.hexBox1.BuiltInContextMenu.CopyMenuItemText = "Copy";
+            this.hexBox1.BuiltInContextMenu.SelectAllMenuItemText = "Select All";
+            this.hexBox1.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.hexBox1.LineInfoVisible = true;
+            this.hexBox1.Location = new System.Drawing.Point(3, 3);
+            this.hexBox1.Name = "hexBox1";
+            this.hexBox1.ReadOnly = true;
+            this.hexBox1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            this.hexBox1.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(60)))), ((int)(((byte)(188)))), ((int)(((byte)(255)))));
+            this.hexBox1.Size = new System.Drawing.Size(1056, 378);
+            this.hexBox1.StringViewVisible = true;
+            this.hexBox1.TabIndex = 1;
+            this.hexBox1.UseFixedBytesPerLine = true;
+            this.hexBox1.VScrollBarVisible = true;
             // 
             // treeView_ParsedData
             // 
@@ -742,7 +755,6 @@
         private System.Windows.Forms.TextBox textBox_Search;
         private System.Windows.Forms.PictureBox pictureBox_Search;
         private System.Windows.Forms.StatusStrip statusStrip;
-        private System.Windows.Forms.RichTextBox textBox_PacketData;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader3;
@@ -794,6 +806,7 @@
         private System.Windows.Forms.ToolStripMenuItem highlightObjectIDMenuItem;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabHexView;
+        private Be.Windows.Forms.HexBox hexBox1;
     }
 }
 
