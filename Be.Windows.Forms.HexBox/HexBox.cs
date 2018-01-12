@@ -2369,7 +2369,7 @@ namespace Be.Windows.Forms
 			else
 			{
 				PaintHexAndStringView(e.Graphics, _startByte, _endByte);
-				if (_shadowSelectionVisible)
+				if (_shadowSelectionVisible && (_caretVisible || _selectionLength > 0))
 					PaintCurrentBytesSign(e.Graphics);
 			}
 			if (_columnInfoVisible)
