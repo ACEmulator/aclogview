@@ -16,11 +16,24 @@ namespace Be.Windows.Forms
 	[ToolboxBitmap(typeof(HexBox), "HexBox.bmp")]
 	public class HexBox : Control
 	{
-		#region IKeyInterpreter interface
-		/// <summary>
-		/// Defines a user input handler such as for mouse and keyboard input
-		/// </summary>
-		interface IKeyInterpreter
+        /// <summary>
+        /// Stores color info for byte data.
+        /// </summary>
+        public struct ColorInfo
+        {
+            public long index;
+            public long length;
+            public Color foreColor;
+            public Color backColor;
+        }
+
+        public static List<ColorInfo> _colorInfoList = new List<ColorInfo>();
+
+        #region IKeyInterpreter interface
+        /// <summary>
+        /// Defines a user input handler such as for mouse and keyboard input
+        /// </summary>
+        interface IKeyInterpreter
 		{
 			/// <summary>
 			/// Activates mouse events
@@ -130,10 +143,10 @@ namespace Be.Windows.Forms
 			/// Contains all message handlers of key interpreter key down message
 			/// </summary>
 			Dictionary<Keys, MessageDelegate> _messageHandlers;
-			#endregion
+            #endregion
 
-			#region Ctors
-			public KeyInterpreter(HexBox hexBox)
+            #region Ctors
+            public KeyInterpreter(HexBox hexBox)
 			{
 				_hexBox = hexBox;
 			}
@@ -1249,13 +1262,13 @@ namespace Be.Windows.Forms
 		/// Contains a state value about Insert or Write mode. When this value is true and the ByteProvider SupportsInsert is true bytes are inserted instead of overridden.
 		/// </summary>
 		bool _insertActive;
-		#endregion
+        #endregion
 
-		#region Events
-		/// <summary>
-		/// Occurs, when the value of InsertActive property has changed.
-		/// </summary>
-		[Description("Occurs, when the value of InsertActive property has changed.")]
+        #region Events
+        /// <summary>
+        /// Occurs, when the value of InsertActive property has changed.
+        /// </summary>
+        [Description("Occurs, when the value of InsertActive property has changed.")]
 		public event EventHandler InsertActiveChanged;
 		/// <summary>
 		/// Occurs, when the value of ReadOnly property has changed.
@@ -1395,7 +1408,7 @@ namespace Be.Windows.Forms
 
 			_thumbTrackTimer.Interval = 50;
 			_thumbTrackTimer.Tick += new EventHandler(PerformScrollThumbTrack);
-		}
+    }
 
 		#endregion
 
@@ -2439,6 +2452,7 @@ namespace Be.Windows.Forms
 		void PaintHex(Graphics g, long startByte, long endByte)
 		{
 			Brush brush = new SolidBrush(GetDefaultForeColor());
+            Brush brushBack = new SolidBrush(Color.White);
 			Brush selBrush = new SolidBrush(_selectionForeColor);
 			Brush selBrushBack = new SolidBrush(_selectionBackColor);
 
@@ -2461,18 +2475,22 @@ namespace Be.Windows.Forms
 				}
 				else
 				{
-					PaintHexString(g, b, brush, gridPoint);
+					PaintHexString(g, b, brush, brushBack, gridPoint);
 				}
 			}
 		}
 
-		void PaintHexString(Graphics g, byte b, Brush brush, Point gridPoint)
+		void PaintHexString(Graphics g, byte b, Brush brush, Brush brushBack, Point gridPoint)
 		{
 			PointF bytePointF = GetBytePointF(gridPoint);
 
 			string sB = ConvertByteToHex(b);
 
-			g.DrawString(sB.Substring(0, 1), Font, brush, bytePointF, _stringFormat);
+            bool isLastLineChar = (gridPoint.X + 1 == _iHexMaxHBytes);
+            float bcWidth = (isLastLineChar) ? _charSize.Width * 2 : _charSize.Width * 3;
+
+            g.FillRectangle(brushBack, bytePointF.X, bytePointF.Y, bcWidth, _charSize.Height);
+            g.DrawString(sB.Substring(0, 1), Font, brush, bytePointF, _stringFormat);
 			bytePointF.X += _charSize.Width;
 			g.DrawString(sB.Substring(1, 1), Font, brush, bytePointF, _stringFormat);
 		}
@@ -2508,6 +2526,7 @@ namespace Be.Windows.Forms
 		void PaintHexAndStringView(Graphics g, long startByte, long endByte)
 		{
 			Brush brush = new SolidBrush(GetDefaultForeColor());
+            Brush brushBack = new SolidBrush(Color.White);
 			Brush selBrush = new SolidBrush(_selectionForeColor);
 			Brush selBrushBack = new SolidBrush(_selectionBackColor);
 
@@ -2532,8 +2551,38 @@ namespace Be.Windows.Forms
 				}
 				else
 				{
-					PaintHexString(g, b, brush, gridPoint);
-				}
+                    var byteFound = false;
+                    foreach (ColorInfo c in _colorInfoList)
+                    {
+                        if (c.length == 1)
+                        {
+                            if (i == c.index)
+                            {
+                                brush = new SolidBrush(c.foreColor);
+                                if (c.backColor != Color.White)
+                                    brushBack = new SolidBrush(c.backColor);
+                                PaintHexString(g, b, brush, brushBack, gridPoint);
+                                byteFound = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (i < (c.index + c.length) && ((i - c.index) < (c.index + c.length)) )
+                            {
+                                brush = new SolidBrush(c.foreColor);
+                                if (c.backColor != Color.White)
+                                    brushBack = new SolidBrush(c.backColor);
+                                PaintHexString(g, b, brush, brushBack, gridPoint);
+                                byteFound = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!byteFound)
+                        PaintHexString(g, b, brush, brushBack, gridPoint);
+                    brushBack = new SolidBrush(Color.White);
+                }
 
 				string s = new String(ByteCharConverter.ToChar(b), 1);
 
@@ -2730,7 +2779,7 @@ namespace Be.Windows.Forms
 			g.DrawImage(myBitmap, rec.Left, rec.Top);
 		}
 
-		Color GetDefaultForeColor()
+        Color GetDefaultForeColor()
 		{
 			if (Enabled)
 				return ForeColor;
@@ -3115,7 +3164,8 @@ namespace Be.Windows.Forms
 			get { return _byteProvider; }
 			set
 			{
-				if (_byteProvider == value)
+                _colorInfoList.Clear();
+                if (_byteProvider == value)
 					return;
 
 				if (value == null)

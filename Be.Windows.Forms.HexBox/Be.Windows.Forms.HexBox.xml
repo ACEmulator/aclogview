@@ -334,6 +334,15 @@
             <param name="index">the start index of the bytes in the byte collection</param>
             <param name="bs">the byte array to insert</param>
         </member>
+        <member name="M:Be.Windows.Forms.DynamicByteProvider.InsertBytes(System.Int64,System.Byte[],System.Drawing.Color,System.Drawing.Color)">
+            <summary>
+            Inserts byte into the byte collection.
+            </summary>
+            <param name="index">the start index of the bytes in the byte collection</param>
+            <param name="bs">the byte array to insert</param>
+            <param name="foreColor">the color of the text</param>
+            <param name="backColor">the background color</param>
+        </member>
         <member name="P:Be.Windows.Forms.DynamicByteProvider.Length">
             <summary>
             Gets the length of the bytes in the byte collection.
@@ -406,6 +415,11 @@
             </summary>
         </member>
         <member name="M:Be.Windows.Forms.DynamicFileByteProvider.InsertBytes(System.Int64,System.Byte[])">
+            <summary>
+            See <see cref="M:Be.Windows.Forms.IByteProvider.InsertBytes(System.Int64,System.Byte[])" /> for more information.
+            </summary>
+        </member>
+        <member name="M:Be.Windows.Forms.DynamicFileByteProvider.InsertBytes(System.Int64,System.Byte[],System.Drawing.Color,System.Drawing.Color)">
             <summary>
             See <see cref="M:Be.Windows.Forms.IByteProvider.InsertBytes(System.Int64,System.Byte[])" /> for more information.
             </summary>
@@ -584,6 +598,11 @@
             Not supported
             </summary>
         </member>
+        <member name="M:Be.Windows.Forms.FileByteProvider.InsertBytes(System.Int64,System.Byte[],System.Drawing.Color,System.Drawing.Color)">
+            <summary>
+            Not supported
+            </summary>
+        </member>
         <member name="M:Be.Windows.Forms.FileByteProvider.SupportsWriteByte">
             <summary>
             Returns true
@@ -682,6 +701,11 @@
         <member name="T:Be.Windows.Forms.HexBox">
             <summary>
             Represents a hex box control.
+            </summary>
+        </member>
+        <member name="T:Be.Windows.Forms.HexBox.ColorInfo">
+            <summary>
+            Stores color info for byte data.
             </summary>
         </member>
         <member name="T:Be.Windows.Forms.HexBox.IKeyInterpreter">
@@ -1676,6 +1700,16 @@
             </summary>
             <param name="index"></param>
             <param name="bs"></param>
+            <remarks>This method must raise the LengthChanged event.</remarks>
+        </member>
+        <member name="M:Be.Windows.Forms.IByteProvider.InsertBytes(System.Int64,System.Byte[],System.Drawing.Color,System.Drawing.Color)">
+            <summary>
+            Inserts bytes into the provider
+            </summary>
+            <param name="index"></param>
+            <param name="bs"></param>
+            <param name="foreColor"></param>
+            <param name="backColor"></param>
             <remarks>This method must raise the LengthChanged event.</remarks>
         </member>
         <member name="M:Be.Windows.Forms.IByteProvider.DeleteBytes(System.Int64,System.Int64)">

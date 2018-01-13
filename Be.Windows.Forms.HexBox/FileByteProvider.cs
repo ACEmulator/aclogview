@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Collections;
+using System.Drawing;
 
 namespace Be.Windows.Forms
 {
@@ -217,10 +218,18 @@ namespace Be.Windows.Forms
 			throw new NotSupportedException("FileByteProvider.DeleteBytes");
 		}
 
-		/// <summary>
+        /// <summary>
 		/// Not supported
 		/// </summary>
 		public void InsertBytes(long index, byte[] bs)
+        {
+            throw new NotSupportedException("FileByteProvider.InsertBytes");
+        }
+
+        /// <summary>
+        /// Not supported
+        /// </summary>
+        public void InsertBytes(long index, byte[] bs, Color foreColor, Color backColor)
 		{  
 			throw new NotSupportedException("FileByteProvider.InsertBytes");
 		}

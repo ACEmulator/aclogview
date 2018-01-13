@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 
 namespace Be.Windows.Forms
 {
@@ -26,22 +27,31 @@ namespace Be.Windows.Forms
 		/// <param name="bs"></param>
 		/// <remarks>This method must raise the LengthChanged event.</remarks>
 		void InsertBytes(long index, byte[] bs);
-		/// <summary>
-		/// Deletes bytes from the provider
+        /// <summary>
+		/// Inserts bytes into the provider
 		/// </summary>
-		/// <param name="index">the start index of the bytes to delete</param>
-		/// <param name="length">the length of the bytes to delete</param>
+		/// <param name="index"></param>
+		/// <param name="bs"></param>
+        /// <param name="foreColor"></param>
+        /// <param name="backColor"></param>
 		/// <remarks>This method must raise the LengthChanged event.</remarks>
-		void DeleteBytes(long index, long length);
+		void InsertBytes(long index, byte[] bs, Color foreColor, Color backColor);
+        /// <summary>
+        /// Deletes bytes from the provider
+        /// </summary>
+        /// <param name="index">the start index of the bytes to delete</param>
+        /// <param name="length">the length of the bytes to delete</param>
+        /// <remarks>This method must raise the LengthChanged event.</remarks>
+        void DeleteBytes(long index, long length);
 
 		/// <summary>
 		/// Returns the total length of bytes the byte provider is providing.
 		/// </summary>
         long Length { get; }
-		/// <summary>
-		/// Occurs, when the Length property changed.
-		/// </summary>
-		event EventHandler LengthChanged;
+        /// <summary>
+        /// Occurs, when the Length property changed.
+        /// </summary>
+        event EventHandler LengthChanged;
 
 		/// <summary>
 		/// True, when changes are done.

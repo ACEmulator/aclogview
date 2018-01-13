@@ -336,6 +336,7 @@
             this.hexBox1.BuiltInContextMenu.CopyMenuItemText = "Copy";
             this.hexBox1.BuiltInContextMenu.SelectAllMenuItemText = "Select All";
             this.hexBox1.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.hexBox1.GroupSize = 8;
             this.hexBox1.LineInfoVisible = true;
             this.hexBox1.Location = new System.Drawing.Point(3, 3);
             this.hexBox1.Name = "hexBox1";

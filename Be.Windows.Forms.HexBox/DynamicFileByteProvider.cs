@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.IO;
+using System.Drawing;
 
 namespace Be.Windows.Forms
 {
@@ -250,6 +251,14 @@ namespace Be.Windows.Forms
                 OnLengthChanged(EventArgs.Empty);
                 OnChanged(EventArgs.Empty);
             }
+        }
+
+        /// <summary>
+        /// See <see cref="IByteProvider.InsertBytes" /> for more information.
+        /// </summary>
+        public void InsertBytes(long index, byte[] bs, Color foreColor, Color backColor)
+        {
+            // Placeholder
         }
 
         /// <summary>

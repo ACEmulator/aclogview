@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using static Be.Windows.Forms.HexBox;
 
 namespace Be.Windows.Forms
 {
@@ -17,11 +19,11 @@ namespace Be.Windows.Forms
 		/// </summary>
 		List<byte> _bytes;
 
-		/// <summary>
-		/// Initializes a new instance of the DynamicByteProvider class.
-		/// </summary>
-		/// <param name="data"></param>
-		public DynamicByteProvider(byte[] data) : this(new List<Byte>(data)) 
+        /// <summary>
+        /// Initializes a new instance of the DynamicByteProvider class.
+        /// </summary>
+        /// <param name="data"></param>
+        public DynamicByteProvider(byte[] data) : this(new List<Byte>(data)) 
 		{
 		}
 
@@ -32,7 +34,7 @@ namespace Be.Windows.Forms
 		public DynamicByteProvider(List<Byte> bytes)
 		{
 			_bytes = bytes;
-		}
+        }
 
 		/// <summary>
 		/// Raises the Changed event.
@@ -137,10 +139,32 @@ namespace Be.Windows.Forms
 			OnChanged(EventArgs.Empty);
 		}
 
-		/// <summary>
-		/// Gets the length of the bytes in the byte collection.
-		/// </summary>
-		public long Length
+        /// <summary>
+        /// Inserts byte into the byte collection.
+        /// </summary>
+        /// <param name="index">the start index of the bytes in the byte collection</param>
+        /// <param name="bs">the byte array to insert</param>
+        /// <param name="foreColor">the color of the text</param>
+        /// <param name="backColor">the background color</param>
+        public void InsertBytes(long index, byte[] bs, Color foreColor, Color backColor)
+        {
+            _bytes.InsertRange((int)index, bs);
+            ColorInfo colorInfo = new ColorInfo
+            {
+                index = index,
+                length = bs.Length,
+                foreColor = foreColor,
+                backColor = backColor
+            };
+            _colorInfoList.Add(colorInfo);
+            OnLengthChanged(EventArgs.Empty);
+            OnChanged(EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Gets the length of the bytes in the byte collection.
+        /// </summary>
+        public long Length
 		{
 			get
 			{
