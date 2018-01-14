@@ -48,6 +48,9 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabHexView = new System.Windows.Forms.TabPage();
             this.hexBox1 = new Be.Windows.Forms.HexBox();
+            this.hexContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyHexMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyTextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -104,6 +107,7 @@
             this.splitContainer_Bottom.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabHexView.SuspendLayout();
+            this.hexContextMenu.SuspendLayout();
             this.parsedContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).BeginInit();
             this.statusStrip.SuspendLayout();
@@ -335,6 +339,7 @@
             // 
             this.hexBox1.BuiltInContextMenu.CopyMenuItemText = "Copy";
             this.hexBox1.BuiltInContextMenu.SelectAllMenuItemText = "Select All";
+            this.hexBox1.ContextMenuStrip = this.hexContextMenu;
             this.hexBox1.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.hexBox1.GroupSize = 8;
             this.hexBox1.LineInfoVisible = true;
@@ -348,6 +353,28 @@
             this.hexBox1.TabIndex = 1;
             this.hexBox1.UseFixedBytesPerLine = true;
             this.hexBox1.VScrollBarVisible = true;
+            // 
+            // hexContextMenu
+            // 
+            this.hexContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyHexMenuItem,
+            this.copyTextMenuItem});
+            this.hexContextMenu.Name = "hexContextMenu";
+            this.hexContextMenu.Size = new System.Drawing.Size(141, 48);
+            this.hexContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.hexContextMenu_Opening);
+            this.hexContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.hexContextMenu_ItemClicked);
+            // 
+            // copyHexMenuItem
+            // 
+            this.copyHexMenuItem.Name = "copyHexMenuItem";
+            this.copyHexMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.copyHexMenuItem.Text = "Copy as &Hex";
+            // 
+            // copyTextMenuItem
+            // 
+            this.copyTextMenuItem.Name = "copyTextMenuItem";
+            this.copyTextMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.copyTextMenuItem.Text = "Copy as &Text";
             // 
             // treeView_ParsedData
             // 
@@ -732,6 +759,7 @@
             this.splitContainer_Bottom.ResumeLayout(false);
             this.tabControl1.ResumeLayout(false);
             this.tabHexView.ResumeLayout(false);
+            this.hexContextMenu.ResumeLayout(false);
             this.parsedContextMenu.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).EndInit();
             this.statusStrip.ResumeLayout(false);
@@ -808,6 +836,9 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabHexView;
         private Be.Windows.Forms.HexBox hexBox1;
+        private System.Windows.Forms.ContextMenuStrip hexContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem copyHexMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyTextMenuItem;
     }
 }
 

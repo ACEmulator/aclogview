@@ -2111,6 +2111,30 @@ namespace Be.Windows.Forms
 			return true;
 		}
 
+        public void CopyText()
+        {
+            // put bytes into buffer
+            byte[] buffer = GetCopyData();
+
+            DataObject da = new DataObject();
+
+            var stringBuilder = new StringBuilder();
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                var character = ByteCharConverter.ToChar(buffer[i]);
+                stringBuilder.Append(character);
+            }
+
+            da.SetData(typeof(string), stringBuilder);
+
+            Clipboard.SetDataObject(da, true);
+            UpdateCaret();
+            ScrollByteIntoView();
+            Invalidate();
+
+            //OnCopied(EventArgs.Empty);
+        }
+
 		/// <summary>
 		/// Moves the current selection in the hex box to the Clipboard.
 		/// </summary>
@@ -3190,8 +3214,8 @@ namespace Be.Windows.Forms
 
 					DestroyCaret();
 				}
-				else
-				{
+				else if (_byteProvider.Length > 0)
+                {
 					SetPosition(0, 0);
 					SetSelectionLength(0);
 
@@ -4002,8 +4026,8 @@ namespace Be.Windows.Forms
 			System.Diagnostics.Debug.WriteLine("OnGotFocus()", "HexBox");
 
 			base.OnGotFocus(e);
-
-			CreateCaret();
+            if (_byteProvider.Length > 0)
+			    CreateCaret();
 		}
 
 		/// <summary>

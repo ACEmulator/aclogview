@@ -1399,6 +1399,23 @@ namespace aclogview
         {
             e.Cancel = (createdListItems.Count == 0);
         }
+
+        private void hexContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (e.ClickedItem == copyHexMenuItem)
+            {
+                hexBox1.CopyHex();
+            }
+            else if (e.ClickedItem == copyTextMenuItem)
+            {
+                hexBox1.CopyText();
+            }
+        }
+
+        private void hexContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            e.Cancel = (hexBox1.SelectionLength == 0);
+        }
     }
 }
 
