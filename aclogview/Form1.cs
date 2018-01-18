@@ -153,20 +153,25 @@ namespace aclogview
             pcapFilePath = Path.GetFullPath(fileName);
             toolStripStatus.Text = pcapFilePath;
             loadedAsMessages = asMessages; // This needs to be set as well or you will encounter some fragment issues with some messages.
-            if (asMessages) {
-                checkBox_useHighlighting.Checked = false;
-                checkBox_useHighlighting.Enabled = false;
-            } else {
-                checkBox_useHighlighting.Checked = true;
-                checkBox_useHighlighting.Enabled = true;
-            }
             btnHighlight.Enabled = true;
-            menuItem_ReOpen.Enabled = true;
+            menuItem_ReOpenAsFragments.Enabled = true;
             menuItem_ReOpenAsMessages.Enabled = true;
             checkBoxUseHex.Enabled = true;
             checkBox_ShowObjects.Enabled = true;
             records.Clear();
             packetListItems.Clear();
+            // This code needs to come after records.Clear(); so that the
+            // hex display does not try to update while still loading the pcap.
+            if (asMessages)
+            {
+                checkBox_useHighlighting.Checked = false;
+                checkBox_useHighlighting.Enabled = false;
+            }
+            else
+            {
+                checkBox_useHighlighting.Checked = true;
+                checkBox_useHighlighting.Enabled = true;
+            }
 
             bool abort = false;
             records = PCapReader.LoadPcap(fileName, asMessages, ref abort);
@@ -227,24 +232,37 @@ namespace aclogview
                     }
                     packetListItems.Add(newItem);
                 }
-                if (hits > 0 && (currentHighlightMode == textModeCS || currentHighlightMode == textModeCI) )
+                if ( (currentHighlightMode == textModeCS || currentHighlightMode == textModeCI) )
                 {
                     string searchText = "";
                     if (currentHighlightMode == textModeCS)
                         searchText = currentCSText;
                     else if (currentHighlightMode == textModeCI)
                         searchText = currentCIText;
-                    Text = Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              Highlighted {hits} message(s) containing text: {searchText}";
+                    if (hits > 0)
+                        Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              Highlighted {hits} message(s) containing text: {searchText}";
+                    else
+                        Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              No message(s) found containing text: {searchText}";
                 }
                 else if (currentHighlightMode == opcodeMode && opCodesToHighlight.Count > 0)
                 {
-                    Text += $"              Highlighted {hits} message(s) containing Opcode: ";
+                    if (hits > 0)
+                    {
+                        Text += $"              Highlighted {hits} message(s) containing Opcode: ";
+                    }
+                    else
+                    {
+                        Text += $"              No message(s) found containing Opcode: ";
+                    }
                     foreach (var opcode in opCodesToHighlight)
                         Text += " 0x" + opcode.ToString("X4") + " (" + opcode + ")";
                 }
-                else if (hits > 0 && currentHighlightMode == uintMode)
+                else if (currentHighlightMode == uintMode)
                 {
-                    Text = Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              Highlighted {hits} message(s) containing UINT32: {textBox_Search.Text}";
+                    if (hits > 0)
+                        Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              Highlighted {hits} message(s) containing UINT32: {textBox_Search.Text}";
+                    else
+                        Text = "AC Log View - " + Path.GetFileName(pcapFilePath) + $"              No message(s) found containing UINT32: {textBox_Search.Text}";
                 }
             }
 
@@ -359,7 +377,6 @@ namespace aclogview
 
                     while (dataConsumed < data.Length)
                     {
-
                         if (dataConsumed < 20)
                         {
                             // Protocol header
@@ -575,7 +592,7 @@ namespace aclogview
             loadPcap(openFile.FileName, asMessages);
         }
 
-        private void menuItem_Open_Click(object sender, EventArgs e)
+        private void menuItem_OpenAsFragments_Click(object sender, EventArgs e)
         {
             openPcap(false);
         }
@@ -863,7 +880,8 @@ namespace aclogview
 
         private void checkBox_useHighlighting_CheckedChanged(object sender, EventArgs e)
         {
-            updateText();
+            if (records.Count > 0)
+                updateText();
         }
 
         private void parsedContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -887,7 +905,7 @@ namespace aclogview
                             treeView_ParsedData.EndUpdate();
                             break;
                         }
-                    case "CopyCmd": {
+                    case "CopyAll": {
                             strbuilder.Clear();
                             foreach (var node in GetTreeNodes(treeView_ParsedData.Nodes))
                             {
@@ -1140,7 +1158,7 @@ namespace aclogview
             return System.Text.RegularExpressions.Regex.IsMatch(test, @"\A\b[0-9a-fA-F]+\b\Z");
         }
 
-        private void menuItem_ReOpen_Click(object sender, EventArgs e)
+        private void menuItem_ReOpenAsFragments_Click(object sender, EventArgs e)
         {
             checkBox_ShowObjects.Checked = false;
             loadPcap(pcapFilePath, false);
@@ -1414,13 +1432,14 @@ namespace aclogview
         private void parsedContextMenu_Opening(object sender, CancelEventArgs e)
         {
             e.Cancel = (treeView_ParsedData.Nodes.Count == 0);
+            // Only display "Find ID in Object List" option if the list is open
             if (treeView_ParsedData.SelectedNode != null && createdListItems.Count > 0)
             {
-                parsedContextMenu.Items[3].Visible = true;
+                FindID.Visible = true;
             }
             else
             {
-                parsedContextMenu.Items[3].Visible = false;
+                FindID.Visible = false;
             }
         }
 

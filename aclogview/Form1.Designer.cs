@@ -49,20 +49,21 @@
             this.tabHexView = new System.Windows.Forms.TabPage();
             this.hexBox1 = new Be.Windows.Forms.HexBox();
             this.hexContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.copyHexMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyTextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyHexMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CollapseAll = new System.Windows.Forms.ToolStripMenuItem();
-            this.CopyCmd = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.CopyAll = new System.Windows.Forms.ToolStripMenuItem();
             this.FindID = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuItem_File = new System.Windows.Forms.MenuItem();
-            this.menuItem_Open = new System.Windows.Forms.MenuItem();
             this.menuItem_OpenAsMessages = new System.Windows.Forms.MenuItem();
-            this.menuItem_ReOpen = new System.Windows.Forms.MenuItem();
+            this.menuItem_OpenAsFragments = new System.Windows.Forms.MenuItem();
             this.menuItem_ReOpenAsMessages = new System.Windows.Forms.MenuItem();
+            this.menuItem_ReOpenAsFragments = new System.Windows.Forms.MenuItem();
             this.menuItem_Edit = new System.Windows.Forms.MenuItem();
             this.mnuItem_EditPreviousHighlightedRow = new System.Windows.Forms.MenuItem();
             this.mnuItem_EditNextHighlightedRow = new System.Windows.Forms.MenuItem();
@@ -357,24 +358,27 @@
             // hexContextMenu
             // 
             this.hexContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyHexMenuItem,
-            this.copyTextMenuItem});
+            this.copyTextMenuItem,
+            this.copyHexMenuItem});
             this.hexContextMenu.Name = "hexContextMenu";
-            this.hexContextMenu.Size = new System.Drawing.Size(141, 48);
+            this.hexContextMenu.Size = new System.Drawing.Size(214, 48);
             this.hexContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.hexContextMenu_Opening);
             this.hexContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.hexContextMenu_ItemClicked);
-            // 
-            // copyHexMenuItem
-            // 
-            this.copyHexMenuItem.Name = "copyHexMenuItem";
-            this.copyHexMenuItem.Size = new System.Drawing.Size(140, 22);
-            this.copyHexMenuItem.Text = "Copy as &Hex";
             // 
             // copyTextMenuItem
             // 
             this.copyTextMenuItem.Name = "copyTextMenuItem";
-            this.copyTextMenuItem.Size = new System.Drawing.Size(140, 22);
+            this.copyTextMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.copyTextMenuItem.Size = new System.Drawing.Size(213, 22);
             this.copyTextMenuItem.Text = "Copy as &Text";
+            // 
+            // copyHexMenuItem
+            // 
+            this.copyHexMenuItem.Name = "copyHexMenuItem";
+            this.copyHexMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.C)));
+            this.copyHexMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.copyHexMenuItem.Text = "Copy as &Hex";
             // 
             // treeView_ParsedData
             // 
@@ -392,10 +396,11 @@
             this.parsedContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ExpandAll,
             this.CollapseAll,
-            this.CopyCmd,
+            this.toolStripSeparator1,
+            this.CopyAll,
             this.FindID});
             this.parsedContextMenu.Name = "parsedContextMenu";
-            this.parsedContextMenu.Size = new System.Drawing.Size(184, 92);
+            this.parsedContextMenu.Size = new System.Drawing.Size(184, 98);
             this.parsedContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.parsedContextMenu_Opening);
             this.parsedContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.parsedContextMenu_ItemClicked);
             // 
@@ -411,12 +416,17 @@
             this.CollapseAll.Size = new System.Drawing.Size(183, 22);
             this.CollapseAll.Text = "C&ollapse All";
             // 
-            // CopyCmd
+            // toolStripSeparator1
             // 
-            this.CopyCmd.Name = "CopyCmd";
-            this.CopyCmd.ShowShortcutKeys = false;
-            this.CopyCmd.Size = new System.Drawing.Size(183, 22);
-            this.CopyCmd.Text = "&Copy";
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(180, 6);
+            // 
+            // CopyAll
+            // 
+            this.CopyAll.Name = "CopyAll";
+            this.CopyAll.ShowShortcutKeys = false;
+            this.CopyAll.Size = new System.Drawing.Size(183, 22);
+            this.CopyAll.Text = "&Copy All";
             // 
             // FindID
             // 
@@ -436,37 +446,39 @@
             // 
             this.menuItem_File.Index = 0;
             this.menuItem_File.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
-            this.menuItem_Open,
             this.menuItem_OpenAsMessages,
-            this.menuItem_ReOpen,
-            this.menuItem_ReOpenAsMessages});
+            this.menuItem_OpenAsFragments,
+            this.menuItem_ReOpenAsMessages,
+            this.menuItem_ReOpenAsFragments});
             this.menuItem_File.Text = "File";
-            // 
-            // menuItem_Open
-            // 
-            this.menuItem_Open.Index = 0;
-            this.menuItem_Open.Text = "Open";
-            this.menuItem_Open.Click += new System.EventHandler(this.menuItem_Open_Click);
             // 
             // menuItem_OpenAsMessages
             // 
-            this.menuItem_OpenAsMessages.Index = 1;
+            this.menuItem_OpenAsMessages.Index = 0;
+            this.menuItem_OpenAsMessages.Shortcut = System.Windows.Forms.Shortcut.CtrlO;
             this.menuItem_OpenAsMessages.Text = "Open As Messages";
             this.menuItem_OpenAsMessages.Click += new System.EventHandler(this.menuItem_OpenAsMessages_Click);
             // 
-            // menuItem_ReOpen
+            // menuItem_OpenAsFragments
             // 
-            this.menuItem_ReOpen.Enabled = false;
-            this.menuItem_ReOpen.Index = 2;
-            this.menuItem_ReOpen.Text = "Re-Open";
-            this.menuItem_ReOpen.Click += new System.EventHandler(this.menuItem_ReOpen_Click);
+            this.menuItem_OpenAsFragments.Index = 1;
+            this.menuItem_OpenAsFragments.Text = "Open As Fragments";
+            this.menuItem_OpenAsFragments.Click += new System.EventHandler(this.menuItem_OpenAsFragments_Click);
             // 
             // menuItem_ReOpenAsMessages
             // 
             this.menuItem_ReOpenAsMessages.Enabled = false;
-            this.menuItem_ReOpenAsMessages.Index = 3;
+            this.menuItem_ReOpenAsMessages.Index = 2;
+            this.menuItem_ReOpenAsMessages.Shortcut = System.Windows.Forms.Shortcut.CtrlShiftO;
             this.menuItem_ReOpenAsMessages.Text = "Re-Open As Messages";
             this.menuItem_ReOpenAsMessages.Click += new System.EventHandler(this.menuItem_ReOpenAsMessages_Click);
+            // 
+            // menuItem_ReOpenAsFragments
+            // 
+            this.menuItem_ReOpenAsFragments.Enabled = false;
+            this.menuItem_ReOpenAsFragments.Index = 3;
+            this.menuItem_ReOpenAsFragments.Text = "Re-Open As Fragments";
+            this.menuItem_ReOpenAsFragments.Click += new System.EventHandler(this.menuItem_ReOpenAsFragments_Click);
             // 
             // menuItem_Edit
             // 
@@ -777,7 +789,7 @@
         private System.Windows.Forms.MenuItem menuItem_File;
         private System.Windows.Forms.MenuItem menuItem_Edit;
         private System.Windows.Forms.MenuItem menuItem_Help;
-        private System.Windows.Forms.MenuItem menuItem_Open;
+        private System.Windows.Forms.MenuItem menuItem_OpenAsFragments;
         private System.Windows.Forms.MenuItem menuItem_About;
         private System.Windows.Forms.SplitContainer splitContainer_Bottom;
         private System.Windows.Forms.MenuStrip menuStrip;
@@ -804,7 +816,7 @@
         private System.Windows.Forms.MenuItem menuItem2;
         private System.Windows.Forms.MenuItem mnuItem_ToolFragDatListTool;
         private System.Windows.Forms.ContextMenuStrip parsedContextMenu;
-        private System.Windows.Forms.ToolStripMenuItem CopyCmd;
+        private System.Windows.Forms.ToolStripMenuItem CopyAll;
         private System.Windows.Forms.Button CmdLock;
         private System.Windows.Forms.Button cmdforward;
         private System.Windows.Forms.Button cmdbackward;
@@ -814,7 +826,7 @@
         private System.Windows.Forms.CheckBox checkBoxUseHex;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatus;
         private System.Windows.Forms.Button btnHighlight;
-        private System.Windows.Forms.MenuItem menuItem_ReOpen;
+        private System.Windows.Forms.MenuItem menuItem_ReOpenAsFragments;
         private System.Windows.Forms.MenuItem menuItem_ReOpenAsMessages;
         private System.Windows.Forms.ToolStripMenuItem ExpandAll;
         private System.Windows.Forms.ToolStripMenuItem CollapseAll;
@@ -839,6 +851,7 @@
         private System.Windows.Forms.ContextMenuStrip hexContextMenu;
         private System.Windows.Forms.ToolStripMenuItem copyHexMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copyTextMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
     }
 }
 

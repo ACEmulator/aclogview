@@ -650,7 +650,7 @@ namespace Be.Windows.Forms
 
 			protected virtual bool PreProcessWmKeyDown_ControlC(ref Message m)
 			{
-				_hexBox.Copy();
+				_hexBox.CopyText();
 				return true;
 			}
 
@@ -4026,7 +4026,7 @@ namespace Be.Windows.Forms
 			System.Diagnostics.Debug.WriteLine("OnGotFocus()", "HexBox");
 
 			base.OnGotFocus(e);
-            if (_byteProvider.Length > 0)
+            if (_byteProvider != null && _byteProvider.Length > 0)
 			    CreateCaret();
 		}
 
