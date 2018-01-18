@@ -55,6 +55,7 @@
     <Compile Include="BufferedTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="ContextInfo.cs" />
     <Compile Include="Tools\FindTextInFilesForm.cs">
       <SubType>Form</SubType>
     </Compile>

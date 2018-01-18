@@ -50,6 +50,10 @@ namespace aclogview
         static private string sortTypeUInt = "UInt";
         static private string sortTypeString = "String";
 
+        public static Dictionary<int, ContextInfo> contextList = new Dictionary<int, ContextInfo>();
+        public static int nodeIndex = 0;
+        public static int dataIndex = 0;
+
         public Form1(string[] args)
         {
             InitializeComponent();
@@ -427,6 +431,9 @@ namespace aclogview
 
         private void updateTree() {
             treeView_ParsedData.Nodes.Clear();
+            contextList.Clear();
+            nodeIndex = 0;
+            dataIndex = 0;
 
             if (listView_Packets.SelectedIndices.Count > 0) {
                 PacketRecord record = records[Int32.Parse(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
@@ -542,6 +549,16 @@ namespace aclogview
         private void treeView_ParsedData_AfterSelect(object sender, TreeViewEventArgs e)
         {
             updateText();
+            if (contextList.Count > 0 && loadedAsMessages)
+            {
+                if (e.Node != null)
+                {
+                    int selectedNodeIndex = Convert.ToInt32(e.Node.Tag);
+                    bool indexIsPresent = contextList.TryGetValue(selectedNodeIndex, out ContextInfo c);
+                    if (indexIsPresent)
+                        hexBox1.Select(c.startPosition, c.length);
+                }
+            }
         }
 
         private void openPcap(bool asMessages)
@@ -1380,6 +1397,18 @@ namespace aclogview
         {
             if (e.Button == MouseButtons.Right)
                 treeView_ParsedData.SelectedNode = e.Node;
+            // Left mouse click is already handled
+            if (contextList.Count > 0 && loadedAsMessages)
+            {
+                if (e.Node != null)
+                {
+                    int selectedNodeIndex = Convert.ToInt32(e.Node.Tag);
+                    bool indexIsPresent = contextList.TryGetValue(selectedNodeIndex, out ContextInfo c);
+                    // Only change selection if needed
+                    if (indexIsPresent && hexBox1.SelectionStart != c.startPosition & hexBox1.SelectionLength != c.length)
+                        hexBox1.Select(c.startPosition, c.length);
+                }
+            }
         }
 
         private void parsedContextMenu_Opening(object sender, CancelEventArgs e)

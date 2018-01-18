@@ -119,8 +119,11 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
-            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);       
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -136,17 +139,21 @@ public class CM_Magic : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();          
+            rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
     }
 
     public class RemoveSpell : Message {
         public uint i_spell_id;
+        public bool isClientToServer;
 
         public static RemoveSpell read(BinaryReader binaryReader) {
             RemoveSpell newObj = new RemoveSpell();
+            newObj.isClientToServer = (binaryReader.BaseStream.Position == 12); 
             newObj.i_spell_id = binaryReader.ReadUInt32();
             return newObj;
         }
@@ -156,6 +163,17 @@ public class CM_Magic : MessageProcessor {
             rootNode.Expand();
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
             treeView.Nodes.Add(rootNode);
+
+            if (isClientToServer)
+            {
+                ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+                ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
+            }
+            else
+            {
+                ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+                ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
+            }
         }
     }
 
@@ -171,7 +189,9 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -282,13 +302,23 @@ public class CM_Magic : MessageProcessor {
                 typeNode.Nodes.Add(EnchantmentTypeEnum.Beneficial_EnchantmentType.ToString());
             }
 
+            // Type field
+            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            for (int i = 0; i < typeNode.Nodes.Count; i++)
+            {
+                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            }
+            Form1.dataIndex += 4;
+            // Key field
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            // Value field
             node.Nodes.Add("val = " + val);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
         }
     }
 
     public class Enchantment {
-        public ushort i_spell_id;
-        public ushort layer;
+        public EnchantmentID eid;
         public ushort spell_category;
         public ushort has_spell_set_id;
         public uint power_level;
@@ -303,8 +333,7 @@ public class CM_Magic : MessageProcessor {
 
         public static Enchantment read(BinaryReader binaryReader) {
             Enchantment newObj = new Enchantment();
-            newObj.i_spell_id = binaryReader.ReadUInt16();
-            newObj.layer = binaryReader.ReadUInt16();
+            newObj.eid = EnchantmentID.read(binaryReader);
             newObj.spell_category = binaryReader.ReadUInt16();
             newObj.has_spell_set_id = binaryReader.ReadUInt16();
             newObj.power_level = binaryReader.ReadUInt32();
@@ -320,25 +349,37 @@ public class CM_Magic : MessageProcessor {
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("i_spell_id = " +  "(" + i_spell_id + ") " + (SpellID)i_spell_id);
-            node.Nodes.Add("layer = " + layer);
+            TreeNode enchantmentIDNode = node.Nodes.Add("enchantment id = ");
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.EnchantmentID }, updateDataIndex: false);
+            eid.contributeToTreeNode(enchantmentIDNode);
             node.Nodes.Add("spell_category = " + Utility.FormatHex(spell_category));
+            ContextInfo.AddToList(new ContextInfo { length = 2 });
             node.Nodes.Add("has_spell_set_id = " + has_spell_set_id);
+            ContextInfo.AddToList(new ContextInfo { length = 2 });
             node.Nodes.Add("power_level = " + power_level);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("start_time = " + start_time);
+            ContextInfo.AddToList(new ContextInfo { length = 8 });
             if (duration == -1) {
                 node.Nodes.Add("duration = " + duration + " (indefinite)");
             }
             else {
                 node.Nodes.Add("duration = " + duration + " seconds");
             }
+            ContextInfo.AddToList(new ContextInfo { length = 8 });
             node.Nodes.Add("caster = " + Utility.FormatHex(caster));
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
             node.Nodes.Add("degrade_modifier = " + degrade_modifier);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("degrade_limit = " + degrade_limit);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("last_time_degraded = " + last_time_degraded);
+            ContextInfo.AddToList(new ContextInfo { length = 8 });
             TreeNode statModNode = node.Nodes.Add("statmod = ");
+            ContextInfo.AddToList(new ContextInfo { length = 12 }, updateDataIndex: false);
             smod.contributeToTreeNode(statModNode);
             node.Nodes.Add("spell_set_id = " + (SpellSetID)spell_set_id);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
         }
     }
 
@@ -357,48 +398,46 @@ public class CM_Magic : MessageProcessor {
         public void contributeToTreeNode(TreeNode treeView)
         {
             treeView.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            ContextInfo.AddToList(new ContextInfo { length = 2, dataType = DataType.SpellID_ushort });
             treeView.Nodes.Add("layer = " + layer);
+            ContextInfo.AddToList(new ContextInfo { length = 2, dataType = DataType.SpellLayer });
         }
     }
 
     
 
     public class DispelEnchantment : Message {
-        public ushort i_spell_id;
-        public ushort layer;
+        public EnchantmentID eid;
 
         public static DispelEnchantment read(BinaryReader binaryReader) {
             DispelEnchantment newObj = new DispelEnchantment();
-            newObj.i_spell_id = binaryReader.ReadUInt16();
-            newObj.layer = binaryReader.ReadUInt16();
+            newObj.eid = EnchantmentID.read(binaryReader);
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
-            rootNode.Nodes.Add("layer = " + layer);
+            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            eid.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
     }
 
     public class RemoveEnchantment : Message {
-        public ushort i_spell_id;
-        public ushort layer;
+        public EnchantmentID eid;
 
         public static RemoveEnchantment read(BinaryReader binaryReader) {
             RemoveEnchantment newObj = new RemoveEnchantment();
-            newObj.i_spell_id = binaryReader.ReadUInt16();
-            newObj.layer = binaryReader.ReadUInt16();
+            newObj.eid = EnchantmentID.read(binaryReader);
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
-            rootNode.Nodes.Add("layer = " + layer);
+            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            eid.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -415,7 +454,9 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
             TreeNode enchantmentNode = rootNode.Nodes.Add("enchantment = ");
+            ContextInfo.AddToList(new ContextInfo { length = 64 }, updateDataIndex: false);
             enchant.contributeToTreeNode(enchantmentNode);
             enchantmentNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
@@ -434,8 +475,12 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            // Skip Plist count uint
+            Form1.dataIndex += 4;
             for (int i = 0; i < enchantmentList.list.Count; i++) {
                 TreeNode listNode = rootNode.Nodes.Add($"enchantment {i+1} = ");
+                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
                 var enchantment = enchantmentList.list[i];
                 enchantment.contributeToTreeNode(listNode);
                 listNode.Expand();
@@ -456,8 +501,12 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            // Skip Plist count uint
+            Form1.dataIndex += 4;
             for (int i = 0; i < enchantmentList.list.Count; i++) {
                 TreeNode listNode = rootNode.Nodes.Add($"enchantment {i+1} = ");
+                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
                 var enchantment = enchantmentList.list[i];
                 enchantment.contributeToTreeNode(listNode);
                 listNode.Expand();

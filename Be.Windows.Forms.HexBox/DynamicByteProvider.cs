@@ -156,7 +156,7 @@ namespace Be.Windows.Forms
                 foreColor = foreColor,
                 backColor = backColor
             };
-            _colorInfoList.Add(colorInfo);
+            colorInfoList.Add(colorInfo);
             OnLengthChanged(EventArgs.Empty);
             OnChanged(EventArgs.Empty);
         }

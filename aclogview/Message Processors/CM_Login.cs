@@ -543,7 +543,7 @@ public class CM_Login : MessageProcessor {
                 foreach (CM_Magic.Enchantment element in _mult_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
-                    ushort spell_id = (ushort)element.i_spell_id;
+                    ushort spell_id = (ushort)element.eid.i_spell_id;
                     TreeNode thisEnchantmentNode = multListNode.Nodes.Add("Enchantment = " + (SpellID)spell_id);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }
@@ -554,7 +554,7 @@ public class CM_Login : MessageProcessor {
                 foreach (CM_Magic.Enchantment element in _add_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
-                    ushort spell_id = (ushort)element.i_spell_id;
+                    ushort spell_id = (ushort)element.eid.i_spell_id;
                     TreeNode thisEnchantmentNode = addListNode.Nodes.Add("Enchantment = " + (SpellID)spell_id);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }
@@ -565,7 +565,7 @@ public class CM_Login : MessageProcessor {
                 foreach (CM_Magic.Enchantment element in _cooldown_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
-                    ushort spell_id = (ushort)element.i_spell_id;
+                    ushort spell_id = (ushort)element.eid.i_spell_id;
                     TreeNode thisEnchantmentNode = cooldownListNode.Nodes.Add("Enchantment = " + (SpellID)spell_id);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }

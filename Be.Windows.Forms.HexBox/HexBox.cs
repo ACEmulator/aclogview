@@ -27,7 +27,7 @@ namespace Be.Windows.Forms
             public Color backColor;
         }
 
-        public static List<ColorInfo> _colorInfoList = new List<ColorInfo>();
+        public static List<ColorInfo> colorInfoList = new List<ColorInfo>();
 
         #region IKeyInterpreter interface
         /// <summary>
@@ -2576,7 +2576,7 @@ namespace Be.Windows.Forms
 				else
 				{
                     var byteFound = false;
-                    foreach (ColorInfo c in _colorInfoList)
+                    foreach (ColorInfo c in colorInfoList)
                     {
                         if (c.length == 1)
                         {
@@ -3188,7 +3188,7 @@ namespace Be.Windows.Forms
 			get { return _byteProvider; }
 			set
 			{
-                _colorInfoList.Clear();
+                colorInfoList.Clear();
                 if (_byteProvider == value)
 					return;
 
