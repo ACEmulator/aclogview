@@ -21,12 +21,27 @@ namespace Be.Windows.Forms
         /// </summary>
         public struct ColorInfo
         {
+            /// <summary>
+            /// The index in the byte data
+            /// </summary>
             public long index;
+            /// <summary>
+            /// The length of the data
+            /// </summary>
             public long length;
+            /// <summary>
+            /// The foreground color
+            /// </summary>
             public Color foreColor;
+            /// <summary>
+            /// The background color
+            /// </summary>
             public Color backColor;
         }
 
+        /// <summary>
+        /// Contains any color info (foreground and background) for the byte provider data
+        /// </summary>
         public static List<ColorInfo> colorInfoList = new List<ColorInfo>();
 
         #region IKeyInterpreter interface
@@ -2111,6 +2126,9 @@ namespace Be.Windows.Forms
 			return true;
 		}
 
+        /// <summary>
+        /// Copies a string representation of the current selection in the hex box to the Clipboard.
+        /// </summary>
         public void CopyText()
         {
             // put bytes into buffer

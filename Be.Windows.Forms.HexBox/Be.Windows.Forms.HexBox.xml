@@ -708,6 +708,31 @@
             Stores color info for byte data.
             </summary>
         </member>
+        <member name="F:Be.Windows.Forms.HexBox.ColorInfo.index">
+            <summary>
+            The index in the byte data
+            </summary>
+        </member>
+        <member name="F:Be.Windows.Forms.HexBox.ColorInfo.length">
+            <summary>
+            The length of the data
+            </summary>
+        </member>
+        <member name="F:Be.Windows.Forms.HexBox.ColorInfo.foreColor">
+            <summary>
+            The foreground color
+            </summary>
+        </member>
+        <member name="F:Be.Windows.Forms.HexBox.ColorInfo.backColor">
+            <summary>
+            The background color
+            </summary>
+        </member>
+        <member name="F:Be.Windows.Forms.HexBox.colorInfoList">
+            <summary>
+            Contains any color info (foreground and background) for the byte provider data
+            </summary>
+        </member>
         <member name="T:Be.Windows.Forms.HexBox.IKeyInterpreter">
             <summary>
             Defines a user input handler such as for mouse and keyboard input
@@ -1166,6 +1191,11 @@
         <member name="M:Be.Windows.Forms.HexBox.CanCopy">
             <summary>
             Return true if Copy method could be invoked.
+            </summary>
+        </member>
+        <member name="M:Be.Windows.Forms.HexBox.CopyText">
+            <summary>
+            Copies a string representation of the current selection in the hex box to the Clipboard.
             </summary>
         </member>
         <member name="M:Be.Windows.Forms.HexBox.Cut">

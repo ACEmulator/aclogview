@@ -22,7 +22,6 @@ namespace aclogview
         private ListViewItemComparer comparer = new ListViewItemComparer();
         private ListViewItemComparer comparer2 = new ListViewItemComparer();
         public List<MessageProcessor> messageProcessors = new List<MessageProcessor>();
-        private long curPacket;
         private bool loadedAsMessages;
 
         private string[] args;

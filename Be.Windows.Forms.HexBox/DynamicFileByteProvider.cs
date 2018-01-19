@@ -187,7 +187,7 @@ namespace Be.Windows.Forms
         }
 
         /// <summary>
-        /// See <see cref="IByteProvider.InsertBytes" /> for more information.
+        /// See <see cref="M:IByteProvider.InsertBytes" /> for more information.
         /// </summary>
         public void InsertBytes(long index, byte[] bs)
         {
@@ -254,7 +254,7 @@ namespace Be.Windows.Forms
         }
 
         /// <summary>
-        /// See <see cref="IByteProvider.InsertBytes" /> for more information.
+        /// See <see cref="M:IByteProvider.InsertBytes" /> for more information.
         /// </summary>
         public void InsertBytes(long index, byte[] bs, Color foreColor, Color backColor)
         {
