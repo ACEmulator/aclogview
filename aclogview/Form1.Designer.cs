@@ -493,14 +493,14 @@
             this.mnuItem_EditPreviousHighlightedRow.Index = 0;
             this.mnuItem_EditPreviousHighlightedRow.Shortcut = System.Windows.Forms.Shortcut.ShiftF3;
             this.mnuItem_EditPreviousHighlightedRow.Text = "Previous Highlighted Row";
-            this.mnuItem_EditPreviousHighlightedRow.Click += new System.EventHandler(this.mnuItem_EditPreviousHighlightedRow_Click);
+            this.mnuItem_EditPreviousHighlightedRow.Click += new System.EventHandler(this.menuItem_EditPreviousHighlightedRow_Click);
             // 
             // mnuItem_EditNextHighlightedRow
             // 
             this.mnuItem_EditNextHighlightedRow.Index = 1;
             this.mnuItem_EditNextHighlightedRow.Shortcut = System.Windows.Forms.Shortcut.F3;
             this.mnuItem_EditNextHighlightedRow.Text = "Next Highlighted Row";
-            this.mnuItem_EditNextHighlightedRow.Click += new System.EventHandler(this.mnuItem_EditNextHighlightedRow_Click);
+            this.mnuItem_EditNextHighlightedRow.Click += new System.EventHandler(this.menuItem_EditNextHighlightedRow_Click);
             // 
             // menuItem1
             // 
@@ -542,7 +542,7 @@
             // 
             this.mnuItem_ToolFindOpcodeInFiles.Index = 4;
             this.mnuItem_ToolFindOpcodeInFiles.Text = "Find Opcode In Files";
-            this.mnuItem_ToolFindOpcodeInFiles.Click += new System.EventHandler(this.mnuItem_ToolFindOpcodeInFiles_Click);
+            this.mnuItem_ToolFindOpcodeInFiles.Click += new System.EventHandler(this.menuItem_ToolFindOpcodeInFiles_Click);
             // 
             // menuItem_ToolFindTextInFiles
             // 
@@ -554,7 +554,7 @@
             // 
             this.mnuItem_ToolFragDatListTool.Index = 6;
             this.mnuItem_ToolFragDatListTool.Text = "Frag Dat List Tool";
-            this.mnuItem_ToolFragDatListTool.Click += new System.EventHandler(this.mnuItem_ToolFragDatListTool_Click);
+            this.mnuItem_ToolFragDatListTool.Click += new System.EventHandler(this.menuItem_ToolFragDatListTool_Click);
             // 
             // menuItem_Help
             // 

@@ -47,8 +47,11 @@ namespace aclogview
         private string textModeCI = "Text (Case-Insensitive)";
         private string uintMode = "UINT32";
 
-        static private string sortTypeUInt = "UInt";
-        static private string sortTypeString = "String";
+        public enum SortType
+        {
+            Uint,
+            String
+        }
 
         public static Dictionary<int, ContextInfo> contextList = new Dictionary<int, ContextInfo>();
         public static int nodeIndex = 0;
@@ -105,7 +108,7 @@ namespace aclogview
                     HighlightMode_comboBox.SelectedItem = opcodeMode;
                     opCodesToHighlight.Add(options.Opcode);
                     currentOpcode = options.Opcode;
-                    textBox_Search.Text += "0x" + currentOpcode.ToString("X");
+                    textBox_Search.Text += "0x" + currentOpcode.ToString("X4");
                 }
                 else if (options.CSTextToSearch != null)
                 {
@@ -284,11 +287,11 @@ namespace aclogview
         {
             if (e.Column == 0 || e.Column == 2 || e.Column == 5)
             {
-                comparer.sortType = sortTypeUInt;
+                comparer.sortType = SortType.Uint;
             }
             else
             {
-                comparer.sortType = sortTypeString;
+                comparer.sortType = SortType.String;
             }
             if (comparer.col == e.Column)
             {
@@ -305,12 +308,12 @@ namespace aclogview
         {
             public int col;
             public bool reverse;
-            public string sortType;
+            public SortType sortType;
 
             public int Compare(ListViewItem x, ListViewItem y)
             {
                 int result = 0;
-                if (sortType == sortTypeUInt)
+                if (sortType == SortType.Uint)
                 {
                     result = CompareUInt(x.SubItems[col].Text, y.SubItems[col].Text);
                 }
@@ -602,7 +605,7 @@ namespace aclogview
             openPcap(true);
         }
 
-        private void mnuItem_EditPreviousHighlightedRow_Click(object sender, EventArgs e)
+        private void menuItem_EditPreviousHighlightedRow_Click(object sender, EventArgs e)
         {
             if (listView_Packets.TopItem == null)
                 return;
@@ -633,7 +636,7 @@ namespace aclogview
             lblTracker.Text = "Viewing #" + listView_Packets.FocusedItem.Index;
         }
 
-        private void mnuItem_EditNextHighlightedRow_Click(object sender, EventArgs e)
+        private void menuItem_EditNextHighlightedRow_Click(object sender, EventArgs e)
         {
             if (listView_Packets.TopItem == null)
                 return;
@@ -854,13 +857,13 @@ namespace aclogview
             popup.ShowDialog();
         }
 
-        private void mnuItem_ToolFindOpcodeInFiles_Click(object sender, EventArgs e)
+        private void menuItem_ToolFindOpcodeInFiles_Click(object sender, EventArgs e)
         {
             var form = new FindOpcodeInFilesForm();
             form.Show(this);
         }
 
-        private void mnuItem_ToolFragDatListTool_Click(object sender, EventArgs e)
+        private void menuItem_ToolFragDatListTool_Click(object sender, EventArgs e)
         {
             var form = new FragDatListToolForm();
             form.Show(this);
@@ -1243,11 +1246,11 @@ namespace aclogview
         {
             if (e.Column == 0 || e.Column == 3)
             {
-                comparer2.sortType = sortTypeUInt;
+                comparer2.sortType = SortType.Uint;
             }
             else
             {
-                comparer2.sortType = sortTypeString;
+                comparer2.sortType = SortType.String;
             }
             if (comparer2.col == e.Column)
             {
