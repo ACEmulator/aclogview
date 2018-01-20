@@ -1,3 +1,23 @@
+### 2018-01-19
+[Slushnas]
+##### Interface Changes
+* Added a tab control and added the hex data view to it. This was done so that new tabs with additional functionality can be added easily.
+* Added Be.Windows.Forms.HexBox control to the solution and changed the hex view to use it instead of the RichTextBox. This control supports shadow highlighting as well as other features and provides an easy to use interface to programmatically select data.
+* Added context menu for copying hex or text from the hexbox control.
+* Added keyboard shortcuts to hex view copy functions.
+* Changed File->Open items to "(Re)Open As Fragments" to clarify the mode and moved the menu item below "Open As Messages" since fragment mode is not widely used.
+* Added keyboard shortcuts to "(Re)Open As Messages" menu items.
+* Refactored highlighting code in "Fragments" mode to use the new hex control.
+* Changed "Copy" item to "Copy All" in the treeview to indicate that it copies the entire tree to the clipboard.
+* Changed some of the text displayed to the user when using search(message highlighting) features to be more intuitive when no results are found.
+* Fixed display of hex opcode when opening a new file.
+* Changed position of items on the Tools menu. The "Find" options are used more often and are now at the top.
+
+##### Other Changes
+* Did a small refactor of CM_Magic code to use the EnchantmentID class.
+* Added ContextInfo class and code in the main form to support it. This allows highlighting hex view data when selecting a tree view node and opens up the possibility of future context aware features.
+* Added context info to CM_Magic messages.
+
 ### 2018-01-02
 [Slushnas]
 * Added a simple highlight UINT32 feature for currently opened files. This can be used to search for Object IDs, DIDs, etc.
