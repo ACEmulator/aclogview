@@ -506,47 +506,47 @@
             // 
             this.menuItem1.Index = 2;
             this.menuItem1.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.mnuItem_ToolFindOpcodeInFiles,
+            this.menuItem_ToolFindTextInFiles,
+            this.menuItem2,
             this.menuItem_ToolCount,
             this.menuItem_ToolBad,
             this.menuItem_ToolHeatmap,
-            this.menuItem2,
-            this.mnuItem_ToolFindOpcodeInFiles,
-            this.menuItem_ToolFindTextInFiles,
             this.mnuItem_ToolFragDatListTool});
             this.menuItem1.Text = "Tools";
             // 
             // menuItem_ToolCount
             // 
-            this.menuItem_ToolCount.Index = 0;
+            this.menuItem_ToolCount.Index = 3;
             this.menuItem_ToolCount.Text = "Count Packet Types";
             this.menuItem_ToolCount.Click += new System.EventHandler(this.menuItem_ToolCount_Click);
             // 
             // menuItem_ToolBad
             // 
-            this.menuItem_ToolBad.Index = 1;
+            this.menuItem_ToolBad.Index = 4;
             this.menuItem_ToolBad.Text = "Find Bad Parsers";
             this.menuItem_ToolBad.Click += new System.EventHandler(this.menuItem_ToolBad_Click);
             // 
             // menuItem_ToolHeatmap
             // 
-            this.menuItem_ToolHeatmap.Index = 2;
+            this.menuItem_ToolHeatmap.Index = 5;
             this.menuItem_ToolHeatmap.Text = "Heatmap";
             this.menuItem_ToolHeatmap.Click += new System.EventHandler(this.menuItem_ToolHeatmap_Click);
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 3;
+            this.menuItem2.Index = 2;
             this.menuItem2.Text = "-";
             // 
             // mnuItem_ToolFindOpcodeInFiles
             // 
-            this.mnuItem_ToolFindOpcodeInFiles.Index = 4;
+            this.mnuItem_ToolFindOpcodeInFiles.Index = 0;
             this.mnuItem_ToolFindOpcodeInFiles.Text = "Find Opcode In Files";
             this.mnuItem_ToolFindOpcodeInFiles.Click += new System.EventHandler(this.menuItem_ToolFindOpcodeInFiles_Click);
             // 
             // menuItem_ToolFindTextInFiles
             // 
-            this.menuItem_ToolFindTextInFiles.Index = 5;
+            this.menuItem_ToolFindTextInFiles.Index = 1;
             this.menuItem_ToolFindTextInFiles.Text = "Find Text In Files";
             this.menuItem_ToolFindTextInFiles.Click += new System.EventHandler(this.menuItem_ToolFindTextInFiles_Click);
             // 
