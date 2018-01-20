@@ -1420,9 +1420,9 @@ namespace aclogview
             // Left mouse click is already handled
             if (contextList.Count > 0 && loadedAsMessages)
             {
-                if (e.Node != null)
+                if (treeView_ParsedData.SelectedNode != null)
                 {
-                    int selectedNodeIndex = Convert.ToInt32(e.Node.Tag);
+                    int selectedNodeIndex = Convert.ToInt32(treeView_ParsedData.SelectedNode.Tag);
                     bool indexIsPresent = contextList.TryGetValue(selectedNodeIndex, out ContextInfo c);
                     // Only change selection if needed
                     if (indexIsPresent && hexBox1.SelectionStart != c.startPosition & hexBox1.SelectionLength != c.length)
