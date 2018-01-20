@@ -419,7 +419,10 @@ public class CM_Magic : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
-            eid.contributeToTreeNode(rootNode);
+            TreeNode enchantmentIDNode = rootNode.Nodes.Add("enchantment id = ");
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.EnchantmentID }, updateDataIndex: false);
+            eid.contributeToTreeNode(enchantmentIDNode);
+            enchantmentIDNode.Expand();
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -433,11 +436,15 @@ public class CM_Magic : MessageProcessor {
             return newObj;
         }
 
-        public override void contributeToTreeView(TreeView treeView) {
+        public override void contributeToTreeView(TreeView treeView)
+        {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
-            eid.contributeToTreeNode(rootNode);
+            TreeNode enchantmentIDNode = rootNode.Nodes.Add("enchantment id = ");
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.EnchantmentID }, updateDataIndex: false);
+            eid.contributeToTreeNode(enchantmentIDNode);
+            enchantmentIDNode.Expand();
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -476,15 +483,18 @@ public class CM_Magic : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
+            ContextInfo.AddToList(new ContextInfo { length = 4 + (enchantmentList.list.Count * 4) }, updateDataIndex: false);
             // Skip Plist count uint
             Form1.dataIndex += 4;
             for (int i = 0; i < enchantmentList.list.Count; i++) {
-                TreeNode listNode = rootNode.Nodes.Add($"enchantment {i+1} = ");
+                TreeNode listNode = plistNode.Nodes.Add($"enchantment {i+1} = ");
                 ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
                 var enchantment = enchantmentList.list[i];
                 enchantment.contributeToTreeNode(listNode);
                 listNode.Expand();
             }
+            plistNode.Expand();
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -498,19 +508,24 @@ public class CM_Magic : MessageProcessor {
             return newObj;
         }
 
-        public override void contributeToTreeView(TreeView treeView) {
+        public override void contributeToTreeView(TreeView treeView)
+        {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
+            ContextInfo.AddToList(new ContextInfo { length = 4 + (enchantmentList.list.Count * 4) }, updateDataIndex: false);
             // Skip Plist count uint
             Form1.dataIndex += 4;
-            for (int i = 0; i < enchantmentList.list.Count; i++) {
-                TreeNode listNode = rootNode.Nodes.Add($"enchantment {i+1} = ");
+            for (int i = 0; i < enchantmentList.list.Count; i++)
+            {
+                TreeNode listNode = plistNode.Nodes.Add($"enchantment {i + 1} = ");
                 ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
                 var enchantment = enchantmentList.list[i];
                 enchantment.contributeToTreeNode(listNode);
                 listNode.Expand();
             }
+            plistNode.Expand();
             treeView.Nodes.Add(rootNode);
         }
     }
