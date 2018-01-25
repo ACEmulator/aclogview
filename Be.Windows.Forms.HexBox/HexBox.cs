@@ -1588,8 +1588,10 @@ namespace Be.Windows.Forms
 
 		void PerformScrollToLine(long pos)
 		{
-			if (pos < _scrollVmin || pos > _scrollVmax || pos == _scrollVpos)
-				return;
+            if (pos < _scrollVmin || pos == _scrollVpos)
+                return;
+            else if (pos > _scrollVmax)
+                pos = _scrollVmax;
 
 			_scrollVpos = pos;
 
@@ -1641,10 +1643,10 @@ namespace Be.Windows.Forms
 		void PerformScrollThumpPosition(long pos)
 		{
 			// Bug fix: Scroll to end, do not scroll to end
-			int difference = (_scrollVmax > 65535) ? 10 : 9;
+			//int difference = (_scrollVmax > 65535) ? 10 : 9;
 
-			if (ToScrollPos(pos) == ToScrollMax(_scrollVmax) - difference)
-				pos = _scrollVmax;
+			//if (ToScrollPos(pos) == ToScrollMax(_scrollVmax) - difference)
+			//	pos = _scrollVmax;
 			// End Bug fix
 
 
@@ -1680,7 +1682,7 @@ namespace Be.Windows.Forms
 			else if (index > _endByte)
 			{
 				long line = (long)Math.Floor((double)index / (double)_iHexMaxHBytes);
-				line -= _iHexMaxVBytes - 1;
+				//line -= _iHexMaxVBytes - 1;
 				PerformScrollThumpPosition(line);
 			}
 		}

@@ -416,12 +416,12 @@
         </member>
         <member name="M:Be.Windows.Forms.DynamicFileByteProvider.InsertBytes(System.Int64,System.Byte[])">
             <summary>
-            See <see cref="M:Be.Windows.Forms.IByteProvider.InsertBytes(System.Int64,System.Byte[])" /> for more information.
+            See <see cref="M:IByteProvider.InsertBytes" /> for more information.
             </summary>
         </member>
         <member name="M:Be.Windows.Forms.DynamicFileByteProvider.InsertBytes(System.Int64,System.Byte[],System.Drawing.Color,System.Drawing.Color)">
             <summary>
-            See <see cref="M:Be.Windows.Forms.IByteProvider.InsertBytes(System.Int64,System.Byte[])" /> for more information.
+            See <see cref="M:IByteProvider.InsertBytes" /> for more information.
             </summary>
         </member>
         <member name="M:Be.Windows.Forms.DynamicFileByteProvider.DeleteBytes(System.Int64,System.Int64)">
