@@ -19,6 +19,7 @@ public class CM_Magic : MessageProcessor {
             case PacketOpcode.Evt_Magic__PurgeBadEnchantments_ID: {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
                     break;
                 }
             case PacketOpcode.Evt_Magic__CastUntargetedSpell_ID: {
@@ -200,6 +201,7 @@ public class CM_Magic : MessageProcessor {
         public uint type;
         public uint key;
         public float val;
+        public int Length = 12;
 
         public static StatMod read(BinaryReader binaryReader) {
             StatMod newObj = new StatMod();
@@ -330,9 +332,11 @@ public class CM_Magic : MessageProcessor {
         public double last_time_degraded;
         public StatMod smod;
         public uint spell_set_id;
+        public int Length;
 
         public static Enchantment read(BinaryReader binaryReader) {
             Enchantment newObj = new Enchantment();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.eid = EnchantmentID.read(binaryReader);
             newObj.spell_category = binaryReader.ReadUInt16();
             newObj.has_spell_set_id = binaryReader.ReadUInt16();
@@ -344,7 +348,9 @@ public class CM_Magic : MessageProcessor {
             newObj.degrade_limit = binaryReader.ReadSingle();
             newObj.last_time_degraded = binaryReader.ReadDouble();
             newObj.smod = StatMod.read(binaryReader);
-            newObj.spell_set_id = binaryReader.ReadUInt32();
+            if (newObj.has_spell_set_id >= 1)
+                newObj.spell_set_id = binaryReader.ReadUInt32();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
@@ -376,7 +382,7 @@ public class CM_Magic : MessageProcessor {
             node.Nodes.Add("last_time_degraded = " + last_time_degraded);
             ContextInfo.AddToList(new ContextInfo { length = 8 });
             TreeNode statModNode = node.Nodes.Add("statmod = ");
-            ContextInfo.AddToList(new ContextInfo { length = 12 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { length = smod.Length }, updateDataIndex: false);
             smod.contributeToTreeNode(statModNode);
             node.Nodes.Add("spell_set_id = " + (SpellSetID)spell_set_id);
             ContextInfo.AddToList(new ContextInfo { length = 4 });
@@ -463,7 +469,7 @@ public class CM_Magic : MessageProcessor {
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
             TreeNode enchantmentNode = rootNode.Nodes.Add("enchantment = ");
-            ContextInfo.AddToList(new ContextInfo { length = 64 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { length = enchant.Length }, updateDataIndex: false);
             enchant.contributeToTreeNode(enchantmentNode);
             enchantmentNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
@@ -484,7 +490,7 @@ public class CM_Magic : MessageProcessor {
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
             TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
-            ContextInfo.AddToList(new ContextInfo { length = 4 + (enchantmentList.list.Count * 4) }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { length = enchantmentList.Length }, updateDataIndex: false);
             // Skip Plist count uint
             Form1.dataIndex += 4;
             for (int i = 0; i < enchantmentList.list.Count; i++) {
@@ -514,7 +520,7 @@ public class CM_Magic : MessageProcessor {
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
             TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
-            ContextInfo.AddToList(new ContextInfo { length = 4 + (enchantmentList.list.Count * 4) }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { length = enchantmentList.Length }, updateDataIndex: false);
             // Skip Plist count uint
             Form1.dataIndex += 4;
             for (int i = 0; i < enchantmentList.list.Count; i++)
