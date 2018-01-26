@@ -41,10 +41,12 @@ public class CM_Admin : MessageProcessor {
         public uint m_roomID; // By ID variable only
         public string m_text;
         public TurbineChatBlob extraInfoBlob;
+        public int Length;
 
         public static Request read(BinaryReader binaryReader, AsyncMethodID m_blobDispatchType)
         {
             Request newObj = new Request();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.m_blobDispatchType = m_blobDispatchType;
             newObj.cbSize = binaryReader.ReadUInt32();
             newObj.m_contextID = binaryReader.ReadUInt32(); // Seems to be incremented every time the client makes a request.
@@ -60,25 +62,40 @@ public class CM_Admin : MessageProcessor {
             }
             newObj.m_text = Util.readUnicodeString(binaryReader);
             newObj.extraInfoBlob = TurbineChatBlob.read(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("cbSize = " + cbSize);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("m_contextID = " + m_contextID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("dwRequestID = " + dwRequestID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("m_methodID = " + m_methodID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             if (m_blobDispatchType == AsyncMethodID.ASYNCMETHOD_SENDTOROOMBYNAME)
             {
                 node.Nodes.Add("m_roomName = " + m_roomName);
+                if (m_roomName.Length >= 128)
+                    ContextInfo.AddToList(new ContextInfo { length = 2 + (m_roomName.Length * 2), dataType = DataType.LongSerialized_UnicodeString });
+                else
+                    ContextInfo.AddToList(new ContextInfo { length = 1 + (m_roomName.Length * 2), dataType = DataType.ShortSerialized_UnicodeString });
             }
             else if (m_blobDispatchType == AsyncMethodID.ASYNCMETHOD_SENDTOROOMBYID)
             {
                 node.Nodes.Add("m_roomID = " + m_roomID);
+                ContextInfo.AddToList(new ContextInfo { length = 4 });
             }
             node.Nodes.Add("m_text = " + m_text);
+            if (m_text.Length >= 128)
+                ContextInfo.AddToList(new ContextInfo { length = 2 + (m_text.Length * 2), dataType = DataType.LongSerialized_UnicodeString });
+            else
+                ContextInfo.AddToList(new ContextInfo { length = 1 + (m_text.Length * 2), dataType = DataType.ShortSerialized_UnicodeString });
             TreeNode extraInfoNode = node.Nodes.Add("extraInfoBlob = ");
+            ContextInfo.AddToList(new ContextInfo { length = extraInfoBlob.Length }, updateDataIndex: false);
             extraInfoBlob.contributeToTreeNode(extraInfoNode);
         }
     }
@@ -91,25 +108,33 @@ public class CM_Admin : MessageProcessor {
         public uint dwResponseID;
         public uint m_methodID;
         public uint m_hResult;
+        public int Length;
 
         public static Response read(BinaryReader binaryReader)
         {
             Response newObj = new Response();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.cbSize = binaryReader.ReadUInt32();
             newObj.m_contextID = binaryReader.ReadUInt32();
             newObj.dwResponseID = binaryReader.ReadUInt32();
             newObj.m_methodID = binaryReader.ReadUInt32();
             newObj.m_hResult = binaryReader.ReadUInt32();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("cbSize = " + cbSize);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("m_contextID = " + m_contextID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("dwResponseID = " + dwResponseID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("m_methodID = " + m_methodID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("m_hResult = " + Utility.FormatHex(m_hResult));
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
         }
     }
 
@@ -119,23 +144,30 @@ public class CM_Admin : MessageProcessor {
         public uint speakerID;
         public uint hResult;
         public uint chatType;
+        public int Length;
 
         public static TurbineChatBlob read(BinaryReader binaryReader)
         {
             TurbineChatBlob newObj = new TurbineChatBlob();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.cbSize = binaryReader.ReadUInt32();
             newObj.speakerID = binaryReader.ReadUInt32();
             newObj.hResult = binaryReader.ReadUInt32();
             newObj.chatType = binaryReader.ReadUInt32();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("cbSize = " + cbSize);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("speakerID = " + Utility.FormatHex(speakerID));
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
             node.Nodes.Add("hResult = " + Utility.FormatHex(hResult));
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("chatType = " + (ChatTypeEnum)chatType);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
         }
     }
 
@@ -147,25 +179,39 @@ public class CM_Admin : MessageProcessor {
         public string pwszDisplayName;
         public string pwszText;
         public TurbineChatBlob extraInfoBlob;
+        public int Length;
 
         public static SendToRoomChatEvent read(BinaryReader binaryReader)
         {
             SendToRoomChatEvent newObj = new SendToRoomChatEvent();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.cbSize = binaryReader.ReadUInt32();
             newObj.dwRoomID = binaryReader.ReadUInt32();
             newObj.pwszDisplayName = Util.readUnicodeString(binaryReader);
             newObj.pwszText = Util.readUnicodeString(binaryReader);
             newObj.extraInfoBlob = TurbineChatBlob.read(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("cbSize = " + cbSize);
+            ContextInfo.AddToList(new ContextInfo { length =  4 });
             node.Nodes.Add("dwRoomID = " + dwRoomID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("pwszDisplayName = " + pwszDisplayName);
+            if (pwszDisplayName.Length >= 128)
+                ContextInfo.AddToList(new ContextInfo { length = 2 + (pwszDisplayName.Length * 2), dataType = DataType.LongSerialized_UnicodeString });
+            else
+                ContextInfo.AddToList(new ContextInfo { length = 1 + (pwszDisplayName.Length * 2), dataType = DataType.ShortSerialized_UnicodeString });
             node.Nodes.Add("pwszText = " + pwszText);
+            if (pwszText.Length >= 128)
+                ContextInfo.AddToList(new ContextInfo { length = 2 + (pwszText.Length * 2), dataType = DataType.LongSerialized_UnicodeString });
+            else
+                ContextInfo.AddToList(new ContextInfo { length = 1 + (pwszText.Length * 2), dataType = DataType.ShortSerialized_UnicodeString });
             TreeNode extraInfoNode = node.Nodes.Add("extraInfoBlob = ");
+            ContextInfo.AddToList(new ContextInfo { length = extraInfoBlob.Length }, updateDataIndex: false);
             extraInfoBlob.contributeToTreeNode(extraInfoNode);
         }
     }
@@ -216,28 +262,40 @@ public class CM_Admin : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.Opcode });
             rootNode.Nodes.Add("cbSize = " + cbSize);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             rootNode.Nodes.Add("m_blobType = " + m_blobType);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             rootNode.Nodes.Add("m_blobDispatchType = " + m_blobDispatchType);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             rootNode.Nodes.Add("m_targetType = " + m_targetType);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             rootNode.Nodes.Add("m_targetID = " + m_targetID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             rootNode.Nodes.Add("m_transportType = " + m_transportType);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             rootNode.Nodes.Add("m_transportID = " + m_transportID);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             rootNode.Nodes.Add("m_cookie = " + m_cookie);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
 
             if (m_blobType == ChatNetworkBlobType.NETBLOB_EVENT_BINARY)
             {
                 TreeNode chatEventNode = rootNode.Nodes.Add("sendToRoomChatEvent = ");
+                ContextInfo.AddToList(new ContextInfo { length = sendToRoomChatEvent.Length }, updateDataIndex: false); 
                 sendToRoomChatEvent.contributeToTreeNode(chatEventNode);
             }
             else if (m_blobType == ChatNetworkBlobType.NETBLOB_REQUEST_BINARY)
             {
                 TreeNode requestNode = rootNode.Nodes.Add("request = ");
+                ContextInfo.AddToList(new ContextInfo { length = request.Length }, updateDataIndex: false);
                 request.contributeToTreeNode(requestNode);
             }
             else if (m_blobType == ChatNetworkBlobType.NETBLOB_RESPONSE_BINARY)
             {
                 TreeNode requestNode = rootNode.Nodes.Add("response = ");
+                ContextInfo.AddToList(new ContextInfo { length = response.Length }, updateDataIndex: false);
                 response.contributeToTreeNode(requestNode);
             }
             rootNode.ExpandAll();
