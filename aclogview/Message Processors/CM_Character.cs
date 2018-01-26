@@ -172,6 +172,7 @@ public class CM_Character : MessageProcessor {
         public int index_;
         public uint objectID_;
         public uint spellID_;
+        public int Length = 12;
 
         public static ShortCutData read(BinaryReader binaryReader) {
             ShortCutData newObj = new ShortCutData();
@@ -183,27 +184,34 @@ public class CM_Character : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("index_ = " + index_);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
             node.Nodes.Add("objectID_ = " + Utility.FormatHex(objectID_));
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
             node.Nodes.Add("spellID_ = " + "(" + spellID_ + ") " + (SpellID)spellID_);
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
         }
     }
 
     public class ShortCutManager {
         public List<ShortCutData> shortCuts_ = new List<ShortCutData>();
+        public int Length;
 
         public static ShortCutManager read(BinaryReader binaryReader) {
+            var startPosition = binaryReader.BaseStream.Position;
             uint numShortcuts = binaryReader.ReadUInt32();
             ShortCutManager newObj = new ShortCutManager();
             for (int i = 0; i < numShortcuts; ++i) {
                 newObj.shortCuts_.Add(ShortCutData.read(binaryReader));
             }
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            TreeNode shortcutsNode = node.Nodes.Add("shortCuts_ = ");
             foreach (ShortCutData shortcut in shortCuts_) {
-                shortcut.contributeToTreeNode(shortcutsNode);
+                TreeNode shortcutNode = node.Nodes.Add($"shortcut {shortcut.index_ + 1} = ");
+                ContextInfo.AddToList(new ContextInfo { length = shortcut.Length }, updateDataIndex: false);
+                shortcut.contributeToTreeNode(shortcutNode);
             }
         }
     }
@@ -234,11 +242,14 @@ public class CM_Character : MessageProcessor {
         public PStringChar m_TimeStampFormat;
         public GenericQualitiesData m_pPlayerOptionsData;
         public PackObjPropertyCollection m_colGameplayOptions;
+        public int Length;
+        public byte padding;
         public List<string> packedItems; // For display purposes
 
         public static PlayerModule read(BinaryReader binaryReader) {
             PlayerModule newObj = new PlayerModule();
             newObj.packedItems = new List<string>();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.header = binaryReader.ReadUInt32();
             newObj.options_ = binaryReader.ReadUInt32();
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_ShortCutManager) != 0) {
@@ -291,87 +302,230 @@ public class CM_Character : MessageProcessor {
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_GameplayOptions) != 0)
             {
                 newObj.m_colGameplayOptions = PackObjPropertyCollection.read(binaryReader);
-                Util.readToAlign(binaryReader); // Align to dword boundary
                 newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_GameplayOptions.ToString());
             }
+            newObj.padding = Util.readToAlign(binaryReader); // Align to dword boundary
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 headerNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
             }
+            // Now skip over the header
+            Form1.dataIndex += 4;
             node.Nodes.Add("options_ = " + Utility.FormatHex(options_));
-            TreeNode shortcutsNode = node.Nodes.Add("shortcuts_ = ");
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            
             if (shortcuts_ != null) {
+                TreeNode shortcutsNode = node.Nodes.Add("shortcuts_ = ");
+                ContextInfo.AddToList(new ContextInfo { length = shortcuts_.Length }, updateDataIndex: false);
+                // Skip over shortcut count dword
+                Form1.dataIndex += 4;
                 shortcuts_.contributeToTreeNode(shortcutsNode);
             }
+
             TreeNode favoritesNode = node.Nodes.Add("favorite_spells_ = ");
-            for (int i = 0; i < favorite_spells_.Count(); i++) {
+            // Calculate favorite spells data length
+            int favoritesLength = 0;
+            for (int i = 0; i < favorite_spells_.Count(); i++)
+            {
                 PList<SpellID> favoritesList = favorite_spells_[i];
-                if (favoritesList != null) {
-                    TreeNode favoritesSubNode = favoritesNode.Nodes.Add($"Spelltab {i+1} = ");
-                    favoritesList.contributeToTreeNode(favoritesSubNode);
+                if (favoritesList != null)
+                {
+                    favoritesLength += favoritesList.Length;
                 }
             }
-            TreeNode desiredCompsNode = node.Nodes.Add("desired_comps_ = ");
+            ContextInfo.AddToList(new ContextInfo { length = favoritesLength }, updateDataIndex: false);
+            for (int i = 0; i < favorite_spells_.Count(); i++) {
+                PList<SpellID> favoritesList = favorite_spells_[i];
+                if (favoritesList.Length != 0) {
+                    TreeNode favoritesSubNode = favoritesNode.Nodes.Add($"Spelltab {i+1} = ");
+                    ContextInfo.AddToList(new ContextInfo { length = favoritesList.Length }, updateDataIndex: false);
+                    // Skip plist count dword
+                    Form1.dataIndex += 4;
+                    favoritesList.contributeToTreeNode(favoritesSubNode);
+                    for (int j = 0; j < favoritesList.list.Count; j++)
+                    {
+                        ContextInfo.AddToList(new ContextInfo { length = sizeof(SpellID), dataType = DataType.SpellID_uint });
+                    }
+                }
+            }
+            
             if ((header & (uint)PlayerModulePackHeader.PM_Packed_DesiredComps) != 0)
             {
+                TreeNode desiredCompsNode = node.Nodes.Add("desired_comps_ = ");
+                ContextInfo.AddToList(new ContextInfo { length = desired_comps_.Length }, updateDataIndex: false);
+                // Skip PackableHashTable count dword
+                Form1.dataIndex += 4;
                 foreach (KeyValuePair<uint, int> element in desired_comps_.hashTable)
                 {
                     desiredCompsNode.Nodes.Add(element.Key + " = " + element.Value);
+                    ContextInfo.AddToList(new ContextInfo { length = 8 });
                 }
             }
-            node.Nodes.Add("spell_filters_ = " + Utility.FormatHex(spell_filters_));
-            node.Nodes.Add("options2 = " + Utility.FormatHex(options2));
-            node.Nodes.Add("m_TimeStampFormat = " + m_TimeStampFormat);
+            
+            if ((header & (uint)PlayerModulePackHeader.PM_Packed_SpellbookFilters) != 0)
+            {
+                node.Nodes.Add("spell_filters_ = " + Utility.FormatHex(spell_filters_));
+                ContextInfo.AddToList(new ContextInfo { length = 4 });
+            }
+            else
+            {
+                node.Nodes.Add("spell_filters_ (not serialized) = " + Utility.FormatHex(spell_filters_));
+                ContextInfo.AddToList(new ContextInfo {});
+            }
+            if ((header & (uint)PlayerModulePackHeader.PM_Packed_2ndCharacterOptions) != 0)
+            {
+                node.Nodes.Add("options2 = " + Utility.FormatHex(options2));
+                ContextInfo.AddToList(new ContextInfo { length = 4 });
+            }
+            else
+            {
+                node.Nodes.Add("options2 (not serialized) = " + Utility.FormatHex(options2));
+                ContextInfo.AddToList(new ContextInfo { length = 4 });
+            }
 
-            TreeNode playerOptionsDataNode = node.Nodes.Add("m_pPlayerOptionsData = ");
+            if ((header & (uint)PlayerModulePackHeader.PM_Packed_TimeStampFormat) != 0)
+            {
+                node.Nodes.Add("m_TimeStampFormat = " + m_TimeStampFormat);
+                ContextInfo.AddToList(new ContextInfo { length = m_TimeStampFormat.Length, dataType = DataType.Serialized_AsciiString });
+            }
+            
             if ((header & (uint)PlayerModulePackHeader.PM_Packed_GenericQualitiesData) != 0)
+            {
+                TreeNode playerOptionsDataNode = node.Nodes.Add("m_pPlayerOptionsData = ");
+                ContextInfo.AddToList(new ContextInfo { length = m_pPlayerOptionsData.Length }, updateDataIndex: false);
                 m_pPlayerOptionsData.contributeToTreeNode(playerOptionsDataNode);
-
-            // DISABLED TREE NODE FORMATTING
-            TreeNode colGameplayOptionsNode = node.Nodes.Add("m_colGameplayOptions = ");
+            }
+            
             if ((header & (uint)PlayerModulePackHeader.PM_Packed_GameplayOptions) != 0)
-                  m_colGameplayOptions.contributeToTreeNode(colGameplayOptionsNode);
+            {
+                TreeNode colGameplayOptionsNode = node.Nodes.Add("m_colGameplayOptions = ");
+                ContextInfo.AddToList(new ContextInfo { length = m_colGameplayOptions.Length }, updateDataIndex: false);
+                m_colGameplayOptions.contributeToTreeNode(colGameplayOptionsNode);
+            }
+            // Skip over padding if any
+            if (padding > 0)
+                Form1.dataIndex += padding;
         }
     }
 
     public class GenericQualitiesData
     {
+        public enum GenericQualitiesPackHeader
+        {
+            Packed_None = 0,
+            Packed_IntStats = 1,
+            Packed_BoolStats = 2,
+            Packed_FloatStats = 4,
+            Packed_StringStats = 8,
+        };
+
         public uint header;
         public PackableHashTable<STypeInt, int> m_pIntStatsTable = new PackableHashTable<STypeInt, int>();
         public PackableHashTable<STypeBool, int> m_pBoolStatsTable = new PackableHashTable<STypeBool, int>();
         public PackableHashTable<STypeFloat, double> m_pFloatStatsTable = new PackableHashTable<STypeFloat, double>();
         public PackableHashTable<uint, PStringChar> m_pStrStatsTable = new PackableHashTable<uint, PStringChar>();
+        public int Length;
+        public List<string> packedItems; // For display purposes
 
         public static GenericQualitiesData read(BinaryReader binaryReader)
         {
             GenericQualitiesData newObj = new GenericQualitiesData();
+            var startPosition = binaryReader.BaseStream.Position;
+            newObj.packedItems = new List<string>();
             newObj.header = binaryReader.ReadUInt32();
-            if ((newObj.header & 0x01) != 0)
+            if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_IntStats) != 0)
+            {
                 newObj.m_pIntStatsTable = PackableHashTable<STypeInt, int>.read(binaryReader);
-            if ((newObj.header & 0x02) != 0)
+                newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_IntStats.ToString());
+            }
+            if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_BoolStats) != 0)
+            {
                 newObj.m_pBoolStatsTable = PackableHashTable<STypeBool, int>.read(binaryReader);
-            if ((newObj.header & 0x04) != 0)
+                newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_BoolStats.ToString());
+            }
+            if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_FloatStats) != 0)
+            {
                 newObj.m_pFloatStatsTable = PackableHashTable<STypeFloat, double>.read(binaryReader);
-            if ((newObj.header & 0x08) != 0)
+                newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_FloatStats.ToString());
+            }
+            if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_StringStats) != 0)
+            {
                 newObj.m_pStrStatsTable = PackableHashTable<uint, PStringChar>.read(binaryReader);
+                newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_StringStats.ToString());
+            }
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
-            TreeNode IntStatsNode = node.Nodes.Add("m_pIntStatsTable = ");
-            m_pIntStatsTable.contributeToTreeNode(IntStatsNode);
-            TreeNode BoolStatsNode = node.Nodes.Add("m_pBoolStatsTable = ");
-            m_pBoolStatsTable.contributeToTreeNode(BoolStatsNode);
-            TreeNode FloatStatsNode = node.Nodes.Add("m_pFloatStatsTable = ");
-            m_pFloatStatsTable.contributeToTreeNode(FloatStatsNode);
-            TreeNode StrStatsNode = node.Nodes.Add("m_pStrStatsTable = ");
-            m_pStrStatsTable.contributeToTreeNode(StrStatsNode);
+            TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            }
+            // Now skip the header
+            Form1.dataIndex += 4;
+            if ((header & (uint)GenericQualitiesPackHeader.Packed_IntStats) != 0)
+            {
+                TreeNode IntStatsNode = node.Nodes.Add("m_pIntStatsTable = ");
+                ContextInfo.AddToList(new ContextInfo { length = m_pIntStatsTable.Length }, updateDataIndex: false);
+                m_pIntStatsTable.contributeToTreeNode(IntStatsNode);
+                // Skip PackableHashTable count dword
+                Form1.dataIndex += 4;
+                for (int i = 0; i < m_pIntStatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeInt) + sizeof(int) });
+                }
+            }
+            if ((header & (uint)GenericQualitiesPackHeader.Packed_BoolStats) != 0)
+            {
+                TreeNode BoolStatsNode = node.Nodes.Add("m_pBoolStatsTable = ");
+                ContextInfo.AddToList(new ContextInfo { length = m_pBoolStatsTable.Length }, updateDataIndex: false);
+                m_pBoolStatsTable.contributeToTreeNode(BoolStatsNode);
+                // Skip PackableHashTable count dword
+                Form1.dataIndex += 4;
+                for (int i = 0; i < m_pBoolStatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeBool) + sizeof(int) });
+                }
+            }
+            if ((header & (uint)GenericQualitiesPackHeader.Packed_FloatStats) != 0)
+            {
+                TreeNode FloatStatsNode = node.Nodes.Add("m_pFloatStatsTable = ");
+                ContextInfo.AddToList(new ContextInfo { length = m_pFloatStatsTable.Length }, updateDataIndex: false);
+                m_pFloatStatsTable.contributeToTreeNode(FloatStatsNode);
+                // Skip PackableHashTable count dword
+                Form1.dataIndex += 4;
+                for (int i = 0; i < m_pFloatStatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeFloat) + sizeof(double) });
+                }
+            }
+            if ((header & (uint)GenericQualitiesPackHeader.Packed_StringStats) != 0)
+            {
+                // TODO: Possibly separate the keys and values to different tree nodes
+                // so context info can be added to the string.
+                TreeNode StrStatsNode = node.Nodes.Add("m_pStrStatsTable = ");
+                ContextInfo.AddToList(new ContextInfo { length = m_pStrStatsTable.Length }, updateDataIndex: false);
+                m_pStrStatsTable.contributeToTreeNode(StrStatsNode);
+                // Skip PackableHashTable count dword
+                Form1.dataIndex += 4;
+                foreach (KeyValuePair<uint, PStringChar> element in m_pStrStatsTable.hashTable)
+                {
+                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeString) + element.Value.Length });
+                }
+            }
         }
     }
 
@@ -379,27 +533,32 @@ public class CM_Character : MessageProcessor {
     {
         public uint i_iVersion; // AKA g_TurbineCorePackVersion: will always be 0x00000002.
         public List<BaseProperty> PropertyCollection = new List<BaseProperty>();
+        public int Length;
 
         public static PackObjPropertyCollection read(BinaryReader binaryReader)
         {
             PackObjPropertyCollection newObj = new PackObjPropertyCollection();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.i_iVersion = binaryReader.ReadUInt32();
-
             byte m_numBuckets = binaryReader.ReadByte();
             byte m_numElements = binaryReader.ReadByte();
             for (byte i = 0; i < m_numElements; i++)
             {
                 newObj.PropertyCollection.Add(BaseProperty.read(binaryReader));
             }
-
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("i_iVersion = " + i_iVersion);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            // Skip PackObjPropertyCollection count word
+            Form1.dataIndex += 2;
             for (int i = 0; i < PropertyCollection.Count; i++) {
                 TreeNode propertyNode = node.Nodes.Add($"{PropertyCollection[i].key}");
+                ContextInfo.AddToList(new ContextInfo { length = PropertyCollection[i].Length }, updateDataIndex:false);
                 PropertyCollection[i].contributeToTreeNode(propertyNode);
             }
             return;
@@ -456,10 +615,12 @@ public class CM_Character : MessageProcessor {
         public byte boolPropertyValue;
         uint num_properties;
         public List<BaseProperty> PropertyCollectionValue;
+        public int Length;
 
         public static BaseProperty read(BinaryReader binaryReader)
         {
             BaseProperty newObj = new BaseProperty();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.key = (OptionProperty)binaryReader.ReadUInt32();
             switch (newObj.key)
             {
@@ -520,6 +681,7 @@ public class CM_Character : MessageProcessor {
                     for (uint i = 0; i < newObj.num_properties; i++)
                     {
                         newObj.PropertyCollectionValue.Add(BaseProperty.read(binaryReader));
+                        newObj.Length += newObj.PropertyCollectionValue[(int)i].Length;
                     }
                     break;
                 case OptionProperty.Option_Placement_Property:
@@ -529,9 +691,11 @@ public class CM_Character : MessageProcessor {
                     for (byte i = 0; i < m_numElements; i++)
                     {
                         newObj.PropertyCollectionValue.Add(BaseProperty.read(binaryReader));
+                        newObj.Length += newObj.PropertyCollectionValue[(int)i].Length;
                     }
                     break;
             }
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
@@ -541,52 +705,91 @@ public class CM_Character : MessageProcessor {
             {
                 case OptionProperty.Option_ActiveOpacity_Property:
                     node.Nodes.Add("floatPropertyValue = " + floatPropertyValue);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     break;
                 case OptionProperty.Option_DefaultOpacity_Property:
                     node.Nodes.Add("floatPropertyValue = " + floatPropertyValue);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     break;
                 case OptionProperty.Option_Placement_X_Property:
                     node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     break;
                 case OptionProperty.Option_Placement_Y_Property:
                     node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     break;
                 case OptionProperty.Option_Placement_Width_Property:
                     node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     break;
                 case OptionProperty.Option_Placement_Height_Property:
                     node.Nodes.Add("intPropertyValue = " + intPropertyValue);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     break;
                 case OptionProperty.Option_Placement_Visibility_Property:
                     node.Nodes.Add("boolPropertyValue = " + boolPropertyValue);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 1 });
                     break;
                 case OptionProperty.Option_Placement_Title_Property:
                     node.Nodes.Add("m_Override = " + m_Override);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 1 });
                     if (m_Override == 1)
                     {
                         node.Nodes.Add("m_LiteralValue = " + m_LiteralValue);
+                        ContextInfo.AddToList(new ContextInfo { length = m_LiteralValue.Length, dataType = DataType.UnicodeString });
                     }
                     else
                     {
                         node.Nodes.Add("m_stringID = " + Utility.FormatHex(m_stringID));
+                        ContextInfo.AddToList(new ContextInfo { length = 4 });
                         node.Nodes.Add("m_tableID = " + Utility.FormatHex(m_tableID));
+                        ContextInfo.AddToList(new ContextInfo { length = 4 });
                     }
                     node.Nodes.Add("bHasStrings = " + bHasStrings);
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     node.Nodes.Add("m_numBuckets = " + m_numBuckets);
+                    ContextInfo.AddToList(new ContextInfo { length = 1 });
                     node.Nodes.Add("m_numElements = " + m_numElements);
+                    ContextInfo.AddToList(new ContextInfo { length = 1 });
                     break;
                 case OptionProperty.Option_TextType_Property:
                     TreeNode chatMask = node.Nodes.Add("int64PropertyValue = " + Utility.FormatHex(int64PropertyValue));
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = sizeof(ulong) }, updateDataIndex: false);
                     foreach (ulong e in Enum.GetValues(typeof(ChatTextFilter)))
                     {
                         if ((int64PropertyValue & e) == e)
                         {
                             chatMask.Nodes.Add($"{Enum.GetName(typeof(ChatTextFilter),e)}");
+                            ContextInfo.AddToList(new ContextInfo { length = sizeof(ulong) }, updateDataIndex: false);
                         }
                     }
+                    // Now skip the property value
+                    Form1.dataIndex += sizeof(ulong);
                     break;
                 case OptionProperty.Option_PlacementArray_Property:
                     node.Nodes.Add("num_properties = " + num_properties);
+                    // Skip property type
+                    Form1.dataIndex += 8;
+                    ContextInfo.AddToList(new ContextInfo { length = 4 });
                     for (int i = 0; i < PropertyCollectionValue.Count; i++)
                     {
                         // Note: num_properties SHOULD equal 17 for the number of client UI elements
@@ -594,19 +797,28 @@ public class CM_Character : MessageProcessor {
                         if (num_properties == 17)
                         {
                             TreeNode PropertyNode = node.Nodes.Add($"{PropertyCollectionValue[i].key} (UIElement: {(UIElement)i+1})");
+                            ContextInfo.AddToList(new ContextInfo { length = PropertyCollectionValue[i].Length }, updateDataIndex: false);
+                            // Skip property type dword
+                            Form1.dataIndex += 4;
                             PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
                         }
                         else
                         {
                             TreeNode PropertyNode = node.Nodes.Add($"{PropertyCollectionValue[i].key}");
+                            ContextInfo.AddToList(new ContextInfo { length = PropertyCollectionValue[i].Length }, updateDataIndex: false);
+                            // Skip property type dword
+                            Form1.dataIndex += 4;
                             PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
                         }
                     }
                     break;
                 case OptionProperty.Option_Placement_Property:
+                    // Skip Placement_Property count word
+                    Form1.dataIndex += 2;
                     for (int i = 0; i < PropertyCollectionValue.Count; i++)
                     {
                         TreeNode PropertyNode = node.Nodes.Add($"{PropertyCollectionValue[i].key}");
+                        ContextInfo.AddToList(new ContextInfo { length = PropertyCollectionValue[i].Length }, updateDataIndex: false);
                         PropertyCollectionValue[i].contributeToTreeNode(PropertyNode);
                     }
                     break;

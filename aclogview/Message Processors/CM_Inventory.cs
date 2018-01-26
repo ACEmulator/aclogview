@@ -474,6 +474,7 @@ public class CM_Inventory : MessageProcessor {
     public class ContentProfile {
         public uint m_iid;
         public uint m_uContainerProperties;
+        public int Length = 8;
 
         public static ContentProfile read(BinaryReader binaryReader) {
             ContentProfile newObj = new ContentProfile();
@@ -484,7 +485,9 @@ public class CM_Inventory : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("m_iid = " + Utility.FormatHex(m_iid));
+            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
             node.Nodes.Add("m_uContainerProperties = " + (ContainerProperties)m_uContainerProperties);
+            ContextInfo.AddToList(new ContextInfo { length = 4 });
         }
     }
 

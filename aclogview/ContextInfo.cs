@@ -45,6 +45,12 @@ namespace aclogview
         EnchantmentID,  // uint divided into two ushorts: the spell ID and the layer
         SpellID_ushort,
         SpellLayer,     
-        ObjectID
+        ObjectID,
+        Opcode,
+        ShortSerialized_UnicodeString, // String length < 128 (+ 1 byte length header)
+        LongSerialized_UnicodeString,   // String length >= 128 (+ 2 byte length header)
+        UnicodeString,                  // UTF-16 string with no length header
+        Serialized_AsciiString,         // AKA PStringChar; Has a 2-4 byte length header
+        CellID
     }
 }
