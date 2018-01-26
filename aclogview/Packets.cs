@@ -1,4 +1,5 @@
-﻿using System;
+﻿using aclogview;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -61,18 +62,27 @@ public class Util {
         return (ushort)(((value & 0x00FFU) << 8) | ((value & 0xFF00U) >> 8));
     }
 
-    public static void readToAlign(BinaryReader binaryReader)
+    /// <summary>
+    /// Calculates and reads any padding bytes needed to align to a dword boundary.
+    /// </summary>
+    /// <param name="binaryReader"></param>
+    /// <returns>Returns a byte with the number of padding bytes read.</returns>
+    public static byte readToAlign(BinaryReader binaryReader)
     {
         long alignDelta = binaryReader.BaseStream.Position % 4;
         if (alignDelta != 0)
         {
             binaryReader.ReadBytes((int)(4 - alignDelta));
+            return (byte)(4 - alignDelta);
         }
+        return 0;
     }
 
     public static string readUnicodeString(BinaryReader binaryReader)
     {
-        uint strLen = binaryReader.ReadByte(); 
+        uint strLen = binaryReader.ReadByte();
+        // If string length is >= 128 a second byte is present and 
+        // the least significant bits are used to calculate the length.
         if((strLen & 0x80) > 0) // PackedByte
         {
             byte lowbyte = binaryReader.ReadByte();
@@ -192,10 +202,11 @@ public class NetPacket {
 
 public class PStringChar {
     public string m_buffer;
+    public int Length;
 
     public static PStringChar read(BinaryReader binaryReader) {
         PStringChar newObj = new PStringChar();
-
+        var startPosition = binaryReader.BaseStream.Position;
         uint size = binaryReader.ReadUInt16();
         if (size == ushort.MaxValue) {
             binaryReader.BaseStream.Seek(-2, SeekOrigin.Current);
@@ -209,7 +220,7 @@ public class PStringChar {
         }
 
         Util.readToAlign(binaryReader);
-
+        newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
         return newObj;
     }
 
@@ -220,13 +231,16 @@ public class PStringChar {
 
 public class PList<T> {
     public List<T> list = new List<T>();
+    public int Length;
 
     public static PList<T> read(BinaryReader binaryReader) {
         PList<T> newObj = new PList<T>();
+        var startPosition = binaryReader.BaseStream.Position;
         uint numElements = binaryReader.ReadUInt32();
         for (int i = 0; i < numElements; ++i) {
             newObj.list.Add(Util.readers[typeof(T)](binaryReader));
         }
+        newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
         return newObj;
     }
 
@@ -239,15 +253,18 @@ public class PList<T> {
 
 public class PackableHashTable<TKey, TValue> {
     public Dictionary<TKey, TValue> hashTable = new Dictionary<TKey, TValue>();
+    public int Length;
 
     public static PackableHashTable<TKey, TValue> read(BinaryReader binaryReader) {
         PackableHashTable<TKey, TValue> newObj = new PackableHashTable<TKey, TValue>();
+        var startPosition = binaryReader.BaseStream.Position;
         uint sizeInfo = binaryReader.ReadUInt32();
         uint _table_size = sizeInfo >> 16; // NOTE: We don't actually need the bucket sizes since C# will just do its own thing internally
         uint _currNum = sizeInfo & 0xFFFF;
         for (int i = 0; i < _currNum; ++i) {
             newObj.hashTable.Add(Util.readers[typeof(TKey)](binaryReader), Util.readers[typeof(TValue)](binaryReader));
         }
+        newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
         return newObj;
     }
 
@@ -330,6 +347,7 @@ public class Frame {
     public float qy;
     public float qz;
     public Mat3x3 m_fl2gv = new Mat3x3(); // Local-to-global matrix?
+    public int Length;
 
     public void cache() {
         // TODO: Clean this up
@@ -359,46 +377,61 @@ public class Frame {
 
     public static Frame read(BinaryReader binaryReader) {
         Frame newObj = new Frame();
+        var startPosition = binaryReader.BaseStream.Position;
         newObj.m_fOrigin = Vector3.read(binaryReader);
         newObj.qw = binaryReader.ReadSingle();
         newObj.qx = binaryReader.ReadSingle();
         newObj.qy = binaryReader.ReadSingle();
         newObj.qz = binaryReader.ReadSingle();
         newObj.cache();
+        newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
         return newObj;
     }
 
     public void contributeToTreeNode(TreeNode node) {
         node.Nodes.Add("m_fOrigin = " + m_fOrigin);
+        ContextInfo.AddToList(new ContextInfo { length = 12 });
         node.Nodes.Add("qw = " + qw);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("qx = " + qx);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("qy = " + qy);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("qz = " + qz);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("m_fl2gv = " + m_fl2gv);
+        ContextInfo.AddToList(new ContextInfo {}, updateDataIndex: false);
     }
 }
 
 public class Position {
     public uint objcell_id;
     public Frame frame = new Frame();
+    public int Length;
 
     public static Position read(BinaryReader binaryReader) {
         Position newObj = new Position();
+        var startPosition = binaryReader.BaseStream.Position;
         newObj.objcell_id = binaryReader.ReadUInt32();
         newObj.frame = Frame.read(binaryReader);
+        newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
         return newObj;
     }
 
     public static Position readOrigin(BinaryReader binaryReader) {
         Position newObj = new Position();
+        var startPosition = binaryReader.BaseStream.Position;
         newObj.objcell_id = binaryReader.ReadUInt32();
         newObj.frame.m_fOrigin = Vector3.read(binaryReader);
+        newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
         return newObj;
     }
 
     public void contributeToTreeNode(TreeNode node) {
         node.Nodes.Add("objcell_id = 0x" + objcell_id.ToString("X8"));
+        ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.CellID } );
         TreeNode frameNode = node.Nodes.Add("frame = ");
+        ContextInfo.AddToList(new ContextInfo { length = frame.Length }, updateDataIndex: false);
         frame.contributeToTreeNode(frameNode);
     }
 }
@@ -410,26 +443,34 @@ public class Skill {
     public uint _init_level;
     public uint _resistance_of_last_check;
     public double _last_used_time;
+    public int Length;
 
     public static Skill read(BinaryReader binaryReader) {
         Skill newObj = new Skill();
+        var startPosition = binaryReader.BaseStream.Position;
         newObj._level_from_pp = binaryReader.ReadUInt32();
         newObj._sac = (SKILL_ADVANCEMENT_CLASS)binaryReader.ReadUInt32();
         newObj._pp = binaryReader.ReadUInt32();
         newObj._init_level = binaryReader.ReadUInt32();
-        // newObj._resistance_of_last_check = binaryReader.ReadDouble();
         newObj._resistance_of_last_check = binaryReader.ReadUInt32();
         newObj._last_used_time = binaryReader.ReadDouble();
+        newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
         return newObj;
     }
 
     public void contributeToTreeNode(TreeNode node) {
         node.Nodes.Add("_level_from_pp = " + _level_from_pp);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_sac = " + _sac);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_pp = " + _pp);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_init_level = " + _init_level);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_resistance_of_last_check = " + _resistance_of_last_check);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_last_used_time = " + _last_used_time);
+        ContextInfo.AddToList(new ContextInfo { length = 8 });
     }
 }
 
@@ -437,6 +478,7 @@ public class Attribute {
     public uint _level_from_cp;
     public uint _init_level;
     public uint _cp_spent;
+    public int Length = 12;
 
     public static Attribute read(BinaryReader binaryReader) {
         Attribute newObj = new Attribute();
@@ -448,8 +490,11 @@ public class Attribute {
 
     public void contributeToTreeNode(TreeNode node) {
         node.Nodes.Add("_level_from_cp = " + _level_from_cp);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_init_level = " + _init_level);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_cp_spent = " + _cp_spent);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
     }
 }
 
@@ -458,6 +503,7 @@ public class SecondaryAttribute {
     public uint _init_level;
     public uint _cp_spent;
     public uint _current_level;
+    public int Length = 16;
 
     public static SecondaryAttribute read(BinaryReader binaryReader) {
         SecondaryAttribute newObj = new SecondaryAttribute();
@@ -470,8 +516,12 @@ public class SecondaryAttribute {
 
     public void contributeToTreeNode(TreeNode node) {
         node.Nodes.Add("_level_from_cp = " + _level_from_cp);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_init_level = " + _init_level);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_cp_spent = " + _cp_spent);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
         node.Nodes.Add("_current_level = " + _current_level);
+        ContextInfo.AddToList(new ContextInfo { length = 4 });
     }
 }
