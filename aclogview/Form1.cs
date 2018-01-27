@@ -55,6 +55,8 @@ namespace aclogview
         public static Dictionary<int, ContextInfo> contextList = new Dictionary<int, ContextInfo>();
         public static int nodeIndex = 0;
         public static int dataIndex = 0;
+        // TODO: Remove after context info is added to all message processors
+        public List<string> ciSupportedMessageProcessors = new List<string>();
 
         public Form1(string[] args)
         {
@@ -67,6 +69,7 @@ namespace aclogview
         {
             Util.initReaders();
             messageProcessors.Add(new CM_Admin());
+            ciSupportedMessageProcessors.Add(typeof(CM_Admin).Name);
             messageProcessors.Add(new CM_Advocate());
             messageProcessors.Add(new CM_Allegiance());
             messageProcessors.Add(new CM_Character());
@@ -80,7 +83,9 @@ namespace aclogview
             messageProcessors.Add(new CM_Inventory());
             messageProcessors.Add(new CM_Item());
             messageProcessors.Add(new CM_Login());
+            ciSupportedMessageProcessors.Add(typeof(CM_Login).Name);
             messageProcessors.Add(new CM_Magic());
+            ciSupportedMessageProcessors.Add(typeof(CM_Magic).Name);
             messageProcessors.Add(new CM_Misc());
             messageProcessors.Add(new CM_Movement());
             messageProcessors.Add(new CM_Physics());
@@ -160,6 +165,7 @@ namespace aclogview
             menuItem_ReOpenAsMessages.Enabled = true;
             checkBoxUseHex.Enabled = true;
             checkBox_ShowObjects.Enabled = true;
+            menuItem_gotoLine.Enabled = false;
             records.Clear();
             packetListItems.Clear();
             // This code needs to come after records.Clear(); so that the
@@ -273,6 +279,7 @@ namespace aclogview
                 listView_Packets.VirtualListSize = records.Count;
 
                 listView_Packets.RedrawItems(0, records.Count - 1, false);
+                menuItem_gotoLine.Enabled = true;
                 updateData();
             }
             else
@@ -473,6 +480,11 @@ namespace aclogview
 
                             if (accepted) {
                                 handled = true;
+                                // TODO: Remove after all message processors have context info
+                                if (!ciSupportedMessageProcessors.Contains(messageProcessor.ToString()))
+                                {
+                                    contextList.Clear();
+                                }
                                 if (messageDataReader.BaseStream.Position != messageDataReader.BaseStream.Length) {
                                     treeView_ParsedData.Nodes.Add(new TreeNode("WARNING: Packet not fully read!"));
                                 }
@@ -567,7 +579,11 @@ namespace aclogview
 
         private void treeView_ParsedData_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            updateText();
+            // No need to reload the hex data if we are in messages mode.
+            // In fragments mode selection highlighting is applied in updateText()
+            // so we do need to call it.
+            if (!loadedAsMessages)
+                updateText();
             if (contextList.Count > 0 && loadedAsMessages)
             {
                 if (e.Node != null)
@@ -1465,6 +1481,20 @@ namespace aclogview
         private void hexContextMenu_Opening(object sender, CancelEventArgs e)
         {
             e.Cancel = (hexBox1.SelectionLength == 0);
+        }
+
+        private void menuItem_gotoLine_Click(object sender, EventArgs e)
+        {
+            using (var form = new GotoLine(listView_Packets.Items.Count))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    listView_Packets.TopItem = listView_Packets.Items[form.lineNumber];
+                    listView_Packets.Items[form.lineNumber].Selected = true;
+                    lblTracker.Text = "Viewing #" + listView_Packets.Items[form.lineNumber].Index;
+                }
+            }
         }
     }
 }

@@ -67,13 +67,15 @@
             this.menuItem_Edit = new System.Windows.Forms.MenuItem();
             this.mnuItem_EditPreviousHighlightedRow = new System.Windows.Forms.MenuItem();
             this.mnuItem_EditNextHighlightedRow = new System.Windows.Forms.MenuItem();
+            this.menuItem3 = new System.Windows.Forms.MenuItem();
+            this.menuItem_gotoLine = new System.Windows.Forms.MenuItem();
             this.menuItem1 = new System.Windows.Forms.MenuItem();
+            this.mnuItem_ToolFindOpcodeInFiles = new System.Windows.Forms.MenuItem();
+            this.menuItem_ToolFindTextInFiles = new System.Windows.Forms.MenuItem();
+            this.menuItem2 = new System.Windows.Forms.MenuItem();
             this.menuItem_ToolCount = new System.Windows.Forms.MenuItem();
             this.menuItem_ToolBad = new System.Windows.Forms.MenuItem();
             this.menuItem_ToolHeatmap = new System.Windows.Forms.MenuItem();
-            this.menuItem2 = new System.Windows.Forms.MenuItem();
-            this.mnuItem_ToolFindOpcodeInFiles = new System.Windows.Forms.MenuItem();
-            this.menuItem_ToolFindTextInFiles = new System.Windows.Forms.MenuItem();
             this.mnuItem_ToolFragDatListTool = new System.Windows.Forms.MenuItem();
             this.menuItem_Help = new System.Windows.Forms.MenuItem();
             this.menuItem_About = new System.Windows.Forms.MenuItem();
@@ -485,7 +487,9 @@
             this.menuItem_Edit.Index = 1;
             this.menuItem_Edit.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
             this.mnuItem_EditPreviousHighlightedRow,
-            this.mnuItem_EditNextHighlightedRow});
+            this.mnuItem_EditNextHighlightedRow,
+            this.menuItem3,
+            this.menuItem_gotoLine});
             this.menuItem_Edit.Text = "Edit";
             // 
             // mnuItem_EditPreviousHighlightedRow
@@ -502,6 +506,19 @@
             this.mnuItem_EditNextHighlightedRow.Text = "Next Highlighted Row";
             this.mnuItem_EditNextHighlightedRow.Click += new System.EventHandler(this.menuItem_EditNextHighlightedRow_Click);
             // 
+            // menuItem3
+            // 
+            this.menuItem3.Index = 2;
+            this.menuItem3.Text = "-";
+            // 
+            // menuItem_gotoLine
+            // 
+            this.menuItem_gotoLine.Enabled = false;
+            this.menuItem_gotoLine.Index = 3;
+            this.menuItem_gotoLine.Shortcut = System.Windows.Forms.Shortcut.CtrlG;
+            this.menuItem_gotoLine.Text = "Go To Line";
+            this.menuItem_gotoLine.Click += new System.EventHandler(this.menuItem_gotoLine_Click);
+            // 
             // menuItem1
             // 
             this.menuItem1.Index = 2;
@@ -514,6 +531,23 @@
             this.menuItem_ToolHeatmap,
             this.mnuItem_ToolFragDatListTool});
             this.menuItem1.Text = "Tools";
+            // 
+            // mnuItem_ToolFindOpcodeInFiles
+            // 
+            this.mnuItem_ToolFindOpcodeInFiles.Index = 0;
+            this.mnuItem_ToolFindOpcodeInFiles.Text = "Find Opcode In Files";
+            this.mnuItem_ToolFindOpcodeInFiles.Click += new System.EventHandler(this.menuItem_ToolFindOpcodeInFiles_Click);
+            // 
+            // menuItem_ToolFindTextInFiles
+            // 
+            this.menuItem_ToolFindTextInFiles.Index = 1;
+            this.menuItem_ToolFindTextInFiles.Text = "Find Text In Files";
+            this.menuItem_ToolFindTextInFiles.Click += new System.EventHandler(this.menuItem_ToolFindTextInFiles_Click);
+            // 
+            // menuItem2
+            // 
+            this.menuItem2.Index = 2;
+            this.menuItem2.Text = "-";
             // 
             // menuItem_ToolCount
             // 
@@ -532,23 +566,6 @@
             this.menuItem_ToolHeatmap.Index = 5;
             this.menuItem_ToolHeatmap.Text = "Heatmap";
             this.menuItem_ToolHeatmap.Click += new System.EventHandler(this.menuItem_ToolHeatmap_Click);
-            // 
-            // menuItem2
-            // 
-            this.menuItem2.Index = 2;
-            this.menuItem2.Text = "-";
-            // 
-            // mnuItem_ToolFindOpcodeInFiles
-            // 
-            this.mnuItem_ToolFindOpcodeInFiles.Index = 0;
-            this.mnuItem_ToolFindOpcodeInFiles.Text = "Find Opcode In Files";
-            this.mnuItem_ToolFindOpcodeInFiles.Click += new System.EventHandler(this.menuItem_ToolFindOpcodeInFiles_Click);
-            // 
-            // menuItem_ToolFindTextInFiles
-            // 
-            this.menuItem_ToolFindTextInFiles.Index = 1;
-            this.menuItem_ToolFindTextInFiles.Text = "Find Text In Files";
-            this.menuItem_ToolFindTextInFiles.Click += new System.EventHandler(this.menuItem_ToolFindTextInFiles_Click);
             // 
             // mnuItem_ToolFragDatListTool
             // 
@@ -852,6 +869,8 @@
         private System.Windows.Forms.ToolStripMenuItem copyHexMenuItem;
         private System.Windows.Forms.ToolStripMenuItem copyTextMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.MenuItem menuItem3;
+        private System.Windows.Forms.MenuItem menuItem_gotoLine;
     }
 }
 

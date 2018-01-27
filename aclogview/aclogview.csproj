@@ -56,6 +56,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ContextInfo.cs" />
+    <Compile Include="GotoLine.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GotoLine.Designer.cs">
+      <DependentUpon>GotoLine.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\FindTextInFilesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -160,6 +166,9 @@
       <DependentUpon>TextPopup.cs</DependentUpon>
     </Compile>
     <Compile Include="Utility.cs" />
+    <EmbeddedResource Include="GotoLine.resx">
+      <DependentUpon>GotoLine.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Tools\FindOpcodeInFilesForm.resx">
       <DependentUpon>FindOpcodeInFilesForm.cs</DependentUpon>
     </EmbeddedResource>
