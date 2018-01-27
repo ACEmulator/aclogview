@@ -1,3 +1,19 @@
+### 2018-01-26
+[Slushnas]
+##### Interface Changes
+* Made some changes to the hexbox control to improve scrolling functionality when using context info highlighting.
+* Changed row click behavior of **_Find Opcode In Files_** and **_Find Text In Files_** so that double-clicking anywhere in the row will open the file.
+* Added fix to main form to prevent hex data from being re-drawn in messages mode every time the user selects a tree view node.
+* Added a **_Go To Line_** feature under the Edit menu to allow the user to input a line number and jump to it.
+* Added some temporary code to prevent context info from being used in messages that are not supported yet.
+
+##### Other Changes
+* Added context info to CM_Admin.
+* Added context info to messages in CM_Login and other supporting classes.
+* Did some small refactoring of CM_Magic context info and added info to the PurgeEnchantments and PurgeBadEnchantments messages for completeness.
+* Added context info supporting code to common packed object types.
+* Changed the readToAlign function to return the number of padding bytes read.
+
 ### 2018-01-19
 [Slushnas]
 ##### Interface Changes
