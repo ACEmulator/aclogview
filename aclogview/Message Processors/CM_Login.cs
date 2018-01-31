@@ -58,11 +58,11 @@ public class CM_Login : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("gid_ = " + Utility.FormatHex(gid_));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             node.Nodes.Add("name_ = " + name_.m_buffer);
-            ContextInfo.AddToList(new ContextInfo { length = name_.Length, dataType = DataType.Serialized_AsciiString });
+            ContextInfo.AddToList(new ContextInfo { Length = name_.Length, DataType = DataType.Serialized_AsciiString });
             node.Nodes.Add("secondsGreyedOut_ = " + secondsGreyedOut_);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -97,9 +97,9 @@ public class CM_Login : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.Opcode });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("status_ = " + status_);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode setNode = rootNode.Nodes.Add("set_ = ");
             // Calculate character set size
             var charSetSize = 4;
@@ -107,12 +107,12 @@ public class CM_Login : MessageProcessor {
             {
                 charSetSize += set_[i].Length;
             }
-            ContextInfo.AddToList(new ContextInfo { length = charSetSize }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = charSetSize }, updateDataIndex: false);
             // Skip character list count uint
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < set_.Count; i++) {
                 TreeNode characterNode = setNode.Nodes.Add($"character {i+1} = ");
-                ContextInfo.AddToList(new ContextInfo { length = set_[i].Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = set_[i].Length }, updateDataIndex: false);
                 set_[i].contributeToTreeNode(characterNode);
             }
             TreeNode delSetNode = rootNode.Nodes.Add("delSet_ = ");
@@ -122,23 +122,23 @@ public class CM_Login : MessageProcessor {
             {
                 charSetSize += delSet_[i].Length;
             }
-            ContextInfo.AddToList(new ContextInfo { length = charSetSize }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = charSetSize }, updateDataIndex: false);
             // Skip character list count uint
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < delSet_.Count; i++)
             {
                 TreeNode characterNode = delSetNode.Nodes.Add($"character {i+1} = ");
-                ContextInfo.AddToList(new ContextInfo { length = delSet_[i].Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = delSet_[i].Length }, updateDataIndex: false);
                 delSet_[i].contributeToTreeNode(characterNode);
             }
             rootNode.Nodes.Add("numAllowedCharacters_ = " + numAllowedCharacters_);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("account_ = " + account_.m_buffer);
-            ContextInfo.AddToList(new ContextInfo { length = account_.Length, dataType = DataType.Serialized_AsciiString });
+            ContextInfo.AddToList(new ContextInfo { Length = account_.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("m_fUseTurbineChat = " + m_fUseTurbineChat);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("m_fHasThroneofDestiny = " + m_fHasThroneofDestiny);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -159,13 +159,13 @@ public class CM_Login : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.Opcode });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("cConnections = " + cConnections);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("cMaxConnections = " + cMaxConnections);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("strWorldName = " + strWorldName.m_buffer);
-            ContextInfo.AddToList(new ContextInfo { length = strWorldName.Length, dataType = DataType.Serialized_AsciiString });
+            ContextInfo.AddToList(new ContextInfo { Length = strWorldName.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -192,31 +192,31 @@ public class CM_Login : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             TreeNode CACQualitiesNode = rootNode.Nodes.Add("CACQualities = ");
-            ContextInfo.AddToList(new ContextInfo { length = CACQualities.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = CACQualities.Length }, updateDataIndex: false);
             CACQualities.contributeToTreeNode(CACQualitiesNode);
             TreeNode PlayerModuleNode = rootNode.Nodes.Add("PlayerModule = ");
-            ContextInfo.AddToList(new ContextInfo { length = PlayerModule.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = PlayerModule.Length }, updateDataIndex: false);
             PlayerModule.contributeToTreeNode(PlayerModuleNode);
             TreeNode ContentProfileNode = rootNode.Nodes.Add("clist = ");
-            ContextInfo.AddToList(new ContextInfo { length = clist.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = clist.Length }, updateDataIndex: false);
             // Skip Plist count dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < clist.list.Count; i++)
             {
                 TreeNode clistItemNode = ContentProfileNode.Nodes.Add($"item {i + 1}");
-                ContextInfo.AddToList(new ContextInfo { length = clist.list[i].Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = clist.list[i].Length }, updateDataIndex: false);
                 clist.list[i].contributeToTreeNode(clistItemNode);
             }
             TreeNode InventoryPlacementProfileNode = rootNode.Nodes.Add("ilist = ");
-            ContextInfo.AddToList(new ContextInfo { length = ilist.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = ilist.Length }, updateDataIndex: false);
             // Skip Plist count dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < ilist.list.Count; i++)
             {
                 TreeNode ilistItemNode = InventoryPlacementProfileNode.Nodes.Add($"item {i + 1}");
-                ContextInfo.AddToList(new ContextInfo { length = ilist.list[i].Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = ilist.list[i].Length }, updateDataIndex: false);
                 ilist.list[i].contributeToTreeNode(ilistItemNode);
             }
             treeView.Nodes.Add(rootNode);
@@ -287,41 +287,41 @@ public class CM_Login : MessageProcessor {
         {
             node.Expand();
             TreeNode CBaseQualitiesNode = node.Nodes.Add("CBaseQualities = ");
-            ContextInfo.AddToList(new ContextInfo { length = CBaseQualities.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = CBaseQualities.Length }, updateDataIndex: false);
             CBaseQualities.contributeToTreeNode(CBaseQualitiesNode);
 
             TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false );
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false );
             for (int i = 0; i < packedItems.Count; i++)
             {
                 headerNode.Nodes.Add(packedItems[i]);
-                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             }
             // Now skip the header
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("_weenie_type = " + _weenie_type);
-            ContextInfo.AddToList(new ContextInfo { length = 4 }) ;
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }) ;
 
             if ((header & (uint)QualitiesPackHeader.Packed_AttributeCache) != 0)
             {
                 TreeNode attribCacheNode = node.Nodes.Add("_attribCache = ");
-                ContextInfo.AddToList(new ContextInfo { length = _attribCache.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _attribCache.Length }, updateDataIndex: false);
                 _attribCache.contributeToTreeNode(attribCacheNode);
             }
 
             if ((header & (uint)QualitiesPackHeader.Packed_SkillHashTable) != 0)
             {
                 TreeNode skillStatsNode = node.Nodes.Add("_skillStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _skillStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _skillStatsTable.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<STypeSkill, Skill> element in _skillStatsTable.hashTable)
                 {
                     TreeNode thisStatNode = skillStatsNode.Nodes.Add(element.Key + " = ");
                     Skill thisSkill = element.Value;
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeSkill) + thisSkill.Length }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeSkill) + thisSkill.Length }, updateDataIndex: false);
                     // Skip STypeSkill dword
-                    Form1.dataIndex += 4;
+                    ContextInfo.DataIndex += 4;
                     thisSkill.contributeToTreeNode(thisStatNode);
                 }
             }
@@ -329,22 +329,22 @@ public class CM_Login : MessageProcessor {
             if ((header & (uint)QualitiesPackHeader.Packed_SpellBook) != 0)
             {
                 TreeNode spellBookNode = node.Nodes.Add("_spell_book = ");
-                ContextInfo.AddToList(new ContextInfo { length = _spell_book.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _spell_book.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<uint, float> element in _spell_book.hashTable)
                 {
                     TreeNode spellNode = spellBookNode.Nodes.Add($"({element.Key}) {(SpellID)element.Key} = ");
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(uint), dataType = DataType.SpellID_uint });
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
                     spellNode.Nodes.Add("_casting_likelihood = " + element.Value);
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(float) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(float) });
                 }
             }
             
             if ((header & (uint)QualitiesPackHeader.Packed_EnchantmentRegistry) != 0)
             {
                 TreeNode enchantmentRegNode = node.Nodes.Add("_enchantment_reg = ");
-                ContextInfo.AddToList(new ContextInfo { length = _enchantment_reg.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _enchantment_reg.Length }, updateDataIndex: false);
                 _enchantment_reg.contributeToTreeNode(enchantmentRegNode);
             }
         }
@@ -431,63 +431,63 @@ public class CM_Login : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 headerNode.Nodes.Add(packedItems[i]);
-                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             }
             // Now skip over the header
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("_weenie_type = " + _weenie_type);
-            ContextInfo.AddToList(new ContextInfo { length = 4 } );
+            ContextInfo.AddToList(new ContextInfo { Length = 4 } );
             
             if ((header & (uint)BaseQualitiesPackHeader.Packed_IntStats) != 0)
             {
                 TreeNode intStatsNode = node.Nodes.Add("_intStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _intStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _intStatsTable.Length }, updateDataIndex: false);
                 _intStatsTable.contributeToTreeNode(intStatsNode);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _intStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeInt) + sizeof(int) } );
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeInt) + sizeof(int) } );
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_Int64Stats) != 0)
             {
                 TreeNode int64StatsNode = node.Nodes.Add("_int64StatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _int64StatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _int64StatsTable.Length }, updateDataIndex: false);
                 _int64StatsTable.contributeToTreeNode(int64StatsNode);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _int64StatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeInt64) + sizeof(long) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeInt64) + sizeof(long) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_BoolStats) != 0)
             {
                 TreeNode boolStatsNode = node.Nodes.Add("_boolStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _boolStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _boolStatsTable.Length }, updateDataIndex: false);
                 _boolStatsTable.contributeToTreeNode(boolStatsNode);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _boolStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeBool) + sizeof(int) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeBool) + sizeof(int) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_FloatStats) != 0)
             {
                 TreeNode floatStatsNode = node.Nodes.Add("_floatStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _floatStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _floatStatsTable.Length }, updateDataIndex: false);
                 _floatStatsTable.contributeToTreeNode(floatStatsNode);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _floatStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeFloat) + sizeof(double) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeFloat) + sizeof(double) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_StringStats) != 0)
@@ -495,52 +495,52 @@ public class CM_Login : MessageProcessor {
                 // TODO: Possibly separate the string type and string into different tree nodes
                 // so context info can be added to the string.
                 TreeNode strStatsNode = node.Nodes.Add("_strStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _strStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _strStatsTable.Length }, updateDataIndex: false);
                 _strStatsTable.contributeToTreeNode(strStatsNode);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<STypeString, PStringChar> element in _strStatsTable.hashTable)
                 {
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeString) + element.Value.Length });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeString) + element.Value.Length });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_DataIDStats) != 0)
             {
                 TreeNode didStatsNode = node.Nodes.Add("_didStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _didStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _didStatsTable.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<STypeDID, uint> element in _didStatsTable.hashTable)
                 {
                     didStatsNode.Nodes.Add(element.Key + " = " + Utility.FormatHex(element.Value));
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeDID) + sizeof(uint) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeDID) + sizeof(uint) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_IIDStats) != 0)
             {
                 TreeNode iidStatsNode = node.Nodes.Add("_iidStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _iidStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _iidStatsTable.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<STypeIID, uint> element in _iidStatsTable.hashTable)
                 {
                     iidStatsNode.Nodes.Add(element.Key + " = " + Utility.FormatHex(element.Value));
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypeIID) + sizeof(uint) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeIID) + sizeof(uint) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_PositionHashTable) != 0)
             {
                 TreeNode posStatsNode = node.Nodes.Add("_posStatsTable = ");
-                ContextInfo.AddToList(new ContextInfo { length = _posStatsTable.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _posStatsTable.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<STypePosition, Position> element in _posStatsTable.hashTable)
                 {
                     TreeNode thisPosNode = posStatsNode.Nodes.Add(element.Key + " = ");
                     Position thisPos = element.Value;
-                    ContextInfo.AddToList(new ContextInfo { length = sizeof(STypePosition) + thisPos.Length }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypePosition) + thisPos.Length }, updateDataIndex: false);
                     // Skip STypePosition count dword
-                    Form1.dataIndex += 4;
+                    ContextInfo.DataIndex += 4;
                     thisPos.contributeToTreeNode(thisPosNode);
                 }
             }
@@ -582,42 +582,42 @@ public class CM_Login : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (ATTRIBUTE_CACHE_MASK element in Enum.GetValues(typeof(ATTRIBUTE_CACHE_MASK))) {
                 if ((header & (uint)element) != 0)
                 {
                     headerNode.Nodes.Add(Enum.GetName(typeof(ATTRIBUTE_CACHE_MASK), element));
-                    ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
             // Now skip the header
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             TreeNode strengthNode = node.Nodes.Add("_strength = ");
-            ContextInfo.AddToList(new ContextInfo { length = _strength.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _strength.Length }, updateDataIndex: false);
             _strength.contributeToTreeNode(strengthNode);
             TreeNode enduranceNode = node.Nodes.Add("_endurance = ");
-            ContextInfo.AddToList(new ContextInfo { length = _endurance.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _endurance.Length }, updateDataIndex: false);
             _endurance.contributeToTreeNode(enduranceNode);
             TreeNode quicknessNode = node.Nodes.Add("_quickness = ");
-            ContextInfo.AddToList(new ContextInfo { length = _quickness.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _quickness.Length }, updateDataIndex: false);
             _quickness.contributeToTreeNode(quicknessNode);
             TreeNode coordinationNode = node.Nodes.Add("_coordination = ");
-            ContextInfo.AddToList(new ContextInfo { length = _coordination.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _coordination.Length }, updateDataIndex: false);
             _coordination.contributeToTreeNode(coordinationNode);
             TreeNode focusNode = node.Nodes.Add("_focus = ");
-            ContextInfo.AddToList(new ContextInfo { length = _focus.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _focus.Length }, updateDataIndex: false);
             _focus.contributeToTreeNode(focusNode);
             TreeNode selfNode = node.Nodes.Add("_self = ");
-            ContextInfo.AddToList(new ContextInfo { length = _self.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _self.Length }, updateDataIndex: false);
             _self.contributeToTreeNode(selfNode);
             TreeNode healthNode = node.Nodes.Add("_health = ");
-            ContextInfo.AddToList(new ContextInfo { length = _health.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _health.Length }, updateDataIndex: false);
             _health.contributeToTreeNode(healthNode);
             TreeNode staminaNode = node.Nodes.Add("_stamina = ");
-            ContextInfo.AddToList(new ContextInfo { length = _stamina.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _stamina.Length }, updateDataIndex: false);
             _stamina.contributeToTreeNode(staminaNode);
             TreeNode manaNode = node.Nodes.Add("_mana = ");
-            ContextInfo.AddToList(new ContextInfo { length = _mana.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = _mana.Length }, updateDataIndex: false);
             _mana.contributeToTreeNode(manaNode);
         }
     }
@@ -664,26 +664,26 @@ public class CM_Login : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 headerNode.Nodes.Add(packedItems[i]);
-                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             }
             // Now skip the header
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             
             if ((header & (uint)EnchantmentRegistryPackHeader.Packed_MultList) != 0)
             {
                 TreeNode multListNode = node.Nodes.Add("_mult_list = ");
-                ContextInfo.AddToList(new ContextInfo { length = _mult_list.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _mult_list.Length }, updateDataIndex: false);
                 // Skip PList count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (CM_Magic.Enchantment element in _mult_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
                     TreeNode thisEnchantmentNode = multListNode.Nodes.Add("Enchantment = " + (SpellID)element.eid.i_spell_id);
-                    ContextInfo.AddToList(new ContextInfo { length = thisEnchantment.Length }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = thisEnchantment.Length }, updateDataIndex: false);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }
             }
@@ -691,14 +691,14 @@ public class CM_Login : MessageProcessor {
             if ((header & (uint)EnchantmentRegistryPackHeader.Packed_AddList) != 0)
             {
                 TreeNode addListNode = node.Nodes.Add("_add_list = ");
-                ContextInfo.AddToList(new ContextInfo { length = _add_list.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _add_list.Length }, updateDataIndex: false);
                 // Skip PList count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (CM_Magic.Enchantment element in _add_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
                     TreeNode thisEnchantmentNode = addListNode.Nodes.Add("Enchantment = " + (SpellID)element.eid.i_spell_id);
-                    ContextInfo.AddToList(new ContextInfo { length = thisEnchantment.Length }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = thisEnchantment.Length }, updateDataIndex: false);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }
             }
@@ -706,14 +706,14 @@ public class CM_Login : MessageProcessor {
             if ((header & (uint)EnchantmentRegistryPackHeader.Packed_Cooldown) != 0)
             {
                 TreeNode cooldownListNode = node.Nodes.Add("_cooldown_list = ");
-                ContextInfo.AddToList(new ContextInfo { length = _cooldown_list.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _cooldown_list.Length }, updateDataIndex: false);
                 // Skip PList count dword
-                Form1.dataIndex += 4;
+                ContextInfo.DataIndex += 4;
                 foreach (CM_Magic.Enchantment element in _cooldown_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
                     TreeNode thisEnchantmentNode = cooldownListNode.Nodes.Add("Enchantment = " + (SpellID)element.eid.i_spell_id);
-                    ContextInfo.AddToList(new ContextInfo { length = thisEnchantment.Length }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = thisEnchantment.Length }, updateDataIndex: false);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }
             }
@@ -721,7 +721,7 @@ public class CM_Login : MessageProcessor {
             if ((header & (uint)EnchantmentRegistryPackHeader.Packed_Vitae) != 0)
             {
                 TreeNode vitaeNode = node.Nodes.Add("_vitae = ");
-                ContextInfo.AddToList(new ContextInfo { length = _vitae.Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = _vitae.Length }, updateDataIndex: false);
                 _vitae.contributeToTreeNode(vitaeNode);
             }
 
@@ -747,21 +747,21 @@ public class CM_Login : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             TreeNode ilistIIDNode = node.Nodes.Add("iid_ = " + Utility.FormatHex(iid_));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode ilistLocNode = node.Nodes.Add("loc_ = " + Utility.FormatHex(loc_));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
             {
                 if ((loc_ & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     ilistLocNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
             // Now skip _loc dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             TreeNode ilistPriorityNode = node.Nodes.Add("priority_ = " + priority_);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 

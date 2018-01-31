@@ -157,15 +157,15 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("i_objectId = " + Utility.FormatHex(i_objectId));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_slot = " + i_slot);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_type = " + (ContainerProperties)i_type);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -188,17 +188,17 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
             {
                 if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     equipMaskNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
             rootNode.ExpandAll();
@@ -221,9 +221,9 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.Opcode });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -244,13 +244,13 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_loc = " + i_loc);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -269,17 +269,17 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
             {
                 if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     equipMaskNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
             rootNode.ExpandAll();
@@ -299,9 +299,9 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -320,11 +320,11 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_object = " + Utility.FormatHex(this.i_object));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -341,9 +341,9 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_object = " + Utility.FormatHex(i_object));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -363,9 +363,9 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("ObjectID = " + Utility.FormatHex(ObjectID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -386,13 +386,13 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_mergeFromID = " + Utility.FormatHex(i_mergeFromID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_mergeToID = " + Utility.FormatHex(i_mergeToID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_amount = " + i_amount);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -415,15 +415,15 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_containerID = " + Utility.FormatHex(i_containerID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_place = " + i_place);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_amount = " + i_amount);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -442,11 +442,11 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_amount = " + i_amount);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -467,11 +467,11 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatHex(i_objectID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("etype = " + etype);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -492,13 +492,13 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_targetID = " + Utility.FormatHex(this.i_targetID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatHex(this.i_objectID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_amount = " + i_amount);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -515,9 +515,9 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -536,9 +536,9 @@ public class CM_Inventory : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("m_iid = " + Utility.FormatHex(m_iid));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             node.Nodes.Add("m_uContainerProperties = " + (ContainerProperties)m_uContainerProperties);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -555,16 +555,16 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode contentsNode = rootNode.Nodes.Add("contents = ");
-            ContextInfo.AddToList(new ContextInfo { length = contents_list.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = contents_list.Length }, updateDataIndex: false);
             // Now skip PList count dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < contents_list.list.Count; i++) {
                 TreeNode itemNode = contentsNode.Nodes.Add($"item {i + 1} = ");
-                ContextInfo.AddToList(new ContextInfo { length = contents_list.list[i].Length }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = contents_list.list[i].Length }, updateDataIndex: false);
                 contents_list.list[i].contributeToTreeNode(itemNode);
             }
             rootNode.ExpandAll();
@@ -588,23 +588,23 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode locationNode = rootNode.Nodes.Add("i_loc = " + Utility.FormatHex(i_loc));
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
             {
                 if ((i_loc & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     locationNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
             // Now skip i_loc dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             rootNode.Nodes.Add("i_amount = " + i_amount);
-            ContextInfo.AddToList(new ContextInfo { length = 4 } );
+            ContextInfo.AddToList(new ContextInfo { Length = 4 } );
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -622,17 +622,17 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_toolID = " + Utility.FormatHex(i_toolID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode gemsNode = rootNode.Nodes.Add("i_gems = ");
-            ContextInfo.AddToList(new ContextInfo { length = i_gems.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = i_gems.Length }, updateDataIndex: false);
             // Skip PList count dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < i_gems.list.Count; i++) {
                 var gem = i_gems.list[i];
                 gemsNode.Nodes.Add(Utility.FormatHex(gem));
-                ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             }
             rootNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
@@ -654,11 +654,11 @@ public class CM_Inventory : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("m_material = " + m_material);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("m_workmanship = " + m_workmanship);
-            ContextInfo.AddToList(new ContextInfo { length = 8 });
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("m_units = " + m_units);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -679,27 +679,27 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("m_skillUsed = " + (STypeSkill)m_skillUsed);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode notSalvageableNode = rootNode.Nodes.Add("m_notSalvagable = ");
-            ContextInfo.AddToList(new ContextInfo { length = m_notSalvagable.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = m_notSalvagable.Length }, updateDataIndex: false);
             // Now skip PList count dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_notSalvagable.list.Count; i++) {
                 var object_id = m_notSalvagable.list[i];
                 notSalvageableNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
-                ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             }
             TreeNode salvageResultsNode = rootNode.Nodes.Add("m_salvageResults = ");
-            ContextInfo.AddToList(new ContextInfo { length = m_salvageResults.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = m_salvageResults.Length }, updateDataIndex: false);
             // Now skip PList count dword
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_salvageResults.list.Count; i++) {
                 m_salvageResults.list[i].contributeToTreeNode(salvageResultsNode);
             }
             rootNode.Nodes.Add("m_augBonus = " + m_augBonus + "%");
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
         }
@@ -723,15 +723,15 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.Opcode });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("ts = " + ts);
-            ContextInfo.AddToList(new ContextInfo { length = 1 });
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("item = " + Utility.FormatHex(item));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("amount = " + amount);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("newValue = " + newValue);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -748,9 +748,9 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("ObjectID = " + Utility.FormatHex(ObjectID));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }

@@ -19,7 +19,7 @@ public class CM_Magic : MessageProcessor {
             case PacketOpcode.Evt_Magic__PurgeBadEnchantments_ID: {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
-                    ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
                     break;
                 }
             case PacketOpcode.Evt_Magic__CastUntargetedSpell_ID: {
@@ -120,11 +120,11 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -141,9 +141,9 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -167,13 +167,13 @@ public class CM_Magic : MessageProcessor {
 
             if (isClientToServer)
             {
-                ContextInfo.AddToList(new ContextInfo { length = 12, dataType = DataType.Header12Bytes });
-                ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             }
             else
             {
-                ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
-                ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             }
         }
     }
@@ -190,9 +190,9 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.SpellID_uint });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -305,17 +305,17 @@ public class CM_Magic : MessageProcessor {
             }
 
             // Type field
-            ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             for (int i = 0; i < typeNode.Nodes.Count; i++)
             {
-                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             }
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             // Key field
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             // Value field
             node.Nodes.Add("val = " + val);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -356,36 +356,36 @@ public class CM_Magic : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             TreeNode enchantmentIDNode = node.Nodes.Add("enchantment id = ");
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.EnchantmentID }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.EnchantmentID }, updateDataIndex: false);
             eid.contributeToTreeNode(enchantmentIDNode);
             node.Nodes.Add("spell_category = " + Utility.FormatHex(spell_category));
-            ContextInfo.AddToList(new ContextInfo { length = 2 });
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("has_spell_set_id = " + has_spell_set_id);
-            ContextInfo.AddToList(new ContextInfo { length = 2 });
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("power_level = " + power_level);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("start_time = " + start_time);
-            ContextInfo.AddToList(new ContextInfo { length = 8 });
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             if (duration == -1) {
                 node.Nodes.Add("duration = " + duration + " (indefinite)");
             }
             else {
                 node.Nodes.Add("duration = " + duration + " seconds");
             }
-            ContextInfo.AddToList(new ContextInfo { length = 8 });
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("caster = " + Utility.FormatHex(caster));
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.ObjectID });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             node.Nodes.Add("degrade_modifier = " + degrade_modifier);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("degrade_limit = " + degrade_limit);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("last_time_degraded = " + last_time_degraded);
-            ContextInfo.AddToList(new ContextInfo { length = 8 });
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             TreeNode statModNode = node.Nodes.Add("statmod = ");
-            ContextInfo.AddToList(new ContextInfo { length = smod.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = smod.Length }, updateDataIndex: false);
             smod.contributeToTreeNode(statModNode);
             node.Nodes.Add("spell_set_id = " + (SpellSetID)spell_set_id);
-            ContextInfo.AddToList(new ContextInfo { length = 4 });
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -404,9 +404,9 @@ public class CM_Magic : MessageProcessor {
         public void contributeToTreeNode(TreeNode treeView)
         {
             treeView.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
-            ContextInfo.AddToList(new ContextInfo { length = 2, dataType = DataType.SpellID_ushort });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_ushort });
             treeView.Nodes.Add("layer = " + layer);
-            ContextInfo.AddToList(new ContextInfo { length = 2, dataType = DataType.SpellLayer });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellLayer });
         }
     }
 
@@ -424,9 +424,9 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             TreeNode enchantmentIDNode = rootNode.Nodes.Add("enchantment id = ");
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.EnchantmentID }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.EnchantmentID }, updateDataIndex: false);
             eid.contributeToTreeNode(enchantmentIDNode);
             enchantmentIDNode.Expand();
             treeView.Nodes.Add(rootNode);
@@ -446,9 +446,9 @@ public class CM_Magic : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             TreeNode enchantmentIDNode = rootNode.Nodes.Add("enchantment id = ");
-            ContextInfo.AddToList(new ContextInfo { length = 4, dataType = DataType.EnchantmentID }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.EnchantmentID }, updateDataIndex: false);
             eid.contributeToTreeNode(enchantmentIDNode);
             enchantmentIDNode.Expand();
             treeView.Nodes.Add(rootNode);
@@ -467,9 +467,9 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             TreeNode enchantmentNode = rootNode.Nodes.Add("enchantment = ");
-            ContextInfo.AddToList(new ContextInfo { length = enchant.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = enchant.Length }, updateDataIndex: false);
             enchant.contributeToTreeNode(enchantmentNode);
             enchantmentNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
@@ -488,14 +488,14 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
-            ContextInfo.AddToList(new ContextInfo { length = enchantmentList.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = enchantmentList.Length }, updateDataIndex: false);
             // Skip Plist count uint
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < enchantmentList.list.Count; i++) {
                 TreeNode listNode = plistNode.Nodes.Add($"enchantment {i+1} = ");
-                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 var enchantment = enchantmentList.list[i];
                 enchantment.contributeToTreeNode(listNode);
                 listNode.Expand();
@@ -518,15 +518,15 @@ public class CM_Magic : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { length = 16, dataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
-            ContextInfo.AddToList(new ContextInfo { length = enchantmentList.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = enchantmentList.Length }, updateDataIndex: false);
             // Skip Plist count uint
-            Form1.dataIndex += 4;
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < enchantmentList.list.Count; i++)
             {
                 TreeNode listNode = plistNode.Nodes.Add($"enchantment {i + 1} = ");
-                ContextInfo.AddToList(new ContextInfo { length = 4 }, updateDataIndex: false);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 var enchantment = enchantmentList.list[i];
                 enchantment.contributeToTreeNode(listNode);
                 listNode.Expand();
