@@ -94,6 +94,7 @@ namespace aclogview
             messageProcessors.Add(new CM_Vendor());
             messageProcessors.Add(new CM_Writing());
             messageProcessors.Add(new Proto_UI());
+            ciSupportedMessageProcessors.Add(typeof(Proto_UI).Name);
             Globals.UseHex = checkBoxUseHex.Checked;
 
             // Initialize our highlight mode
@@ -905,10 +906,11 @@ namespace aclogview
                 switch (clickedItem) {
                     case "ExpandAll":
                         {
-                            var topNode = treeView_ParsedData.TopNode;
+                            var currentNodeIndex = treeView_ParsedData.SelectedNode;
                             treeView_ParsedData.BeginUpdate();
                             treeView_ParsedData.Nodes[0].ExpandAll();
-                            treeView_ParsedData.TopNode = topNode;
+                            treeView_ParsedData.TopNode = currentNodeIndex;
+                            currentNodeIndex.EnsureVisible();
                             treeView_ParsedData.EndUpdate();
                             break;
                         }
@@ -916,6 +918,8 @@ namespace aclogview
                         {
                             treeView_ParsedData.BeginUpdate();
                             treeView_ParsedData.Nodes[0].Collapse(false);
+                            treeView_ParsedData.SelectedNode = null;
+                            treeView_ParsedData.SelectedNode = treeView_ParsedData.TopNode;
                             treeView_ParsedData.EndUpdate();
                             break;
                         }

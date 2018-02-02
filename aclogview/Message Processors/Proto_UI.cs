@@ -19,6 +19,7 @@ public class Proto_UI : MessageProcessor {
             case PacketOpcode.Evt_Admin__GetServerVersion_ID: {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
                     break;
                 }
             case PacketOpcode.CHARACTER_GENERATION_VERIFICATION_RESPONSE_EVENT: {
@@ -53,7 +54,7 @@ public class Proto_UI : MessageProcessor {
                     break;
                 }
             case PacketOpcode.Evt_Admin__Friends_ID: {
-                    Friends message = Friends.read(messageDataReader);
+                    AdminFriends message = AdminFriends.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -99,9 +100,15 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("verificationResponse = " + verificationResponse);
-            TreeNode identNode = rootNode.Nodes.Add("ident = ");
-            ident.contributeToTreeNode(identNode);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            if (verificationResponse == CG_VERIFICATION_RESPONSE.CG_VERIFICATION_RESPONSE_OK)
+            {
+                TreeNode identNode = rootNode.Nodes.Add("ident = ");
+                ContextInfo.AddToList(new ContextInfo { Length = ident.Length }, updateDataIndex: false);
+                ident.contributeToTreeNode(identNode);
+            }
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -127,8 +134,12 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             if (clientMessage)
+            {
                 rootNode.Nodes.Add("gid = " + Utility.FormatHex(gid));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
+            }
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -158,10 +169,13 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             if (clientMessage)
             {
                 rootNode.Nodes.Add("account = " + account);
+                ContextInfo.AddToList(new ContextInfo { Length = account.Length, DataType = DataType.Serialized_AsciiString });
                 rootNode.Nodes.Add("slot = " + slot);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             treeView.Nodes.Add(rootNode);
         }
@@ -208,9 +222,11 @@ public class Proto_UI : MessageProcessor {
         // Note: The following field is the sum of the following fields: heritageGroup, gender, eyesStrip, noseStrip, mouthStrip, hairColor, eyeColor,
         // hairStyle, headgearStyle, shirtStyle, trousersStyle, footwearStyle, templateNum, strength, endurance, coordination, quickness, focus, and self
         public int validationChecksum__guessedname;
+        public int Length;
 
         public static ACCharGenResult read(BinaryReader binaryReader) {
             ACCharGenResult newObj = new ACCharGenResult();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.packVersion__guessedname = binaryReader.ReadUInt32();
             newObj.heritageGroup = (HeritageGroup)binaryReader.ReadUInt32();
             newObj.gender = binaryReader.ReadUInt32();
@@ -249,52 +265,94 @@ public class Proto_UI : MessageProcessor {
             newObj.isAdmin = binaryReader.ReadInt32();
             newObj.isEnvoy = binaryReader.ReadInt32();
             newObj.validationChecksum__guessedname = binaryReader.ReadInt32();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("packVersion__guessedname = " + packVersion__guessedname);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("heritageGroup = " + heritageGroup);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("gender = " + (Gender)gender);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("eyesStrip = " + eyesStrip);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("noseStrip = " + noseStrip);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("mouthStrip = " + mouthStrip);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("hairColor = " + hairColor);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("eyeColor = " + eyeColor);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("hairStyle = " + hairStyle);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("headgearStyle = " + headgearStyle);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("headgearColor = " + headgearColor);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("shirtStyle = " + shirtStyle);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("shirtColor = " + shirtColor);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("trousersStyle = " + trousersStyle);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("trousersColor = " + trousersColor);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("footwearStyle = " + footwearStyle);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("footwearColor = " + footwearColor);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("skinShade = " + skinShade);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("hairShade = " + hairShade);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("headgearShade = " + headgearShade);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("shirtShade = " + shirtShade);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("trousersShade = " + trousersShade);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("footwearShade = " + footwearShade);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("templateNum = " + (CG_Profession)templateNum);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("strength = " + strength);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("endurance = " + endurance);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("coordination = " + coordination);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("quickness = " + quickness);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("focus = " + focus);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("self = " + self);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("slot = " + slot);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("classID = " + (WCLASSID)classID);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode sacsNode = node.Nodes.Add("skillAdvancementClasses = ");
+            ContextInfo.AddToList(new ContextInfo { Length = skillAdvancementClasses.Length }, updateDataIndex: false);
+            // Skip PList count dword
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < skillAdvancementClasses.list.Count; i++)
             {
                 sacsNode.Nodes.Add($"{(STypeSkill)i} = " + skillAdvancementClasses.list[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             node.Nodes.Add("name = " + name);
+            ContextInfo.AddToList(new ContextInfo { Length = name.Length, DataType = DataType.Serialized_AsciiString });
             node.Nodes.Add("startArea = " + (CG_Town)startArea);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("isAdmin = " + isAdmin);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("isEnvoy = " + isEnvoy);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("validationChecksum__guessedname = " + validationChecksum__guessedname);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -312,8 +370,11 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("account = " + account);
+            ContextInfo.AddToList(new ContextInfo { Length = account.Length, DataType = DataType.Serialized_AsciiString });
             TreeNode resultNode = rootNode.Nodes.Add("_charGenResult = ");
+            ContextInfo.AddToList(new ContextInfo { Length = _charGenResult.Length }, updateDataIndex: false);
             _charGenResult.contributeToTreeNode(resultNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -333,8 +394,11 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("gid = " + Utility.FormatHex(gid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("account = " + account.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = account.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -351,17 +415,21 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
 
-    public class Friends : Message {
-        public uint cmd; // TODO: Perhaps a FriendsUpdateType??
+    public class AdminFriends : Message {
+        // This command is sent by the client typing @friends old in chat.
+        // The field cmd is always 0 and i_player is a null string.
+        public uint cmd;
         public PStringChar i_player;
 
-        public static Friends read(BinaryReader binaryReader) {
-            Friends newObj = new Friends();
+        public static AdminFriends read(BinaryReader binaryReader) {
+            AdminFriends newObj = new AdminFriends();
             newObj.cmd = binaryReader.ReadUInt32();
             newObj.i_player = PStringChar.read(binaryReader);
             return newObj;
@@ -370,13 +438,17 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("cmd = " + cmd);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_player = " + i_player);
+            ContextInfo.AddToList(new ContextInfo { Length = i_player.Length });
             treeView.Nodes.Add(rootNode);
         }
     }
 
     public class AdminRestoreCharacter : Message {
+        // The fields i_restoredCharName and i_acctToRestoreTo are both sent from the client as null strings.
         public uint iid;
         public PStringChar i_restoredCharName;
         public PStringChar i_acctToRestoreTo;
@@ -392,9 +464,13 @@ public class Proto_UI : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("iid = " + iid);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("iid = " + Utility.FormatHex(iid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_restoredCharName = " + i_restoredCharName);
+            ContextInfo.AddToList(new ContextInfo { Length = i_restoredCharName.Length });
             rootNode.Nodes.Add("i_acctToRestoreTo = " + i_acctToRestoreTo);
+            ContextInfo.AddToList(new ContextInfo { Length = i_acctToRestoreTo.Length });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -414,7 +490,9 @@ public class Proto_UI : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("additionalReasonText = " + additionalReasonText);
+            ContextInfo.AddToList(new ContextInfo { Length = additionalReasonText.Length });
             treeView.Nodes.Add(rootNode);
         }
     }
