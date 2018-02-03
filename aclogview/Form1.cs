@@ -93,6 +93,7 @@ namespace aclogview
             messageProcessors.Add(new CM_Train());
             messageProcessors.Add(new CM_Vendor());
             messageProcessors.Add(new CM_Writing());
+            ciSupportedMessageProcessors.Add(typeof(CM_Writing).Name);
             messageProcessors.Add(new Proto_UI());
             ciSupportedMessageProcessors.Add(typeof(Proto_UI).Name);
             Globals.UseHex = checkBoxUseHex.Checked;
@@ -587,7 +588,7 @@ namespace aclogview
                 {
                     int selectedNodeIndex = Convert.ToInt32(e.Node.Tag);
                     bool indexIsPresent = ContextInfo.contextList.TryGetValue(selectedNodeIndex, out ContextInfo c);
-                    if (indexIsPresent && c.Length > 0)
+                    if (indexIsPresent)
                         hexBox1.Select(c.StartPosition, c.Length);
                 }
             }
