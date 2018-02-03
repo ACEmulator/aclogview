@@ -16,7 +16,7 @@ public class CM_Writing : MessageProcessor {
         switch (opcode) {
             case PacketOpcode.BOOK_DATA_RESPONSE_EVENT:
                 {
-                    PageDataList message = PageDataList.read(messageDataReader);
+                    BookDataResponse message = BookDataResponse.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -40,7 +40,7 @@ public class CM_Writing : MessageProcessor {
                 }
             case PacketOpcode.BOOK_PAGE_DATA_RESPONSE_EVENT:
                 {
-                    PageData message = PageData.read(messageDataReader);
+                    BookPageDataResponse message = BookPageDataResponse.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -85,35 +85,28 @@ public class CM_Writing : MessageProcessor {
         return handled;
     }
 
-    public class PageDataList : Message
+    public class BookDataResponse : Message
     {
         public uint i_bookID;
-        public uint i_maxNumPages;
+        public int i_maxNumPages;
         public uint numPages;
         public uint maxNumCharsPerPage;
-        public List<BookPageDataResponse> pageData = new List<BookPageDataResponse>();
+        public PList<PageData> pageData = new PList<PageData>();
         public PStringChar inscription;
         public uint authorId;
         public PStringChar authorName;
 
-        public static PageDataList read(BinaryReader binaryReader)
+        public static BookDataResponse read(BinaryReader binaryReader)
         {
-            PageDataList newObj = new PageDataList();
+            BookDataResponse newObj = new BookDataResponse();
             newObj.i_bookID = binaryReader.ReadUInt32();
-            newObj.i_maxNumPages = binaryReader.ReadUInt32();
+            newObj.i_maxNumPages = binaryReader.ReadInt32();
             newObj.numPages = binaryReader.ReadUInt32();
             newObj.maxNumCharsPerPage = binaryReader.ReadUInt32();
-
-            uint used_pages = binaryReader.ReadUInt32();
-            for (uint i = 0; i < used_pages; i++)
-            {
-                newObj.pageData.Add(BookPageDataResponse.read(binaryReader));
-            }
-
+            newObj.pageData = PList<PageData>.read(binaryReader);
             newObj.inscription = PStringChar.read(binaryReader);
             newObj.authorId = binaryReader.ReadUInt32();
             newObj.authorName = PStringChar.read(binaryReader);
-
             return newObj;
         }
 
@@ -121,25 +114,35 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("i_bookID = " + Utility.FormatHex(i_bookID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_maxNumPages = " + i_maxNumPages);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("numPages = " + numPages);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("maxNumCharsPerPage = " + maxNumCharsPerPage);
-
-            TreeNode pageDataNode = new TreeNode("pageData = ");
-            for (int i = 0; i < pageData.Count; i++)
-                pageData[i].contributeToTreeNode(pageDataNode);
-            rootNode.Nodes.Add(pageDataNode);
-
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            TreeNode pageDataNode = rootNode.Nodes.Add("pageData = ");
+            ContextInfo.AddToList(new ContextInfo { Length = pageData.Length }, updateDataIndex: false);
+            // Skip PList count dword
+            ContextInfo.DataIndex += 4;
+            for (int i = 0; i < pageData.list.Count; i++)
+            {
+                pageData.list[i].contributeToTreeNode(pageDataNode);
+            }
             rootNode.Nodes.Add("inscription = " + inscription);
-            rootNode.Nodes.Add("authorId = " + authorId);
+            ContextInfo.AddToList(new ContextInfo { Length = inscription.Length, DataType = DataType.Serialized_AsciiString });
+            rootNode.Nodes.Add("authorId = " + Utility.FormatHex(authorId));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("authorName = " + authorName);
+            ContextInfo.AddToList(new ContextInfo { Length = authorName.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
 
 
-    public class BookPageDataResponse : Message
+    public class PageData
     {
         public uint authorID;
         public PStringChar authorName;
@@ -148,10 +151,12 @@ public class CM_Writing : MessageProcessor {
         public uint textIncluded;
         public uint ignoreAuthor;
         public PStringChar pageText;
+        public int Length;
 
-        public static BookPageDataResponse read(BinaryReader binaryReader)
+        public static PageData read(BinaryReader binaryReader)
         {
-            BookPageDataResponse newObj = new BookPageDataResponse();
+            PageData newObj = new PageData();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.authorID = binaryReader.ReadUInt32();
             newObj.authorName = PStringChar.read(binaryReader);
             newObj.authorAccount = PStringChar.read(binaryReader);
@@ -162,7 +167,8 @@ public class CM_Writing : MessageProcessor {
                 {
                     newObj.textIncluded = binaryReader.ReadUInt32();
                     newObj.ignoreAuthor = binaryReader.ReadUInt32();
-                }else
+                }
+                else
                 {
                     newObj.textIncluded = newObj.flags;
                     newObj.ignoreAuthor = 0;
@@ -170,30 +176,40 @@ public class CM_Writing : MessageProcessor {
             }
             if (newObj.textIncluded != 0)
                 newObj.pageText = PStringChar.read(binaryReader);
-
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
-        }
-
-        public override void contributeToTreeView(TreeView treeView)
-        {
-            TreeNode rootNode = new TreeNode(this.GetType().Name);
-            contributeToTreeNode(rootNode);
-            treeView.Nodes.Add(rootNode);
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             TreeNode rootNode = new TreeNode("PageData");
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { Length = this.Length }, updateDataIndex: false);
             rootNode.Nodes.Add("authorID = " + Utility.FormatHex(authorID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("authorName = " + authorName);
+            ContextInfo.AddToList(new ContextInfo { Length = authorName.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("authorAccount = " + authorAccount);
+            ContextInfo.AddToList(new ContextInfo { Length = authorAccount.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("flags = " + Utility.FormatHex(flags));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("textIncluded = " + textIncluded);
             rootNode.Nodes.Add("ignoreAuthor = " + ignoreAuthor);
+            if((flags >> 16) == 0xFFFF && (ushort)flags == 2) {
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            }
+            else
+            {
+                // Skip textIncluded and ignoreAuthor nodes
+                ContextInfo.AddToList(new ContextInfo { });
+                ContextInfo.AddToList(new ContextInfo { });
+            }
             if (textIncluded != 0)
+            {
                 rootNode.Nodes.Add("pageText = " + pageText);
-
+                ContextInfo.AddToList(new ContextInfo { Length = pageText.Length, DataType = DataType.Serialized_AsciiString });
+            }
             node.Nodes.Add(rootNode);
         }
     }
@@ -216,8 +232,11 @@ public class CM_Writing : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("i_bookID = " + Utility.FormatHex(i_bookID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             node.Nodes.Add("i_pageNum = " + i_pageNum);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("i_success = " + i_success);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -236,6 +255,7 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             pageResponse.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -256,6 +276,7 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             pageResponse.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -276,48 +297,24 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             pageResponse.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
     }
 
-    public class PageData : Message
+    public class BookPageDataResponse : Message
     {
         public uint bookID;
         public uint page;
-        public uint authorID;
-        public PStringChar authorName;
-        public PStringChar authorAccount;
-        public uint flags;
-        public uint textIncluded;
-        public uint ignoreAuthor;
-        public PStringChar pageText;
+        public PageData pageData;
 
-        public static PageData read(BinaryReader binaryReader)
+        public static BookPageDataResponse read(BinaryReader binaryReader)
         {
-            PageData newObj = new PageData();
+            BookPageDataResponse newObj = new BookPageDataResponse();
             newObj.bookID = binaryReader.ReadUInt32();
             newObj.page = binaryReader.ReadUInt32();
-            newObj.authorID = binaryReader.ReadUInt32();
-            newObj.authorName = PStringChar.read(binaryReader);
-            newObj.authorAccount = PStringChar.read(binaryReader);
-            newObj.flags = binaryReader.ReadUInt32();
-            if ((newObj.flags >> 16) == 0xFFFF)
-            {
-                if ((ushort)newObj.flags == 2)
-                {
-                    newObj.textIncluded = binaryReader.ReadUInt32();
-                    newObj.ignoreAuthor = binaryReader.ReadUInt32();
-                }
-                else
-                {
-                    newObj.textIncluded = newObj.flags;
-                    newObj.ignoreAuthor = 0;
-                }
-            }
-            if (newObj.textIncluded != 0)
-                newObj.pageText = PStringChar.read(binaryReader);
-
+            newObj.pageData = PageData.read(binaryReader);
             return newObj;
         }
 
@@ -325,20 +322,18 @@ public class CM_Writing : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
             rootNode.Nodes.Add("bookID = " + Utility.FormatHex(bookID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("page = " + page);
-            rootNode.Nodes.Add("authorID = " + Utility.FormatHex(authorID));
-            rootNode.Nodes.Add("authorName = " + authorName);
-            rootNode.Nodes.Add("authorAccount = " + authorAccount);
-            rootNode.Nodes.Add("flags = " + Utility.FormatHex(flags));
-            rootNode.Nodes.Add("textIncluded = " + textIncluded);
-            rootNode.Nodes.Add("ignoreAuthor = " + ignoreAuthor);
-            if (textIncluded != 0)
-                rootNode.Nodes.Add("pageText = " + pageText);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            pageData.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
     }
 
+    // This message is sent by the client if the add page response fails (i_success = 0) or
+    // the page number in the response is not the page number expected by the client;
     public class BookData : Message {
         public uint i_objectid;
 
@@ -351,7 +346,9 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -372,9 +369,13 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_pageNum = " + i_pageNum);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_pageText = " + i_pageText);
+            ContextInfo.AddToList(new ContextInfo { Length = i_pageText.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -391,7 +392,9 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -410,8 +413,11 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_pageNum = " + i_pageNum);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -430,8 +436,11 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_pageNum = " + i_pageNum);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -450,8 +459,11 @@ public class CM_Writing : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
             rootNode.Nodes.Add("i_objectid = " + Utility.FormatHex(i_objectid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_inscription = " + i_inscription);
+            ContextInfo.AddToList(new ContextInfo { Length = i_inscription.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
