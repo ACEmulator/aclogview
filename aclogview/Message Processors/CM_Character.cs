@@ -344,7 +344,7 @@ public class CM_Character : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { Length = favoritesLength }, updateDataIndex: false);
             for (int i = 0; i < favorite_spells_.Count(); i++) {
                 PList<SpellID> favoritesList = favorite_spells_[i];
-                if (favoritesList.Length != 0) {
+                if (favoritesList != null) {
                     TreeNode favoritesSubNode = favoritesNode.Nodes.Add($"Spelltab {i+1} = ");
                     ContextInfo.AddToList(new ContextInfo { Length = favoritesList.Length }, updateDataIndex: false);
                     // Skip plist count dword
