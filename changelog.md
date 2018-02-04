@@ -1,3 +1,13 @@
+### 2018-02-04
+[Slushnas]
+* Added context info to CM_Writing.
+* Added context info to Proto_UI.
+* Refactored and fixed some message display code.
+* Refactoring and other small changes were made to the ContextInfo class and its implementation to better align with my current understanding of recommended practices.
+* Fixed a bug that prevented PLAYER_DESCRIPTION messages from being displayed properly in some cases.
+* Fixed some small issues with treeview expansion and collapse features to better align with intuitive behavior.
+* Corrected context info selection code: entries with a length of zero are used to clear the selection in some cases.
+
 ### 2018-01-29
 [Dworkin]
 * Put timestamps in MovementData in the correct order.
