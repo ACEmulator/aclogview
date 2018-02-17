@@ -69,6 +69,7 @@ namespace aclogview
             messageProcessors.Add(new CM_Admin());
             ciSupportedMessageProcessors.Add(typeof(CM_Admin).Name);
             messageProcessors.Add(new CM_Advocate());
+            ciSupportedMessageProcessors.Add(typeof(CM_Advocate).Name);
             messageProcessors.Add(new CM_Allegiance());
             messageProcessors.Add(new CM_Character());
             messageProcessors.Add(new CM_Combat());
@@ -93,6 +94,7 @@ namespace aclogview
             messageProcessors.Add(new CM_Trade());
             messageProcessors.Add(new CM_Train());
             messageProcessors.Add(new CM_Vendor());
+            ciSupportedMessageProcessors.Add(typeof(CM_Vendor).Name);
             messageProcessors.Add(new CM_Writing());
             ciSupportedMessageProcessors.Add(typeof(CM_Writing).Name);
             messageProcessors.Add(new Proto_UI());

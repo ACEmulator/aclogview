@@ -234,38 +234,56 @@ namespace aclogview
                         var parsed = CM_Physics.CreateObject.read(messageDataReader);
                     }*/
 
-                    /*if (messageCode == 0xF7B0) // Game Event
+                    if (messageCode == 0xF7B0) // Game Event
                     {
                         var character = messageDataReader.ReadUInt32(); // Character
                         var sequence = messageDataReader.ReadUInt32(); // Sequence
                         var _event = messageDataReader.ReadUInt32(); // Event
 
-                        if (_event == 0x0147) // Group Chat
+                        //if (_event == 0x0147) // Group Chat
+                        //{
+                        //    var parsed = CM_Communication.ChannelBroadcast.read(messageDataReader);
+
+                        //    var output = parsed.GroupChatType.ToString("X4");
+                        //    if (!specialOutputHits.ContainsKey(output))
+                        //    {
+                        //        if (specialOutputHits.TryAdd(output, 0))
+                        //            specialOutputHitsQueue.Enqueue(output);
+                        //    }
+                        //}
+
+                        //if (_event == 0x02BD) // Tell
+                        //{
+                        //    var parsed = CM_Communication.HearDirectSpeech.read(messageDataReader);
+
+                        //    var output = parsed.ChatMessageType.ToString("X4");
+
+                        //    if (!specialOutputHits.ContainsKey(output))
+                        //    {
+                        //        if (specialOutputHits.TryAdd(output, 0))
+                        //            specialOutputHitsQueue.Enqueue(output);
+                        //    }
+                        //}
+                        if (_event == 0x0062) // Vendor Info
                         {
-                            var parsed = CM_Communication.ChannelBroadcast.read(messageDataReader);
-
-                            var output = parsed.GroupChatType.ToString("X4");
-                            if (!specialOutputHits.ContainsKey(output))
+                            var parsed = CM_Vendor.gmVendorUI.read(messageDataReader);
+                            for (int i = 0; i < parsed.shopItemProfileList.list.Count; i++)
                             {
-                                if (specialOutputHits.TryAdd(output, 0))
-                                    specialOutputHitsQueue.Enqueue(output);
+                                if (parsed.shopItemProfileList.list[i].amount < 0xFFFFFF && parsed.shopItemProfileList.list[i].amount > 10)
+                                {
+                                    //var output = $"File: {fileName} Line: {record.index}\n";
+                                    var output = $"{parsed.shopItemProfileList.list[i].amount}\n";
+
+                                    if (!specialOutputHits.ContainsKey(output))
+                                    {
+                                        if (specialOutputHits.TryAdd(output, 0))
+                                            specialOutputHitsQueue.Enqueue(output);
+                                    }
+                                }
                             }
+
                         }
-
-                        if (_event == 0x02BD) // Tell
-                        {
-                            var parsed = CM_Communication.HearDirectSpeech.read(messageDataReader);
-
-                            var output = parsed.ChatMessageType.ToString("X4");
-
-                            if (!specialOutputHits.ContainsKey(output))
-                            {
-                                if (specialOutputHits.TryAdd(output, 0))
-                                    specialOutputHitsQueue.Enqueue(output);
-                            }
-                        }
-                    }*/
-
+                    }
                     /*if (messageCode == 0xF7B1) // Game Action
                     {
                     }*/
