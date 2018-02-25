@@ -41,6 +41,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +64,13 @@
     <Compile Include="GotoLine.Designer.cs">
       <DependentUpon>GotoLine.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\OptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\OptionsForm.Designer.cs">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProtocolDocs.cs" />
     <Compile Include="Tools\FindTextInFilesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -168,6 +177,9 @@
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="GotoLine.resx">
       <DependentUpon>GotoLine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\OptionsForm.resx">
+      <DependentUpon>OptionsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\FindOpcodeInFilesForm.resx">
       <DependentUpon>FindOpcodeInFilesForm.cs</DependentUpon>

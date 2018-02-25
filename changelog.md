@@ -1,3 +1,10 @@
+### 2018-02-25
+[Slushnas]
+* Added a feature to view an offline version of protocol documentation on the main form. The latest documentation was taken from Zegeger's website and is now hosted at <a href="https://acemulator.github.io">https://acemulator.github.io</a>. 
+The user will be prompted to download the documentation on the first run and will check for updates by default every five days.
+Selecting a message and clicking on the _Protocol Documentation_ tab will view the information.
+* Added an options menu to Tools -> Options. For now it only includes the ability to turn on/off protocol update checks and adjust the update interval.
+
 ### 2018-02-04
 [Slushnas]
 * Added context info to CM_Writing.

@@ -36,6 +36,7 @@ namespace aclogview
 
         private string pcapFilePath;
         private int currentOpcode;
+        private string currentDocOpcode;
         private uint currentUint;
         private string currentHighlightMode;
         private string currentCSText;
@@ -62,7 +63,7 @@ namespace aclogview
             this.args = args;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private async void Form1_Load(object sender, EventArgs e)
         {
             Util.initReaders();
             messageProcessors.Add(new CM_Admin());
@@ -140,6 +141,13 @@ namespace aclogview
             prop.SetValue(listView_Packets, true, null);
             prop = listView_CreatedObjects.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             prop.SetValue(listView_CreatedObjects, true, null);
+
+            var pDocs = new ProtocolDocs();
+            if (pDocs.IsTimeForUpdateCheck())
+            {
+                pDocs.ShowUpToDateMessage = false;
+                await pDocs.UpdateIfNeededAsync();
+            }
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -480,9 +488,8 @@ namespace aclogview
                                 handled = true;
                                 // TODO: Remove after all message processors have context info
                                 if (!ciSupportedMessageProcessors.Contains(messageProcessor.ToString()))
-                                {
                                     ContextInfo.Reset();
-                                }
+                                //
                                 if (messageDataReader.BaseStream.Position != messageDataReader.BaseStream.Length) {
                                     treeView_ParsedData.Nodes.Add(new TreeNode("WARNING: Packet not fully read!"));
                                 }
@@ -539,6 +546,22 @@ namespace aclogview
                 {
                     node.Tag = i;
                     i++;
+                }
+                // Handle protocol documentation
+                var currentOpcodeString = "0x" + record.opcodes[0].ToString("X").Substring(4, 4);
+                if (tabControl1.SelectedTab == tabProtocolDocs && record.opcodes.Count > 0)
+                {
+                    bool isClientToServer = record.isSend;
+                    navigateToDocPage(currentOpcodeString, isClientToServer);
+                }
+                else if (record.opcodes.Count > 0 && currentOpcodeString == currentDocOpcode)
+                {
+                    // User selected a message with the same opcode type so do nothing (no need to reload the documentation)
+                }
+                else
+                {
+                    protocolWebBrowser.DocumentText = "";
+                    currentDocOpcode = null;
                 }
             }
         }
@@ -1495,6 +1518,59 @@ namespace aclogview
                     listView_Packets.Items[form.lineNumber].Selected = true;
                     lblTracker.Text = "Viewing #" + listView_Packets.Items[form.lineNumber].Index;
                 }
+            }
+        }
+
+        private void navigateToDocPage(string opcode, bool isClientToServer)
+        {
+            if (opcode == currentDocOpcode) return;
+            currentDocOpcode = opcode;
+            var curDir = Directory.GetCurrentDirectory();
+            var direction = isClientToServer ? "C2S" : "S2C";
+            protocolWebBrowser.DocumentText =
+                $"<!DOCTYPE HTML>" +
+                $"<html>" +
+                $"<head>" +
+                $"<title>AC Protocol</title>" +
+                $"<link type = \"text/css\" rel = \"stylesheet\" href = \"file:///{curDir}/Protocol Documentation/Classic.css\"/>" +
+                $"</head>" +
+                $"<frameset cols = \"*, *\" frameborder = \"yes\" framespacing = \"2\">" +
+                $"<frame name = \"frameMsg\" scrolling = \"yes\" src = \"file:///{curDir}/Protocol Documentation/Messages/{opcode}-{direction}.html\"/>" +
+                "<frame name = \"frameType\" scrolling = \"yes\" src = \"" +
+                $"<head><link type='text/css' rel='stylesheet' href='file:///{curDir}/Protocol Documentation/Classic.css'/></head>" +
+                "<body><p class='Prompt'>Click a type to display the definition in this window.</p></body>\"/>" +
+                $"</frameset>" +
+                $"</html> ";
+        }
+
+        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        {
+            if (tabControl1.SelectedTab != tabProtocolDocs) return;
+            if (listView_Packets.SelectedIndices.Count <= 0) return;
+            var record = records[int.Parse(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
+            if (record.opcodes.Count > 0)
+            {
+                var isClientToServer = record.isSend;
+                navigateToDocPage("0x" + record.opcodes[0].ToString("X").Substring(4, 4), isClientToServer);
+            }
+            else
+            {
+                protocolWebBrowser.DocumentText = "";
+                currentDocOpcode = null;
+            }
+        }
+
+        private async void menuItem_CheckUpdates_Click(object sender, EventArgs e)
+        {
+            var pDocs = new ProtocolDocs {ShowUpToDateMessage = true};
+            await pDocs.UpdateIfNeededAsync();
+        }
+
+        private void menuItem_Options_Click(object sender, EventArgs e)
+        {
+            using (var form = new OptionsForm())
+            {
+                form.ShowDialog();
             }
         }
     }

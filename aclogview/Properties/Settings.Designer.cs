@@ -82,5 +82,40 @@ namespace aclogview.Properties {
                 this["FindTextInFilesRoot"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public byte ProtocolUpdateIntervalDays {
+            get {
+                return ((byte)(this["ProtocolUpdateIntervalDays"]));
+            }
+            set {
+                this["ProtocolUpdateIntervalDays"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.DateTime ProtocolLastUpdateCheck {
+            get {
+                return ((global::System.DateTime)(this["ProtocolLastUpdateCheck"]));
+            }
+            set {
+                this["ProtocolLastUpdateCheck"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ProtocolCheckForUpdates {
+            get {
+                return ((bool)(this["ProtocolCheckForUpdates"]));
+            }
+            set {
+                this["ProtocolCheckForUpdates"] = value;
+            }
+        }
     }
 }

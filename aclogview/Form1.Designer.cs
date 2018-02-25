@@ -51,6 +51,8 @@
             this.hexContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyTextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyHexMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabProtocolDocs = new System.Windows.Forms.TabPage();
+            this.protocolWebBrowser = new System.Windows.Forms.WebBrowser();
             this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,7 +79,10 @@
             this.menuItem_ToolBad = new System.Windows.Forms.MenuItem();
             this.menuItem_ToolHeatmap = new System.Windows.Forms.MenuItem();
             this.mnuItem_ToolFragDatListTool = new System.Windows.Forms.MenuItem();
+            this.menuItem4 = new System.Windows.Forms.MenuItem();
+            this.menuItem_Options = new System.Windows.Forms.MenuItem();
             this.menuItem_Help = new System.Windows.Forms.MenuItem();
+            this.menuItem_CheckUpdates = new System.Windows.Forms.MenuItem();
             this.menuItem_About = new System.Windows.Forms.MenuItem();
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.textBox_Search = new System.Windows.Forms.TextBox();
@@ -111,6 +116,7 @@
             this.tabControl1.SuspendLayout();
             this.tabHexView.SuspendLayout();
             this.hexContextMenu.SuspendLayout();
+            this.tabProtocolDocs.SuspendLayout();
             this.parsedContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).BeginInit();
             this.statusStrip.SuspendLayout();
@@ -313,12 +319,14 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabHexView);
+            this.tabControl1.Controls.Add(this.tabProtocolDocs);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(1070, 410);
             this.tabControl1.TabIndex = 0;
+            this.tabControl1.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
             // 
             // tabHexView
             // 
@@ -381,6 +389,25 @@
             | System.Windows.Forms.Keys.C)));
             this.copyHexMenuItem.Size = new System.Drawing.Size(213, 22);
             this.copyHexMenuItem.Text = "Copy as &Hex";
+            // 
+            // tabProtocolDocs
+            // 
+            this.tabProtocolDocs.Controls.Add(this.protocolWebBrowser);
+            this.tabProtocolDocs.Location = new System.Drawing.Point(4, 22);
+            this.tabProtocolDocs.Name = "tabProtocolDocs";
+            this.tabProtocolDocs.Size = new System.Drawing.Size(1059, 380);
+            this.tabProtocolDocs.TabIndex = 1;
+            this.tabProtocolDocs.Text = "Protocol Documentation";
+            this.tabProtocolDocs.UseVisualStyleBackColor = true;
+            // 
+            // protocolWebBrowser
+            // 
+            this.protocolWebBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.protocolWebBrowser.Location = new System.Drawing.Point(0, 0);
+            this.protocolWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.protocolWebBrowser.Name = "protocolWebBrowser";
+            this.protocolWebBrowser.Size = new System.Drawing.Size(1059, 380);
+            this.protocolWebBrowser.TabIndex = 0;
             // 
             // treeView_ParsedData
             // 
@@ -529,7 +556,9 @@
             this.menuItem_ToolCount,
             this.menuItem_ToolBad,
             this.menuItem_ToolHeatmap,
-            this.mnuItem_ToolFragDatListTool});
+            this.mnuItem_ToolFragDatListTool,
+            this.menuItem4,
+            this.menuItem_Options});
             this.menuItem1.Text = "Tools";
             // 
             // mnuItem_ToolFindOpcodeInFiles
@@ -573,16 +602,34 @@
             this.mnuItem_ToolFragDatListTool.Text = "Frag Dat List Tool";
             this.mnuItem_ToolFragDatListTool.Click += new System.EventHandler(this.menuItem_ToolFragDatListTool_Click);
             // 
+            // menuItem4
+            // 
+            this.menuItem4.Index = 7;
+            this.menuItem4.Text = "-";
+            // 
+            // menuItem_Options
+            // 
+            this.menuItem_Options.Index = 8;
+            this.menuItem_Options.Text = "Options";
+            this.menuItem_Options.Click += new System.EventHandler(this.menuItem_Options_Click);
+            // 
             // menuItem_Help
             // 
             this.menuItem_Help.Index = 3;
             this.menuItem_Help.MenuItems.AddRange(new System.Windows.Forms.MenuItem[] {
+            this.menuItem_CheckUpdates,
             this.menuItem_About});
             this.menuItem_Help.Text = "Help";
             // 
+            // menuItem_CheckUpdates
+            // 
+            this.menuItem_CheckUpdates.Index = 0;
+            this.menuItem_CheckUpdates.Text = "Check for updates...";
+            this.menuItem_CheckUpdates.Click += new System.EventHandler(this.menuItem_CheckUpdates_Click);
+            // 
             // menuItem_About
             // 
-            this.menuItem_About.Index = 0;
+            this.menuItem_About.Index = 1;
             this.menuItem_About.Text = "About";
             this.menuItem_About.Click += new System.EventHandler(this.menuItem_About_Click);
             // 
@@ -789,6 +836,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabHexView.ResumeLayout(false);
             this.hexContextMenu.ResumeLayout(false);
+            this.tabProtocolDocs.ResumeLayout(false);
             this.parsedContextMenu.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).EndInit();
             this.statusStrip.ResumeLayout(false);
@@ -871,6 +919,11 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.MenuItem menuItem3;
         private System.Windows.Forms.MenuItem menuItem_gotoLine;
+        private System.Windows.Forms.TabPage tabProtocolDocs;
+        private System.Windows.Forms.WebBrowser protocolWebBrowser;
+        private System.Windows.Forms.MenuItem menuItem_CheckUpdates;
+        private System.Windows.Forms.MenuItem menuItem_Options;
+        private System.Windows.Forms.MenuItem menuItem4;
     }
 }
 
