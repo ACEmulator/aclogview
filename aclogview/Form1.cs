@@ -37,10 +37,12 @@ namespace aclogview
         private string pcapFilePath;
         private int currentOpcode;
         private string currentDocOpcode;
+        private bool currentDocOpcodeIsC2S;
         private uint currentUint;
         private string currentHighlightMode;
         private string currentCSText;
         private string currentCIText;
+        private string projectDirectory;
         // Highlight mode options
         private string opcodeMode = "Opcode";
         private string textModeCS = "Text (Case-Sensitive)";
@@ -100,8 +102,9 @@ namespace aclogview
             messageProcessors.Add(new Proto_UI());
             ciSupportedMessageProcessors.Add(typeof(Proto_UI).Name);
             Globals.UseHex = checkBoxUseHex.Checked;
+            projectDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
 
-            // Initialize our highlight mode
+            // Initialize our highlight modes
             HighlightMode_comboBox.Items.Add(opcodeMode);
             HighlightMode_comboBox.Items.Add(textModeCS);
             HighlightMode_comboBox.Items.Add(textModeCI);
@@ -550,21 +553,16 @@ namespace aclogview
                     i++;
                 }
                 // Handle protocol documentation
-                var currentOpcodeString = "0x" + record.opcodes[0].ToString("X").Substring(4, 4);
-                if (tabControl1.SelectedTab == tabProtocolDocs && record.opcodes.Count > 0)
-                {
-                    bool isClientToServer = record.isSend;
-                    navigateToDocPage(currentOpcodeString, isClientToServer);
-                }
-                else if (record.opcodes.Count > 0 && currentOpcodeString == currentDocOpcode)
-                {
-                    // User selected a message with the same opcode type so do nothing (no need to reload the documentation)
-                }
-                else
+                if (record.opcodes.Count == 0)
                 {
                     protocolWebBrowser.DocumentText = "";
                     currentDocOpcode = null;
+                    return;
                 }
+                var currentOpcodeString = "0x" + record.opcodes[0].ToString("X").Substring(4, 4);
+                bool isClientToServer = record.isSend;
+                if (tabControl1.SelectedTab == tabProtocolDocs)
+                    navigateToDocPage(currentOpcodeString, isClientToServer);
             }
         }
 
@@ -1457,20 +1455,20 @@ namespace aclogview
 
         private void treeView_ParsedData_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
+            if (treeView_ParsedData.SelectedNode == null) return;
             if (e.Button == MouseButtons.Right)
                 treeView_ParsedData.SelectedNode = e.Node;
             // Left mouse click is already handled
-            if (ContextInfo.contextList.Count > 0 && loadedAsMessages)
-            {
-                if (treeView_ParsedData.SelectedNode != null)
-                {
-                    int selectedNodeIndex = Convert.ToInt32(treeView_ParsedData.SelectedNode.Tag);
-                    bool indexIsPresent = ContextInfo.contextList.TryGetValue(selectedNodeIndex, out ContextInfo c);
-                    // Only change selection if needed
-                    if (indexIsPresent && hexBox1.SelectionStart != c.StartPosition & hexBox1.SelectionLength != c.Length)
-                        hexBox1.Select(c.StartPosition, c.Length);
-                }
-            }
+            if (ContextInfo.contextList.Count == 0 || !loadedAsMessages) return;
+            int selectedNodeIndex = Convert.ToInt32(treeView_ParsedData.SelectedNode.Tag);
+            bool indexIsPresent = ContextInfo.contextList.TryGetValue(selectedNodeIndex, out ContextInfo c);
+            if (indexIsPresent && hexboxSelectionChanged(c))
+                hexBox1.Select(c.StartPosition, c.Length);
+        }
+
+        private bool hexboxSelectionChanged(ContextInfo c)
+        {
+            return hexBox1.SelectionStart != c.StartPosition & hexBox1.SelectionLength != c.Length;
         }
 
         private void parsedContextMenu_Opening(object sender, CancelEventArgs e)
@@ -1513,8 +1511,7 @@ namespace aclogview
         {
             using (var form = new GotoLine(listView_Packets.Items.Count))
             {
-                var result = form.ShowDialog();
-                if (result == DialogResult.OK)
+                if (form.ShowDialog() == DialogResult.OK)
                 {
                     listView_Packets.TopItem = listView_Packets.Items[form.lineNumber];
                     listView_Packets.Items[form.lineNumber].Selected = true;
@@ -1525,21 +1522,21 @@ namespace aclogview
 
         private void navigateToDocPage(string opcode, bool isClientToServer)
         {
-            if (opcode == currentDocOpcode) return;
+            if (opcode == currentDocOpcode && currentDocOpcodeIsC2S == isClientToServer) return;
             currentDocOpcode = opcode;
-            var curDir = Directory.GetCurrentDirectory();
+            currentDocOpcodeIsC2S = isClientToServer;
             var direction = isClientToServer ? "C2S" : "S2C";
             protocolWebBrowser.DocumentText =
                 $"<!DOCTYPE HTML>" +
                 $"<html>" +
                 $"<head>" +
                 $"<title>AC Protocol</title>" +
-                $"<link type = \"text/css\" rel = \"stylesheet\" href = \"file:///{curDir}/Protocol Documentation/Classic.css\"/>" +
+                $"<link type = \"text/css\" rel = \"stylesheet\" href = \"file:///{projectDirectory}/Protocol Documentation/Classic.css\"/>" +
                 $"</head>" +
                 $"<frameset cols = \"*, *\" frameborder = \"yes\" framespacing = \"2\">" +
-                $"<frame name = \"frameMsg\" scrolling = \"yes\" src = \"file:///{curDir}/Protocol Documentation/Messages/{opcode}-{direction}.html\"/>" +
+                $"<frame name = \"frameMsg\" scrolling = \"yes\" src = \"file:///{projectDirectory}/Protocol Documentation/Messages/{opcode}-{direction}.html\"/>" +
                 "<frame name = \"frameType\" scrolling = \"yes\" src = \"" +
-                $"<head><link type='text/css' rel='stylesheet' href='file:///{curDir}/Protocol Documentation/Classic.css'/></head>" +
+                $"<head><link type='text/css' rel='stylesheet' href='file:///{projectDirectory}/Protocol Documentation/Classic.css'/></head>" +
                 "<body><p class='Prompt'>Click a type to display the definition in this window.</p></body>\"/>" +
                 $"</frameset>" +
                 $"</html> ";
