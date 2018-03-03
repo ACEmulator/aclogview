@@ -1577,9 +1577,11 @@ namespace aclogview
             {
                 form.ShowDialog();
                 var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
+                var savedTopNode = treeView_ParsedData.GetTopNode();
                 treeView_ParsedData.BeginUpdate();
                 treeView_ParsedData.ShowNodeToolTips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
                 treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
+                treeView_ParsedData.SetTopNode(savedTopNode);
                 treeView_ParsedData.EndUpdate();
             }
         }
