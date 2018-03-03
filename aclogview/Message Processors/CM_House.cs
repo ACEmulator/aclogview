@@ -467,10 +467,12 @@ public class CM_House : MessageProcessor {
         public ushort _buckets;
         public ushort _table_size;
         public List<RestrictionDBTable> _table;
+        public int Length;
 
         public static RestrictionDB read(BinaryReader binaryReader)
         {
             RestrictionDB newObj = new RestrictionDB();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.version = binaryReader.ReadUInt32();
             newObj._bitmask = binaryReader.ReadUInt32();
             newObj._monarch_iid = binaryReader.ReadUInt32();
@@ -481,20 +483,28 @@ public class CM_House : MessageProcessor {
             {
                 newObj._table.Add(RestrictionDBTable.read(binaryReader));
             }
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("version = " + Utility.FormatHex(version));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_bitmask = " + (RDBBitmask)_bitmask);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_monarch_iid = " + Utility.FormatHex(_monarch_iid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode tableNode = node.Nodes.Add("_table = ");
+            ContextInfo.AddToList(new ContextInfo ());
             tableNode.Nodes.Add("_buckets = " + _buckets);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             tableNode.Nodes.Add("_table_size = " + _table_size);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             for (int i = 0; i < _buckets; i++)
             {
                 TreeNode guestNode = tableNode.Nodes.Add($"guest {i+1} = ");
+                ContextInfo.AddToList(new ContextInfo{ Length = _table[i].Length }, updateDataIndex: false);
                 _table[i].contributeToTreeNode(guestNode);
             }
         }
@@ -503,13 +513,15 @@ public class CM_House : MessageProcessor {
     public class RestrictionDBTable {
         public uint char_object_id;
         public int _item_storage_permission;
+        public int Length;
 
         public static RestrictionDBTable read(BinaryReader binaryReader)
         {
             RestrictionDBTable newObj = new RestrictionDBTable();
-
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.char_object_id = binaryReader.ReadUInt32();
             newObj._item_storage_permission = binaryReader.ReadInt32();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
@@ -517,7 +529,9 @@ public class CM_House : MessageProcessor {
         {
 
             node.Nodes.Add("char_object_id = " + Utility.FormatHex(char_object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             node.Nodes.Add("_item_storage_permission = " + _item_storage_permission);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 

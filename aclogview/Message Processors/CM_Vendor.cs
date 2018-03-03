@@ -64,7 +64,7 @@ public class CM_Vendor : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("shopVendorID = " + Utility.FormatHex(shopVendorID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode shopVendorProfileNode = rootNode.Nodes.Add("shopVendorProfile = ");
@@ -78,7 +78,7 @@ public class CM_Vendor : MessageProcessor {
             {
                 TreeNode itemProfileNode = shopItemProfilesNode.Nodes.Add("itemProfile = ");
                 ItemProfile thisProfile = shopItemProfileList.list[i];
-                // 
+                ContextInfo.AddToList(new ContextInfo { Length = thisProfile.Length }, updateDataIndex: false);
                 thisProfile.contributeToTreeNode(itemProfileNode);
             }
 
@@ -161,33 +161,46 @@ public class CM_Vendor : MessageProcessor {
         public uint iid;
         public CM_Physics.PublicWeenieDesc pwd;
         public CM_Physics.OldPublicWeenieDesc opwd;
+        public int Length;
 
         public static ItemProfile read(BinaryReader binaryReader) {
             ItemProfile newObj = new ItemProfile();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.packedAmount = binaryReader.ReadInt32();
             newObj.amount = newObj.packedAmount & 0xFFFFFF;
             newObj.iid = binaryReader.ReadUInt32();
             newObj.pwdType = (newObj.packedAmount >> 24);
             if (newObj.pwdType == (int)PWDType.PublicWeenieDesc)
                 newObj.pwd = CM_Physics.PublicWeenieDesc.read(binaryReader);
+            // NOTE: I've not found an actual instance of this method being used.
             else if (newObj.pwdType == (int)PWDType.OldPublicWeenieDesc)
-                newObj.opwd = CM_Physics.OldPublicWeenieDesc.read(binaryReader); // NOTE: I've not found an actual instance of this method being used.
+                newObj.opwd = CM_Physics.OldPublicWeenieDesc.read(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             TreeNode packedAmountNode = node.Nodes.Add("packedAmount = ");
-            packedAmountNode.Nodes.Add("amount = " + amount);
+            ContextInfo.AddToList(new ContextInfo {Length = 4}, updateDataIndex: false);
+            if (amount == 0x00FFFFFF)
+                packedAmountNode.Nodes.Add("amount = " + "-1 (unlimited)");
+            else
+                packedAmountNode.Nodes.Add("amount = " + amount);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             packedAmountNode.Nodes.Add("pwdType = " + (PWDType)pwdType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("iid = " + Utility.FormatHex(iid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             if (pwd != null)
             {
                 TreeNode pwdNode = node.Nodes.Add("wdesc = ");
+                ContextInfo.AddToList(new ContextInfo { Length = pwd.Length }, updateDataIndex: false);
                 pwd.contributeToTreeNode(pwdNode);
             }
             if (opwd != null)
             {
                 TreeNode opwdNode = node.Nodes.Add("oldwdesc = ");
+                // Context info has not been added to the old weenie description class as it is not used
                 opwd.contributeToTreeNode(opwdNode);
             }
         }
@@ -211,15 +224,22 @@ public class CM_Vendor : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo{ DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_vendorID = " + Utility.FormatHex(i_vendorID));
+            ContextInfo.AddToList(new ContextInfo{ DataType = DataType.ObjectID });
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
+            ContextInfo.AddToList(new ContextInfo{ Length = i_stuff.Length }, updateDataIndex: false);
+            // Now skip PList count dword
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < i_stuff.list.Count; i++)
             {
                 TreeNode itemProfileNode = stuffNode.Nodes.Add("itemProfile = ");
                 ItemProfile thisProfile = i_stuff.list[i];
+                ContextInfo.AddToList(new ContextInfo { Length = thisProfile.Length }, updateDataIndex: false);
                 thisProfile.contributeToTreeNode(itemProfileNode);
             }
             rootNode.Nodes.Add("i_alternateCurrencyID = " + Utility.FormatHex(i_alternateCurrencyID));
+            ContextInfo.AddToList(new ContextInfo { Length = 4, DataType = DataType.WCID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -240,12 +260,18 @@ public class CM_Vendor : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_vendorID = " + Utility.FormatHex(i_vendorID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
+            ContextInfo.AddToList(new ContextInfo { Length = i_stuff.Length }, updateDataIndex: false);
+            // Now skip PList count dword
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < i_stuff.list.Count; i++)
             {
                 TreeNode itemProfileNode = stuffNode.Nodes.Add("itemProfile = ");
                 ItemProfile thisProfile = i_stuff.list[i];
+                ContextInfo.AddToList(new ContextInfo { Length = thisProfile.Length }, updateDataIndex: false);
                 thisProfile.contributeToTreeNode(itemProfileNode);
             }
             treeView.Nodes.Add(rootNode);

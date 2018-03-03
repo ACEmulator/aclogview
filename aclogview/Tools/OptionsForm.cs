@@ -9,6 +9,7 @@ namespace aclogview
     {
         private bool _protocolCheckForUpdates;
         private byte _protocolUpdateIntervalDays;
+        private bool _parsedDataTreeviewDisplayTooltips;
 
         public OptionsForm()
         {
@@ -22,6 +23,7 @@ namespace aclogview
             checkBox_ProtocolUpdates.Checked = _protocolCheckForUpdates;
             if (!_protocolCheckForUpdates)
                 textBox_ProtocolDays.Enabled = false;
+            displayNodeTooltips.Checked = _parsedDataTreeviewDisplayTooltips;
         }
 
         private void LoadDefaultSettings()
@@ -29,6 +31,7 @@ namespace aclogview
             Settings.Default.Reload();
             _protocolUpdateIntervalDays = Settings.Default.ProtocolUpdateIntervalDays;
             _protocolCheckForUpdates = Settings.Default.ProtocolCheckForUpdates;
+            _parsedDataTreeviewDisplayTooltips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -43,7 +46,7 @@ namespace aclogview
         {
             var result = FillProtocolSettings();
             if (!result) return false;
-            // Add new settings here
+            FillTreeviewSettings();
 
             return true;
         }
@@ -52,7 +55,13 @@ namespace aclogview
         {
             Settings.Default.ProtocolUpdateIntervalDays = _protocolUpdateIntervalDays;
             Settings.Default.ProtocolCheckForUpdates = _protocolCheckForUpdates;
+            Settings.Default.ParsedDataTreeviewDisplayTooltips = _parsedDataTreeviewDisplayTooltips;
             Settings.Default.Save();
+        }
+
+        private void FillTreeviewSettings()
+        {
+            _parsedDataTreeviewDisplayTooltips = displayNodeTooltips.Checked;
         }
 
         private bool FillProtocolSettings()

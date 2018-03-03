@@ -19,8 +19,8 @@ namespace aclogview
         public DataType DataType { get; set; }
         private static readonly Dictionary<DataType, int> dataTypeList = new Dictionary<DataType, int>()
         {
-            { DataType.Header12Bytes, 12 },
-            { DataType.Header16Bytes, 16 },
+            { DataType.ClientToServerHeader, 12 },
+            { DataType.ServerToClientHeader, 16 },
             { DataType.SpellID_uint, 4 },
             { DataType.EnchantmentID, 4 },
             { DataType.SpellID_ushort, 2 },
@@ -69,20 +69,23 @@ namespace aclogview
         Undefined,
 
         // Fixed length
-        Header12Bytes,                   // Client to Server
-        Header16Bytes,                   // Server to Client
+        ClientToServerHeader,            // 12 bytes
+        ServerToClientHeader,            // 16 bytes
         SpellID_uint,        
-        EnchantmentID,                   // uint divided into two ushorts: the spell ID and the layer
+        EnchantmentID,                   // uint composed of two ushorts: the spell ID and the layer
         SpellID_ushort,
         SpellLayer,     
         ObjectID,
         Opcode,
         CellID,                          // 4 byte landblock cell ID
+        
 
         // Variable length
         ShortSerialized_UnicodeString,   // UTF-16 string with length < 128 (+ 1 byte length header)
         LongSerialized_UnicodeString,    // UTF-16 string with length >= 128 (+ 2 byte length header)
         UnicodeString,                   // UTF-16 string with no length header
         Serialized_AsciiString,          // AKA PStringChar; Has a 2-4 byte length header
+        WCID,                            // Weenie class ID
+        IconID
     }
 }

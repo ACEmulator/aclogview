@@ -157,7 +157,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_objectId = " + Utility.FormatHex(i_objectId));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
@@ -188,7 +188,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
@@ -244,7 +244,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
@@ -269,7 +269,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
@@ -299,7 +299,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
@@ -320,7 +320,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_object = " + Utility.FormatHex(this.i_object));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
@@ -341,7 +341,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_object = " + Utility.FormatHex(i_object));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
@@ -363,7 +363,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("ObjectID = " + Utility.FormatHex(ObjectID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
@@ -386,7 +386,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_mergeFromID = " + Utility.FormatHex(i_mergeFromID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_mergeToID = " + Utility.FormatHex(i_mergeToID));
@@ -415,7 +415,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_containerID = " + Utility.FormatHex(i_containerID));
@@ -442,7 +442,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_amount = " + i_amount);
@@ -467,7 +467,7 @@ public class CM_Inventory : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatHex(i_objectID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("etype = " + etype);
@@ -492,7 +492,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_targetID = " + Utility.FormatHex(this.i_targetID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_ObjectID = " + Utility.FormatHex(this.i_objectID));
@@ -515,7 +515,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
@@ -555,7 +555,7 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_container = " + Utility.FormatHex(i_container));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode contentsNode = rootNode.Nodes.Add("contents = ");
@@ -588,7 +588,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_stackID = " + Utility.FormatHex(i_stackID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode locationNode = rootNode.Nodes.Add("i_loc = " + Utility.FormatHex(i_loc));
@@ -622,7 +622,7 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_toolID = " + Utility.FormatHex(i_toolID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode gemsNode = rootNode.Nodes.Add("i_gems = ");
@@ -679,7 +679,7 @@ public class CM_Inventory : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("m_skillUsed = " + (STypeSkill)m_skillUsed);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode notSalvageableNode = rootNode.Nodes.Add("m_notSalvagable = ");
@@ -748,7 +748,7 @@ public class CM_Inventory : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("ObjectID = " + Utility.FormatHex(ObjectID));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);

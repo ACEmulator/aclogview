@@ -117,5 +117,17 @@ namespace aclogview.Properties {
                 this["ProtocolCheckForUpdates"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ParsedDataTreeviewDisplayTooltips {
+            get {
+                return ((bool)(this["ParsedDataTreeviewDisplayTooltips"]));
+            }
+            set {
+                this["ParsedDataTreeviewDisplayTooltips"] = value;
+            }
+        }
     }
 }

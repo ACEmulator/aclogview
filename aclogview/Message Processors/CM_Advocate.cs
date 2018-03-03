@@ -52,7 +52,7 @@ public class CM_Advocate : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target = " + i_target);
             ContextInfo.AddToList(new ContextInfo { Length = i_target.Length, DataType = DataType.Serialized_AsciiString });
             TreeNode destNode = rootNode.Nodes.Add("i_dest = ");

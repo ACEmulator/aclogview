@@ -56,8 +56,7 @@ namespace aclogview
                         DisplayYouHaveLatestDocs();
                     return;
                 }
-                var dialogResult = DisplayConfirmUpdateDialog();
-                if (dialogResult == DialogResult.Yes)
+                if (DisplayConfirmUpdateDialog() == DialogResult.Yes)
                     await InstallDocumentation();
             }
             catch (Exception e)
@@ -87,6 +86,7 @@ namespace aclogview
             FillLocalReleaseInfo();
             await FillLatestReleaseInfo();
             Settings.Default.ProtocolLastUpdateCheck = DateTime.Now;
+            if (!_isLocalReleaseValid) return true;
             return _localReleaseVersion != _latestReleaseVersion;
         }
 

@@ -103,6 +103,7 @@ namespace aclogview
             ciSupportedMessageProcessors.Add(typeof(Proto_UI).Name);
             Globals.UseHex = checkBoxUseHex.Checked;
             projectDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            treeView_ParsedData.ShowNodeToolTips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
 
             // Initialize our highlight modes
             HighlightMode_comboBox.Items.Add(opcodeMode);
@@ -545,11 +546,16 @@ namespace aclogview
                         }
                     }
                 }
-                // Give each treeview node a unique identifier
+                // Give each treeview node a unique identifier and context info tooltip
                 int i = 0;
                 foreach (var node in GetTreeNodes(treeView_ParsedData.Nodes))
                 {
                     node.Tag = i;
+                    bool indexIsPresent = ContextInfo.contextList.TryGetValue(i, out ContextInfo c);
+                    if (indexIsPresent)
+                    {
+                        node.ToolTipText = $"Data Type: {c.DataType}";
+                    }
                     i++;
                 }
                 // Handle protocol documentation
@@ -1570,6 +1576,11 @@ namespace aclogview
             using (var form = new OptionsForm())
             {
                 form.ShowDialog();
+                var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
+                treeView_ParsedData.BeginUpdate();
+                treeView_ParsedData.ShowNodeToolTips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
+                treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
+                treeView_ParsedData.EndUpdate();
             }
         }
     }

@@ -545,10 +545,13 @@ public class CM_Physics : MessageProcessor {
         }
 
         public uint header;
+        public byte headerPadding;
         public uint header2;
         public PStringChar _name;
         public uint _wcid;
+        public int _wcid_length;
         public uint _iconID;
+        public int _iconID_length;
         public ITEM_TYPE _type;
         public uint _bitfield;
         public PStringChar _plural_name;
@@ -582,24 +585,33 @@ public class CM_Physics : MessageProcessor {
         public uint _monarch;
         public ushort _hook_type;
         public uint _iconOverlayID;
+        public int _iconOverlayLength;
         public uint _iconUnderlayID;
+        public int _iconUnderlayLength;
         public MaterialType _material_type;
         public uint _cooldown_id;
         public double _cooldown_duration;
         public uint _pet_owner;
+        public byte endPadding;
         public List<string> packedItems; // For display purposes
+        public int Length;
 
         public static PublicWeenieDesc read(BinaryReader binaryReader) {
             PublicWeenieDesc newObj = new PublicWeenieDesc();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.packedItems = new List<string>();
             newObj.header = binaryReader.ReadUInt32();
             newObj._name = PStringChar.read(binaryReader);
+            var wcidStart = binaryReader.BaseStream.Position;
             newObj._wcid = Util.readWClassIDCompressed(binaryReader);
+            newObj._wcid_length = (int)(binaryReader.BaseStream.Position - wcidStart);
+            var iconIdStart = binaryReader.BaseStream.Position;
             newObj._iconID = Util.readDataIDOfKnownType(0x6000000, binaryReader);
+            newObj._iconID_length = (int)(binaryReader.BaseStream.Position - iconIdStart);
             newObj._type = (ITEM_TYPE)binaryReader.ReadUInt32();
             newObj._bitfield = binaryReader.ReadUInt32();
 
-            Util.readToAlign(binaryReader);
+            newObj.headerPadding = Util.readToAlign(binaryReader);
 
             if ((newObj._bitfield & (uint)BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0)
             {
@@ -757,12 +769,16 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0) {
+                var _iconOverlayStart = binaryReader.BaseStream.Position;
                 newObj._iconOverlayID = Util.readDataIDOfKnownType(0x6000000, binaryReader);
+                newObj._iconOverlayLength = (int) (binaryReader.BaseStream.Position - _iconOverlayStart);
                 newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_IconOverlay.ToString());
             }
 
             if ((newObj.header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0) {
+                var _iconUnderlayStart = binaryReader.BaseStream.Position;
                 newObj._iconUnderlayID = Util.readDataIDOfKnownType(0x6000000, binaryReader);
+                newObj._iconUnderlayLength = (int)(binaryReader.BaseStream.Position - _iconUnderlayStart);
                 newObj.packedItems.Add(PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay.ToString());
             }
 
@@ -785,184 +801,254 @@ public class CM_Physics : MessageProcessor {
                 newObj._pet_owner = binaryReader.ReadUInt32();
                 newObj.packedItems.Add(PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner.ToString());
             }
-
-            Util.readToAlign(binaryReader);
+            newObj.endPadding = Util.readToAlign(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
 
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             TreeNode headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 headerNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             }
+            // Now skip header length
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("_name = " + _name.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = _name.Length, DataType = DataType.Serialized_AsciiString });
             node.Nodes.Add("_wcid = " + _wcid);
+            ContextInfo.AddToList(new ContextInfo { Length = _wcid_length, DataType = DataType.WCID });
             node.Nodes.Add("_iconID = " + Utility.FormatHex(_iconID));
+            ContextInfo.AddToList(new ContextInfo { Length = _iconID_length, DataType = DataType.IconID });
             node.Nodes.Add("_type = " + _type);
+            ContextInfo.AddToList(new ContextInfo{ Length = 4 });
             TreeNode bitfieldNode = node.Nodes.Add("_bitfield = " + Utility.FormatHex(_bitfield));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (BitfieldIndex e in Enum.GetValues(typeof(BitfieldIndex)))
             {
                 if (((uint)_bitfield & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     bitfieldNode.Nodes.Add($"{Enum.GetName(typeof(BitfieldIndex), e)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
+            // Now skip bitfield dword
+            ContextInfo.DataIndex += 4;
+            ContextInfo.DataIndex += headerPadding;
             if ((_bitfield & (uint)BitfieldIndex.BF_INCLUDES_SECOND_HEADER) != 0) {
                 node.Nodes.Add("header2 = " + Utility.FormatHex(header2));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0) {
                 node.Nodes.Add("_plural_name = " + _plural_name);
+                ContextInfo.AddToList(new ContextInfo { Length = _plural_name.Length, DataType = DataType.Serialized_AsciiString});
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ItemsCapacity) != 0) {
                 node.Nodes.Add("_itemsCapacity = " + _itemsCapacity);
+                ContextInfo.AddToList(new ContextInfo{ Length = 1 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ContainersCapacity) != 0) {
                 node.Nodes.Add("_containersCapacity = " + _containersCapacity);
+                ContextInfo.AddToList(new ContextInfo { Length = 1 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0) {
                 node.Nodes.Add("_ammoType = " + _ammoType);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Value) != 0) {
                 node.Nodes.Add("_value = " + _value);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0) {
                 node.Nodes.Add("_useability = " + _useability);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0) {
                 node.Nodes.Add("_useRadius = " + _useRadius);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0) {
                 TreeNode targetTypeNode = node.Nodes.Add("_targetType = " + Utility.FormatHex((uint)_targetType));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
                 {
                     if (((uint)_targetType & (uint)e) == (uint)e && (uint)e != 0)
                     {
                         targetTypeNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                // Now skip target type dword
+                ContextInfo.DataIndex += 4;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0) {
                 node.Nodes.Add("_effects = " + (UI_EFFECT_TYPE)_effects);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0) {
                 node.Nodes.Add("_combatUse = " + (COMBAT_USE)_combatUse);
+                ContextInfo.AddToList(new ContextInfo { Length = 1 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0) {
                 node.Nodes.Add("_structure = " + _structure);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_MaxStructure) != 0) {
                 node.Nodes.Add("_maxStructure = " + _maxStructure);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_StackSize) != 0) {
                 node.Nodes.Add("_stackSize = " + _stackSize);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_MaxStackSize) != 0) {
                 node.Nodes.Add("_maxStackSize = " + _maxStackSize);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ContainerID) != 0) {
                 node.Nodes.Add("_containerID = " + Utility.FormatHex(_containerID));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID});
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_WielderID) != 0) {
                 node.Nodes.Add("_wielderID = " + Utility.FormatHex( _wielderID));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0) {
                 TreeNode validLocationsNode = node.Nodes.Add("_valid_locations = " + Utility.FormatHex(_valid_locations));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
                 {
                     if ((_valid_locations & (uint)e) == (uint)e && (uint)e != 0)
                     {
                         validLocationsNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                // Now skip valid locations dword
+                ContextInfo.DataIndex += 4;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Location) != 0) {
                 TreeNode locationNode = node.Nodes.Add("_location = " + Utility.FormatHex(_location));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
                 {
                     if ((_location & (uint)e) == (uint)e && (uint)e != 0)
                     {
                         locationNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                // Now skip locations dword
+                ContextInfo.DataIndex += 4;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0) {
                 TreeNode priorityNode = node.Nodes.Add("_priority = " + Utility.FormatHex(_priority));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 foreach (uint e in Enum.GetValues(typeof(CoverageMask)))
                 {
                     if (((uint)_priority & e) == e)
                     {
                         priorityNode.Nodes.Add($"{Enum.GetName(typeof(CoverageMask), e)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                // Now skip priority dword
+                ContextInfo.DataIndex += 4;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_BlipColor) != 0) {
                 node.Nodes.Add("_blipColor = " + (RadarColor)_blipColor);
+                ContextInfo.AddToList(new ContextInfo { Length = 1 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_RadarEnum) != 0) {
                 node.Nodes.Add("_radar_enum = " + _radar_enum);
+                ContextInfo.AddToList(new ContextInfo { Length = 1 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0) {
                 node.Nodes.Add("_pscript = " + (PScriptType)_pscript);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0) {
                 node.Nodes.Add("_workmanship = " + _workmanship);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Burden) != 0) {
                 node.Nodes.Add("_burden = " + _burden);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0) {
                 node.Nodes.Add("_spellID = " + $"({_spellID}) " + (SpellID)_spellID);
+                ContextInfo.AddToList(new ContextInfo { Length = 2, DataType = DataType.SpellID_ushort});
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0) {
                 node.Nodes.Add("_house_owner_iid = " + Utility.FormatHex(_house_owner_iid));
+                ContextInfo.AddToList(new ContextInfo{ DataType = DataType.ObjectID });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseRestrictions) != 0) {
                 TreeNode dbNode = node.Nodes.Add("_db = ");
+                ContextInfo.AddToList(new ContextInfo{ Length = _db.Length }, updateDataIndex: false);
                 _db.contributeToTreeNode(dbNode);
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0) {
                 TreeNode hookItemTypesNode = node.Nodes.Add("_hook_item_types = " + Utility.FormatHex(_hook_item_types));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
                 {
                     if ((_hook_item_types & (uint)e) == (uint)e && (uint)e != 0)
                     {
                         hookItemTypesNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                // Now skip hook item types dword
+                ContextInfo.DataIndex += 4;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Monarch) != 0) {
                 node.Nodes.Add("_monarch = " + Utility.FormatHex(_monarch));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0) {
                 TreeNode hookTypeNode = node.Nodes.Add("_hook_type = " + Utility.FormatHex(_hook_type));
+                ContextInfo.AddToList(new ContextInfo { Length = 2 }, updateDataIndex: false);
                 foreach (HookTypeEnum e in Enum.GetValues(typeof(HookTypeEnum)))
                 {
                     if ((_hook_type & (ushort)e) == (ushort)e && (ushort)e != 0)
                     {
                         hookTypeNode.Nodes.Add($"{Enum.GetName(typeof(HookTypeEnum), e)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 2 }, updateDataIndex: false);
                     }
                 }
+                // Now update hook type ushort
+                ContextInfo.DataIndex += 2;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_IconOverlay) != 0) {
                 node.Nodes.Add("_iconOverlayID = " + Utility.FormatHex(_iconOverlayID));
+                ContextInfo.AddToList(new ContextInfo{ Length = _iconOverlayLength});
             }
             if ((header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_IconUnderlay) != 0) {
                 node.Nodes.Add("_iconUnderlayID = " + Utility.FormatHex(_iconUnderlayID));
+                ContextInfo.AddToList(new ContextInfo { Length = _iconUnderlayLength });
             }
             if ((header & unchecked((uint)PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0) {
                 node.Nodes.Add("_material_type = " + _material_type);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_CooldownID) != 0) {
                 node.Nodes.Add("_cooldown_id = " + _cooldown_id);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_CooldownDuration) != 0) {
                 node.Nodes.Add("_cooldown_duration = " + _cooldown_duration);
+                ContextInfo.AddToList(new ContextInfo { Length = 8 });
             }
             if ((header2 & (uint)PublicWeenieDescPackHeader2.PWD2_Packed_PetOwner) != 0) {
                 node.Nodes.Add("_pet_owner = " + Utility.FormatHex(_pet_owner));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             }
+
+            ContextInfo.DataIndex += endPadding;
         }
     }
 
@@ -1079,6 +1165,7 @@ public class CM_Physics : MessageProcessor {
         public uint _monarch;
         public MaterialType _material_type;
 
+        // Context info has not been added to the old weenie description class as it is not used
         public static OldPublicWeenieDesc read(BinaryReader binaryReader)
         {
             OldPublicWeenieDesc newObj = new OldPublicWeenieDesc();

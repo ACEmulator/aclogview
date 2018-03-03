@@ -19,7 +19,7 @@ public class CM_Magic : MessageProcessor {
             case PacketOpcode.Evt_Magic__PurgeBadEnchantments_ID: {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
-                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
                     break;
                 }
             case PacketOpcode.Evt_Magic__CastUntargetedSpell_ID: {
@@ -120,7 +120,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
@@ -141,7 +141,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
@@ -167,12 +167,12 @@ public class CM_Magic : MessageProcessor {
 
             if (isClientToServer)
             {
-                ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header12Bytes });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
                 ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             }
             else
             {
-                ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
                 ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             }
         }
@@ -190,7 +190,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
@@ -424,7 +424,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode enchantmentIDNode = rootNode.Nodes.Add("enchantment id = ");
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.EnchantmentID }, updateDataIndex: false);
             eid.contributeToTreeNode(enchantmentIDNode);
@@ -446,7 +446,7 @@ public class CM_Magic : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode enchantmentIDNode = rootNode.Nodes.Add("enchantment id = ");
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.EnchantmentID }, updateDataIndex: false);
             eid.contributeToTreeNode(enchantmentIDNode);
@@ -467,7 +467,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode enchantmentNode = rootNode.Nodes.Add("enchantment = ");
             ContextInfo.AddToList(new ContextInfo { Length = enchant.Length }, updateDataIndex: false);
             enchant.contributeToTreeNode(enchantmentNode);
@@ -488,7 +488,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
             ContextInfo.AddToList(new ContextInfo { Length = enchantmentList.Length }, updateDataIndex: false);
             // Skip Plist count uint
@@ -518,7 +518,7 @@ public class CM_Magic : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode plistNode = rootNode.Nodes.Add($"PackableList<EnchantmentID>: {enchantmentList.list.Count} objects");
             ContextInfo.AddToList(new ContextInfo { Length = enchantmentList.Length }, updateDataIndex: false);
             // Skip Plist count uint

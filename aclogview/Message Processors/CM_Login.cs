@@ -192,7 +192,7 @@ public class CM_Login : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Header16Bytes });
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode CACQualitiesNode = rootNode.Nodes.Add("CACQualities = ");
             ContextInfo.AddToList(new ContextInfo { Length = CACQualities.Length }, updateDataIndex: false);
             CACQualities.contributeToTreeNode(CACQualitiesNode);
