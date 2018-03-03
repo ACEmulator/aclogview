@@ -267,11 +267,13 @@ public class CM_Qualities : MessageProcessor {
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            TreeNode rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
-            rootNode.Nodes.Add("opcode = " + opcode);
+            ContextInfo.AddToList(new ContextInfo{ DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
+            ContextInfo.AddToList(new ContextInfo{ Length = 1 } );
             rootNode.Nodes.Add("stype = " + stype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -292,12 +294,15 @@ public class CM_Qualities : MessageProcessor {
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            TreeNode rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
-            rootNode.Nodes.Add("opcode = " + opcode);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("sender = " + sender);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("stype = " + stype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -307,31 +312,61 @@ public class CM_Qualities : MessageProcessor {
         public byte wts;
         public TSType stype;
         public T val;
+        public int valLength;
 
         public static PrivateUpdateQualityEvent<TSType, T> read(PacketOpcode opcode, BinaryReader binaryReader) {
             PrivateUpdateQualityEvent<TSType, T> newObj = new PrivateUpdateQualityEvent<TSType, T>();
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.stype = (TSType)Enum.ToObject(typeof(TSType), binaryReader.ReadUInt32());
+            var valStartPosition = binaryReader.BaseStream.Position;
             newObj.val = Util.readers[typeof(T)](binaryReader);
+            newObj.valLength = (int)(binaryReader.BaseStream.Position - valStartPosition);
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            TreeNode rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
-            rootNode.Nodes.Add("opcode = " + opcode);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("stype = " + stype);
-            // TODO: Need to contribute to this node for types that are capable of doing so
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             if (val is uint)
             {
                 rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)(object)val));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            }
+            else if (val is int)
+            {
+                rootNode.Nodes.Add("val = " + (int)(object)val);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            }
+            else if (val is long)
+            {
+                rootNode.Nodes.Add("val = " + (long)(object)val);
+                ContextInfo.AddToList(new ContextInfo { Length = 8 });
+            }
+            else if (val is double)
+            {
+                rootNode.Nodes.Add("val = " + (double)(object)val);
+                ContextInfo.AddToList(new ContextInfo { Length = 8 });
+            }
+            else if (val is SKILL_ADVANCEMENT_CLASS)
+            {
+                rootNode.Nodes.Add("val = " + val);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             else
             {
-                rootNode.Nodes.Add("val = " + val); 
+                var valNode = rootNode.Nodes.Add(val.GetType().Name + " = ");
+                ContextInfo.AddToList(new ContextInfo { Length = valLength }, updateDataIndex: false);
+                var methodInfo = val.GetType().GetMethod("contributeToTreeNode");
+                var args = new object[] {valNode};
+                methodInfo.Invoke(val, args);
             }
+            rootNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -342,6 +377,7 @@ public class CM_Qualities : MessageProcessor {
         public uint sender;
         public TSType stype;
         public T val;
+        public int valLength;
 
         public static UpdateQualityEvent<TSType, T> read(PacketOpcode opcode, BinaryReader binaryReader) {
             UpdateQualityEvent<TSType, T> newObj = new UpdateQualityEvent<TSType, T>();
@@ -349,26 +385,56 @@ public class CM_Qualities : MessageProcessor {
             newObj.wts = binaryReader.ReadByte();
             newObj.sender = binaryReader.ReadUInt32();
             newObj.stype = (TSType)Enum.ToObject(typeof(TSType), binaryReader.ReadUInt32());
+            var valStartPosition = binaryReader.BaseStream.Position;
             newObj.val = Util.readers[typeof(T)](binaryReader);
+            newObj.valLength = (int)(binaryReader.BaseStream.Position - valStartPosition);
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            TreeNode rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
-            rootNode.Nodes.Add("opcode = " + opcode);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("sender = " + Utility.FormatHex(sender));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("stype = " + stype);
-            // TODO: Need to contribute to this node for types that are capable of doing so
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             if (val is uint)
             {
                 rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)(object)val));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            }
+            else if (val is int)
+            {
+                rootNode.Nodes.Add("val = " + (int)(object)val);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            }
+            else if (val is long)
+            {
+                rootNode.Nodes.Add("val = " + (long)(object)val);
+                ContextInfo.AddToList(new ContextInfo { Length = 8 });
+            }
+            else if (val is double)
+            {
+                rootNode.Nodes.Add("val = " + (double)(object)val);
+                ContextInfo.AddToList(new ContextInfo { Length = 8 });
+            }
+            else if (val is SKILL_ADVANCEMENT_CLASS)
+            {
+                rootNode.Nodes.Add("val = " + val);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             else
             {
-                rootNode.Nodes.Add("val = " + val);
+                var valNode = rootNode.Nodes.Add(val.GetType().Name + " = ");
+                ContextInfo.AddToList(new ContextInfo { Length = valLength }, updateDataIndex: false);
+                var methodInfo = val.GetType().GetMethod("contributeToTreeNode");
+                var args = new object[] { valNode };
+                methodInfo.Invoke(val, args);
             }
+            rootNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -379,6 +445,7 @@ public class CM_Qualities : MessageProcessor {
         public PacketOpcode opcode;
         public byte wts;
         public STypeString stype;
+        public byte padding;
         public PStringChar val;
 
         public static PrivateUpdateStringEvent read(PacketOpcode opcode, BinaryReader binaryReader)
@@ -387,19 +454,22 @@ public class CM_Qualities : MessageProcessor {
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.stype = (STypeString)binaryReader.ReadUInt32();
-            Util.readToAlign(binaryReader);
+            newObj.padding = Util.readToAlign(binaryReader);
             newObj.val = PStringChar.read(binaryReader);
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView)
         {
-            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            TreeNode rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
-            rootNode.Nodes.Add("opcode = " + opcode);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("stype = " + stype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("val = " + val);
+            ContextInfo.AddToList(new ContextInfo { Length = val.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -410,6 +480,7 @@ public class CM_Qualities : MessageProcessor {
         public byte wts;
         public STypeString stype;
         public uint sender;
+        public byte padding;
         public PStringChar val;
 
         public static UpdateStringEvent read(PacketOpcode opcode, BinaryReader binaryReader)
@@ -419,20 +490,26 @@ public class CM_Qualities : MessageProcessor {
             newObj.wts = binaryReader.ReadByte();
             newObj.stype = (STypeString)binaryReader.ReadUInt32();
             newObj.sender = binaryReader.ReadUInt32();
-            Util.readToAlign(binaryReader);
+            newObj.padding = Util.readToAlign(binaryReader);
             newObj.val = PStringChar.read(binaryReader);
             return newObj;
         }
 
         public override void contributeToTreeView(TreeView treeView)
         {
-            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            TreeNode rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
-            rootNode.Nodes.Add("opcode = " + opcode);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("stype = " + stype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("sender = " + Utility.FormatHex(sender));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
+            // Skip padding
+            ContextInfo.DataIndex += padding;
             rootNode.Nodes.Add("val = " + val);
+            ContextInfo.AddToList(new ContextInfo { Length = val.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }

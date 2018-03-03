@@ -92,6 +92,7 @@ namespace aclogview
             messageProcessors.Add(new CM_Movement());
             messageProcessors.Add(new CM_Physics());
             messageProcessors.Add(new CM_Qualities());
+            ciSupportedMessageProcessors.Add(typeof(CM_Qualities).Name);
             messageProcessors.Add(new CM_Social());
             messageProcessors.Add(new CM_Trade());
             messageProcessors.Add(new CM_Train());
