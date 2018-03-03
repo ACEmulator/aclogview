@@ -1576,6 +1576,7 @@ namespace aclogview
             using (var form = new OptionsForm())
             {
                 form.ShowDialog();
+                if (treeView_ParsedData.Nodes.Count == 0) return;
                 var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
                 var savedTopNode = treeView_ParsedData.GetTopNode();
                 treeView_ParsedData.BeginUpdate();
