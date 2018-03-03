@@ -1,3 +1,11 @@
+### 2018-03-03
+[Slushnas]
+* Added context info to CM_Advocate and CM_Vendor.
+* Added treeview tooltip to display the nodes context info data type. This option is off by default but can be toggled on in the options menu.
+* Fixed a small bug when checking for protocol documentation updates.
+* Fixed exception in fragments mode when clicking an a row with no opcode.
+* Fixed bug where protocol documentation wasn't being updated when clicking on the same opcode with a different packet direction (C2S vs. S2C).
+
 ### 2018-02-25
 [Slushnas]
 * Added a feature to view an offline version of protocol documentation on the main form. The latest documentation was taken from Zegeger's website and is now hosted at <a href="https://acemulator.github.io">https://acemulator.github.io</a>. 
