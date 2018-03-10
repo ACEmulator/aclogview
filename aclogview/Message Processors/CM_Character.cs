@@ -753,7 +753,7 @@ public class CM_Character : MessageProcessor {
                     if (m_Override == 1)
                     {
                         node.Nodes.Add("m_LiteralValue = " + m_LiteralValue);
-                        ContextInfo.AddToList(new ContextInfo { Length = m_LiteralValue.Length, DataType = DataType.UnicodeString });
+                        ContextInfo.AddToList(new ContextInfo { Length = (m_LiteralValue.Length * 2) + 1, DataType = DataType.UnicodeString });
                     }
                     else
                     {
