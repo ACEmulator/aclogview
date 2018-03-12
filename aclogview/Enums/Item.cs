@@ -371,3 +371,20 @@ public enum PALETTE_TEMPLATE
     DYESPRINGPURPLE_PALETTE_TEMPLATE,
     DYESPRINGBLACK_PALETTE_TEMPLATE
 }
+
+public enum WieldRequirement
+{
+    Invalid_WieldRequirement,
+    WIELD_REQUIRES_SKILL_WieldRequirement,
+    WIELD_REQUIRES_RAW_SKILL_WieldRequirement,
+    WIELD_REQUIRES_ATTRIB_WieldRequirement,
+    WIELD_REQUIRES_RAW_ATTRIB_WieldRequirement,
+    WIELD_REQUIRES_SECONDARY_ATTRIB_WieldRequirement,
+    WIELD_REQUIRES_RAW_SECONDARY_ATTRIB_WieldRequirement,
+    WIELD_REQUIRES_LEVEL_WieldRequirement,
+    WIELD_REQUIRES_TRAINING_WieldRequirement,
+    WIELD_REQUIRES_INTSTAT_WieldRequirement,
+    WIELD_REQUIRES_BOOLSTAT_WieldRequirement,
+    WIELD_REQUIRES_CREATURE_TYPE_WieldRequirement,
+    WIELD_REQUIRES_HERITAGE_TYPE_WieldRequirement
+}
