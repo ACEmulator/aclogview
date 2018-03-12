@@ -209,9 +209,7 @@ public class CM_Examine : MessageProcessor {
         public uint _bitField;
         public uint _validLocations;
         public AMMO_TYPE _ammoType;
-        public bool isInscribable;
-        public bool isHealer;
-        public bool isLockpick;
+        public List<string> packedItems = new List<string>();
 
         public static HookAppraisalProfile read(BinaryReader binaryReader)
         {
@@ -220,24 +218,28 @@ public class CM_Examine : MessageProcessor {
             newObj._validLocations = binaryReader.ReadUInt32();
             newObj._ammoType = (AMMO_TYPE)binaryReader.ReadUInt32();
 
-            if ((newObj._bitField & (uint)Enchantment_BFIndex.BF_INSCRIBABLE) != 0)
-                newObj.isInscribable = true;
-            if ((newObj._bitField & (uint)Enchantment_BFIndex.BF_HEALER) != 0)
-                newObj.isHealer = true;
-            if ((newObj._bitField & (uint)Enchantment_BFIndex.BF_LOCKPICK) != 0)
-                newObj.isLockpick = true;
+            if ((newObj._bitField & (uint) HookAppraisal_BF.BF_INSCRIBABLE) != 0)
+                newObj.packedItems.Add(HookAppraisal_BF.BF_INSCRIBABLE.ToString());
+            if ((newObj._bitField & (uint) HookAppraisal_BF.BF_HEALER) != 0)
+                newObj.packedItems.Add(HookAppraisal_BF.BF_HEALER.ToString());
+            if ((newObj._bitField & (uint) HookAppraisal_BF.BF_FOOD) != 0)
+                newObj.packedItems.Add(HookAppraisal_BF.BF_FOOD.ToString());
+            if ((newObj._bitField & (uint) HookAppraisal_BF.BF_LOCKPICK) != 0)
+                newObj.packedItems.Add(HookAppraisal_BF.BF_LOCKPICK.ToString());
 
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("_bitField = " + Utility.FormatHex(_bitField));
-            node.Nodes.Add("_validLocations = " + _validLocations);
+            var bitfieldNode = node.Nodes.Add("_bitField = " + Utility.FormatHex(_bitField));
+            foreach (string item in packedItems)
+            {
+                bitfieldNode.Nodes.Add(item);
+            }
+            var locationsNode = node.Nodes.Add("_validLocations = " + Utility.FormatHex(_validLocations));
+            CM_Inventory.InventoryLocation.contributeToTreeNode(locationsNode, _validLocations);
             node.Nodes.Add("_ammoType = " + _ammoType);
-            node.Nodes.Add("isInscribable = " + isInscribable);
-            node.Nodes.Add("isHealer = " + isHealer);
-            node.Nodes.Add("isLockpick = " + isLockpick);
         }
     }
 
