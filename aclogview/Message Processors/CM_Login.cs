@@ -750,14 +750,7 @@ public class CM_Login : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode ilistLocNode = node.Nodes.Add("loc_ = " + Utility.FormatHex(loc_));
             ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
-            {
-                if ((loc_ & (uint)e) == (uint)e && (uint)e != 0)
-                {
-                    ilistLocNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                }
-            }
+            InventoryLocation.contributeToTreeNode(ilistLocNode, loc_);
             // Now skip _loc dword
             ContextInfo.DataIndex += 4;
             TreeNode ilistPriorityNode = node.Nodes.Add("priority_ = " + priority_);
