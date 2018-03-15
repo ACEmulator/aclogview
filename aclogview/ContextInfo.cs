@@ -26,6 +26,7 @@ namespace aclogview
             { DataType.SpellID_ushort, 2 },
             { DataType.SpellLayer, 2 },
             { DataType.ObjectID, 4 },
+            { DataType.DataID, 4 },
             { DataType.Opcode, 4 },
             { DataType.CellID, 4 }
         };
@@ -76,6 +77,7 @@ namespace aclogview
         SpellID_ushort,
         SpellLayer,     
         ObjectID,
+        DataID,
         Opcode,
         CellID,                          // 4 byte landblock cell ID
         
