@@ -229,3 +229,13 @@ public enum WeenieType {
     PetDevice_WeenieType,
     CombatPet_WeenieType
 }
+
+// Gleaned from client code. See CharExamineUI::SetAppraiseInfo()
+public enum FactionBits
+{
+    No_Faction,
+    Celestial_Hand,
+    Eldrytch_Web,
+    // skip 1
+    Radiant_Blood = 4
+}
