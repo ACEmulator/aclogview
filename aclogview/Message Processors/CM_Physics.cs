@@ -919,42 +919,19 @@ public class CM_Physics : MessageProcessor {
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_ValidLocations) != 0) {
                 TreeNode validLocationsNode = node.Nodes.Add("_valid_locations = " + Utility.FormatHex(_valid_locations));
                 ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
-                {
-                    if ((_valid_locations & (uint)e) == (uint)e && (uint)e != 0)
-                    {
-                        validLocationsNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                    }
-                }
+                CM_Inventory.InventoryLocation.contributeToTreeNode(validLocationsNode, _valid_locations);
                 // Now skip valid locations dword
                 ContextInfo.DataIndex += 4;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Location) != 0) {
                 TreeNode locationNode = node.Nodes.Add("_location = " + Utility.FormatHex(_location));
                 ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
-                {
-                    if ((_location & (uint)e) == (uint)e && (uint)e != 0)
-                    {
-                        locationNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                    }
-                }
+                CM_Inventory.InventoryLocation.contributeToTreeNode(locationNode, _location);
                 // Now skip locations dword
                 ContextInfo.DataIndex += 4;
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Priority) != 0) {
-                TreeNode priorityNode = node.Nodes.Add("_priority = " + Utility.FormatHex(_priority));
-                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                foreach (uint e in Enum.GetValues(typeof(CoverageMask)))
-                {
-                    if (((uint)_priority & e) == e)
-                    {
-                        priorityNode.Nodes.Add($"{Enum.GetName(typeof(CoverageMask), e)}");
-                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                    }
-                }
+                ClothingPriority.contributeToTreeNode(node, _priority);
                 // Now skip priority dword
                 ContextInfo.DataIndex += 4;
             }
@@ -1012,14 +989,7 @@ public class CM_Physics : MessageProcessor {
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookType) != 0) {
                 TreeNode hookTypeNode = node.Nodes.Add("_hook_type = " + Utility.FormatHex(_hook_type));
                 ContextInfo.AddToList(new ContextInfo { Length = 2 }, updateDataIndex: false);
-                foreach (HookTypeEnum e in Enum.GetValues(typeof(HookTypeEnum)))
-                {
-                    if ((_hook_type & (ushort)e) == (ushort)e && (ushort)e != 0)
-                    {
-                        hookTypeNode.Nodes.Add($"{Enum.GetName(typeof(HookTypeEnum), e)}");
-                        ContextInfo.AddToList(new ContextInfo { Length = 2 }, updateDataIndex: false);
-                    }
-                }
+                HookType.contributeToTreeNode(hookTypeNode, _hook_type);
                 // Now update hook type ushort
                 ContextInfo.DataIndex += 2;
             }
@@ -1049,6 +1019,45 @@ public class CM_Physics : MessageProcessor {
             }
 
             ContextInfo.DataIndex += endPadding;
+        }
+    }
+
+    public class HookType
+    {
+        public static void contributeToTreeNode<T>(TreeNode node, T _hook_type_generic)
+        {
+            byte _hook_type_length = 0;
+            var _hook_type = Convert.ToUInt16(_hook_type_generic);
+            if (_hook_type_generic is uint)
+                _hook_type_length = 4;
+            else if (_hook_type_generic is ushort)
+                _hook_type_length = 2;
+                
+            foreach (HookTypeEnum e in Enum.GetValues(typeof(HookTypeEnum)))
+            {
+                if ((_hook_type & (ushort)e) == (ushort)e && (ushort)e != 0)
+                {
+                    node.Nodes.Add($"{Enum.GetName(typeof(HookTypeEnum), e)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = _hook_type_length }, updateDataIndex: false);
+                }
+            }
+        }
+    }
+
+    public class ClothingPriority
+    {
+        public static void contributeToTreeNode(TreeNode node, uint _priority)
+        {
+            TreeNode priorityNode = node.Nodes.Add("_priority = " + Utility.FormatHex(_priority));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            foreach (uint e in Enum.GetValues(typeof(CoverageMask)))
+            {
+                if (((uint)_priority & e) == e)
+                {
+                    priorityNode.Nodes.Add($"{Enum.GetName(typeof(CoverageMask), e)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                }
+            }
         }
     }
 
