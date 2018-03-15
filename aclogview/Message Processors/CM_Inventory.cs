@@ -191,18 +191,32 @@ public class CM_Inventory : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
-            TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
+            var equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
             ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            InventoryLocation.contributeToTreeNode(equipMaskNode, i_equipMask);
+            rootNode.ExpandAll();
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class InventoryLocation
+    {
+        public static void contributeToTreeNode(TreeNode node, uint i_equipMask)
+        {
+            if (i_equipMask == 0)
+            {
+                node.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), 0)}");
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                return;
+            }
             foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
             {
                 if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
                 {
-                    equipMaskNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                    node.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                    ContextInfo.AddToList(new ContextInfo {Length = 4}, updateDataIndex: false);
                 }
             }
-            rootNode.ExpandAll();
-            treeView.Nodes.Add(rootNode);
         }
     }
 
@@ -272,16 +286,9 @@ public class CM_Inventory : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
-            TreeNode equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
+            var equipMaskNode = rootNode.Nodes.Add("i_equipMask = " + Utility.FormatHex(i_equipMask));
             ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
-            {
-                if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
-                {
-                    equipMaskNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                }
-            }
+            InventoryLocation.contributeToTreeNode(equipMaskNode, i_equipMask);
             rootNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
         }
@@ -593,14 +600,7 @@ public class CM_Inventory : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode locationNode = rootNode.Nodes.Add("i_loc = " + Utility.FormatHex(i_loc));
             ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
-            {
-                if ((i_loc & (uint)e) == (uint)e && (uint)e != 0)
-                {
-                    locationNode.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
-                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                }
-            }
+            InventoryLocation.contributeToTreeNode(locationNode, i_loc);
             // Now skip i_loc dword
             ContextInfo.DataIndex += 4;
             rootNode.Nodes.Add("i_amount = " + i_amount);
