@@ -153,7 +153,7 @@ public enum WeaponType {
     Magic_WeaponType
 }
 
-public enum Enchantment_BFIndex {
+public enum HookAppraisal_BF {
     BF_INSCRIBABLE = (1 << 0),
     BF_HEALER = (1 << 1),
     BF_FOOD = (1 << 2),
@@ -387,4 +387,13 @@ public enum WieldRequirement
     WIELD_REQUIRES_BOOLSTAT_WieldRequirement,
     WIELD_REQUIRES_CREATURE_TYPE_WieldRequirement,
     WIELD_REQUIRES_HERITAGE_TYPE_WieldRequirement
+}
+
+public enum ItemXpStyle
+{
+    Undef,
+    Fixed,
+    ScalesWithLevel,
+    // This appears to be another "scales with level type" that appears in the client but was never used
+    Unknown
 }
