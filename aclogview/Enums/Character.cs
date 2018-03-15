@@ -231,13 +231,32 @@ public enum CG_Town
 };
 
 // gmCGProfessionPage::EProfession
-enum CG_Profession
+public enum CG_Profession
 {
-    ECG_CUSTOM=0,
-    ECG_BOWHUNTER=1,
-    ECG_SWASHBUCKLER=2,
-    ECG_LIFECASTER=3,
-    ECG_WARMAGE=4,
-    ECG_WAYFARER=5,
-    ECG_SOLDIER=6
+    ECG_CUSTOM = 0,
+    ECG_BOWHUNTER = 1,
+    ECG_SWASHBUCKLER = 2,
+    ECG_LIFECASTER = 3,
+    ECG_WARMAGE = 4,
+    ECG_WAYFARER = 5,
+    ECG_SOLDIER = 6
 };
+
+public enum AetheriaBitfield
+{
+    NoSlotsUnlocked,
+    OneSlotUnlocked,
+    // Skip 1
+    TwoSlotsUnlocked = 3,
+    // Skip 3
+    ThreeSlotsUnlocked = 7
+}
+
+// Gleaned from client. See gmCharacterInfoUI::UpdateAugmentations()
+public enum SummoningMastery
+{
+    Undef,
+    Primalist,
+    Necromancer,
+    Naturalist
+}
