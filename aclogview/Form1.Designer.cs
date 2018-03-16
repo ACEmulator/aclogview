@@ -201,8 +201,8 @@
             // 
             // columnHeader2
             // 
-            this.columnHeader2.Text = "Time";
-            this.columnHeader2.Width = 80;
+            this.columnHeader2.Text = "Epoch Time (s)";
+            this.columnHeader2.Width = 84;
             // 
             // columnHeader7
             // 
