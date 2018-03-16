@@ -58,6 +58,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ContextInfo.cs" />
+    <Compile Include="Enum Helpers\PropertyInt.cs" />
     <Compile Include="GotoLine.cs">
       <SubType>Form</SubType>
     </Compile>
