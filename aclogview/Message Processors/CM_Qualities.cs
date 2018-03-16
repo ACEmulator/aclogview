@@ -387,58 +387,58 @@ public class CM_Qualities : MessageProcessor {
 
         public void ContributeValuesToTreeView(TreeNode rootNode)
         {
-            if (opcode == PacketOpcode.Evt_Qualities__PrivateUpdateInt_ID ||
-                opcode == PacketOpcode.Evt_Qualities__UpdateInt_ID)
+            switch (opcode)
             {
-                PropertyInt.contributeToTreeNode(rootNode, this);
-            }
-            else if (opcode == PacketOpcode.Evt_Qualities__PrivateUpdateBool_ID || 
-                     opcode == PacketOpcode.Evt_Qualities__UpdateBool_ID)
-            {
-                rootNode.Nodes.Add("val = " + Convert.ToBoolean(val));
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            }
-            else if (val is int)
-            {
-                rootNode.Nodes.Add("val = " + (int)val);
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            }
-            else if (val is uint)
-            {
-                rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)val));
-                if (opcode == PacketOpcode.Evt_Qualities__PrivateUpdateDataID_ID || 
-                    opcode == PacketOpcode.Evt_Qualities__UpdateDataID_ID)
-                {
+                case PacketOpcode.Evt_Qualities__PrivateUpdateInt_ID:
+                case PacketOpcode.Evt_Qualities__UpdateInt_ID:
+                    PropertyInt.contributeToTreeNode(rootNode, this);
+                    break;
+                case PacketOpcode.Evt_Qualities__PrivateUpdateInt64_ID:
+                case PacketOpcode.Evt_Qualities__UpdateInt64_ID:
+                    rootNode.Nodes.Add("val = " + (long)val);
+                    ContextInfo.AddToList(new ContextInfo { Length = 8 });
+                    break;
+                case PacketOpcode.Evt_Qualities__PrivateUpdateBool_ID:
+                case PacketOpcode.Evt_Qualities__UpdateBool_ID:
+                    rootNode.Nodes.Add("val = " + Convert.ToBoolean(val));
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    break;
+                case PacketOpcode.Evt_Qualities__PrivateUpdateFloat_ID:
+                case PacketOpcode.Evt_Qualities__UpdateFloat_ID:
+                    rootNode.Nodes.Add("val = " + (double)val);
+                    ContextInfo.AddToList(new ContextInfo { Length = 8 });
+                    break;
+                case PacketOpcode.Evt_Qualities__PrivateUpdateDataID_ID:
+                case PacketOpcode.Evt_Qualities__UpdateDataID_ID:
+                    rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)val));
                     ContextInfo.AddToList(new ContextInfo { Length = 4, DataType = DataType.DataID });
-                }
-                else { 
-                    // PacketOpcode.Evt_Qualities__PrivateUpdateInstanceID_ID
-                    // PacketOpcode.Evt_Qualities__UpdateInstanceID_ID
+                    break;
+                case PacketOpcode.Evt_Qualities__PrivateUpdateInstanceID_ID:
+                case PacketOpcode.Evt_Qualities__UpdateInstanceID_ID:
+                    rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)val));
                     ContextInfo.AddToList(new ContextInfo { Length = 4, DataType = DataType.ObjectID });
-                }
-            }
-            else if (val is long)
-            {
-                rootNode.Nodes.Add("val = " + (long)val);
-                ContextInfo.AddToList(new ContextInfo { Length = 8 });
-            }
-            else if (val is double)
-            {
-                rootNode.Nodes.Add("val = " + (double)val);
-                ContextInfo.AddToList(new ContextInfo { Length = 8 });
-            }
-            else if (val is SKILL_ADVANCEMENT_CLASS)
-            {
-                rootNode.Nodes.Add("val = " + val);
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            }
-            else
-            {
-                var valNode = rootNode.Nodes.Add(val.GetType().Name + " = ");
-                ContextInfo.AddToList(new ContextInfo { Length = valLength }, updateDataIndex: false);
-                var methodInfo = val.GetType().GetMethod("contributeToTreeNode");
-                var args = new object[] { valNode };
-                methodInfo.Invoke(val, args);
+                    break;
+                case PacketOpcode.Evt_Qualities__PrivateUpdateSkillLevel_ID:
+                case PacketOpcode.Evt_Qualities__UpdateSkillLevel_ID:
+                case PacketOpcode.Evt_Qualities__PrivateUpdateAttributeLevel_ID:
+                case PacketOpcode.Evt_Qualities__UpdateAttributeLevel_ID:
+                case PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2ndLevel_ID:
+                case PacketOpcode.Evt_Qualities__UpdateAttribute2ndLevel_ID:
+                    rootNode.Nodes.Add("val = " + (int)val);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    break;
+                case PacketOpcode.Evt_Qualities__PrivateUpdateSkillAC_ID:
+                case PacketOpcode.Evt_Qualities__UpdateSkillAC_ID:
+                    rootNode.Nodes.Add("val = " + val);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    break;
+                default:
+                    var valNode = rootNode.Nodes.Add(val.GetType().Name + " = ");
+                    ContextInfo.AddToList(new ContextInfo { Length = valLength }, updateDataIndex: false);
+                    var methodInfo = val.GetType().GetMethod("contributeToTreeNode");
+                    var args = new object[] { valNode };
+                    methodInfo.Invoke(val, args);
+                    break;
             }
         }
     }
