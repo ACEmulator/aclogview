@@ -6,241 +6,242 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview.Enum_Helpers;
 
 public class CM_Qualities : MessageProcessor {
 
     public override bool acceptMessageData(BinaryReader messageDataReader, TreeView outputTreeView) {
-        bool handled = true;
+        var handled = true;
 
-        PacketOpcode opcode = Util.readOpcode(messageDataReader);
+        var opcode = Util.readOpcode(messageDataReader);
         switch (opcode) {
             case PacketOpcode.Evt_Qualities__PrivateRemoveIntEvent_ID: {
-                    PrivateRemoveQualityEvent<STypeInt> message = PrivateRemoveQualityEvent<STypeInt>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypeInt>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemoveIntEvent_ID: {
-                    RemoveQualityEvent<STypeInt> message = RemoveQualityEvent<STypeInt>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypeInt>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateRemoveBoolEvent_ID: {
-                    PrivateRemoveQualityEvent<STypeBool> message = PrivateRemoveQualityEvent<STypeBool>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypeBool>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemoveBoolEvent_ID: {
-                    RemoveQualityEvent<STypeBool> message = RemoveQualityEvent<STypeBool>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypeBool>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateRemoveFloatEvent_ID: {
-                    PrivateRemoveQualityEvent<STypeFloat> message = PrivateRemoveQualityEvent<STypeFloat>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypeFloat>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemoveFloatEvent_ID: {
-                    RemoveQualityEvent<STypeFloat> message = RemoveQualityEvent<STypeFloat>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypeFloat>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateRemoveStringEvent_ID: {
-                    PrivateRemoveQualityEvent<STypeString> message = PrivateRemoveQualityEvent<STypeString>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypeString>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemoveStringEvent_ID: {
-                    RemoveQualityEvent<STypeString> message = RemoveQualityEvent<STypeString>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypeString>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateRemoveDataIDEvent_ID: {
-                    PrivateRemoveQualityEvent<STypeDID> message = PrivateRemoveQualityEvent<STypeDID>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypeDID>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemoveDataIDEvent_ID: {
-                    RemoveQualityEvent<STypeDID> message = RemoveQualityEvent<STypeDID>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypeDID>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateRemoveInstanceIDEvent_ID: {
-                    PrivateRemoveQualityEvent<STypeIID> message = PrivateRemoveQualityEvent<STypeIID>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypeIID>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemoveInstanceIDEvent_ID: {
-                    RemoveQualityEvent<STypeIID> message = RemoveQualityEvent<STypeIID>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypeIID>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateRemovePositionEvent_ID: {
-                    PrivateRemoveQualityEvent<STypePosition> message = PrivateRemoveQualityEvent<STypePosition>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypePosition>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemovePositionEvent_ID: {
-                    RemoveQualityEvent<STypePosition> message = RemoveQualityEvent<STypePosition>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypePosition>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateRemoveInt64Event_ID: {
-                    PrivateRemoveQualityEvent<STypeInt64> message = PrivateRemoveQualityEvent<STypeInt64>.read(opcode, messageDataReader);
+                    var message = PrivateRemoveQualityEvent<STypeInt64>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__RemoveInt64Event_ID: {
-                    RemoveQualityEvent<STypeInt64> message = RemoveQualityEvent<STypeInt64>.read(opcode, messageDataReader);
+                    var message = RemoveQualityEvent<STypeInt64>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateInt_ID: {
-                    PrivateUpdateQualityEvent<STypeInt, int> message = PrivateUpdateQualityEvent<STypeInt, int>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeInt, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateInt_ID: {
-                    UpdateQualityEvent<STypeInt, int> message = UpdateQualityEvent<STypeInt, int>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeInt, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateInt64_ID: {
-                    PrivateUpdateQualityEvent<STypeInt64, long> message = PrivateUpdateQualityEvent<STypeInt64, long>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeInt64, long>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateInt64_ID: {
-                    UpdateQualityEvent<STypeInt64, long> message = UpdateQualityEvent<STypeInt64, long>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeInt64, long>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateBool_ID: {
-                    PrivateUpdateQualityEvent<STypeBool, int> message = PrivateUpdateQualityEvent<STypeBool, int>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeBool, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateBool_ID: {
-                    UpdateQualityEvent<STypeBool, int> message = UpdateQualityEvent<STypeBool, int>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeBool, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateFloat_ID: {
-                    PrivateUpdateQualityEvent<STypeFloat, double> message = PrivateUpdateQualityEvent<STypeFloat, double>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeFloat, double>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateFloat_ID: {
-                    UpdateQualityEvent<STypeFloat, double> message = UpdateQualityEvent<STypeFloat, double>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeFloat, double>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateString_ID: {
-                    PrivateUpdateStringEvent message = PrivateUpdateStringEvent.read(opcode, messageDataReader);
+                    var message = PrivateUpdateStringEvent.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateString_ID: {
-                    UpdateStringEvent message = UpdateStringEvent.read(opcode, messageDataReader);
+                    var message = UpdateStringEvent.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateDataID_ID: {
-                    PrivateUpdateQualityEvent<STypeDID, uint> message = PrivateUpdateQualityEvent<STypeDID, uint>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeDID, uint>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateDataID_ID: {
-                    UpdateQualityEvent<STypeDID, uint> message = UpdateQualityEvent<STypeDID, uint>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeDID, uint>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateInstanceID_ID: {
-                    PrivateUpdateQualityEvent<STypeIID, uint> message = PrivateUpdateQualityEvent<STypeIID, uint>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeIID, uint>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateInstanceID_ID: {
-                    UpdateQualityEvent<STypeIID, uint> message = UpdateQualityEvent<STypeIID, uint>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeIID, uint>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdatePosition_ID: {
-                    PrivateUpdateQualityEvent<STypePosition, Position> message = PrivateUpdateQualityEvent<STypePosition, Position>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypePosition, Position>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdatePosition_ID: {
-                    UpdateQualityEvent<STypePosition, Position> message = UpdateQualityEvent<STypePosition, Position>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypePosition, Position>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateSkill_ID: {
-                    PrivateUpdateQualityEvent<STypeSkill, Skill> message = PrivateUpdateQualityEvent<STypeSkill, Skill>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeSkill, Skill>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateSkill_ID: {
-                    UpdateQualityEvent<STypeSkill, Skill> message = UpdateQualityEvent<STypeSkill, Skill>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeSkill, Skill>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateSkillLevel_ID: {
-                    PrivateUpdateQualityEvent<STypeSkill, int> message = PrivateUpdateQualityEvent<STypeSkill, int>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeSkill, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateSkillLevel_ID: {
-                    UpdateQualityEvent<STypeSkill, int> message = UpdateQualityEvent<STypeSkill, int>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeSkill, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateSkillAC_ID: {
-                    PrivateUpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS> message = PrivateUpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateSkillAC_ID: {
-                    UpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS> message = UpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateAttribute_ID: {
-                    PrivateUpdateQualityEvent<STypeAttribute, Attribute> message = PrivateUpdateQualityEvent<STypeAttribute, Attribute>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeAttribute, Attribute>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateAttribute_ID: {
-                    UpdateQualityEvent<STypeAttribute, Attribute> message = UpdateQualityEvent<STypeAttribute, Attribute>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeAttribute, Attribute>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateAttributeLevel_ID: {
-                    PrivateUpdateQualityEvent<STypeAttribute, int> message = PrivateUpdateQualityEvent<STypeAttribute, int>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeAttribute, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateAttributeLevel_ID: {
-                    UpdateQualityEvent<STypeAttribute, int> message = UpdateQualityEvent<STypeAttribute, int>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeAttribute, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2nd_ID: {
-                    PrivateUpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute> message = PrivateUpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateAttribute2nd_ID: {
-                    UpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute> message = UpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2ndLevel_ID: {
-                    PrivateUpdateQualityEvent<STypeAttribute2nd, int> message = PrivateUpdateQualityEvent<STypeAttribute2nd, int>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeAttribute2nd, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateAttribute2ndLevel_ID: {
-                    UpdateQualityEvent<STypeAttribute2nd, int> message = UpdateQualityEvent<STypeAttribute2nd, int>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeAttribute2nd, int>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -259,7 +260,7 @@ public class CM_Qualities : MessageProcessor {
         public TSType stype;
 
         public static PrivateRemoveQualityEvent<TSType> read(PacketOpcode opcode, BinaryReader binaryReader) {
-            PrivateRemoveQualityEvent<TSType> newObj = new PrivateRemoveQualityEvent<TSType>();
+            var newObj = new PrivateRemoveQualityEvent<TSType>();
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.stype = (TSType)Enum.ToObject(typeof(TSType), binaryReader.ReadUInt32());
@@ -267,7 +268,7 @@ public class CM_Qualities : MessageProcessor {
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(opcode.ToString());
+            var rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo{ DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
@@ -285,7 +286,7 @@ public class CM_Qualities : MessageProcessor {
         public TSType stype;
 
         public static RemoveQualityEvent<TSType> read(PacketOpcode opcode, BinaryReader binaryReader) {
-            RemoveQualityEvent<TSType> newObj = new RemoveQualityEvent<TSType>();
+            var newObj = new RemoveQualityEvent<TSType>();
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.sender = binaryReader.ReadUInt32();
@@ -294,7 +295,7 @@ public class CM_Qualities : MessageProcessor {
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(opcode.ToString());
+            var rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
@@ -315,7 +316,7 @@ public class CM_Qualities : MessageProcessor {
         public int valLength;
 
         public static PrivateUpdateQualityEvent<TSType, T> read(PacketOpcode opcode, BinaryReader binaryReader) {
-            PrivateUpdateQualityEvent<TSType, T> newObj = new PrivateUpdateQualityEvent<TSType, T>();
+            var newObj = new PrivateUpdateQualityEvent<TSType, T>();
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.stype = (TSType)Enum.ToObject(typeof(TSType), binaryReader.ReadUInt32());
@@ -326,46 +327,15 @@ public class CM_Qualities : MessageProcessor {
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(opcode.ToString());
+            var rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
             ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("stype = " + stype);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            if (val is uint)
-            {
-                rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)(object)val));
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            }
-            else if (val is int)
-            {
-                rootNode.Nodes.Add("val = " + (int)(object)val);
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            }
-            else if (val is long)
-            {
-                rootNode.Nodes.Add("val = " + (long)(object)val);
-                ContextInfo.AddToList(new ContextInfo { Length = 8 });
-            }
-            else if (val is double)
-            {
-                rootNode.Nodes.Add("val = " + (double)(object)val);
-                ContextInfo.AddToList(new ContextInfo { Length = 8 });
-            }
-            else if (val is SKILL_ADVANCEMENT_CLASS)
-            {
-                rootNode.Nodes.Add("val = " + val);
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            }
-            else
-            {
-                var valNode = rootNode.Nodes.Add(val.GetType().Name + " = ");
-                ContextInfo.AddToList(new ContextInfo { Length = valLength }, updateDataIndex: false);
-                var methodInfo = val.GetType().GetMethod("contributeToTreeNode");
-                var args = new object[] {valNode};
-                methodInfo.Invoke(val, args);
-            }
+            var updateValues = new QualityValues{opcode = opcode, stype = stype, val = val, valLength = valLength};
+            updateValues.ContributeValuesToTreeView(rootNode);
             rootNode.ExpandAll();
             treeView.Nodes.Add(rootNode);
         }
@@ -380,7 +350,7 @@ public class CM_Qualities : MessageProcessor {
         public int valLength;
 
         public static UpdateQualityEvent<TSType, T> read(PacketOpcode opcode, BinaryReader binaryReader) {
-            UpdateQualityEvent<TSType, T> newObj = new UpdateQualityEvent<TSType, T>();
+            var newObj = new UpdateQualityEvent<TSType, T>();
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.sender = binaryReader.ReadUInt32();
@@ -392,7 +362,7 @@ public class CM_Qualities : MessageProcessor {
         }
 
         public override void contributeToTreeView(TreeView treeView) {
-            TreeNode rootNode = new TreeNode(opcode.ToString());
+            var rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
@@ -401,24 +371,60 @@ public class CM_Qualities : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("stype = " + stype);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            if (val is uint)
+            var updateValues = new QualityValues { opcode = opcode, stype = stype, val = val, valLength = valLength };
+            updateValues.ContributeValuesToTreeView(rootNode);
+            rootNode.ExpandAll();
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class QualityValues
+    {
+        public PacketOpcode opcode;
+        public object stype;
+        public object val;
+        public int valLength;
+
+        public void ContributeValuesToTreeView(TreeNode rootNode)
+        {
+            if (opcode == PacketOpcode.Evt_Qualities__PrivateUpdateInt_ID ||
+                opcode == PacketOpcode.Evt_Qualities__UpdateInt_ID)
             {
-                rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)(object)val));
+                PropertyInt.contributeToTreeNode(rootNode, this);
+            }
+            else if (opcode == PacketOpcode.Evt_Qualities__PrivateUpdateBool_ID || 
+                     opcode == PacketOpcode.Evt_Qualities__UpdateBool_ID)
+            {
+                rootNode.Nodes.Add("val = " + Convert.ToBoolean(val));
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             else if (val is int)
             {
-                rootNode.Nodes.Add("val = " + (int)(object)val);
+                rootNode.Nodes.Add("val = " + (int)val);
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            }
+            else if (val is uint)
+            {
+                rootNode.Nodes.Add("val = " + Utility.FormatHex((uint)val));
+                if (opcode == PacketOpcode.Evt_Qualities__PrivateUpdateDataID_ID || 
+                    opcode == PacketOpcode.Evt_Qualities__UpdateDataID_ID)
+                {
+                    ContextInfo.AddToList(new ContextInfo { Length = 4, DataType = DataType.DataID });
+                }
+                else { 
+                    // PacketOpcode.Evt_Qualities__PrivateUpdateInstanceID_ID
+                    // PacketOpcode.Evt_Qualities__UpdateInstanceID_ID
+                    ContextInfo.AddToList(new ContextInfo { Length = 4, DataType = DataType.ObjectID });
+                }
             }
             else if (val is long)
             {
-                rootNode.Nodes.Add("val = " + (long)(object)val);
+                rootNode.Nodes.Add("val = " + (long)val);
                 ContextInfo.AddToList(new ContextInfo { Length = 8 });
             }
             else if (val is double)
             {
-                rootNode.Nodes.Add("val = " + (double)(object)val);
+                rootNode.Nodes.Add("val = " + (double)val);
                 ContextInfo.AddToList(new ContextInfo { Length = 8 });
             }
             else if (val is SKILL_ADVANCEMENT_CLASS)
@@ -434,8 +440,6 @@ public class CM_Qualities : MessageProcessor {
                 var args = new object[] { valNode };
                 methodInfo.Invoke(val, args);
             }
-            rootNode.ExpandAll();
-            treeView.Nodes.Add(rootNode);
         }
     }
 
@@ -450,7 +454,7 @@ public class CM_Qualities : MessageProcessor {
 
         public static PrivateUpdateStringEvent read(PacketOpcode opcode, BinaryReader binaryReader)
         {
-            PrivateUpdateStringEvent newObj = new PrivateUpdateStringEvent();
+            var newObj = new PrivateUpdateStringEvent();
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.stype = (STypeString)binaryReader.ReadUInt32();
@@ -461,13 +465,15 @@ public class CM_Qualities : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView)
         {
-            TreeNode rootNode = new TreeNode(opcode.ToString());
+            var rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
             ContextInfo.AddToList(new ContextInfo { Length = 1 });
             rootNode.Nodes.Add("stype = " + stype);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            // Skip padding
+            ContextInfo.DataIndex += padding;
             rootNode.Nodes.Add("val = " + val);
             ContextInfo.AddToList(new ContextInfo { Length = val.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
@@ -485,7 +491,7 @@ public class CM_Qualities : MessageProcessor {
 
         public static UpdateStringEvent read(PacketOpcode opcode, BinaryReader binaryReader)
         {
-            UpdateStringEvent newObj = new UpdateStringEvent();
+            var newObj = new UpdateStringEvent();
             newObj.opcode = opcode;
             newObj.wts = binaryReader.ReadByte();
             newObj.stype = (STypeString)binaryReader.ReadUInt32();
@@ -497,7 +503,7 @@ public class CM_Qualities : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView)
         {
-            TreeNode rootNode = new TreeNode(opcode.ToString());
+            var rootNode = new TreeNode(opcode.ToString());
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("wts = " + wts);
