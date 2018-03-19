@@ -1,3 +1,12 @@
+### 2018-03-19
+[Slushnas]
+* Added context info to CM_Qualities and added/improved parsing of property values.
+* Fixed parsing issues with a couple messages.
+* Renamed listview Time column to indicate the epoch time format and added a feature to display local time in the options menu.
+* Added/fixed various supporting enums.
+* Refactored and broke out some parsing into classes to avoid code duplication.
+* Fixed an exception when clicking on the Options menu Cancel button.
+
 ### 2018-03-03
 [Slushnas]
 * Added context info to CM_Advocate and CM_Vendor.
