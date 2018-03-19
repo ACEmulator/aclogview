@@ -55,6 +55,12 @@ namespace aclogview
             String
         }
 
+        public enum TimeFormat
+        {
+            EpochTime,
+            LocalTime
+        }
+
         // TODO: Remove after context info is added to all message processors
         public List<string> ciSupportedMessageProcessors = new List<string>();
 
@@ -148,6 +154,8 @@ namespace aclogview
             prop.SetValue(listView_Packets, true, null);
             prop = listView_CreatedObjects.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             prop.SetValue(listView_CreatedObjects, true, null);
+
+            setupTimeColumn();
 
             var pDocs = new ProtocolDocs();
             if (pDocs.IsTimeForUpdateCheck())
@@ -307,18 +315,17 @@ namespace aclogview
         private void listView_Packets_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             if (e.Column == 0 || e.Column == 2 || e.Column == 5)
-            {
                 comparer.sortType = SortType.Uint;
-            }
             else
-            {
                 comparer.sortType = SortType.String;
-            }
-            if (comparer.col == e.Column)
+            if (comparer.col == e.Column || comparer.col == 0 && e.Column == 2)
             {
                 comparer.reverse = !comparer.reverse;
             }
-            comparer.col = e.Column;
+            if (e.Column == 2)
+                comparer.col = 0;
+            else
+                comparer.col = e.Column;
             packetListItems.Sort(comparer);
             if (records.Count>0)
                 listView_Packets.RedrawItems(0, records.Count - 1, false);
@@ -582,12 +589,14 @@ namespace aclogview
         {
             if (e.ItemIndex < packetListItems.Count) {
                 e.Item = packetListItems[e.ItemIndex];
-
+                var record = records[Int32.Parse(e.Item.SubItems[0].Text)];
+                if (Settings.Default.PacketsListviewTimeFormat == (byte)TimeFormat.LocalTime)
+                    e.Item.SubItems[2].Text = Utility.EpochTimeToLocalTime(Convert.ToDouble(record.tsSec));
+                else
+                    e.Item.SubItems[2].Text = record.tsSec.ToString();
                 // Apply highlights here
-                if ( (currentHighlightMode == opcodeMode) && (opCodesToHighlight.Count > 0) )
+                if ( (currentHighlightMode == opcodeMode && opCodesToHighlight.Count > 0) )
                 {
-                    var record = records[Int32.Parse(e.Item.SubItems[0].Text)];
-
                     for (int i = 0 ; i < opCodesToHighlight.Count ; i++)
                     {
                         if (record.opcodes.Contains((PacketOpcode)opCodesToHighlight[i]))
@@ -1577,7 +1586,11 @@ namespace aclogview
             using (var form = new OptionsForm())
             {
                 form.ShowDialog();
+                listView_Packets.BeginUpdate();
+                setupTimeColumn();
+                listView_Packets.EndUpdate();
                 if (treeView_ParsedData.Nodes.Count == 0) return;
+                // Treeview gets redrawn when toggling tooltips so save and restore our state
                 var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
                 var savedTopNode = treeView_ParsedData.GetTopNode();
                 treeView_ParsedData.BeginUpdate();
@@ -1585,6 +1598,21 @@ namespace aclogview
                 treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
                 treeView_ParsedData.SetTopNode(savedTopNode);
                 treeView_ParsedData.EndUpdate();
+            }
+        }
+
+        private void setupTimeColumn()
+        {
+            var timeFormat = Settings.Default.PacketsListviewTimeFormat;
+            if (timeFormat == (byte)TimeFormat.EpochTime)
+            {
+                listView_Packets.Columns[2].Text = "Epoch Time (s)";
+                listView_Packets.Columns[2].Width = 84;
+            }
+            else if (timeFormat == (byte)TimeFormat.LocalTime)
+            {
+                listView_Packets.Columns[2].Text = "Local Time";
+                listView_Packets.Columns[2].Width = 125;
             }
         }
     }

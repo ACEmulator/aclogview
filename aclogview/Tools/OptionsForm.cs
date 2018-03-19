@@ -10,6 +10,7 @@ namespace aclogview
         private bool _protocolCheckForUpdates;
         private byte _protocolUpdateIntervalDays;
         private bool _parsedDataTreeviewDisplayTooltips;
+        private byte _packetsListviewTimeFormat;
 
         public OptionsForm()
         {
@@ -24,6 +25,7 @@ namespace aclogview
             if (!_protocolCheckForUpdates)
                 textBox_ProtocolDays.Enabled = false;
             displayNodeTooltips.Checked = _parsedDataTreeviewDisplayTooltips;
+            comboBox_TimeFormat.SelectedIndex = _packetsListviewTimeFormat;
         }
 
         private void LoadDefaultSettings()
@@ -32,6 +34,7 @@ namespace aclogview
             _protocolUpdateIntervalDays = Settings.Default.ProtocolUpdateIntervalDays;
             _protocolCheckForUpdates = Settings.Default.ProtocolCheckForUpdates;
             _parsedDataTreeviewDisplayTooltips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
+            _packetsListviewTimeFormat = Settings.Default.PacketsListviewTimeFormat;
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -56,6 +59,7 @@ namespace aclogview
             Settings.Default.ProtocolUpdateIntervalDays = _protocolUpdateIntervalDays;
             Settings.Default.ProtocolCheckForUpdates = _protocolCheckForUpdates;
             Settings.Default.ParsedDataTreeviewDisplayTooltips = _parsedDataTreeviewDisplayTooltips;
+            Settings.Default.PacketsListviewTimeFormat = _packetsListviewTimeFormat;
             Settings.Default.Save();
         }
 
@@ -122,6 +126,11 @@ namespace aclogview
             {
                 e.Handled = true;
             }
+        }
+
+        private void comboBox_TimeFormat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _packetsListviewTimeFormat = (byte)comboBox_TimeFormat.SelectedIndex;
         }
     }
 }
