@@ -1,11 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Utility.cs" company="">
-//   
-// </copyright>
-// <summary>
-//   The utility class is for helper methods.
-// </summary>
-// --------------------------------------------------------------------------------------------------------------------
+﻿using System;
 
 namespace aclogview
 {
@@ -41,6 +34,11 @@ namespace aclogview
             }
 
             return theValue.ToString();
+        }
+
+        public static string EpochTimeToLocalTime(double epochTime)
+        {
+            return new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(epochTime).ToLocalTime().ToString();
         }
     }
 }
