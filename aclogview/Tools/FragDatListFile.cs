@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 namespace aclogview
 {
+	// TODO: Make Disposable
     class FragDatListFile
     {
         private static readonly byte FileVersion = 0x01;

@@ -305,57 +305,60 @@ namespace aclogview
             packet.tsSec = tsSec;
             packet.extraInfo = "";
             packet.data = binaryReader.ReadBytes((int)(len - headersSize));
-            BinaryReader packetReader = new BinaryReader(new MemoryStream(packet.data));
-            try
-            {
-                ProtoHeader pHeader = ProtoHeader.read(packetReader);
+			using (BinaryReader packetReader = new BinaryReader(new MemoryStream(packet.data)))
+			{
+				try
+				{
+					ProtoHeader pHeader = ProtoHeader.read(packetReader);
 
-                packet.optionalHeadersLen = readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader);
+					packet.optionalHeadersLen = readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader);
 
-                if (packetReader.BaseStream.Position == packetReader.BaseStream.Length)
-                    packetTypeStr.Append("<Header Only>");
+					if (packetReader.BaseStream.Position == packetReader.BaseStream.Length)
+						packetTypeStr.Append("<Header Only>");
 
-                uint HAS_FRAGS_MASK = 0x4; // See SharedNet::SplitPacketData
+					uint HAS_FRAGS_MASK = 0x4; // See SharedNet::SplitPacketData
 
-                if ((pHeader.header_ & HAS_FRAGS_MASK) != 0)
-                {
-                    while (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
-                    {
-                        if (packetTypeStr.Length != 0)
-                            packetTypeStr.Append(" + ");
+					if ((pHeader.header_ & HAS_FRAGS_MASK) != 0)
+					{
+						while (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
+						{
+							if (packetTypeStr.Length != 0)
+								packetTypeStr.Append(" + ");
 
-                        BlobFrag newFrag = readFragment(packetReader);
-                        packet.frags.Add(newFrag);
+							BlobFrag newFrag = readFragment(packetReader);
+							packet.frags.Add(newFrag);
 
-                        if (newFrag.memberHeader_.blobNum != 0)
-                        {
-                            packetTypeStr.Append("FragData[");
-                            packetTypeStr.Append(newFrag.memberHeader_.blobNum);
-                            packetTypeStr.Append("]");
-                        }
-                        else
-                        {
-                            BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_));
-                            PacketOpcode opcode = Util.readOpcode(fragDataReader);
-                            packet.opcodes.Add(opcode);
-                            packetTypeStr.Append(opcode);
-                        }
-                    }
-                }
+							if (newFrag.memberHeader_.blobNum != 0)
+							{
+								packetTypeStr.Append("FragData[");
+								packetTypeStr.Append(newFrag.memberHeader_.blobNum);
+								packetTypeStr.Append("]");
+							}
+							else
+							{
+								using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_)))
+								{
+									PacketOpcode opcode = Util.readOpcode(fragDataReader);
+									packet.opcodes.Add(opcode);
+									packetTypeStr.Append(opcode);
+								}
+							}
+						}
+					}
 
-                if (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
-                    packet.extraInfo = "Didnt read entire packet! " + packet.extraInfo;
-            }
-            catch (OutOfMemoryException e)
-            {
-                //MessageBox.Show("Out of memory (packet " + curPacket + "), stopping read: " + e);
-                return null;
-            }
-            catch (Exception e)
-            {
-                packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
-            }
-
+					if (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
+						packet.extraInfo = "Didnt read entire packet! " + packet.extraInfo;
+				}
+				catch (OutOfMemoryException e)
+				{
+					//MessageBox.Show("Out of memory (packet " + curPacket + "), stopping read: " + e);
+					return null;
+				}
+				catch (Exception e)
+				{
+					packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
+				}
+			}
             packet.packetHeadersStr = packetHeadersStr.ToString();
             packet.packetTypeStr = packetTypeStr.ToString();
 
@@ -377,68 +380,71 @@ namespace aclogview
 
             PacketRecord packet = null;
             byte[] packetData = binaryReader.ReadBytes((int)(len - headersSize));
-            BinaryReader packetReader = new BinaryReader(new MemoryStream(packetData));
-            try
-            {
-                ProtoHeader pHeader = ProtoHeader.read(packetReader);
+			using (BinaryReader packetReader = new BinaryReader(new MemoryStream(packetData)))
+			{
+				try
+				{
+					ProtoHeader pHeader = ProtoHeader.read(packetReader);
 
-                uint HAS_FRAGS_MASK = 0x4; // See SharedNet::SplitPacketData
+					uint HAS_FRAGS_MASK = 0x4; // See SharedNet::SplitPacketData
 
-                if ((pHeader.header_ & HAS_FRAGS_MASK) != 0)
-                {
-                    readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader);
+					if ((pHeader.header_ & HAS_FRAGS_MASK) != 0)
+					{
+						readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader);
 
-                    while (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
-                    {
-                        BlobFrag newFrag = readFragment(packetReader);
+						while (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
+						{
+							BlobFrag newFrag = readFragment(packetReader);
 
-                        ulong blobID = newFrag.memberHeader_.blobID;
-                        if (incompletePacketMap.ContainsKey(blobID))
-                        {
-                            packet = incompletePacketMap[newFrag.memberHeader_.blobID];
-                        }
-                        else
-                        {
-                            packet = new PacketRecord();
-                            incompletePacketMap.Add(blobID, packet);
-                        }
+							ulong blobID = newFrag.memberHeader_.blobID;
+							if (incompletePacketMap.ContainsKey(blobID))
+							{
+								packet = incompletePacketMap[newFrag.memberHeader_.blobID];
+							}
+							else
+							{
+								packet = new PacketRecord();
+								incompletePacketMap.Add(blobID, packet);
+							}
 
-                        if (newFrag.memberHeader_.blobNum == 0)
-                        {
-                            packet.isSend = isSend;
-                            packet.tsSec = tsSec;
-                            packet.extraInfo = "";
+							if (newFrag.memberHeader_.blobNum == 0)
+							{
+								packet.isSend = isSend;
+								packet.tsSec = tsSec;
+								packet.extraInfo = "";
 
-                            BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_));
-                            PacketOpcode opcode = Util.readOpcode(fragDataReader);
-                            packet.opcodes.Add(opcode);
-                            packet.packetTypeStr = opcode.ToString();
-                        }
+								using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_)))
+								{
+									PacketOpcode opcode = Util.readOpcode(fragDataReader);
+									packet.opcodes.Add(opcode);
+									packet.packetTypeStr = opcode.ToString();
+								}
+							}
 
-                        packet.packetHeadersStr += packetHeadersStr.ToString();
+							packet.packetHeadersStr += packetHeadersStr.ToString();
 
-                        packet.frags.Add(newFrag);
+							packet.frags.Add(newFrag);
 
-                        if (addPacketIfFinished(results, packet))
-                        {
-                            incompletePacketMap.Remove(blobID);
-                        }
-                    }
+							if (addPacketIfFinished(results, packet))
+							{
+								incompletePacketMap.Remove(blobID);
+							}
+						}
 
-                    if (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
-                        packet.extraInfo = "Didnt read entire packet! " + packet.extraInfo;
-                }
-            }
-            catch (OutOfMemoryException e)
-            {
-                //MessageBox.Show("Out of memory (packet " + curPacket + "), stopping read: " + e);
-                return false;
-            }
-            catch (Exception e)
-            {
-                packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
-            }
-
+						if (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
+							packet.extraInfo = "Didnt read entire packet! " + packet.extraInfo;
+					}
+				}
+				catch (OutOfMemoryException e)
+				{
+					//MessageBox.Show("Out of memory (packet " + curPacket + "), stopping read: " + e);
+					return false;
+				}
+				catch (Exception e)
+				{
+					packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
+				}
+			}
             return true;
         }
 

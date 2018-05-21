@@ -20,23 +20,27 @@ namespace aclogview {
         }
 
         private void menuItem_Save_Click(object sender, EventArgs e) {
-            SaveFileDialog saveDialog = new SaveFileDialog();
-            saveDialog.Filter = "Images|*.png;*.bmp;*.jpg";
-            if (saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK) {
-                System.Drawing.Imaging.ImageFormat imageFormat;
-                switch (Path.GetExtension(saveDialog.FileName)) {
-                    case ".bmp":
-                        imageFormat = System.Drawing.Imaging.ImageFormat.Bmp;
-                        break;
-                    case ".jpg":
-                        imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
-                        break;
-                    default:
-                        imageFormat = System.Drawing.Imaging.ImageFormat.Png;
-                        break;
-                }
-                pictureBox1.Image.Save(saveDialog.FileName, imageFormat);
-            }
+			using (SaveFileDialog saveDialog = new SaveFileDialog())
+			{
+				saveDialog.Filter = "Images|*.png;*.bmp;*.jpg";
+				if (saveDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				{
+					System.Drawing.Imaging.ImageFormat imageFormat;
+					switch (Path.GetExtension(saveDialog.FileName))
+					{
+						case ".bmp":
+							imageFormat = System.Drawing.Imaging.ImageFormat.Bmp;
+							break;
+						case ".jpg":
+							imageFormat = System.Drawing.Imaging.ImageFormat.Jpeg;
+							break;
+						default:
+							imageFormat = System.Drawing.Imaging.ImageFormat.Png;
+							break;
+					}
+					pictureBox1.Image.Save(saveDialog.FileName, imageFormat);
+				}
+			}
         }
     }
 }

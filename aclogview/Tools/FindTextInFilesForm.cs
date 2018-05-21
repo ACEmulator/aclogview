@@ -117,14 +117,14 @@ namespace aclogview
 
                 timer1.Start();
 
-                new Thread(() =>
+                ThreadPool.QueueUserWorkItem((state) =>
                 {
                     // Do the actual search here
                     DoSearch();
 
                     if (!Disposing && !IsDisposed)
                         btnStopSearch.BeginInvoke((Action)(() => btnStopSearch_Click(null, null)));
-                }).Start();
+                });
             }
             catch (Exception ex)
             {
@@ -182,9 +182,9 @@ namespace aclogview
                     if (record.data.Length <= 4 || (TextToSearchFor.Length > record.data.Length) )
                         continue;
 
-                    BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data));
-
-                    var messageCode = messageDataReader.ReadUInt32();
+					//BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data));
+					//var messageCode = messageDataReader.ReadUInt32();
+					int messageCode = BitConverter.ToInt32(record.data, 0);
 
 
                     var result = SearchForText(record, TextToSearchFor, caseSensitive);
@@ -271,7 +271,7 @@ namespace aclogview
                 if (record.data.Length <= 4)
                     return hits;
 
-                BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
+                //BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
 
                 if (caseSensitive)
                 {
@@ -284,8 +284,8 @@ namespace aclogview
                 {
                     string asciiStringData = System.Text.Encoding.ASCII.GetString(record.data);
                     string unicodeStringData = System.Text.Encoding.Unicode.GetString(record.data);
-                    // Shift the byte stream by 1 to catch any Unicode strings not on the previous two byte boundary
-                    string unicodeStringData2 = System.Text.Encoding.Unicode.GetString(record.data, 1, (int)fragDataReader.BaseStream.Length - 1);
+					// Shift the byte stream by 1 to catch any Unicode strings not on the previous two byte boundary
+					string unicodeStringData2 = System.Text.Encoding.Unicode.GetString(record.data, 1, record.data.Length - 1);//(int)fragDataReader.BaseStream.Length - 1);
                     int asciiResultCI = asciiStringData.IndexOf(textToSearch, StringComparison.OrdinalIgnoreCase);
                     int unicodeResultCI = unicodeStringData.IndexOf(textToSearch, StringComparison.OrdinalIgnoreCase);
                     int unicodeResultCI2 = unicodeStringData2.IndexOf(textToSearch, StringComparison.OrdinalIgnoreCase);

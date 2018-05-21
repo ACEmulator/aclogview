@@ -486,72 +486,92 @@ namespace aclogview
 
                 if (loadedAsMessages)
                 {
-                    BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data));
-                    try {
-                        bool handled = false;
-                        foreach (MessageProcessor messageProcessor in messageProcessors) {
-                            long readerStartPos = messageDataReader.BaseStream.Position;
+					using (BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data)))
+					{
+						try
+						{
+							bool handled = false;
+							foreach (MessageProcessor messageProcessor in messageProcessors)
+							{
+								long readerStartPos = messageDataReader.BaseStream.Position;
 
-                            bool accepted = messageProcessor.acceptMessageData(messageDataReader, treeView_ParsedData);
+								bool accepted = messageProcessor.acceptMessageData(messageDataReader, treeView_ParsedData);
 
-                            if (accepted && handled) {
-                                throw new Exception("Multiple message processors are handling the same data!");
-                            }
+								if (accepted && handled)
+								{
+									throw new Exception("Multiple message processors are handling the same data!");
+								}
 
-                            if (accepted) {
-                                handled = true;
-                                // TODO: Remove after all message processors have context info
-                                if (!ciSupportedMessageProcessors.Contains(messageProcessor.ToString()))
-                                    ContextInfo.Reset();
-                                //
-                                if (messageDataReader.BaseStream.Position != messageDataReader.BaseStream.Length) {
-                                    treeView_ParsedData.Nodes.Add(new TreeNode("WARNING: Packet not fully read!"));
-                                }
-                            }
+								if (accepted)
+								{
+									handled = true;
+									// TODO: Remove after all message processors have context info
+									if (!ciSupportedMessageProcessors.Contains(messageProcessor.ToString()))
+										ContextInfo.Reset();
+									//
+									if (messageDataReader.BaseStream.Position != messageDataReader.BaseStream.Length)
+									{
+										treeView_ParsedData.Nodes.Add(new TreeNode("WARNING: Packet not fully read!"));
+									}
+								}
 
-                            messageDataReader.BaseStream.Position = readerStartPos;
-                        }
+								messageDataReader.BaseStream.Position = readerStartPos;
+							}
 
-                        if (!handled) {
-                            PacketOpcode opcode = Util.readOpcode(messageDataReader);
-                            treeView_ParsedData.Nodes.Add(new TreeNode("Unhandled: " + opcode));
-                        }
-                    } catch (Exception e) {
-                        treeView_ParsedData.Nodes.Add(new TreeNode("EXCEPTION: " + e.Message));
-                    }
+							if (!handled)
+							{
+								PacketOpcode opcode = Util.readOpcode(messageDataReader);
+								treeView_ParsedData.Nodes.Add(new TreeNode("Unhandled: " + opcode));
+							}
+						}
+						catch (Exception e)
+						{
+							treeView_ParsedData.Nodes.Add(new TreeNode("EXCEPTION: " + e.Message));
+						}
+					}
                 }
                 else
                 {
                     foreach (BlobFrag frag in record.frags) {
-                        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
-                        try {
-                            bool handled = false;
-                            foreach (MessageProcessor messageProcessor in messageProcessors) {
-                                long readerStartPos = fragDataReader.BaseStream.Position;
+						using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_)))
+						{
+							try
+							{
+								bool handled = false;
+								foreach (MessageProcessor messageProcessor in messageProcessors)
+								{
+									long readerStartPos = fragDataReader.BaseStream.Position;
 
-                                bool accepted = messageProcessor.acceptMessageData(fragDataReader, treeView_ParsedData);
+									bool accepted = messageProcessor.acceptMessageData(fragDataReader, treeView_ParsedData);
 
-                                if (accepted && handled) {
-                                    throw new Exception("Multiple message processors are handling the same data!");
-                                }
+									if (accepted && handled)
+									{
+										throw new Exception("Multiple message processors are handling the same data!");
+									}
 
-                                if (accepted) {
-                                    handled = true;
-                                    if (fragDataReader.BaseStream.Position != fragDataReader.BaseStream.Length) {
-                                        treeView_ParsedData.Nodes.Add(new TreeNode("WARNING: Prev fragment not fully read!"));
-                                    }
-                                }
+									if (accepted)
+									{
+										handled = true;
+										if (fragDataReader.BaseStream.Position != fragDataReader.BaseStream.Length)
+										{
+											treeView_ParsedData.Nodes.Add(new TreeNode("WARNING: Prev fragment not fully read!"));
+										}
+									}
 
-                                fragDataReader.BaseStream.Position = readerStartPos;
-                            }
+									fragDataReader.BaseStream.Position = readerStartPos;
+								}
 
-                            if (!handled) {
-                                PacketOpcode opcode = Util.readOpcode(fragDataReader);
-                                treeView_ParsedData.Nodes.Add(new TreeNode("Unhandled: " + opcode));
-                            }
-                        } catch (Exception e) {
-                            treeView_ParsedData.Nodes.Add(new TreeNode("EXCEPTION: " + e.Message));
-                        }
+								if (!handled)
+								{
+									PacketOpcode opcode = Util.readOpcode(fragDataReader);
+									treeView_ParsedData.Nodes.Add(new TreeNode("Unhandled: " + opcode));
+								}
+							}
+							catch (Exception e)
+							{
+								treeView_ParsedData.Nodes.Add(new TreeNode("EXCEPTION: " + e.Message));
+							}
+						}
                     }
                 }
                 // Give each treeview node a unique identifier and context info tooltip
@@ -635,16 +655,18 @@ namespace aclogview
 
         private void openPcap(bool asMessages)
         {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.AddExtension = true;
-            openFile.Filter = "Packet Captures (*.pcap;*.pcapng)|*.pcap;*.pcapng|All Files (*.*)|*.*";
+			using (OpenFileDialog openFile = new OpenFileDialog())
+			{
+				openFile.AddExtension = true;
+				openFile.Filter = "Packet Captures (*.pcap;*.pcapng)|*.pcap;*.pcapng|All Files (*.*)|*.*";
 
-            if (openFile.ShowDialog() != DialogResult.OK)
-                return;
-            checkBox_ShowObjects.Checked = false;
-            loadedAsMessages = asMessages;
+				if (openFile.ShowDialog() != DialogResult.OK)
+					return;
+				checkBox_ShowObjects.Checked = false;
+				loadedAsMessages = asMessages;
 
-            loadPcap(openFile.FileName, asMessages);
+				loadPcap(openFile.FileName, asMessages);
+			}
         }
 
         private void menuItem_OpenAsFragments_Click(object sender, EventArgs e)
@@ -725,14 +747,17 @@ namespace aclogview
 
 
         private void menuItem_ToolCount_Click(object sender, EventArgs e) {
-            FolderBrowserDialog openFolder = new FolderBrowserDialog();
+			List<string> files = null;
 
-            if (openFolder.ShowDialog() != DialogResult.OK)
-                return;
+			using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
+			{
+				if (openFolder.ShowDialog() != DialogResult.OK)
+					return;
 
-            List<string> files = new List<string>();
-            files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
-            files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
+				files = new List<string>();
+				files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
+				files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
+			}
 
             OrderedDictionary opcodeOccurrences = new OrderedDictionary();
 
@@ -771,22 +796,27 @@ namespace aclogview
             occurencesString.Append(totalCount);
             occurencesString.Append("\r\n");
 
-            TextPopup popup = new TextPopup();
-            popup.setText(occurencesString.ToString());
-            popup.setText(occurencesString.ToString() + "\r\n\r\n" + String.Join("\r\n", files));
-            popup.ShowDialog();
+			using (TextPopup popup = new TextPopup())
+			{
+				popup.setText(occurencesString.ToString());
+				popup.setText(occurencesString.ToString() + "\r\n\r\n" + String.Join("\r\n", files));
+				popup.ShowDialog();
+			}
         }
 
         private void menuItem_ToolBad_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog openFolder = new FolderBrowserDialog();
+			List<string> files = null;
 
-            if (openFolder.ShowDialog() != DialogResult.OK)
-                return;
+			using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
+			{
+				if (openFolder.ShowDialog() != DialogResult.OK)
+					return;
 
-            List<string> files = new List<string>();
-            files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
-            files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
+				files = new List<string>();
+				files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
+				files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
+			}
 
             OrderedDictionary opcodeOccurrences = new OrderedDictionary();
 
@@ -810,30 +840,31 @@ namespace aclogview
                             if (frag.memberHeader_.numFrags > 0)
                                 continue;
 
-                            BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
+							using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_)))
+							{
 
-                            bool handled = false;
-                            foreach (MessageProcessor messageProcessor in messageProcessors)
-                            {
-                                long readerStartPos = fragDataReader.BaseStream.Position;
+								bool handled = false;
+								foreach (MessageProcessor messageProcessor in messageProcessors)
+								{
+									long readerStartPos = fragDataReader.BaseStream.Position;
 
-                                bool accepted = messageProcessor.acceptMessageData(fragDataReader, treeView_ParsedData);
+									bool accepted = messageProcessor.acceptMessageData(fragDataReader, treeView_ParsedData);
 
-                                if (accepted && handled)
-                                    throw new Exception("Multiple message processors are handling the same data!");
+									if (accepted && handled)
+										throw new Exception("Multiple message processors are handling the same data!");
 
-                                if (accepted)
-                                    handled = true;
+									if (accepted)
+										handled = true;
 
-                                fragDataReader.BaseStream.Position = readerStartPos;
-                            }
+									fragDataReader.BaseStream.Position = readerStartPos;
+								}
 
-                            /*if (!handled) {
-                                PacketOpcode opcode = Util.readOpcode(fragDataReader);
-                                treeView_ParsedData.Nodes.Add(new TreeNode("Unhandled: " + opcode));
-                            }*/
-
-                        }
+								/*if (!handled) {
+									PacketOpcode opcode = Util.readOpcode(fragDataReader);
+									treeView_ParsedData.Nodes.Add(new TreeNode("Unhandled: " + opcode));
+								}*/
+							}
+						}
                     }
                 }
                 catch (Exception ex)
@@ -846,14 +877,17 @@ namespace aclogview
 
         private void menuItem_ToolHeatmap_Click(object sender, EventArgs e)
         {
-            FolderBrowserDialog openFolder = new FolderBrowserDialog();
+			List<string> files = null;
 
-            if (openFolder.ShowDialog() != DialogResult.OK)
-                return;
+			using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
+			{
+				if (openFolder.ShowDialog() != DialogResult.OK)
+					return;
 
-            List<string> files = new List<string>();
-            files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
-            files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
+				files = new List<string>();
+				files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
+				files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
+			}
 
             uint packetCount = 0;
             uint messageCount = 0;
@@ -872,12 +906,13 @@ namespace aclogview
 
                         if (frag.dat_.Length > 20)
                         {
-                            BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
-                            fragDataReader.ReadUInt32();
-                            fragDataReader.ReadUInt32();
-                            if ((PacketOpcode)fragDataReader.ReadUInt32() == PacketOpcode.Evt_Movement__AutonomousPosition_ID)
-                            {
-                                uint objcell_id = fragDataReader.ReadUInt32();
+							//BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
+							//fragDataReader.ReadUInt32();
+							//fragDataReader.ReadUInt32();
+							//if ((PacketOpcode)fragDataReader.ReadUInt32() == PacketOpcode.Evt_Movement__AutonomousPosition_ID)
+							if ((PacketOpcode)BitConverter.ToInt32(frag.dat_, 8) == PacketOpcode.Evt_Movement__AutonomousPosition_ID)
+							{
+								uint objcell_id = unchecked((uint)BitConverter.ToInt32(frag.dat_, 12));//fragDataReader.ReadUInt32();
                                 uint x = (objcell_id >> 24) & 0xFF;
                                 uint y = 255 - ((objcell_id >> 16) & 0xFF);
                                 heatmap[x, y] = 1;
@@ -888,25 +923,29 @@ namespace aclogview
             }
 
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            Stream imageStream = assembly.GetManifestResourceStream("aclogview.map.png");
-            Bitmap heatmapImg = new Bitmap(imageStream);
-            for (int y = 0; y < 256; ++y)
-            {
-                for (int x = 0; x < 256; ++x)
-                {
-                    if (heatmap[x, y] > 0)
-                    {
-                        Color curColor = heatmapImg.GetPixel(x, y);
-                        heatmapImg.SetPixel(x, y, Color.FromArgb(255, Math.Min(255, 200 + curColor.R), curColor.G, curColor.B));
-                    }
-                }
-            }
+			using (Stream imageStream = assembly.GetManifestResourceStream("aclogview.map.png"))
+			using (Bitmap heatmapImg = new Bitmap(imageStream))
+			{
+				for (int y = 0; y < 256; ++y)
+				{
+					for (int x = 0; x < 256; ++x)
+					{
+						if (heatmap[x, y] > 0)
+						{
+							Color curColor = heatmapImg.GetPixel(x, y);
+							heatmapImg.SetPixel(x, y, Color.FromArgb(255, Math.Min(255, 200 + curColor.R), curColor.G, curColor.B));
+						}
+					}
+				}
 
-            ImagePopup popup = new ImagePopup();
-            popup.Text = "Coverage Map - " + packetCount + " packets, " + messageCount + " messages";
-            popup.ClientSize = new Size(512, 512);
-            popup.setImage(heatmapImg);
-            popup.ShowDialog();
+				using (ImagePopup popup = new ImagePopup())
+				{
+					popup.Text = "Coverage Map - " + packetCount + " packets, " + messageCount + " messages";
+					popup.ClientSize = new Size(512, 512);
+					popup.setImage(heatmapImg);
+					popup.ShowDialog();
+				}
+			}
         }
 
         private void menuItem_ToolFindOpcodeInFiles_Click(object sender, EventArgs e)
@@ -1267,22 +1306,23 @@ namespace aclogview
                     if (record.data.Length <= 4)
                         continue;
 
-                    BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
+					using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data)))
+					{
+						var messageCode = fragDataReader.ReadUInt32();
 
-                    var messageCode = fragDataReader.ReadUInt32();
-
-                    if (messageCode == 0xF745) // Create Object
-                    {
-                        hits++;
-                        var parsed = CM_Physics.CreateObject.read(fragDataReader);
-                        ListViewItem lvi = new ListViewItem();
-                        lvi.Text = record.index.ToString();
-                        lvi.SubItems.Add(Utility.FormatHex(parsed.object_id));
-                        lvi.SubItems.Add(parsed.wdesc._name.ToString());
-                        lvi.SubItems.Add(parsed.wdesc._wcid.ToString());
-                        lvi.SubItems.Add(parsed.wdesc._type.ToString());
-                        createdListItems.Add(lvi);
-                    }
+						if (messageCode == 0xF745) // Create Object
+						{
+							hits++;
+							var parsed = CM_Physics.CreateObject.read(fragDataReader);
+							ListViewItem lvi = new ListViewItem();
+							lvi.Text = record.index.ToString();
+							lvi.SubItems.Add(Utility.FormatHex(parsed.object_id));
+							lvi.SubItems.Add(parsed.wdesc._name.ToString());
+							lvi.SubItems.Add(parsed.wdesc._wcid.ToString());
+							lvi.SubItems.Add(parsed.wdesc._type.ToString());
+							createdListItems.Add(lvi);
+						}
+					}
                 }
                 catch
                 {
@@ -1377,7 +1417,7 @@ namespace aclogview
                 if (record.data.Length <= 4 || (textToSearch.Length > record.data.Length) )
                     return hits;
 
-                BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
+                //BinaryReader fragDataReader = new BinaryReader(new MemoryStream(record.data));
 
                 if (caseSensitive)
                 {
@@ -1390,8 +1430,8 @@ namespace aclogview
                 {
                     string asciiStringData = System.Text.Encoding.ASCII.GetString(record.data);
                     string unicodeStringData = System.Text.Encoding.Unicode.GetString(record.data);
-                    // Shift the byte stream by 1 to catch any Unicode strings not on the previous two byte boundary
-                    string unicodeStringData2 = System.Text.Encoding.Unicode.GetString(record.data, 1, (int)fragDataReader.BaseStream.Length - 1);
+					// Shift the byte stream by 1 to catch any Unicode strings not on the previous two byte boundary
+					string unicodeStringData2 = System.Text.Encoding.Unicode.GetString(record.data, 1, record.data.Length - 1);//(int)fragDataReader.BaseStream.Length - 1);
                     int asciiResultCI = asciiStringData.IndexOf(textToSearch, StringComparison.OrdinalIgnoreCase);
                     int unicodeResultCI = unicodeStringData.IndexOf(textToSearch, StringComparison.OrdinalIgnoreCase);
                     int unicodeResultCI2 = unicodeStringData2.IndexOf(textToSearch, StringComparison.OrdinalIgnoreCase);

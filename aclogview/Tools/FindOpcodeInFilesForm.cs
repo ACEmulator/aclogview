@@ -131,14 +131,14 @@ namespace aclogview
 
                 timer1.Start();
 
-                new Thread(() =>
+                ThreadPool.QueueUserWorkItem((state) =>
                 {
                     // Do the actual search here
                     DoSearch();
 
                     if (!Disposing && !IsDisposed)
                         btnStopSearch.BeginInvoke((Action)(() => btnStopSearch_Click(null, null)));
-                }).Start();
+                });
             }
             catch (Exception ex)
             {
@@ -209,9 +209,9 @@ namespace aclogview
                     if (record.data.Length <= 4)
                         continue;
 
-                    BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data));
+                    //BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data));
 
-                    var messageCode = messageDataReader.ReadUInt32();
+                    //var messageCode = messageDataReader.ReadUInt32();
 
                     /*if (messageCode == 0x02BB) // Creature Message
                     {

@@ -118,14 +118,14 @@ namespace aclogview
 
                 timer1.Start();
 
-                new Thread(() =>
+				ThreadPool.QueueUserWorkItem((state) =>
                 {
                     // Do the actual work here
                     DoBuild();
 
                     if (!Disposing && !IsDisposed)
                         btnStopBuild.BeginInvoke((Action)(() => btnStopBuild_Click(null, null)));
-                }).Start();
+                });
             }
             catch (Exception ex)
             {
@@ -224,17 +224,17 @@ namespace aclogview
                         // Write to emperorary object
                         allFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
 
-                        BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
+						//BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
+						//var messageCode = fragDataReader.ReadUInt32();
+						int messageCode = BitConverter.ToInt32(frag.dat_, 0);
 
-                        var messageCode = fragDataReader.ReadUInt32();
+						// Write to emperorary object
+						if (messageCode == 0xF745) // Create Object
+						{
+							Interlocked.Increment(ref totalHits);
 
-                        // Write to emperorary object
-                        if (messageCode == 0xF745) // Create Object
-                        {
-                            Interlocked.Increment(ref totalHits);
-
-                            createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
-                        }
+							createObjectFrags.Add(new FragDatListFile.FragDatInfo(packetDirection, record.index, frag.dat_));
+						}
                     }
                     catch
                     {
@@ -274,14 +274,14 @@ namespace aclogview
 
                 timer1.Start();
 
-                new Thread(() =>
+                ThreadPool.QueueUserWorkItem((state) =>
                 {
                     // Do the actual work here
                     DoProcess();
 
                     if (!Disposing && !IsDisposed)
                         btnStopProcess.BeginInvoke((Action)(() => btnStopProcess_Click(null, null)));
-                }).Start();
+                });
             }
             catch (Exception ex)
             {
@@ -373,65 +373,66 @@ namespace aclogview
                             if (frag.Data.Length <= 4)
                                 continue;
 
-                            BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data));
+							using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.Data)))
+							{
+								var messageCode = fragDataReader.ReadUInt32();
 
-                            var messageCode = fragDataReader.ReadUInt32();
+								if (messageCode == 0xF745) // Create Object
+								{
+									var parsed = CM_Physics.CreateObject.read(fragDataReader);
 
-                            if (messageCode == 0xF745) // Create Object
-                            {
-                                var parsed = CM_Physics.CreateObject.read(fragDataReader);
+									if (!itemTypesToParse.Contains(parsed.wdesc._type))
+										continue;
 
-                                if (!itemTypesToParse.Contains(parsed.wdesc._type))
-                                    continue;
+									totalHits++;
 
-                                totalHits++;
+									// This bit of trickery uses the existing tree view parser code to create readable output, which we can then convert to csv
+									treeView.Nodes.Clear();
+									parsed.contributeToTreeView(treeView);
+									if (treeView.Nodes.Count == 1)
+									{
+										var lineItems = new string[256];
+										int lineItemCount = 0;
 
-                                // This bit of trickery uses the existing tree view parser code to create readable output, which we can then convert to csv
-                                treeView.Nodes.Clear();
-                                parsed.contributeToTreeView(treeView);
-                                if (treeView.Nodes.Count == 1)
-                                {
-                                    var lineItems = new string[256];
-                                    int lineItemCount = 0;
+										ProcessNode(treeView.Nodes[0], itemTypeKeys[parsed.wdesc._type], null, lineItems, ref lineItemCount);
 
-                                    ProcessNode(treeView.Nodes[0], itemTypeKeys[parsed.wdesc._type], null, lineItems, ref lineItemCount);
+										var sb = new StringBuilder();
 
-                                    var sb = new StringBuilder();
+										for (int i = 0; i < lineItemCount; i++)
+										{
+											if (i > 0)
+												sb.Append(',');
 
-                                    for (int i = 0; i < lineItemCount; i++)
-                                    {
-                                        if (i > 0)
-                                            sb.Append(',');
+											var output = lineItems[i];
 
-                                        var output = lineItems[i];
+											// Format the value for CSV output, if needed.
+											// We only do this for certain columns. This is very time consuming
+											if (output != null && itemTypeKeys[parsed.wdesc._type][i].EndsWith("name"))
+											{
+												if (output.Contains(",") || output.Contains("\"") || output.Contains("\r") || output.Contains("\n"))
+												{
+													var sb2 = new StringBuilder();
+													sb2.Append("\"");
+													foreach (char nextChar in output)
+													{
+														sb2.Append(nextChar);
+														if (nextChar == '"')
+															sb2.Append("\"");
+													}
+													sb2.Append("\"");
+													output = sb2.ToString();
+												}
 
-                                        // Format the value for CSV output, if needed.
-                                        // We only do this for certain columns. This is very time consuming
-                                        if (output != null && itemTypeKeys[parsed.wdesc._type][i].EndsWith("name"))
-                                        {
-                                            if (output.Contains(",") || output.Contains("\"") || output.Contains("\r") || output.Contains("\n"))
-                                            {
-                                                var sb2 = new StringBuilder();
-                                                sb2.Append("\"");
-                                                foreach (char nextChar in output)
-                                                {
-                                                    sb2.Append(nextChar);
-                                                    if (nextChar == '"')
-                                                        sb2.Append("\"");
-                                                }
-                                                sb2.Append("\"");
-                                                output = sb2.ToString();
-                                            }
+											}
 
-                                        }
+											if (output != null)
+												sb.Append(output);
+										}
 
-                                        if (output != null)
-                                            sb.Append(output);
-                                    }
-
-                                    itemTypeStreamWriters[parsed.wdesc._type].WriteLine(sb.ToString());
-                                }
-                            }
+										itemTypeStreamWriters[parsed.wdesc._type].WriteLine(sb.ToString());
+									}
+								}
+							}
                         }
                         catch (EndOfStreamException) // This can happen when a frag is incomplete and we try to parse it
                         {
