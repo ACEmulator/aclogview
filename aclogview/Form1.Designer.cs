@@ -34,6 +34,8 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.HexOpCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.textBox_PacketData = new System.Windows.Forms.RichTextBox();
             this.treeView_ParsedData = new System.Windows.Forms.TreeView();
@@ -70,6 +72,7 @@
             this.cmdbackward = new System.Windows.Forms.Button();
             this.lblTracker = new System.Windows.Forms.Label();
             this.btnHighlight = new System.Windows.Forms.Button();
+            this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -115,7 +118,10 @@
             this.columnHeader3,
             this.columnHeader4,
             this.columnHeader6,
-            this.HexOpCode});
+            this.HexOpCode,
+            this.columnHeader8,
+            this.columnHeader9,
+            this.columnHeader10});
             this.listView_Packets.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_Packets.FullRowSelect = true;
             this.listView_Packets.HideSelection = false;
@@ -169,6 +175,14 @@
             // 
             this.HexOpCode.Text = "OpCode";
             this.HexOpCode.Width = 66;
+            // 
+            // columnHeader8
+            // 
+            this.columnHeader8.Text = "Seq";
+            // 
+            // columnHeader9
+            // 
+            this.columnHeader9.Text = "Queue";
             // 
             // splitContainer_Bottom
             // 
@@ -364,7 +378,6 @@
             this.textBox_Search.Name = "textBox_Search";
             this.textBox_Search.Size = new System.Drawing.Size(165, 20);
             this.textBox_Search.TabIndex = 2;
-            this.textBox_Search.KeyDown += this.textBox_Search_KeyDown;
             // 
             // pictureBox_Search
             // 
@@ -478,6 +491,10 @@
             this.btnHighlight.UseVisualStyleBackColor = true;
             this.btnHighlight.Click += new System.EventHandler(this.btnHighlight_Click);
             // 
+            // columnHeader10
+            // 
+            this.columnHeader10.Text = "Iteration";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -566,6 +583,9 @@
         private System.Windows.Forms.Button btnHighlight;
         private System.Windows.Forms.MenuItem menuItem_ReOpen;
         private System.Windows.Forms.MenuItem menuItem_ReOpenAsMessages;
+        private System.Windows.Forms.ColumnHeader columnHeader8;
+        private System.Windows.Forms.ColumnHeader columnHeader9;
+        private System.Windows.Forms.ColumnHeader columnHeader10;
     }
 }
 

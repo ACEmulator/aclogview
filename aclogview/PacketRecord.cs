@@ -15,5 +15,9 @@ namespace aclogview
 
         public byte[] data;
         public List<BlobFrag> frags = new List<BlobFrag>();
+
+        public uint Seq;
+        public uint Queue;
+        public ushort Iteration;
     }
 }
