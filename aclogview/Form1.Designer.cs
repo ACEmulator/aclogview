@@ -1,4 +1,4 @@
-﻿namespace aclogview {
+namespace aclogview {
     partial class Form1 {
         /// <summary>
         /// Required designer variable.
@@ -35,6 +35,9 @@
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.HexOpCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader13 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader15 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listView_CreatedObjects = new System.Windows.Forms.ListView();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -140,8 +143,8 @@
             // 
             this.splitContainer_Main.Panel2.Controls.Add(this.splitContainer_Bottom);
             this.splitContainer_Main.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.splitContainer_Main.Size = new System.Drawing.Size(1520, 785);
-            this.splitContainer_Main.SplitterDistance = 367;
+            this.splitContainer_Main.Size = new System.Drawing.Size(1520, 428);
+            this.splitContainer_Main.SplitterDistance = 25;
             this.splitContainer_Main.TabIndex = 0;
             // 
             // splitContainer_Top
@@ -159,7 +162,7 @@
             // 
             this.splitContainer_Top.Panel2.Controls.Add(this.listView_CreatedObjects);
             this.splitContainer_Top.Panel2Collapsed = true;
-            this.splitContainer_Top.Size = new System.Drawing.Size(1520, 367);
+            this.splitContainer_Top.Size = new System.Drawing.Size(1520, 25);
             this.splitContainer_Top.SplitterDistance = 931;
             this.splitContainer_Top.TabIndex = 1;
             // 
@@ -173,14 +176,17 @@
             this.columnHeader3,
             this.columnHeader4,
             this.columnHeader6,
-            this.HexOpCode});
+            this.HexOpCode,
+            this.columnHeader13,
+            this.columnHeader15,
+            this.columnHeader14});
             this.listView_Packets.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_Packets.FullRowSelect = true;
             this.listView_Packets.HideSelection = false;
             this.listView_Packets.Location = new System.Drawing.Point(0, 0);
             this.listView_Packets.MultiSelect = false;
             this.listView_Packets.Name = "listView_Packets";
-            this.listView_Packets.Size = new System.Drawing.Size(1516, 363);
+            this.listView_Packets.Size = new System.Drawing.Size(1516, 21);
             this.listView_Packets.TabIndex = 0;
             this.listView_Packets.UseCompatibleStateImageBehavior = false;
             this.listView_Packets.View = System.Windows.Forms.View.Details;
@@ -227,6 +233,18 @@
             // 
             this.HexOpCode.Text = "OpCode";
             this.HexOpCode.Width = 66;
+            // 
+            // columnHeader13
+            // 
+            this.columnHeader13.Text = "Seq";
+            // 
+            // columnHeader15
+            // 
+            this.columnHeader15.Text = "Queue";
+            // 
+            // columnHeader14
+            // 
+            this.columnHeader14.Text = "Iteration";
             // 
             // listView_CreatedObjects
             // 
@@ -312,7 +330,7 @@
             // splitContainer_Bottom.Panel2
             // 
             this.splitContainer_Bottom.Panel2.Controls.Add(this.treeView_ParsedData);
-            this.splitContainer_Bottom.Size = new System.Drawing.Size(1520, 414);
+            this.splitContainer_Bottom.Size = new System.Drawing.Size(1520, 399);
             this.splitContainer_Bottom.SplitterDistance = 1074;
             this.splitContainer_Bottom.TabIndex = 0;
             // 
@@ -324,7 +342,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1070, 410);
+            this.tabControl1.Size = new System.Drawing.Size(1070, 395);
             this.tabControl1.TabIndex = 0;
             this.tabControl1.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
             // 
@@ -334,7 +352,7 @@
             this.tabHexView.Location = new System.Drawing.Point(4, 22);
             this.tabHexView.Name = "tabHexView";
             this.tabHexView.Padding = new System.Windows.Forms.Padding(3);
-            this.tabHexView.Size = new System.Drawing.Size(1062, 384);
+            this.tabHexView.Size = new System.Drawing.Size(1062, 369);
             this.tabHexView.TabIndex = 0;
             this.tabHexView.Text = "Hex View";
             this.tabHexView.UseVisualStyleBackColor = true;
@@ -359,7 +377,7 @@
             this.hexBox1.ReadOnly = true;
             this.hexBox1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             this.hexBox1.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(60)))), ((int)(((byte)(188)))), ((int)(((byte)(255)))));
-            this.hexBox1.Size = new System.Drawing.Size(1056, 378);
+            this.hexBox1.Size = new System.Drawing.Size(1056, 363);
             this.hexBox1.StringViewVisible = true;
             this.hexBox1.TabIndex = 1;
             this.hexBox1.UseFixedBytesPerLine = true;
@@ -395,7 +413,7 @@
             this.tabProtocolDocs.Controls.Add(this.protocolWebBrowser);
             this.tabProtocolDocs.Location = new System.Drawing.Point(4, 22);
             this.tabProtocolDocs.Name = "tabProtocolDocs";
-            this.tabProtocolDocs.Size = new System.Drawing.Size(1059, 380);
+            this.tabProtocolDocs.Size = new System.Drawing.Size(1059, 365);
             this.tabProtocolDocs.TabIndex = 1;
             this.tabProtocolDocs.Text = "Protocol Documentation";
             this.tabProtocolDocs.UseVisualStyleBackColor = true;
@@ -406,7 +424,7 @@
             this.protocolWebBrowser.Location = new System.Drawing.Point(0, 0);
             this.protocolWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
             this.protocolWebBrowser.Name = "protocolWebBrowser";
-            this.protocolWebBrowser.Size = new System.Drawing.Size(1059, 380);
+            this.protocolWebBrowser.Size = new System.Drawing.Size(1059, 365);
             this.protocolWebBrowser.TabIndex = 0;
             // 
             // treeView_ParsedData
@@ -415,7 +433,7 @@
             this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
             this.treeView_ParsedData.Name = "treeView_ParsedData";
-            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
+            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 395);
             this.treeView_ParsedData.TabIndex = 0;
             this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
             this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
@@ -663,7 +681,7 @@
             // 
             this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatus});
-            this.statusStrip.Location = new System.Drawing.Point(0, 809);
+            this.statusStrip.Location = new System.Drawing.Point(0, 452);
             this.statusStrip.Name = "statusStrip";
             this.statusStrip.Size = new System.Drawing.Size(1520, 22);
             this.statusStrip.TabIndex = 1;
@@ -798,7 +816,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1520, 831);
+            this.ClientSize = new System.Drawing.Size(1520, 474);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.HighlightMode_comboBox);
             this.Controls.Add(this.checkBox_ShowObjects);
@@ -924,6 +942,9 @@
         private System.Windows.Forms.MenuItem menuItem_CheckUpdates;
         private System.Windows.Forms.MenuItem menuItem_Options;
         private System.Windows.Forms.MenuItem menuItem4;
+        private System.Windows.Forms.ColumnHeader columnHeader13;
+        private System.Windows.Forms.ColumnHeader columnHeader15;
+        private System.Windows.Forms.ColumnHeader columnHeader14;
     }
 }
 

@@ -1,4 +1,4 @@
-﻿using aclogview.Properties;
+using aclogview.Properties;
 using System;
 using System.Security.Policy;
 using System.Windows.Forms;
@@ -11,6 +11,7 @@ namespace aclogview
         private byte _protocolUpdateIntervalDays;
         private bool _parsedDataTreeviewDisplayTooltips;
         private byte _packetsListviewTimeFormat;
+        private bool _ACEStyleHeaders;
 
         public OptionsForm()
         {
@@ -26,6 +27,7 @@ namespace aclogview
                 textBox_ProtocolDays.Enabled = false;
             displayNodeTooltips.Checked = _parsedDataTreeviewDisplayTooltips;
             comboBox_TimeFormat.SelectedIndex = _packetsListviewTimeFormat;
+            cbACEStyleHeaders.Checked = _ACEStyleHeaders;
         }
 
         private void LoadDefaultSettings()
@@ -35,6 +37,7 @@ namespace aclogview
             _protocolCheckForUpdates = Settings.Default.ProtocolCheckForUpdates;
             _parsedDataTreeviewDisplayTooltips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
             _packetsListviewTimeFormat = Settings.Default.PacketsListviewTimeFormat;
+            _ACEStyleHeaders = Settings.Default.ACEStyleHeaders;
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -60,6 +63,7 @@ namespace aclogview
             Settings.Default.ProtocolCheckForUpdates = _protocolCheckForUpdates;
             Settings.Default.ParsedDataTreeviewDisplayTooltips = _parsedDataTreeviewDisplayTooltips;
             Settings.Default.PacketsListviewTimeFormat = _packetsListviewTimeFormat;
+            Settings.Default.ACEStyleHeaders = _ACEStyleHeaders;
             Settings.Default.Save();
         }
 
@@ -131,6 +135,11 @@ namespace aclogview
         private void comboBox_TimeFormat_SelectedIndexChanged(object sender, EventArgs e)
         {
             _packetsListviewTimeFormat = (byte)comboBox_TimeFormat.SelectedIndex;
+        }
+
+        private void cbACEStyleHeaders_CheckedChanged(object sender, EventArgs e)
+        {
+            _ACEStyleHeaders = cbACEStyleHeaders.Checked;
         }
     }
 }
