@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -274,8 +274,8 @@ namespace aclogview
 
             UdpHeader udpHeader = UdpHeader.read(binaryReader);
 
-            bool isSend = (udpHeader.dPort >= 9000 && udpHeader.dPort <= 9013);
-            bool isRecv = (udpHeader.sPort >= 9000 && udpHeader.sPort <= 9013);
+            bool isSend = (udpHeader.dPort >= 9000 && udpHeader.dPort <= 10013);
+            bool isRecv = (udpHeader.sPort >= 9000 && udpHeader.sPort <= 10013);
 
             // Skip non-AC-port packets
             if (!isSend && !isRecv)
