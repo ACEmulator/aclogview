@@ -1,11 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using aclogview;
+
+using ACE.Entity.Enum.Properties;
 
 public class CM_Character : MessageProcessor {
 
@@ -429,8 +432,8 @@ public class CM_Character : MessageProcessor {
 
         public uint header;
         public PackableHashTable<STypeInt, int> m_pIntStatsTable = new PackableHashTable<STypeInt, int>();
-        public PackableHashTable<STypeBool, int> m_pBoolStatsTable = new PackableHashTable<STypeBool, int>();
-        public PackableHashTable<STypeFloat, double> m_pFloatStatsTable = new PackableHashTable<STypeFloat, double>();
+        public PackableHashTable<PropertyBool, int> m_pBoolStatsTable = new PackableHashTable<PropertyBool, int>();
+        public PackableHashTable<PropertyFloat, double> m_pFloatStatsTable = new PackableHashTable<PropertyFloat, double>();
         public PackableHashTable<uint, PStringChar> m_pStrStatsTable = new PackableHashTable<uint, PStringChar>();
         public int Length;
         public List<string> packedItems; // For display purposes
@@ -448,12 +451,12 @@ public class CM_Character : MessageProcessor {
             }
             if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_BoolStats) != 0)
             {
-                newObj.m_pBoolStatsTable = PackableHashTable<STypeBool, int>.read(binaryReader);
+                newObj.m_pBoolStatsTable = PackableHashTable<PropertyBool, int>.read(binaryReader);
                 newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_BoolStats.ToString());
             }
             if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_FloatStats) != 0)
             {
-                newObj.m_pFloatStatsTable = PackableHashTable<STypeFloat, double>.read(binaryReader);
+                newObj.m_pFloatStatsTable = PackableHashTable<PropertyFloat, double>.read(binaryReader);
                 newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_FloatStats.ToString());
             }
             if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_StringStats) != 0)
@@ -497,7 +500,7 @@ public class CM_Character : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 for (int i = 0; i < m_pBoolStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeBool) + sizeof(int) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyBool) + sizeof(int) });
                 }
             }
             if ((header & (uint)GenericQualitiesPackHeader.Packed_FloatStats) != 0)
@@ -509,7 +512,7 @@ public class CM_Character : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 for (int i = 0; i < m_pFloatStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeFloat) + sizeof(double) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyFloat) + sizeof(double) });
                 }
             }
             if ((header & (uint)GenericQualitiesPackHeader.Packed_StringStats) != 0)
@@ -523,7 +526,7 @@ public class CM_Character : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<uint, PStringChar> element in m_pStrStatsTable.hashTable)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeString) + element.Value.Length });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyString) + element.Value.Length });
                 }
             }
         }

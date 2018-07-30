@@ -1,4 +1,4 @@
-﻿using aclogview;
+using aclogview;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using ACE.Entity.Enum;
 
 public class CM_Vendor : MessageProcessor {
 
@@ -120,11 +122,11 @@ public class CM_Vendor : MessageProcessor {
         {
             TreeNode itemTypeNode = node.Nodes.Add("item_types = " + Utility.FormatHex(item_types));
             ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-            foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
+            foreach (ItemType e in Enum.GetValues(typeof(ItemType)))
             {
                 if ( (item_types & (uint)e) == (uint)e && (uint)e != 0 )
                 {
-                    itemTypeNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                    itemTypeNode.Nodes.Add($"{Enum.GetName(typeof(ItemType), e)}");
                     ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }

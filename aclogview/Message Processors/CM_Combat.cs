@@ -1,11 +1,14 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using aclogview;
+
+using ACE.Entity.Enum;
 
 public class CM_Combat : MessageProcessor {
 
@@ -88,13 +91,13 @@ public class CM_Combat : MessageProcessor {
 
     public class TargetedMeleeAttack : Message {
         public uint i_targetID;
-        public ATTACK_HEIGHT i_ah;
+        public AttackHeight i_ah;
         public float i_power_level;
 
         public static TargetedMeleeAttack read(BinaryReader binaryReader) {
             TargetedMeleeAttack newObj = new TargetedMeleeAttack();
             newObj.i_targetID = binaryReader.ReadUInt32();
-            newObj.i_ah = (ATTACK_HEIGHT)binaryReader.ReadUInt32();
+            newObj.i_ah = (AttackHeight)binaryReader.ReadUInt32();
             newObj.i_power_level = binaryReader.ReadSingle();
             Util.readToAlign(binaryReader);
             return newObj;
@@ -113,13 +116,13 @@ public class CM_Combat : MessageProcessor {
 
     public class TargetedMissileAttack : Message {
         public uint i_targetID;
-        public ATTACK_HEIGHT i_ah;
+        public AttackHeight i_ah;
         public float i_accuracy_level;
 
         public static TargetedMissileAttack read(BinaryReader binaryReader) {
             TargetedMissileAttack newObj = new TargetedMissileAttack();
             newObj.i_targetID = binaryReader.ReadUInt32();
-            newObj.i_ah = (ATTACK_HEIGHT)binaryReader.ReadUInt32();
+            newObj.i_ah = (AttackHeight)binaryReader.ReadUInt32();
             newObj.i_accuracy_level = binaryReader.ReadSingle();
             Util.readToAlign(binaryReader);
             return newObj;
@@ -136,11 +139,11 @@ public class CM_Combat : MessageProcessor {
     }
 
     public class ChangeCombatMode : Message {
-        public COMBAT_MODE i_mode;
+        public CombatMode i_mode;
 
         public static ChangeCombatMode read(BinaryReader binaryReader) {
             ChangeCombatMode newObj = new ChangeCombatMode();
-            newObj.i_mode = (COMBAT_MODE)binaryReader.ReadUInt32();
+            newObj.i_mode = (CombatMode)binaryReader.ReadUInt32();
             Util.readToAlign(binaryReader);
             return newObj;
         }
@@ -240,7 +243,7 @@ public class CM_Combat : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("defenders_name = " + defenders_name);
-            rootNode.Nodes.Add("damage_type = " + (DAMAGE_TYPE)damage_type);
+            rootNode.Nodes.Add("damage_type = " + (DamageType)damage_type);
             rootNode.Nodes.Add("severity = " + severity);
             rootNode.Nodes.Add("damage = " + damage);
             rootNode.Nodes.Add("critical = " + critical);
@@ -278,10 +281,10 @@ public class CM_Combat : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("attackers_name = " + attackers_name);
-            rootNode.Nodes.Add("damage_type = " + (DAMAGE_TYPE)damage_type);
+            rootNode.Nodes.Add("damage_type = " + (DamageType)damage_type);
             rootNode.Nodes.Add("severity = " + severity);
             rootNode.Nodes.Add("damage = " + damage);
-            rootNode.Nodes.Add("part = " + (BodyPart)part);
+            rootNode.Nodes.Add("part = " + (CombatBodyPart)part);
             rootNode.Nodes.Add("critical = " + critical);
             rootNode.Nodes.Add("attackConditions = " + (AttackConditions)attack_conditions);
             treeView.Nodes.Add(rootNode);

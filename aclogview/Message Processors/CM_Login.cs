@@ -1,11 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using aclogview;
+
+using ACE.Entity.Enum;
+using ACE.Entity.Enum.Properties;
+
 using static CM_Inventory;
 
 public class CM_Login : MessageProcessor {
@@ -368,13 +373,13 @@ public class CM_Login : MessageProcessor {
         public uint header;
         public WeenieType _weenie_type;
         public PackableHashTable<STypeInt, int> _intStatsTable = new PackableHashTable<STypeInt, int>();
-        public PackableHashTable<STypeInt64, long> _int64StatsTable = new PackableHashTable<STypeInt64, long>();
-        public PackableHashTable<STypeBool, int> _boolStatsTable = new PackableHashTable<STypeBool, int>();
-        public PackableHashTable<STypeFloat, double> _floatStatsTable = new PackableHashTable<STypeFloat, double>();
-        public PackableHashTable<STypeString, PStringChar> _strStatsTable = new PackableHashTable<STypeString, PStringChar>();
-        public PackableHashTable<STypeDID, uint> _didStatsTable = new PackableHashTable<STypeDID, uint>();
-        public PackableHashTable<STypeIID, uint> _iidStatsTable = new PackableHashTable<STypeIID, uint>();
-        public PackableHashTable<STypePosition, Position> _posStatsTable = new PackableHashTable<STypePosition, Position>();
+        public PackableHashTable<PropertyInt64, long> _int64StatsTable = new PackableHashTable<PropertyInt64, long>();
+        public PackableHashTable<PropertyBool, int> _boolStatsTable = new PackableHashTable<PropertyBool, int>();
+        public PackableHashTable<PropertyFloat, double> _floatStatsTable = new PackableHashTable<PropertyFloat, double>();
+        public PackableHashTable<PropertyString, PStringChar> _strStatsTable = new PackableHashTable<PropertyString, PStringChar>();
+        public PackableHashTable<PropertyDataId, uint> _didStatsTable = new PackableHashTable<PropertyDataId, uint>();
+        public PackableHashTable<PropertyInstanceId, uint> _iidStatsTable = new PackableHashTable<PropertyInstanceId, uint>();
+        public PackableHashTable<PositionType, Position> _posStatsTable = new PackableHashTable<PositionType, Position>();
         public int Length;
         public List<string> packedItems = new List<string>(); // Display purposes
 
@@ -391,37 +396,37 @@ public class CM_Login : MessageProcessor {
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_Int64Stats) != 0)
             {
-                newObj._int64StatsTable = PackableHashTable<STypeInt64, long>.read(binaryReader);
+                newObj._int64StatsTable = PackableHashTable<PropertyInt64, long>.read(binaryReader);
                 newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_Int64Stats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_BoolStats) != 0)
             {
-                newObj._boolStatsTable = PackableHashTable<STypeBool, int>.read(binaryReader);
+                newObj._boolStatsTable = PackableHashTable<PropertyBool, int>.read(binaryReader);
                 newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_BoolStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_FloatStats) != 0)
             {
-                newObj._floatStatsTable = PackableHashTable<STypeFloat, double>.read(binaryReader);
+                newObj._floatStatsTable = PackableHashTable<PropertyFloat, double>.read(binaryReader);
                 newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_FloatStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_StringStats) != 0)
             {
-                newObj._strStatsTable = PackableHashTable<STypeString, PStringChar>.read(binaryReader);
+                newObj._strStatsTable = PackableHashTable<PropertyString, PStringChar>.read(binaryReader);
                 newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_StringStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_DataIDStats) != 0)
             {
-                newObj._didStatsTable = PackableHashTable<STypeDID, uint>.read(binaryReader);
+                newObj._didStatsTable = PackableHashTable<PropertyDataId, uint>.read(binaryReader);
                 newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_DataIDStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_IIDStats) != 0)
             {
-                newObj._iidStatsTable = PackableHashTable<STypeIID, uint>.read(binaryReader);
+                newObj._iidStatsTable = PackableHashTable<PropertyInstanceId, uint>.read(binaryReader);
                 newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_IIDStats.ToString());
             }
             if ((newObj.header & (uint)BaseQualitiesPackHeader.Packed_PositionHashTable) != 0)
             {
-                newObj._posStatsTable = PackableHashTable<STypePosition, Position>.read(binaryReader);
+                newObj._posStatsTable = PackableHashTable<PositionType, Position>.read(binaryReader);
                 newObj.packedItems.Add(BaseQualitiesPackHeader.Packed_PositionHashTable.ToString());
             }
             newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
@@ -463,7 +468,7 @@ public class CM_Login : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _int64StatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeInt64) + sizeof(long) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyInt64) + sizeof(long) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_BoolStats) != 0)
@@ -475,7 +480,7 @@ public class CM_Login : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _boolStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeBool) + sizeof(int) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyBool) + sizeof(int) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_FloatStats) != 0)
@@ -487,7 +492,7 @@ public class CM_Login : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _floatStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeFloat) + sizeof(double) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyFloat) + sizeof(double) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_StringStats) != 0)
@@ -499,9 +504,9 @@ public class CM_Login : MessageProcessor {
                 _strStatsTable.contributeToTreeNode(strStatsNode);
                 // Skip PackableHashTable count dword
                 ContextInfo.DataIndex += 4;
-                foreach (KeyValuePair<STypeString, PStringChar> element in _strStatsTable.hashTable)
+                foreach (KeyValuePair<PropertyString, PStringChar> element in _strStatsTable.hashTable)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeString) + element.Value.Length });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyString) + element.Value.Length });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_DataIDStats) != 0)
@@ -510,10 +515,10 @@ public class CM_Login : MessageProcessor {
                 ContextInfo.AddToList(new ContextInfo { Length = _didStatsTable.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
                 ContextInfo.DataIndex += 4;
-                foreach (KeyValuePair<STypeDID, uint> element in _didStatsTable.hashTable)
+                foreach (KeyValuePair<PropertyDataId, uint> element in _didStatsTable.hashTable)
                 {
                     didStatsNode.Nodes.Add(element.Key + " = " + Utility.FormatHex(element.Value));
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeDID) + sizeof(uint) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyDataId) + sizeof(uint) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_IIDStats) != 0)
@@ -522,10 +527,10 @@ public class CM_Login : MessageProcessor {
                 ContextInfo.AddToList(new ContextInfo { Length = _iidStatsTable.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
                 ContextInfo.DataIndex += 4;
-                foreach (KeyValuePair<STypeIID, uint> element in _iidStatsTable.hashTable)
+                foreach (KeyValuePair<PropertyInstanceId, uint> element in _iidStatsTable.hashTable)
                 {
                     iidStatsNode.Nodes.Add(element.Key + " = " + Utility.FormatHex(element.Value));
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeIID) + sizeof(uint) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyInstanceId) + sizeof(uint) });
                 }
             }
             if ((header & (uint)BaseQualitiesPackHeader.Packed_PositionHashTable) != 0)
@@ -534,11 +539,11 @@ public class CM_Login : MessageProcessor {
                 ContextInfo.AddToList(new ContextInfo { Length = _posStatsTable.Length }, updateDataIndex: false);
                 // Skip PackableHashTable count dword
                 ContextInfo.DataIndex += 4;
-                foreach (KeyValuePair<STypePosition, Position> element in _posStatsTable.hashTable)
+                foreach (KeyValuePair<PositionType, Position> element in _posStatsTable.hashTable)
                 {
                     TreeNode thisPosNode = posStatsNode.Nodes.Add(element.Key + " = ");
                     Position thisPos = element.Value;
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypePosition) + thisPos.Length }, updateDataIndex: false);
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PositionType) + thisPos.Length }, updateDataIndex: false);
                     // Skip STypePosition count dword
                     ContextInfo.DataIndex += 4;
                     thisPos.contributeToTreeNode(thisPosNode);

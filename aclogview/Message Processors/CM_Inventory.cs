@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview;
+using ACE.Entity.Enum;
 
 public class CM_Inventory : MessageProcessor {
 
@@ -164,7 +165,7 @@ public class CM_Inventory : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_slot = " + i_slot);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            rootNode.Nodes.Add("i_type = " + (ContainerProperties)i_type);
+            rootNode.Nodes.Add("i_type = " + (ContainerType)i_type);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
@@ -544,7 +545,7 @@ public class CM_Inventory : MessageProcessor {
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("m_iid = " + Utility.FormatHex(m_iid));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
-            node.Nodes.Add("m_uContainerProperties = " + (ContainerProperties)m_uContainerProperties);
+            node.Nodes.Add("m_uContainerProperties = " + (ContainerType)m_uContainerProperties);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
@@ -640,13 +641,13 @@ public class CM_Inventory : MessageProcessor {
     }
 
     public class SalvageResult {
-        public MaterialType m_material;
+        public Material m_material;
         public double m_workmanship;
         public int m_units;
 
         public static SalvageResult read(BinaryReader binaryReader) {
             SalvageResult newObj = new SalvageResult();
-            newObj.m_material = (MaterialType)binaryReader.ReadUInt32();
+            newObj.m_material = (Material)binaryReader.ReadUInt32();
             newObj.m_workmanship = binaryReader.ReadDouble();
             newObj.m_units = binaryReader.ReadInt32();
             return newObj;

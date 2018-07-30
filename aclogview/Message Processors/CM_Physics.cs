@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview;
+using ACE.Entity.Enum;
 
 public class CM_Physics : MessageProcessor {
 
@@ -261,7 +262,7 @@ public class CM_Physics : MessageProcessor {
         public Vector3 velocity = new Vector3();
         public Vector3 acceleration = new Vector3();
         public Vector3 omega = new Vector3();
-        public PScriptType default_script;
+        public PlayScript default_script;
         public float default_script_intensity;
         public ushort[] timestamps = new ushort[9];
         public List<string> packedItems; // For display purposes
@@ -365,7 +366,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.bitfield & (uint)PhysicsDescInfo.DEFAULT_SCRIPT) != 0) {
-                newObj.default_script = (PScriptType)binaryReader.ReadUInt32();
+                newObj.default_script = (PlayScript)binaryReader.ReadUInt32();
                 newObj.packedItems.Add(PhysicsDescInfo.DEFAULT_SCRIPT.ToString());
             }
 
@@ -552,16 +553,16 @@ public class CM_Physics : MessageProcessor {
         public int _wcid_length;
         public uint _iconID;
         public int _iconID_length;
-        public ITEM_TYPE _type;
+        public ItemType _type;
         public uint _bitfield;
         public PStringChar _plural_name;
         public byte _itemsCapacity;
         public byte _containersCapacity;
-        public AMMO_TYPE _ammoType;
+        public AmmoType _ammoType;
         public uint _value;
-        public ITEM_USEABLE _useability;
+        public Usable _useability;
         public float _useRadius;
-        public ITEM_TYPE _targetType;
+        public ItemType _targetType;
         public uint _effects;
         public byte _combatUse;
         public ushort _structure;
@@ -588,7 +589,7 @@ public class CM_Physics : MessageProcessor {
         public int _iconOverlayLength;
         public uint _iconUnderlayID;
         public int _iconUnderlayLength;
-        public MaterialType _material_type;
+        public Material _material_type;
         public uint _cooldown_id;
         public double _cooldown_duration;
         public uint _pet_owner;
@@ -608,7 +609,7 @@ public class CM_Physics : MessageProcessor {
             var iconIdStart = binaryReader.BaseStream.Position;
             newObj._iconID = Util.readDataIDOfKnownType(0x6000000, binaryReader);
             newObj._iconID_length = (int)(binaryReader.BaseStream.Position - iconIdStart);
-            newObj._type = (ITEM_TYPE)binaryReader.ReadUInt32();
+            newObj._type = (ItemType)binaryReader.ReadUInt32();
             newObj._bitfield = binaryReader.ReadUInt32();
 
             newObj.headerPadding = Util.readToAlign(binaryReader);
@@ -634,7 +635,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0) {
-                newObj._ammoType = (AMMO_TYPE)binaryReader.ReadUInt16();
+                newObj._ammoType = (AmmoType)binaryReader.ReadUInt16();
                 newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_AmmoType.ToString());
             }
 
@@ -644,7 +645,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Useability) != 0) {
-                newObj._useability = (ITEM_USEABLE)binaryReader.ReadUInt32();
+                newObj._useability = (Usable)binaryReader.ReadUInt32();
                 newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_Useability.ToString());
             }
 
@@ -654,7 +655,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & (uint)PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0) {
-                newObj._targetType = (ITEM_TYPE)binaryReader.ReadUInt32();
+                newObj._targetType = (ItemType)binaryReader.ReadUInt32();
                 newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_TargetType.ToString());
             }
 
@@ -783,7 +784,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & unchecked((uint)PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0) {
-                newObj._material_type = (MaterialType)binaryReader.ReadUInt32();
+                newObj._material_type = (Material)binaryReader.ReadUInt32();
                 newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_MaterialType.ToString());
             }
 
@@ -873,11 +874,11 @@ public class CM_Physics : MessageProcessor {
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0) {
                 TreeNode targetTypeNode = node.Nodes.Add("_targetType = " + Utility.FormatHex((uint)_targetType));
                 ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
+                foreach (ItemType e in Enum.GetValues(typeof(ItemType)))
                 {
                     if (((uint)_targetType & (uint)e) == (uint)e && (uint)e != 0)
                     {
-                        targetTypeNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                        targetTypeNode.Nodes.Add($"{Enum.GetName(typeof(ItemType), e)}");
                         ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
@@ -889,7 +890,7 @@ public class CM_Physics : MessageProcessor {
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0) {
-                node.Nodes.Add("_combatUse = " + (COMBAT_USE)_combatUse);
+                node.Nodes.Add("_combatUse = " + (CombatUse)_combatUse);
                 ContextInfo.AddToList(new ContextInfo { Length = 1 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Structure) != 0) {
@@ -944,7 +945,7 @@ public class CM_Physics : MessageProcessor {
                 ContextInfo.AddToList(new ContextInfo { Length = 1 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_PScript) != 0) {
-                node.Nodes.Add("_pscript = " + (PScriptType)_pscript);
+                node.Nodes.Add("_pscript = " + (PlayScript)_pscript);
                 ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_Workmanship) != 0) {
@@ -971,11 +972,11 @@ public class CM_Physics : MessageProcessor {
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0) {
                 TreeNode hookItemTypesNode = node.Nodes.Add("_hook_item_types = " + Utility.FormatHex(_hook_item_types));
                 ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
-                foreach (ITEM_TYPE e in Enum.GetValues(typeof(ITEM_TYPE)))
+                foreach (ItemType e in Enum.GetValues(typeof(ItemType)))
                 {
                     if ((_hook_item_types & (uint)e) == (uint)e && (uint)e != 0)
                     {
-                        hookItemTypesNode.Nodes.Add($"{Enum.GetName(typeof(ITEM_TYPE), e)}");
+                        hookItemTypesNode.Nodes.Add($"{Enum.GetName(typeof(ItemType), e)}");
                         ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
@@ -1148,14 +1149,14 @@ public class CM_Physics : MessageProcessor {
         public uint _location;
         public byte _itemsCapacity;
         public byte _containersCapacity;
-        public ITEM_TYPE _type;
+        public ItemType _type;
         public uint _value;
-        public ITEM_USEABLE _useability;
+        public Usable _useability;
         public float _useRadius;
-        public ITEM_TYPE _targetType;
+        public ItemType _targetType;
         public uint _effects;
-        public AMMO_TYPE _ammoType;
-        public COMBAT_USE _combatUse;
+        public AmmoType _ammoType;
+        public CombatUse _combatUse;
         public ushort _structure;
         public ushort _maxStructure;
         public ushort _stackSize;
@@ -1169,10 +1170,10 @@ public class CM_Physics : MessageProcessor {
         public uint _house_owner_iid;
         public CM_House.RestrictionDB _db;
         public ushort _pscript;
-        public ITEM_TYPE _hook_type;
+        public ItemType _hook_type;
         public uint _hook_item_types;
         public uint _monarch;
-        public MaterialType _material_type;
+        public Material _material_type;
 
         // Context info has not been added to the old weenie description class as it is not used
         public static OldPublicWeenieDesc read(BinaryReader binaryReader)
@@ -1182,7 +1183,7 @@ public class CM_Physics : MessageProcessor {
             newObj._name = PStringChar.read(binaryReader);
             newObj._wcid = binaryReader.ReadUInt16();
             newObj._iconID = binaryReader.ReadUInt16() | 0x6000000u;
-            newObj._type = (ITEM_TYPE)binaryReader.ReadUInt32();
+            newObj._type = (ItemType)binaryReader.ReadUInt32();
             newObj._bitfield = binaryReader.ReadUInt32();
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_PluralName) != 0)
@@ -1207,7 +1208,7 @@ public class CM_Physics : MessageProcessor {
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_Useability) != 0)
             {
-                newObj._useability = (ITEM_USEABLE)binaryReader.ReadUInt32();
+                newObj._useability = (Usable)binaryReader.ReadUInt32();
             }
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_UseRadius) != 0)
@@ -1217,7 +1218,7 @@ public class CM_Physics : MessageProcessor {
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_TargetType) != 0)
             {
-                newObj._targetType = (ITEM_TYPE)binaryReader.ReadUInt32();
+                newObj._targetType = (ItemType)binaryReader.ReadUInt32();
             }
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_UIEffects) != 0)
@@ -1227,12 +1228,12 @@ public class CM_Physics : MessageProcessor {
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_AmmoType) != 0)
             {
-                newObj._ammoType = (AMMO_TYPE)binaryReader.ReadByte();
+                newObj._ammoType = (AmmoType)binaryReader.ReadByte();
             }
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_CombatUse) != 0)
             {
-                newObj._combatUse = (COMBAT_USE)binaryReader.ReadByte();
+                newObj._combatUse = (CombatUse)binaryReader.ReadByte();
             }
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_Structure) != 0)
@@ -1322,7 +1323,7 @@ public class CM_Physics : MessageProcessor {
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_HookType) != 0)
             {
-                newObj._hook_type = (ITEM_TYPE)binaryReader.ReadUInt16();
+                newObj._hook_type = (ItemType)binaryReader.ReadUInt16();
             }
 
             if ((newObj.header & (uint)OldPublicWeenieDescPackHeader.PWD_Packed_HookItemTypes) != 0)
@@ -1342,7 +1343,7 @@ public class CM_Physics : MessageProcessor {
 
             if ((newObj.header & unchecked((uint)OldPublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
             {
-                newObj._material_type = (MaterialType)binaryReader.ReadUInt32();
+                newObj._material_type = (Material)binaryReader.ReadUInt32();
             }
 
             Util.readToAlign(binaryReader);
@@ -1771,13 +1772,13 @@ public class CM_Physics : MessageProcessor {
 
     public class PlayScriptType : Message {
         public uint object_id;
-        public PScriptType script_type;
+        public PlayScript script_type;
         public float mod;
 
         public static PlayScriptType read(BinaryReader binaryReader) {
             PlayScriptType newObj = new PlayScriptType();
             newObj.object_id = binaryReader.ReadUInt32();
-            newObj.script_type = (PScriptType)binaryReader.ReadUInt32();
+            newObj.script_type = (PlayScript)binaryReader.ReadUInt32();
             newObj.mod = binaryReader.ReadSingle();
             return newObj;
         }

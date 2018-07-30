@@ -37,6 +37,15 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ACE.Common">
+      <HintPath>..\lib\ACE.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="ACE.Database">
+      <HintPath>..\lib\ACE.Database.dll</HintPath>
+    </Reference>
+    <Reference Include="ACE.Entity">
+      <HintPath>..\lib\ACE.Entity.dll</HintPath>
+    </Reference>
     <Reference Include="CommandLine, Version=1.9.71.2, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
       <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
     </Reference>
@@ -94,10 +103,8 @@
     <Compile Include="Message Processors\CM_Train.cs" />
     <Compile Include="Message Processors\CM_Vendor.cs" />
     <Compile Include="Message Processors\CM_Writing.cs" />
-    <Compile Include="Enums\Account.cs" />
     <Compile Include="Enums\Admin.cs" />
     <Compile Include="Enums\Allegiance.cs" />
-    <Compile Include="Enums\Animation.cs" />
     <Compile Include="Enums\Appraisal.cs" />
     <Compile Include="Enums\Character.cs" />
     <Compile Include="Enums\CharacterTitles.cs" />
@@ -113,18 +120,15 @@
     <Compile Include="Enums\Chat.cs" />
     <Compile Include="Enums\Chess.cs" />
     <Compile Include="Enums\Combat.cs" />
-    <Compile Include="Enums\Emote.cs" />
     <Compile Include="Enums\Enums.cs" />
     <Compile Include="Enums\House.cs" />
     <Compile Include="Enums\Inventory.cs" />
     <Compile Include="Enums\Item.cs" />
     <Compile Include="Enums\LandDefs.cs" />
-    <Compile Include="Enums\MaterialType.cs" />
     <Compile Include="Enums\Movement.cs" />
     <Compile Include="Enums\Net.cs" />
     <Compile Include="Enums\Physics.cs" />
     <Compile Include="Enums\Portals.cs" />
-    <Compile Include="Enums\Script.cs" />
     <Compile Include="Enums\Shop.cs" />
     <Compile Include="Enums\Skills.cs" />
     <Compile Include="Enums\Social.cs" />
