@@ -501,7 +501,7 @@ public class CM_Examine : MessageProcessor {
                 {
                     uint i_spell_id = _spellsTable.list[i] & 0x7FFFFFFF;
                     uint enchantment_flag = _spellsTable.list[i] & 0x80000000;
-                    TreeNode spellIDNode = spellsNode.Nodes.Add($"({i_spell_id}) " + (SpellID)i_spell_id);
+                    TreeNode spellIDNode = spellsNode.Nodes.Add($"({i_spell_id}) " + (SpellCategory)i_spell_id);
                     if (enchantment_flag != 0)
                     {
                         spellIDNode.Nodes.Add("enchantment_flag = On");

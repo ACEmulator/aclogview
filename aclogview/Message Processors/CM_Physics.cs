@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -589,7 +589,7 @@ public class CM_Physics : MessageProcessor {
         public int _iconOverlayLength;
         public uint _iconUnderlayID;
         public int _iconUnderlayLength;
-        public Material _material_type;
+        public MaterialType _material_type;
         public uint _cooldown_id;
         public double _cooldown_duration;
         public uint _pet_owner;
@@ -784,7 +784,7 @@ public class CM_Physics : MessageProcessor {
             }
 
             if ((newObj.header & unchecked((uint)PublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0) {
-                newObj._material_type = (Material)binaryReader.ReadUInt32();
+                newObj._material_type = (MaterialType)binaryReader.ReadUInt32();
                 newObj.packedItems.Add(PublicWeenieDescPackHeader.PWD_Packed_MaterialType.ToString());
             }
 
@@ -957,7 +957,7 @@ public class CM_Physics : MessageProcessor {
                 ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_SpellID) != 0) {
-                node.Nodes.Add("_spellID = " + $"({_spellID}) " + (SpellID)_spellID);
+                node.Nodes.Add("_spellID = " + $"({_spellID}) " + (SpellCategory)_spellID);
                 ContextInfo.AddToList(new ContextInfo { Length = 2, DataType = DataType.SpellID_ushort});
             }
             if ((header & (uint)PublicWeenieDescPackHeader.PWD_Packed_HouseOwner) != 0) {
@@ -1173,7 +1173,7 @@ public class CM_Physics : MessageProcessor {
         public ItemType _hook_type;
         public uint _hook_item_types;
         public uint _monarch;
-        public Material _material_type;
+        public MaterialType _material_type;
 
         // Context info has not been added to the old weenie description class as it is not used
         public static OldPublicWeenieDesc read(BinaryReader binaryReader)
@@ -1343,7 +1343,7 @@ public class CM_Physics : MessageProcessor {
 
             if ((newObj.header & unchecked((uint)OldPublicWeenieDescPackHeader.PWD_Packed_MaterialType)) != 0)
             {
-                newObj._material_type = (Material)binaryReader.ReadUInt32();
+                newObj._material_type = (MaterialType)binaryReader.ReadUInt32();
             }
 
             Util.readToAlign(binaryReader);
@@ -1726,7 +1726,7 @@ public class CM_Physics : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
-            rootNode.Nodes.Add("sound = " + "(" + sound + ") " + (SoundType)sound);
+            rootNode.Nodes.Add("sound = " + "(" + sound + ") " + (Sound)sound);
             rootNode.Nodes.Add("volume = " + volume);
             treeView.Nodes.Add(rootNode);
         }

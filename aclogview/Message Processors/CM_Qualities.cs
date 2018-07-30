@@ -199,12 +199,12 @@ public class CM_Qualities : MessageProcessor {
                     break;
                 }
             case PacketOpcode.Evt_Qualities__PrivateUpdateSkillAC_ID: {
-                    var message = PrivateUpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(opcode, messageDataReader);
+                    var message = PrivateUpdateQualityEvent<STypeSkill, SkillStatus>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
             case PacketOpcode.Evt_Qualities__UpdateSkillAC_ID: {
-                    var message = UpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(opcode, messageDataReader);
+                    var message = UpdateQualityEvent<STypeSkill, SkillStatus>.read(opcode, messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }

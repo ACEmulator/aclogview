@@ -39,7 +39,7 @@ public class Util {
             readers.Add(typeof(STypeSkill), r => (STypeSkill)r.ReadUInt32());
 
             readers.Add(typeof(CharacterTitle), r => (CharacterTitle)r.ReadUInt32());
-            readers.Add(typeof(SKILL_ADVANCEMENT_CLASS), r => (SKILL_ADVANCEMENT_CLASS)r.ReadUInt32());
+            readers.Add(typeof(SkillStatus), r => (SkillStatus)r.ReadUInt32());
 
             readers.Add(typeof(CM_Magic.Enchantment), r => CM_Magic.Enchantment.read(r));
             readers.Add(typeof(CM_Magic.EnchantmentID), r => CM_Magic.EnchantmentID.read(r));
@@ -50,7 +50,7 @@ public class Util {
             readers.Add(typeof(Position), r => Position.read(r));
             readers.Add(typeof(Skill), r => Skill.read(r));
 
-            readers.Add(typeof(SpellID), r => (SpellID)r.ReadUInt32());
+            readers.Add(typeof(SpellCategory), r => (SpellCategory)r.ReadUInt32());
             readers.Add(typeof(CM_Vendor.ItemProfile), r => CM_Vendor.ItemProfile.read(r));
             readers.Add(typeof(CM_Fellowship.Fellow), r => CM_Fellowship.Fellow.read(r));
             readers.Add(typeof(CM_Fellowship.LockedFellowshipList), r => CM_Fellowship.LockedFellowshipList.read(r));
@@ -442,7 +442,7 @@ public class Position {
 
 public class Skill {
     public uint _level_from_pp;
-    public SKILL_ADVANCEMENT_CLASS _sac;
+    public SkillStatus _sac;
     public uint _pp;
     public uint _init_level;
     public uint _resistance_of_last_check;
@@ -453,7 +453,7 @@ public class Skill {
         Skill newObj = new Skill();
         var startPosition = binaryReader.BaseStream.Position;
         newObj._level_from_pp = binaryReader.ReadUInt32();
-        newObj._sac = (SKILL_ADVANCEMENT_CLASS)binaryReader.ReadUInt32();
+        newObj._sac = (SkillStatus)binaryReader.ReadUInt32();
         newObj._pp = binaryReader.ReadUInt32();
         newObj._init_level = binaryReader.ReadUInt32();
         newObj._resistance_of_last_check = binaryReader.ReadUInt32();

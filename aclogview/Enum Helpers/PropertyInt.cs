@@ -15,12 +15,12 @@ namespace aclogview.Enum_Helpers
         public static Dictionary<STypeInt, Type> EnumMapper = new Dictionary<STypeInt, Type>()
         {
             {STypeInt.ATTACK_TYPE_INT, typeof(AttackType)},
-            {STypeInt.CURRENT_WIELDED_LOCATION_INT, typeof(INVENTORY_LOC)},
+            {STypeInt.CURRENT_WIELDED_LOCATION_INT, typeof(EquipMask)},
             {STypeInt.PLAYER_KILLER_STATUS_INT, typeof(PlayerKillerStatus)},
             {STypeInt.EQUIPMENT_SET_ID_INT, typeof(EquipmentSet)},
             {STypeInt.PALETTE_TEMPLATE_INT, typeof(PaletteTemplate)},
             {STypeInt.CLOTHING_PRIORITY_INT, typeof(CoverageMask)},
-            {STypeInt.LOCATIONS_INT, typeof(INVENTORY_LOC)},
+            {STypeInt.LOCATIONS_INT, typeof(EquipMask)},
             {STypeInt.UI_EFFECTS_INT, typeof(UI_EFFECT_TYPE)},
             {STypeInt.ATTUNED_INT, typeof(AttunedStatus)},
             {STypeInt.HOOK_TYPE_INT, typeof(HookTypeEnum)},

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview;
+
+using ACE.Entity.Enum;
 
 public class Proto_UI : MessageProcessor {
 
@@ -214,7 +216,7 @@ public class Proto_UI : MessageProcessor {
         public int self;
         public int slot;
         public uint classID;
-        public PList<SKILL_ADVANCEMENT_CLASS> skillAdvancementClasses;
+        public PList<SkillStatus> skillAdvancementClasses;
         public PStringChar name;
         public uint startArea;
         public int isAdmin;
@@ -259,7 +261,7 @@ public class Proto_UI : MessageProcessor {
             newObj.self = binaryReader.ReadInt32();
             newObj.slot = binaryReader.ReadInt32();
             newObj.classID = binaryReader.ReadUInt32();
-            newObj.skillAdvancementClasses = PList<SKILL_ADVANCEMENT_CLASS>.read(binaryReader);
+            newObj.skillAdvancementClasses = PList<SkillStatus>.read(binaryReader);
             newObj.name = PStringChar.read(binaryReader);
             newObj.startArea = binaryReader.ReadUInt32();
             newObj.isAdmin = binaryReader.ReadInt32();

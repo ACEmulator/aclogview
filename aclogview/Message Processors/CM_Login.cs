@@ -339,7 +339,7 @@ public class CM_Login : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<uint, float> element in _spell_book.hashTable)
                 {
-                    TreeNode spellNode = spellBookNode.Nodes.Add($"({element.Key}) {(SpellID)element.Key} = ");
+                    TreeNode spellNode = spellBookNode.Nodes.Add($"({element.Key}) {(SpellCategory)element.Key} = ");
                     ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
                     spellNode.Nodes.Add("_casting_likelihood = " + element.Value);
                     ContextInfo.AddToList(new ContextInfo { Length = sizeof(float) });
@@ -687,7 +687,7 @@ public class CM_Login : MessageProcessor {
                 foreach (CM_Magic.Enchantment element in _mult_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
-                    TreeNode thisEnchantmentNode = multListNode.Nodes.Add("Enchantment = " + (SpellID)element.eid.i_spell_id);
+                    TreeNode thisEnchantmentNode = multListNode.Nodes.Add("Enchantment = " + (SpellCategory)element.eid.i_spell_id);
                     ContextInfo.AddToList(new ContextInfo { Length = thisEnchantment.Length }, updateDataIndex: false);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }
@@ -702,7 +702,7 @@ public class CM_Login : MessageProcessor {
                 foreach (CM_Magic.Enchantment element in _add_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
-                    TreeNode thisEnchantmentNode = addListNode.Nodes.Add("Enchantment = " + (SpellID)element.eid.i_spell_id);
+                    TreeNode thisEnchantmentNode = addListNode.Nodes.Add("Enchantment = " + (SpellCategory)element.eid.i_spell_id);
                     ContextInfo.AddToList(new ContextInfo { Length = thisEnchantment.Length }, updateDataIndex: false);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }
@@ -717,7 +717,7 @@ public class CM_Login : MessageProcessor {
                 foreach (CM_Magic.Enchantment element in _cooldown_list.list)
                 {
                     CM_Magic.Enchantment thisEnchantment = element;
-                    TreeNode thisEnchantmentNode = cooldownListNode.Nodes.Add("Enchantment = " + (SpellID)element.eid.i_spell_id);
+                    TreeNode thisEnchantmentNode = cooldownListNode.Nodes.Add("Enchantment = " + (SpellCategory)element.eid.i_spell_id);
                     ContextInfo.AddToList(new ContextInfo { Length = thisEnchantment.Length }, updateDataIndex: false);
                     thisEnchantment.contributeToTreeNode(thisEnchantmentNode);
                 }

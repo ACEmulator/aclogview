@@ -132,7 +132,6 @@
     <Compile Include="Enums\Shop.cs" />
     <Compile Include="Enums\Skills.cs" />
     <Compile Include="Enums\Social.cs" />
-    <Compile Include="Enums\Sound.cs" />
     <Compile Include="Enums\Trade.cs" />
     <Compile Include="Enums\UI.cs" />
     <Compile Include="Enums\WeenieClasses.cs" />

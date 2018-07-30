@@ -126,7 +126,7 @@ public class CM_Magic : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target = " + Utility.FormatHex(this.i_target));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
-            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellCategory)i_spell_id);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
@@ -145,7 +145,7 @@ public class CM_Magic : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
-            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellCategory)i_spell_id);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
@@ -165,7 +165,7 @@ public class CM_Magic : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellCategory)i_spell_id);
             treeView.Nodes.Add(rootNode);
 
             if (isClientToServer)
@@ -194,7 +194,7 @@ public class CM_Magic : MessageProcessor {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
-            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            rootNode.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellCategory)i_spell_id);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             treeView.Nodes.Add(rootNode);
         }
@@ -406,7 +406,7 @@ public class CM_Magic : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode treeView)
         {
-            treeView.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellID)i_spell_id);
+            treeView.Nodes.Add("i_spell_id = " + "(" + i_spell_id + ") " + (SpellCategory)i_spell_id);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_ushort });
             treeView.Nodes.Add("layer = " + layer);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellLayer });

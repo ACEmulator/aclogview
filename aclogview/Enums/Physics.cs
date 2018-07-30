@@ -1,39 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public enum PhysicsState {
-    STATIC_PS = (1 << 0),
-    UNUSED1_PS = (1 << 1),
-    ETHEREAL_PS = (1 << 2),
-    REPORT_COLLISIONS_PS = (1 << 3),
-    IGNORE_COLLISIONS_PS = (1 << 4),
-    NODRAW_PS = (1 << 5),
-    MISSILE_PS = (1 << 6),
-    PUSHABLE_PS = (1 << 7),
-    ALIGNPATH_PS = (1 << 8),
-    PATHCLIPPED_PS = (1 << 9),
-    GRAVITY_PS = (1 << 10),
-    LIGHTING_ON_PS = (1 << 11),
-    PARTICLE_EMITTER_PS = (1 << 12),
-    UNNUSED2_PS = (1 << 13),
-    HIDDEN_PS = (1 << 14),
-    SCRIPTED_COLLISION_PS = (1 << 15),
-    HAS_PHYSICS_BSP_PS = (1 << 16),
-    INELASTIC_PS = (1 << 17),
-    HAS_DEFAULT_ANIM_PS = (1 << 18),
-    HAS_DEFAULT_SCRIPT_PS = (1 << 19),
-    CLOAKED_PS = (1 << 20),
-    REPORT_COLLISIONS_AS_ENVIRONMENT_PS = (1 << 21),
-    EDGE_SLIDE_PS = (1 << 22),
-    SLEDDING_PS = (1 << 23),
-    FROZEN_PS = (1 << 24)
-}
-
 namespace PhysicsObjHook {
-    public enum HookType {
+    public enum PhysicsHookType {
         SCALING,
         TRANSLUCENCY,
         PART_TRANSLUCENCY,

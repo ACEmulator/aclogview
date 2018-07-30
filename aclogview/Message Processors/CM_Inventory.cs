@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -206,15 +206,15 @@ public class CM_Inventory : MessageProcessor {
         {
             if (i_equipMask == 0)
             {
-                node.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), 0)}");
+                node.Nodes.Add($"{Enum.GetName(typeof(EquipMask), 0)}");
                 ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 return;
             }
-            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+            foreach (EquipMask e in Enum.GetValues(typeof(EquipMask)))
             {
                 if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
                 {
-                    node.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                    node.Nodes.Add($"{Enum.GetName(typeof(EquipMask), e)}");
                     ContextInfo.AddToList(new ContextInfo {Length = 4}, updateDataIndex: false);
                 }
             }
@@ -641,13 +641,13 @@ public class CM_Inventory : MessageProcessor {
     }
 
     public class SalvageResult {
-        public Material m_material;
+        public MaterialType m_material;
         public double m_workmanship;
         public int m_units;
 
         public static SalvageResult read(BinaryReader binaryReader) {
             SalvageResult newObj = new SalvageResult();
-            newObj.m_material = (Material)binaryReader.ReadUInt32();
+            newObj.m_material = (MaterialType)binaryReader.ReadUInt32();
             newObj.m_workmanship = binaryReader.ReadDouble();
             newObj.m_units = binaryReader.ReadInt32();
             return newObj;
