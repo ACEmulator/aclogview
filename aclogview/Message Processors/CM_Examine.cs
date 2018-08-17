@@ -1,4 +1,4 @@
-﻿using aclogview;
+using aclogview;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using ACE.Entity.Enum;
+using ACE.Entity.Enum.Properties;
 
 public class CM_Examine : MessageProcessor {
 
@@ -208,7 +211,7 @@ public class CM_Examine : MessageProcessor {
     {
         public uint _bitField;
         public uint _validLocations;
-        public AMMO_TYPE _ammoType;
+        public AmmoType _ammoType;
         public List<string> packedItems = new List<string>();
 
         public static HookAppraisalProfile read(BinaryReader binaryReader)
@@ -216,7 +219,7 @@ public class CM_Examine : MessageProcessor {
             HookAppraisalProfile newObj = new HookAppraisalProfile();
             newObj._bitField = binaryReader.ReadUInt32();
             newObj._validLocations = binaryReader.ReadUInt32();
-            newObj._ammoType = (AMMO_TYPE)binaryReader.ReadUInt32();
+            newObj._ammoType = (AmmoType)binaryReader.ReadUInt32();
 
             if ((newObj._bitField & (uint) HookAppraisal_BF.BF_INSCRIBABLE) != 0)
                 newObj.packedItems.Add(HookAppraisal_BF.BF_INSCRIBABLE.ToString());
@@ -382,11 +385,11 @@ public class CM_Examine : MessageProcessor {
         public uint header;
         public uint success_flag;
         public PackableHashTable<STypeInt, int> _intStatsTable = new PackableHashTable<STypeInt, int>();
-        public PackableHashTable<STypeInt64, long> _int64StatsTable = new PackableHashTable<STypeInt64, long>();
-        public PackableHashTable<STypeBool, int> _boolStatsTable = new PackableHashTable<STypeBool, int>();
-        public PackableHashTable<STypeFloat, double> _floatStatsTable = new PackableHashTable<STypeFloat, double>();
-        public PackableHashTable<STypeString, PStringChar> _strStatsTable = new PackableHashTable<STypeString, PStringChar>();
-        public PackableHashTable<STypeDID, uint> _didStatsTable = new PackableHashTable<STypeDID, uint>();
+        public PackableHashTable<PropertyInt64, long> _int64StatsTable = new PackableHashTable<PropertyInt64, long>();
+        public PackableHashTable<PropertyBool, int> _boolStatsTable = new PackableHashTable<PropertyBool, int>();
+        public PackableHashTable<PropertyFloat, double> _floatStatsTable = new PackableHashTable<PropertyFloat, double>();
+        public PackableHashTable<PropertyString, PStringChar> _strStatsTable = new PackableHashTable<PropertyString, PStringChar>();
+        public PackableHashTable<PropertyDataId, uint> _didStatsTable = new PackableHashTable<PropertyDataId, uint>();
         public PList<uint> _spellsTable = new PList<uint>();
         public ArmorProfile _armorProfileTable = new ArmorProfile();
         public CreatureAppraisalProfile _creatureProfileTable = new CreatureAppraisalProfile();
@@ -405,19 +408,19 @@ public class CM_Examine : MessageProcessor {
                 newObj._intStatsTable = PackableHashTable<STypeInt, int>.read(binaryReader);
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_Int64Stats) != 0) {
-                newObj._int64StatsTable = PackableHashTable<STypeInt64, long>.read(binaryReader);
+                newObj._int64StatsTable = PackableHashTable<PropertyInt64, long>.read(binaryReader);
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_BoolStats) != 0) {
-                newObj._boolStatsTable = PackableHashTable<STypeBool, int>.read(binaryReader);
+                newObj._boolStatsTable = PackableHashTable<PropertyBool, int>.read(binaryReader);
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_FloatStats) != 0) {
-                newObj._floatStatsTable = PackableHashTable<STypeFloat, double>.read(binaryReader);
+                newObj._floatStatsTable = PackableHashTable<PropertyFloat, double>.read(binaryReader);
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_StringStats) != 0) {
-                newObj._strStatsTable = PackableHashTable<STypeString, PStringChar>.read(binaryReader);
+                newObj._strStatsTable = PackableHashTable<PropertyString, PStringChar>.read(binaryReader);
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_DataIDStats) != 0) {
-                newObj._didStatsTable = PackableHashTable<STypeDID, uint>.read(binaryReader);
+                newObj._didStatsTable = PackableHashTable<PropertyDataId, uint>.read(binaryReader);
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_SpellList) != 0)
             {
@@ -498,7 +501,7 @@ public class CM_Examine : MessageProcessor {
                 {
                     uint i_spell_id = _spellsTable.list[i] & 0x7FFFFFFF;
                     uint enchantment_flag = _spellsTable.list[i] & 0x80000000;
-                    TreeNode spellIDNode = spellsNode.Nodes.Add($"({i_spell_id}) " + (SpellID)i_spell_id);
+                    TreeNode spellIDNode = spellsNode.Nodes.Add($"({i_spell_id}) " + (SpellCategory)i_spell_id);
                     if (enchantment_flag != 0)
                     {
                         spellIDNode.Nodes.Add("enchantment_flag = On");

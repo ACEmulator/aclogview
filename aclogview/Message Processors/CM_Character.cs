@@ -1,11 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 using aclogview;
+
+using ACE.Entity.Enum;
+using ACE.Entity.Enum.Properties;
 
 public class CM_Character : MessageProcessor {
 
@@ -147,12 +151,12 @@ public class CM_Character : MessageProcessor {
     }
 
     public class PlayerOptionChangedEvent : Message {
-        PlayerOption i_po;
+        CharacterOption i_po;
         int i_value;
 
         public static PlayerOptionChangedEvent read(BinaryReader binaryReader) {
             PlayerOptionChangedEvent newObj = new PlayerOptionChangedEvent();
-            newObj.i_po = (PlayerOption)binaryReader.ReadUInt32();
+            newObj.i_po = (CharacterOption)binaryReader.ReadUInt32();
             // TODO: These is some more logic right here - need to handle it correctly
             newObj.i_value = binaryReader.ReadInt32();
             Util.readToAlign(binaryReader);
@@ -187,7 +191,7 @@ public class CM_Character : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("objectID_ = " + Utility.FormatHex(objectID_));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
-            node.Nodes.Add("spellID_ = " + "(" + spellID_ + ") " + (SpellID)spellID_);
+            node.Nodes.Add("spellID_ = " + "(" + spellID_ + ") " + (SpellCategory)spellID_);
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
         }
     }
@@ -235,7 +239,7 @@ public class CM_Character : MessageProcessor {
         public uint header;
         public uint options_;
         public ShortCutManager shortcuts_;
-        public PList<SpellID>[] favorite_spells_ = new PList<SpellID>[8];
+        public PList<SpellCategory>[] favorite_spells_ = new PList<SpellCategory>[8];
         public PackableHashTable<uint, int> desired_comps_ = new PackableHashTable<uint, int>();
         public uint spell_filters_;
         public uint options2;
@@ -257,20 +261,20 @@ public class CM_Character : MessageProcessor {
                 newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_ShortCutManager.ToString());
             }
 
-            newObj.favorite_spells_[0] = PList<SpellID>.read(binaryReader);
+            newObj.favorite_spells_[0] = PList<SpellCategory>.read(binaryReader);
             if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_MultiSpellLists) != 0) {
                 for (int i = 1; i < 5; ++i) {
-                    newObj.favorite_spells_[i] = PList<SpellID>.read(binaryReader);
+                    newObj.favorite_spells_[i] = PList<SpellCategory>.read(binaryReader);
                 }
                 newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_MultiSpellLists.ToString());
             } else if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_ExtendedMultiSpellLists) != 0) {
                 for (int i = 1; i < 7; ++i) {
-                    newObj.favorite_spells_[i] = PList<SpellID>.read(binaryReader);
+                    newObj.favorite_spells_[i] = PList<SpellCategory>.read(binaryReader);
                 }
                 newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_ExtendedMultiSpellLists.ToString());
             } else if ((newObj.header & (uint)PlayerModulePackHeader.PM_Packed_8_SpellLists) != 0) {
                 for (int i = 1; i < 8; ++i) {
-                    newObj.favorite_spells_[i] = PList<SpellID>.read(binaryReader);
+                    newObj.favorite_spells_[i] = PList<SpellCategory>.read(binaryReader);
                 }
                 newObj.packedItems.Add(PlayerModulePackHeader.PM_Packed_8_SpellLists.ToString());
             }
@@ -335,7 +339,7 @@ public class CM_Character : MessageProcessor {
             int favoritesLength = 0;
             for (int i = 0; i < favorite_spells_.Count(); i++)
             {
-                PList<SpellID> favoritesList = favorite_spells_[i];
+                PList<SpellCategory> favoritesList = favorite_spells_[i];
                 if (favoritesList != null)
                 {
                     favoritesLength += favoritesList.Length;
@@ -343,7 +347,7 @@ public class CM_Character : MessageProcessor {
             }
             ContextInfo.AddToList(new ContextInfo { Length = favoritesLength }, updateDataIndex: false);
             for (int i = 0; i < favorite_spells_.Count(); i++) {
-                PList<SpellID> favoritesList = favorite_spells_[i];
+                PList<SpellCategory> favoritesList = favorite_spells_[i];
                 if (favoritesList != null) {
                     TreeNode favoritesSubNode = favoritesNode.Nodes.Add($"Spelltab {i+1} = ");
                     ContextInfo.AddToList(new ContextInfo { Length = favoritesList.Length }, updateDataIndex: false);
@@ -429,8 +433,8 @@ public class CM_Character : MessageProcessor {
 
         public uint header;
         public PackableHashTable<STypeInt, int> m_pIntStatsTable = new PackableHashTable<STypeInt, int>();
-        public PackableHashTable<STypeBool, int> m_pBoolStatsTable = new PackableHashTable<STypeBool, int>();
-        public PackableHashTable<STypeFloat, double> m_pFloatStatsTable = new PackableHashTable<STypeFloat, double>();
+        public PackableHashTable<PropertyBool, int> m_pBoolStatsTable = new PackableHashTable<PropertyBool, int>();
+        public PackableHashTable<PropertyFloat, double> m_pFloatStatsTable = new PackableHashTable<PropertyFloat, double>();
         public PackableHashTable<uint, PStringChar> m_pStrStatsTable = new PackableHashTable<uint, PStringChar>();
         public int Length;
         public List<string> packedItems; // For display purposes
@@ -448,12 +452,12 @@ public class CM_Character : MessageProcessor {
             }
             if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_BoolStats) != 0)
             {
-                newObj.m_pBoolStatsTable = PackableHashTable<STypeBool, int>.read(binaryReader);
+                newObj.m_pBoolStatsTable = PackableHashTable<PropertyBool, int>.read(binaryReader);
                 newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_BoolStats.ToString());
             }
             if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_FloatStats) != 0)
             {
-                newObj.m_pFloatStatsTable = PackableHashTable<STypeFloat, double>.read(binaryReader);
+                newObj.m_pFloatStatsTable = PackableHashTable<PropertyFloat, double>.read(binaryReader);
                 newObj.packedItems.Add(GenericQualitiesPackHeader.Packed_FloatStats.ToString());
             }
             if ((newObj.header & (uint)GenericQualitiesPackHeader.Packed_StringStats) != 0)
@@ -497,7 +501,7 @@ public class CM_Character : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 for (int i = 0; i < m_pBoolStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeBool) + sizeof(int) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyBool) + sizeof(int) });
                 }
             }
             if ((header & (uint)GenericQualitiesPackHeader.Packed_FloatStats) != 0)
@@ -509,7 +513,7 @@ public class CM_Character : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 for (int i = 0; i < m_pFloatStatsTable.hashTable.Count; i++)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeFloat) + sizeof(double) });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyFloat) + sizeof(double) });
                 }
             }
             if ((header & (uint)GenericQualitiesPackHeader.Packed_StringStats) != 0)
@@ -523,7 +527,7 @@ public class CM_Character : MessageProcessor {
                 ContextInfo.DataIndex += 4;
                 foreach (KeyValuePair<uint, PStringChar> element in m_pStrStatsTable.hashTable)
                 {
-                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(STypeString) + element.Value.Length });
+                    ContextInfo.AddToList(new ContextInfo { Length = sizeof(PropertyString) + element.Value.Length });
                 }
             }
         }
@@ -865,13 +869,13 @@ public class CM_Character : MessageProcessor {
     }
 
     public class AddSpellFavorite : Message {
-        public SpellID i_spid;
+        public SpellCategory i_spid;
         public uint i_index;
         public uint i_list;
 
         public static AddSpellFavorite read(BinaryReader binaryReader) {
             AddSpellFavorite newObj = new AddSpellFavorite();
-            newObj.i_spid = (SpellID)binaryReader.ReadUInt32();
+            newObj.i_spid = (SpellCategory)binaryReader.ReadUInt32();
             newObj.i_index = binaryReader.ReadUInt32();
             newObj.i_list = binaryReader.ReadUInt32();
             return newObj;
@@ -962,12 +966,12 @@ public class CM_Character : MessageProcessor {
     }
 
     public class RemoveSpellFavorite : Message {
-        public SpellID i_spid;
+        public SpellCategory i_spid;
         public uint i_list;
 
         public static RemoveSpellFavorite read(BinaryReader binaryReader) {
             RemoveSpellFavorite newObj = new RemoveSpellFavorite();
-            newObj.i_spid = (SpellID)binaryReader.ReadUInt32();
+            newObj.i_spid = (SpellCategory)binaryReader.ReadUInt32();
             newObj.i_list = binaryReader.ReadUInt32();
             return newObj;
         }

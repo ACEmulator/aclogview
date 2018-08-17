@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -8,6 +8,8 @@ using System.Threading;
 using System.Windows.Forms;
 
 using aclogview.Properties;
+
+using ACE.Entity.Enum;
 
 namespace aclogview
 {
@@ -334,13 +336,13 @@ namespace aclogview
             if (!fragDatListFile.OpenFile(fileName))
                 return;
 
-            var itemTypesToParse = new List<ITEM_TYPE>();
+            var itemTypesToParse = new List<ItemType>();
 
-            var itemTypeKeys = new Dictionary<ITEM_TYPE, List<string>>();
-            var itemTypeStreamWriters = new Dictionary<ITEM_TYPE, StreamWriter>();
+            var itemTypeKeys = new Dictionary<ItemType, List<string>>();
+            var itemTypeStreamWriters = new Dictionary<ItemType, StreamWriter>();
 
             // If you only want to output a single item_type, you can change this code
-            foreach (ITEM_TYPE itemType in Enum.GetValues(typeof(ITEM_TYPE)))
+            foreach (ItemType itemType in Enum.GetValues(typeof(ItemType)))
             {
                 itemTypesToParse.Add(itemType);
                 itemTypeKeys[itemType] = new List<string>();

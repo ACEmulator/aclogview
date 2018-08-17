@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -27,12 +27,4 @@ public enum HARBitmask {
     OpenHouse_HARBitmask = (1 << 0),
     AllegianceGuests_HARBitmask = (1 << 1),
     AllegianceStorage_HARBitmask = (1 << 2)
-}
-
-public enum HouseType {
-    Undef_HouseType,
-    Cottage_HouseType,
-    Villa_HouseType,
-    Mansion_HouseType,
-    Apartment_HouseType
 }

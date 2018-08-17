@@ -1,3 +1,8 @@
+### 2018-07-30
+[Mag-nus]
+* Included ACE.Common, ACE.Entity and ACE.Database in the lib folder and added as project references.
+* Removed a lot of duplicate enums found in ACLogView and instead referenced ones found in ACE.Entity.Enum
+
 ### 2018-03-19
 [Slushnas]
 * Added context info to CM_Qualities and added/improved parsing of property values.

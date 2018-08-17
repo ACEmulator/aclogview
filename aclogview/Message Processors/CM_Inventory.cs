@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview;
+using ACE.Entity.Enum;
 
 public class CM_Inventory : MessageProcessor {
 
@@ -164,7 +165,7 @@ public class CM_Inventory : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_slot = " + i_slot);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
-            rootNode.Nodes.Add("i_type = " + (ContainerProperties)i_type);
+            rootNode.Nodes.Add("i_type = " + (ContainerType)i_type);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
@@ -205,15 +206,15 @@ public class CM_Inventory : MessageProcessor {
         {
             if (i_equipMask == 0)
             {
-                node.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), 0)}");
+                node.Nodes.Add($"{Enum.GetName(typeof(EquipMask), 0)}");
                 ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 return;
             }
-            foreach (INVENTORY_LOC e in Enum.GetValues(typeof(INVENTORY_LOC)))
+            foreach (EquipMask e in Enum.GetValues(typeof(EquipMask)))
             {
                 if ((i_equipMask & (uint)e) == (uint)e && (uint)e != 0)
                 {
-                    node.Nodes.Add($"{Enum.GetName(typeof(INVENTORY_LOC), e)}");
+                    node.Nodes.Add($"{Enum.GetName(typeof(EquipMask), e)}");
                     ContextInfo.AddToList(new ContextInfo {Length = 4}, updateDataIndex: false);
                 }
             }
@@ -544,7 +545,7 @@ public class CM_Inventory : MessageProcessor {
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("m_iid = " + Utility.FormatHex(m_iid));
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
-            node.Nodes.Add("m_uContainerProperties = " + (ContainerProperties)m_uContainerProperties);
+            node.Nodes.Add("m_uContainerProperties = " + (ContainerType)m_uContainerProperties);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }

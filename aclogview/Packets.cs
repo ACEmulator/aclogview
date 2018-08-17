@@ -1,4 +1,4 @@
-﻿using aclogview;
+using aclogview;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using ACE.Entity.Enum;
+using ACE.Entity.Enum.Properties;
 
 public class Util {
     public static IDictionary<Type, Func<BinaryReader, dynamic>> readers = null;
@@ -26,17 +29,17 @@ public class Util {
             readers.Add(typeof(PStringChar), r => PStringChar.read(r));
 
             readers.Add(typeof(STypeInt), r => (STypeInt)r.ReadUInt32());
-            readers.Add(typeof(STypeInt64), r => (STypeInt64)r.ReadUInt32());
-            readers.Add(typeof(STypeBool), r => (STypeBool)r.ReadUInt32());
-            readers.Add(typeof(STypeFloat), r => (STypeFloat)r.ReadUInt32());
-            readers.Add(typeof(STypeString), r => (STypeString)r.ReadUInt32());
-            readers.Add(typeof(STypeDID), r => (STypeDID)r.ReadUInt32());
-            readers.Add(typeof(STypePosition), r => (STypePosition)r.ReadUInt32());
-            readers.Add(typeof(STypeIID), r => (STypeIID)r.ReadUInt32());
+            readers.Add(typeof(PropertyInt64), r => (PropertyInt64)r.ReadUInt32());
+            readers.Add(typeof(PropertyBool), r => (PropertyBool)r.ReadUInt32());
+            readers.Add(typeof(PropertyFloat), r => (PropertyFloat)r.ReadUInt32());
+            readers.Add(typeof(PropertyString), r => (PropertyString)r.ReadUInt32());
+            readers.Add(typeof(PropertyDataId), r => (PropertyDataId)r.ReadUInt32());
+            readers.Add(typeof(PositionType), r => (PositionType)r.ReadUInt32());
+            readers.Add(typeof(PropertyInstanceId), r => (PropertyInstanceId)r.ReadUInt32());
             readers.Add(typeof(STypeSkill), r => (STypeSkill)r.ReadUInt32());
 
             readers.Add(typeof(CharacterTitle), r => (CharacterTitle)r.ReadUInt32());
-            readers.Add(typeof(SKILL_ADVANCEMENT_CLASS), r => (SKILL_ADVANCEMENT_CLASS)r.ReadUInt32());
+            readers.Add(typeof(SkillStatus), r => (SkillStatus)r.ReadUInt32());
 
             readers.Add(typeof(CM_Magic.Enchantment), r => CM_Magic.Enchantment.read(r));
             readers.Add(typeof(CM_Magic.EnchantmentID), r => CM_Magic.EnchantmentID.read(r));
@@ -47,7 +50,7 @@ public class Util {
             readers.Add(typeof(Position), r => Position.read(r));
             readers.Add(typeof(Skill), r => Skill.read(r));
 
-            readers.Add(typeof(SpellID), r => (SpellID)r.ReadUInt32());
+            readers.Add(typeof(SpellCategory), r => (SpellCategory)r.ReadUInt32());
             readers.Add(typeof(CM_Vendor.ItemProfile), r => CM_Vendor.ItemProfile.read(r));
             readers.Add(typeof(CM_Fellowship.Fellow), r => CM_Fellowship.Fellow.read(r));
             readers.Add(typeof(CM_Fellowship.LockedFellowshipList), r => CM_Fellowship.LockedFellowshipList.read(r));
@@ -439,7 +442,7 @@ public class Position {
 
 public class Skill {
     public uint _level_from_pp;
-    public SKILL_ADVANCEMENT_CLASS _sac;
+    public SkillStatus _sac;
     public uint _pp;
     public uint _init_level;
     public uint _resistance_of_last_check;
@@ -450,7 +453,7 @@ public class Skill {
         Skill newObj = new Skill();
         var startPosition = binaryReader.BaseStream.Position;
         newObj._level_from_pp = binaryReader.ReadUInt32();
-        newObj._sac = (SKILL_ADVANCEMENT_CLASS)binaryReader.ReadUInt32();
+        newObj._sac = (SkillStatus)binaryReader.ReadUInt32();
         newObj._pp = binaryReader.ReadUInt32();
         newObj._init_level = binaryReader.ReadUInt32();
         newObj._resistance_of_last_check = binaryReader.ReadUInt32();

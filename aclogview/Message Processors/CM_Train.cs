@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+using ACE.Entity.Enum.Properties;
 
 public class CM_Train : MessageProcessor {
 
@@ -43,12 +45,12 @@ public class CM_Train : MessageProcessor {
     }
 
     public class TrainAttribute2nd : Message {
-        public STypeAttribute2nd i_atype;
+        public PropertyAttribute2nd i_atype;
         public uint i_xp_spent;
 
         public static TrainAttribute2nd read(BinaryReader binaryReader) {
             TrainAttribute2nd newObj = new TrainAttribute2nd();
-            newObj.i_atype = (STypeAttribute2nd)binaryReader.ReadUInt32();
+            newObj.i_atype = (PropertyAttribute2nd)binaryReader.ReadUInt32();
             Util.readToAlign(binaryReader);
             newObj.i_xp_spent = binaryReader.ReadUInt32();
             Util.readToAlign(binaryReader);
@@ -65,12 +67,12 @@ public class CM_Train : MessageProcessor {
     }
 
     public class TrainAttribute : Message {
-        public STypeAttribute i_atype;
+        public PropertyAttribute i_atype;
         public uint i_xp_spent;
 
         public static TrainAttribute read(BinaryReader binaryReader) {
             TrainAttribute newObj = new TrainAttribute();
-            newObj.i_atype = (STypeAttribute)binaryReader.ReadUInt32();
+            newObj.i_atype = (PropertyAttribute)binaryReader.ReadUInt32();
             Util.readToAlign(binaryReader);
             newObj.i_xp_spent = binaryReader.ReadUInt32();
             Util.readToAlign(binaryReader);
