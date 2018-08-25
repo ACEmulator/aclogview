@@ -1,4 +1,4 @@
-﻿namespace aclogview {
+namespace aclogview {
     partial class Form1 {
         /// <summary>
         /// Required designer variable.
@@ -53,12 +53,12 @@
             this.copyHexMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabProtocolDocs = new System.Windows.Forms.TabPage();
             this.protocolWebBrowser = new System.Windows.Forms.WebBrowser();
-            this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CollapseAll = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.CopyAll = new System.Windows.Forms.ToolStripMenuItem();
+            this.TeleLoc = new System.Windows.Forms.ToolStripMenuItem();
             this.FindID = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuItem_File = new System.Windows.Forms.MenuItem();
@@ -100,6 +100,7 @@
             this.checkBox_ShowObjects = new System.Windows.Forms.CheckBox();
             this.HighlightMode_comboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.treeView_ParsedData = new BufferedTreeView();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -409,17 +410,6 @@
             this.protocolWebBrowser.Size = new System.Drawing.Size(1059, 380);
             this.protocolWebBrowser.TabIndex = 0;
             // 
-            // treeView_ParsedData
-            // 
-            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
-            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
-            this.treeView_ParsedData.Name = "treeView_ParsedData";
-            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
-            this.treeView_ParsedData.TabIndex = 0;
-            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
-            this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
-            // 
             // parsedContextMenu
             // 
             this.parsedContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -427,9 +417,10 @@
             this.CollapseAll,
             this.toolStripSeparator1,
             this.CopyAll,
+            this.TeleLoc,
             this.FindID});
             this.parsedContextMenu.Name = "parsedContextMenu";
-            this.parsedContextMenu.Size = new System.Drawing.Size(184, 98);
+            this.parsedContextMenu.Size = new System.Drawing.Size(184, 120);
             this.parsedContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.parsedContextMenu_Opening);
             this.parsedContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.parsedContextMenu_ItemClicked);
             // 
@@ -456,6 +447,13 @@
             this.CopyAll.ShowShortcutKeys = false;
             this.CopyAll.Size = new System.Drawing.Size(183, 22);
             this.CopyAll.Text = "&Copy All";
+            // 
+            // TeleLoc
+            // 
+            this.TeleLoc.Name = "TeleLoc";
+            this.TeleLoc.Size = new System.Drawing.Size(183, 22);
+            this.TeleLoc.Text = "Copy ACE @teleloc";
+            this.TeleLoc.Visible = false;
             // 
             // FindID
             // 
@@ -794,6 +792,17 @@
             this.label1.TabIndex = 11;
             this.label1.Text = "Highlight Mode:";
             // 
+            // treeView_ParsedData
+            // 
+            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
+            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
+            this.treeView_ParsedData.Name = "treeView_ParsedData";
+            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
+            this.treeView_ParsedData.TabIndex = 0;
+            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
+            this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -924,6 +933,7 @@
         private System.Windows.Forms.MenuItem menuItem_CheckUpdates;
         private System.Windows.Forms.MenuItem menuItem_Options;
         private System.Windows.Forms.MenuItem menuItem4;
+        private System.Windows.Forms.ToolStripMenuItem TeleLoc;
     }
 }
 

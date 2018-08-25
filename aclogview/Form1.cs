@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using aclogview.Properties;
 using Be.Windows.Forms;
 
@@ -36,8 +35,9 @@ namespace aclogview
 
         private string pcapFilePath;
         private int currentOpcode;
-        private string currentDocOpcode;
-        private bool currentDocOpcodeIsC2S;
+        private int currentSelOpcode;
+        private int currentSelDocOpcode;
+        private bool currentSelOpcodeIsC2S;
         private uint currentUint;
         private string currentHighlightMode;
         private string currentCSText;
@@ -388,6 +388,8 @@ namespace aclogview
                 PacketRecord record = records[Int32.Parse(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
                 byte[] data = record.data;
 
+                if (record.opcodes.Count > 0) currentSelOpcode = (int)record.opcodes[0];
+
                 if (checkBox_useHighlighting.Checked && !loadedAsMessages)
                 {
                     hexBox1.SuspendLayout();
@@ -590,13 +592,12 @@ namespace aclogview
                 if (record.opcodes.Count == 0)
                 {
                     protocolWebBrowser.DocumentText = "";
-                    currentDocOpcode = null;
+                    currentSelOpcode = 0;
                     return;
                 }
-                var currentOpcodeString = "0x" + record.opcodes[0].ToString("X").Substring(4, 4);
                 bool isClientToServer = record.isSend;
                 if (tabControl1.SelectedTab == tabProtocolDocs)
-                    navigateToDocPage(currentOpcodeString, isClientToServer);
+                    navigateToDocPage((int)record.opcodes[0], isClientToServer);
             }
         }
 
@@ -1002,7 +1003,8 @@ namespace aclogview
                             treeView_ParsedData.EndUpdate();
                             break;
                         }
-                    case "CopyAll": {
+                    case "CopyAll":
+                        {
                             strbuilder.Clear();
                             foreach (var node in GetTreeNodes(treeView_ParsedData.Nodes))
                             {
@@ -1012,17 +1014,28 @@ namespace aclogview
                             break;
                         }
                     case "FindID":
-                        for (int i = 0; i < createdListItems.Count; i++)
                         {
-                            if (treeView_ParsedData.SelectedNode.Text.Contains(createdListItems[i].SubItems[1].Text))
+                            for (int i = 0; i < createdListItems.Count; i++)
                             {
-                                listView_CreatedObjects.Items[i].Selected = true;
-                                listView_CreatedObjects.TopItem = createdListItems[i];
-                                System.Media.SystemSounds.Asterisk.Play();
-                                break;
+                                if (treeView_ParsedData.SelectedNode.Text.Contains(createdListItems[i].SubItems[1].Text))
+                                {
+                                    listView_CreatedObjects.Items[i].Selected = true;
+                                    listView_CreatedObjects.TopItem = createdListItems[i];
+                                    System.Media.SystemSounds.Asterisk.Play();
+                                    break;
+                                }
                             }
+                            break;
                         }
-                        break;
+                    case "TeleLoc":
+                        {
+                            if (ACETeleloc.MessageContainsPosition(currentSelOpcode))
+                            {
+                                PacketRecord record = records[Int32.Parse(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[0].Text)];
+                                ACETeleloc.CopyACETelelocToClipboard(record);
+                            }
+                            break;
+                        }
                 }
             }
         }
@@ -1532,13 +1545,11 @@ namespace aclogview
             e.Cancel = (treeView_ParsedData.Nodes.Count == 0);
             // Only display "Find ID in Object List" option if the list is open
             if (treeView_ParsedData.SelectedNode != null && createdListItems.Count > 0)
-            {
                 FindID.Visible = true;
-            }
             else
-            {
                 FindID.Visible = false;
-            }
+
+            TeleLoc.Visible = ACETeleloc.MessageContainsPosition(currentSelOpcode);
         }
 
         private void objectsContextMenu_Opening(object sender, CancelEventArgs e)
@@ -1576,11 +1587,12 @@ namespace aclogview
             }
         }
 
-        private void navigateToDocPage(string opcode, bool isClientToServer)
+        private void navigateToDocPage(int opcode, bool isClientToServer)
         {
-            if (opcode == currentDocOpcode && currentDocOpcodeIsC2S == isClientToServer) return;
-            currentDocOpcode = opcode;
-            currentDocOpcodeIsC2S = isClientToServer;
+            if (opcode == currentSelDocOpcode && currentSelOpcodeIsC2S == isClientToServer) return;
+            currentSelDocOpcode = opcode;
+            currentSelOpcodeIsC2S = isClientToServer;
+            var currentOpcodeString = "0x" + opcode.ToString("X8").Substring(4, 4);
             var direction = isClientToServer ? "C2S" : "S2C";
             protocolWebBrowser.DocumentText =
                 $"<!DOCTYPE HTML>" +
@@ -1590,7 +1602,7 @@ namespace aclogview
                 $"<link type = \"text/css\" rel = \"stylesheet\" href = \"file:///{projectDirectory}/Protocol Documentation/Classic.css\"/>" +
                 $"</head>" +
                 $"<frameset cols = \"*, *\" frameborder = \"yes\" framespacing = \"2\">" +
-                $"<frame name = \"frameMsg\" scrolling = \"yes\" src = \"file:///{projectDirectory}/Protocol Documentation/Messages/{opcode}-{direction}.html\"/>" +
+                $"<frame name = \"frameMsg\" scrolling = \"yes\" src = \"file:///{projectDirectory}/Protocol Documentation/Messages/{currentOpcodeString}-{direction}.html\"/>" +
                 "<frame name = \"frameType\" scrolling = \"yes\" src = \"" +
                 $"<head><link type='text/css' rel='stylesheet' href='file:///{projectDirectory}/Protocol Documentation/Classic.css'/></head>" +
                 "<body><p class='Prompt'>Click a type to display the definition in this window.</p></body>\"/>" +
@@ -1606,12 +1618,12 @@ namespace aclogview
             if (record.opcodes.Count > 0)
             {
                 var isClientToServer = record.isSend;
-                navigateToDocPage("0x" + record.opcodes[0].ToString("X").Substring(4, 4), isClientToServer);
+                navigateToDocPage((int)record.opcodes[0], isClientToServer);
             }
             else
             {
                 protocolWebBrowser.DocumentText = "";
-                currentDocOpcode = null;
+                currentSelOpcode = 0;
             }
         }
 
