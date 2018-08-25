@@ -32,5 +32,8 @@
     <Setting Name="PacketsListviewTimeFormat" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
+    <Setting Name="TreeviewCopyAllPadding" Type="System.Byte" Scope="User">
+      <Value Profile="(Default)">3</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

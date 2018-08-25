@@ -39,11 +39,16 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.displayNodeTooltips = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.comboBox_TimeFormat = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.comboBox_TimeFormat = new System.Windows.Forms.ComboBox();
+            this.copyAllPadding = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox4.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -89,9 +94,9 @@
             // 
             // button_OK
             // 
-            this.button_OK.Location = new System.Drawing.Point(252, 214);
+            this.button_OK.Location = new System.Drawing.Point(252, 252);
             this.button_OK.Name = "button_OK";
-            this.button_OK.Size = new System.Drawing.Size(75, 23);
+            this.button_OK.Size = new System.Drawing.Size(75, 24);
             this.button_OK.TabIndex = 1;
             this.button_OK.Text = "OK";
             this.button_OK.UseVisualStyleBackColor = true;
@@ -100,9 +105,9 @@
             // button_Cancel
             // 
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(333, 214);
+            this.button_Cancel.Location = new System.Drawing.Point(333, 252);
             this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 23);
+            this.button_Cancel.Size = new System.Drawing.Size(75, 24);
             this.button_Cancel.TabIndex = 2;
             this.button_Cancel.Text = "Cancel";
             this.button_Cancel.UseVisualStyleBackColor = true;
@@ -110,10 +115,11 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.groupBox4);
             this.groupBox2.Controls.Add(this.displayNodeTooltips);
             this.groupBox2.Location = new System.Drawing.Point(12, 153);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(396, 54);
+            this.groupBox2.Size = new System.Drawing.Size(396, 89);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Treeview";
@@ -121,7 +127,7 @@
             // displayNodeTooltips
             // 
             this.displayNodeTooltips.AutoSize = true;
-            this.displayNodeTooltips.Location = new System.Drawing.Point(6, 19);
+            this.displayNodeTooltips.Location = new System.Drawing.Point(6, 37);
             this.displayNodeTooltips.Name = "displayNodeTooltips";
             this.displayNodeTooltips.Size = new System.Drawing.Size(123, 17);
             this.displayNodeTooltips.TabIndex = 0;
@@ -139,6 +145,15 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Packets ListView";
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 23);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(137, 13);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "Time column display format:";
+            // 
             // comboBox_TimeFormat
             // 
             this.comboBox_TimeFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -152,14 +167,42 @@
             this.comboBox_TimeFormat.TabIndex = 0;
             this.comboBox_TimeFormat.SelectedIndexChanged += new System.EventHandler(this.comboBox_TimeFormat_SelectedIndexChanged);
             // 
-            // label2
+            // copyAllPadding
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 23);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(137, 13);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "Time column display format:";
+            this.copyAllPadding.Location = new System.Drawing.Point(65, 22);
+            this.copyAllPadding.Name = "copyAllPadding";
+            this.copyAllPadding.Size = new System.Drawing.Size(33, 20);
+            this.copyAllPadding.TabIndex = 1;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(11, 25);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(48, 13);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "Pad with";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(104, 25);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(43, 13);
+            this.label4.TabIndex = 3;
+            this.label4.Text = "Spaces";
+            // 
+            // groupBox4
+            // 
+            this.groupBox4.Controls.Add(this.label3);
+            this.groupBox4.Controls.Add(this.label4);
+            this.groupBox4.Controls.Add(this.copyAllPadding);
+            this.groupBox4.Location = new System.Drawing.Point(208, 19);
+            this.groupBox4.Name = "groupBox4";
+            this.groupBox4.Size = new System.Drawing.Size(179, 52);
+            this.groupBox4.TabIndex = 4;
+            this.groupBox4.TabStop = false;
+            this.groupBox4.Text = "Pad \"Copy All\" output";
             // 
             // OptionsForm
             // 
@@ -167,7 +210,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(419, 246);
+            this.ClientSize = new System.Drawing.Size(419, 291);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.button_Cancel);
@@ -185,6 +228,8 @@
             this.groupBox2.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox4.ResumeLayout(false);
+            this.groupBox4.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -203,5 +248,9 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox_TimeFormat;
+        private System.Windows.Forms.GroupBox groupBox4;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox copyAllPadding;
     }
 }

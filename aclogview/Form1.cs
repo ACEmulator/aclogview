@@ -1008,7 +1008,8 @@ namespace aclogview
                             strbuilder.Clear();
                             foreach (var node in GetTreeNodes(treeView_ParsedData.Nodes))
                             {
-                                strbuilder.AppendLine(node.Text);
+                                strbuilder.AppendLine($"{node.Text}".PadLeft(
+                                    node.Level * Settings.Default.TreeviewCopyAllPadding + node.Text.Length));
                             }
                             Clipboard.SetText(strbuilder.ToString());
                             break;
