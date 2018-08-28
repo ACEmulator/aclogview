@@ -35,6 +35,8 @@ namespace aclogview {
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.HexOpCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.listviewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listView_CreatedObjects = new System.Windows.Forms.ListView();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -53,6 +55,7 @@ namespace aclogview {
             this.copyHexMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabProtocolDocs = new System.Windows.Forms.TabPage();
             this.protocolWebBrowser = new System.Windows.Forms.WebBrowser();
+            this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CollapseAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -100,7 +103,6 @@ namespace aclogview {
             this.checkBox_ShowObjects = new System.Windows.Forms.CheckBox();
             this.HighlightMode_comboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.treeView_ParsedData = new BufferedTreeView();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -109,6 +111,7 @@ namespace aclogview {
             this.splitContainer_Top.Panel1.SuspendLayout();
             this.splitContainer_Top.Panel2.SuspendLayout();
             this.splitContainer_Top.SuspendLayout();
+            this.listviewContextMenu.SuspendLayout();
             this.objectsContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Bottom)).BeginInit();
             this.splitContainer_Bottom.Panel1.SuspendLayout();
@@ -175,6 +178,7 @@ namespace aclogview {
             this.columnHeader4,
             this.columnHeader6,
             this.HexOpCode});
+            this.listView_Packets.ContextMenuStrip = this.listviewContextMenu;
             this.listView_Packets.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_Packets.FullRowSelect = true;
             this.listView_Packets.HideSelection = false;
@@ -228,6 +232,21 @@ namespace aclogview {
             // 
             this.HexOpCode.Text = "OpCode";
             this.HexOpCode.Width = 66;
+            // 
+            // listviewContextMenu
+            // 
+            this.listviewContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyTimeMenuItem});
+            this.listviewContextMenu.Name = "listviewContextMenu";
+            this.listviewContextMenu.Size = new System.Drawing.Size(181, 48);
+            this.listviewContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.listviewContextMenu_Opening);
+            this.listviewContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.listviewContextMenu_ItemClicked);
+            // 
+            // copyTimeMenuItem
+            // 
+            this.copyTimeMenuItem.Name = "copyTimeMenuItem";
+            this.copyTimeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.copyTimeMenuItem.Text = "Copy time field";
             // 
             // listView_CreatedObjects
             // 
@@ -409,6 +428,17 @@ namespace aclogview {
             this.protocolWebBrowser.Name = "protocolWebBrowser";
             this.protocolWebBrowser.Size = new System.Drawing.Size(1059, 380);
             this.protocolWebBrowser.TabIndex = 0;
+            // 
+            // treeView_ParsedData
+            // 
+            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
+            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
+            this.treeView_ParsedData.Name = "treeView_ParsedData";
+            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
+            this.treeView_ParsedData.TabIndex = 0;
+            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
+            this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
             // 
             // parsedContextMenu
             // 
@@ -792,17 +822,6 @@ namespace aclogview {
             this.label1.TabIndex = 11;
             this.label1.Text = "Highlight Mode:";
             // 
-            // treeView_ParsedData
-            // 
-            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
-            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
-            this.treeView_ParsedData.Name = "treeView_ParsedData";
-            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
-            this.treeView_ParsedData.TabIndex = 0;
-            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
-            this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -837,6 +856,7 @@ namespace aclogview {
             this.splitContainer_Top.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Top)).EndInit();
             this.splitContainer_Top.ResumeLayout(false);
+            this.listviewContextMenu.ResumeLayout(false);
             this.objectsContextMenu.ResumeLayout(false);
             this.splitContainer_Bottom.Panel1.ResumeLayout(false);
             this.splitContainer_Bottom.Panel2.ResumeLayout(false);
@@ -934,6 +954,8 @@ namespace aclogview {
         private System.Windows.Forms.MenuItem menuItem_Options;
         private System.Windows.Forms.MenuItem menuItem4;
         private System.Windows.Forms.ToolStripMenuItem TeleLoc;
+        private System.Windows.Forms.ContextMenuStrip listviewContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem copyTimeMenuItem;
     }
 }
 

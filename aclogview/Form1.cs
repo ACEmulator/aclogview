@@ -1687,6 +1687,21 @@ namespace aclogview
                 listView_Packets.Columns[2].Width = 175;
             }
         }
+
+        private void listviewContextMenu_Opening(object sender, CancelEventArgs e)
+        {
+            e.Cancel = (listView_Packets.SelectedIndices.Count == 0);
+        }
+
+        private void listviewContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            var clickedItem = e.ClickedItem;
+
+            if (clickedItem == copyTimeMenuItem)
+            {
+                Clipboard.SetText(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[2].Text);
+            }
+        }
     }
 }
 
