@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -169,8 +169,9 @@ namespace aclogview
         {
             int hits = 0;
             int exceptions = 0;
+            bool isPcapng = false;
 
-            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted);
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, ref isPcapng);
 
             foreach (PacketRecord record in records)
             {

@@ -34,6 +34,7 @@ namespace aclogview
         private StringBuilder strbuilder = new StringBuilder();
 
         private string pcapFilePath;
+        private bool isPcapng;
         private int currentOpcode;
         private int currentSelOpcode;
         private int currentSelDocOpcode;
@@ -205,7 +206,7 @@ namespace aclogview
             }
 
             bool abort = false;
-            records = PCapReader.LoadPcap(fileName, asMessages, ref abort);
+            records = PCapReader.LoadPcap(fileName, asMessages, ref abort, ref isPcapng);
 
             if (!dontList)
             {
@@ -214,7 +215,7 @@ namespace aclogview
                 {
                     ListViewItem newItem = new ListViewItem(record.index.ToString());
                     newItem.SubItems.Add(record.isSend ? "Send" : "Recv");
-                    newItem.SubItems.Add(record.tsSec.ToString());
+                    newItem.SubItems.Add(GetTimestampString(record));
                     newItem.SubItems.Add(record.packetHeadersStr);
                     newItem.SubItems.Add(record.packetTypeStr);                   
                     newItem.SubItems.Add(record.data.Length.ToString());
@@ -611,10 +612,7 @@ namespace aclogview
             if (e.ItemIndex < packetListItems.Count) {
                 e.Item = packetListItems[e.ItemIndex];
                 var record = records[Int32.Parse(e.Item.SubItems[0].Text)];
-                if (Settings.Default.PacketsListviewTimeFormat == (byte)TimeFormat.LocalTime)
-                    e.Item.SubItems[2].Text = Utility.EpochTimeToLocalTime(Convert.ToDouble(record.tsSec));
-                else
-                    e.Item.SubItems[2].Text = record.tsSec.ToString();
+                e.Item.SubItems[2].Text = GetTimestampString(record);
                 // Apply highlights here
                 if ( (currentHighlightMode == opcodeMode && opCodesToHighlight.Count > 0) )
                 {
@@ -631,6 +629,27 @@ namespace aclogview
                         }
                     }
                 }
+            }
+        }
+
+        private string GetTimestampString(PacketRecord record)
+        {
+            if (isPcapng)
+            {
+                long microseconds = record.tsHigh;
+                microseconds = (microseconds << 32) | record.tsLow;
+
+                if (Settings.Default.PacketsListviewTimeFormat == (byte)TimeFormat.LocalTime)
+                    return Utility.EpochTimeToLocalTime(microseconds);
+
+                return $"{microseconds / (decimal)1000000}";
+            }
+            else
+            {
+                if (Settings.Default.PacketsListviewTimeFormat == (byte)TimeFormat.LocalTime)
+                    return Utility.EpochTimeToLocalTime(record.tsSec, record.tsUsec);
+
+                return record.tsSec + $".{record.tsUsec}";
             }
         }
 
@@ -1311,7 +1330,7 @@ namespace aclogview
             int exceptions = 0;
             bool searchAborted = false;
 
-            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted);
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, ref isPcapng);
 
             foreach (PacketRecord record in records)
             {
@@ -1660,12 +1679,12 @@ namespace aclogview
             if (timeFormat == (byte)TimeFormat.EpochTime)
             {
                 listView_Packets.Columns[2].Text = "Epoch Time (s)";
-                listView_Packets.Columns[2].Width = 84;
+                listView_Packets.Columns[2].Width = 120;
             }
             else if (timeFormat == (byte)TimeFormat.LocalTime)
             {
                 listView_Packets.Columns[2].Text = "Local Time";
-                listView_Packets.Columns[2].Width = 125;
+                listView_Packets.Columns[2].Width = 175;
             }
         }
     }

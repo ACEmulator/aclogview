@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -194,9 +194,10 @@ namespace aclogview
 
         private void ProcessFileForBuild(string fileName)
         {
-            // NOTE: If you want to get fully constructed/merged messages isntead of fragments:
+            // NOTE: If you want to get fully constructed/merged messages instead of fragments:
             // Pass true below and use record.data as the full message, instead of individual record.frags
-            var records = PCapReader.LoadPcap(fileName, false, ref searchAborted);
+            var isPcapng = false;
+            var records = PCapReader.LoadPcap(fileName, false, ref searchAborted, ref isPcapng);
 
             // Temperorary objects
             var allFrags = new List<FragDatListFile.FragDatInfo>();
