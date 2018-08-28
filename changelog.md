@@ -1,3 +1,9 @@
+### 2018-08-28
+[Slushnas]
+* Added microsecond time precision display to the main listview.
+* Fixed an issue with the time field not being displayed properly for .pcapng files.
+* Added **"Copy time field"** option to the main listview.
+
 ### 2018-08-25
 [Slushnas]
 * Added an option to pad the treeview *Copy All* output so it doesn't have a flat structure. The default is 3 spaces.
