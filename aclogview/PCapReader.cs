@@ -8,7 +8,7 @@ namespace aclogview
 {
     static class PCapReader
     {
-        public static List<PacketRecord> LoadPcap(string fileName, bool asMessages, ref bool abort)
+        public static List<PacketRecord> LoadPcap(string fileName, bool asMessages, ref bool abort, ref bool isPcapng)
         {
             using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -19,8 +19,12 @@ namespace aclogview
                     binaryReader.BaseStream.Position = 0;
 
                     if (magicNumber == 0xA1B2C3D4 || magicNumber == 0xD4C3B2A1)
+                    {
+                        isPcapng = false;
                         return loadPcapPacketRecords(binaryReader, asMessages, ref abort);
+                    }
 
+                    isPcapng = true;
                     return loadPcapngPacketRecords(binaryReader, asMessages, ref abort);
                 }
             }
@@ -143,12 +147,12 @@ namespace aclogview
                 {
                     if (asMessages)
                     {
-                        if (!readMessageData(binaryReader, recordHeader.inclLen, recordHeader.tsSec, results, incompletePacketMap))
+                        if (!readMessageData(binaryReader, recordHeader.inclLen, recordHeader.tsSec, recordHeader.tsUsec, results, incompletePacketMap, false))
                             break;
                     }
                     else
                     {
-                        var packetRecord = readPacketData(binaryReader, recordHeader.inclLen, recordHeader.tsSec, curPacket);
+                        var packetRecord = readPacketData(binaryReader, recordHeader.inclLen, recordHeader.tsSec, recordHeader.tsUsec, curPacket, false);
 
                         if (packetRecord == null)
                             break;
@@ -229,12 +233,12 @@ namespace aclogview
                 {
                     if (asMessages)
                     {
-                        if (!readMessageData(binaryReader, blockHeader.capturedLen, blockHeader.tsLow, results, incompletePacketMap))
+                        if (!readMessageData(binaryReader, blockHeader.capturedLen, blockHeader.tsLow, blockHeader.tsHigh, results, incompletePacketMap, true))
                             break;
                     }
                     else
                     {
-                        var packetRecord = readPacketData(binaryReader, blockHeader.capturedLen, blockHeader.tsLow, curPacket);
+                        var packetRecord = readPacketData(binaryReader, blockHeader.capturedLen, blockHeader.tsLow, blockHeader.tsHigh, curPacket, true);
 
                         if (packetRecord == null)
                             break;
@@ -275,8 +279,8 @@ namespace aclogview
 
             UdpHeader udpHeader = UdpHeader.read(binaryReader);
 
-            bool isSend = (udpHeader.dPort >= 9000 && udpHeader.dPort <= 9013);
-            bool isRecv = (udpHeader.sPort >= 9000 && udpHeader.sPort <= 9013);
+            bool isSend = (udpHeader.dPort >= 9000 && udpHeader.dPort <= 10013);
+            bool isRecv = (udpHeader.sPort >= 9000 && udpHeader.sPort <= 10013);
 
             // Skip non-AC-port packets
             if (!isSend && !isRecv)
@@ -287,7 +291,7 @@ namespace aclogview
             return isSend;
         }
 
-        private static PacketRecord readPacketData(BinaryReader binaryReader, long len, uint tsSec, int curPacket)
+        private static PacketRecord readPacketData(BinaryReader binaryReader, long len, uint ts1, uint ts2, int curPacket, bool isPcapng)
         {
             // Begin reading headers
             long packetStartPos = binaryReader.BaseStream.Position;
@@ -303,7 +307,16 @@ namespace aclogview
             PacketRecord packet = new PacketRecord();
             packet.index = curPacket;
             packet.isSend = isSend;
-            packet.tsSec = tsSec;
+            if (isPcapng)
+            {
+                packet.tsLow = ts1;
+                packet.tsHigh = ts2;
+            }
+            else
+            {
+                packet.tsSec = ts1;
+                packet.tsUsec = ts2;
+            }
             packet.extraInfo = "";
             packet.data = binaryReader.ReadBytes((int)(len - headersSize));
 			using (BinaryReader packetReader = new BinaryReader(new MemoryStream(packet.data)))
@@ -370,7 +383,7 @@ namespace aclogview
             return packet;
         }
 
-        private static bool readMessageData(BinaryReader binaryReader, long len, uint tsSec, List<PacketRecord> results, Dictionary<ulong, PacketRecord> incompletePacketMap)
+        private static bool readMessageData(BinaryReader binaryReader, long len, uint ts1, uint ts2, List<PacketRecord> results, Dictionary<ulong, PacketRecord> incompletePacketMap, bool isPcapng)
         {
             // Begin reading headers
             long packetStartPos = binaryReader.BaseStream.Position;
@@ -418,7 +431,16 @@ namespace aclogview
 							if (newFrag.memberHeader_.blobNum == 0)
 							{
 								packet.isSend = isSend;
-								packet.tsSec = tsSec;
+							    if (isPcapng)
+							    {
+							        packet.tsLow = ts1;
+							        packet.tsHigh = ts2;
+							    }
+							    else
+							    {
+							        packet.tsSec = ts1;
+							        packet.tsUsec = ts2;
+                                }
 								packet.extraInfo = "";
 								packet.Seq = pHeader.seqID_;
 								packet.Iteration = pHeader.iteration_;

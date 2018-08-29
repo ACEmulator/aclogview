@@ -7,6 +7,9 @@ namespace aclogview
         public int index;
         public bool isSend;
         public uint tsSec;
+        public uint tsUsec;
+        public uint tsHigh;
+        public uint tsLow;
         public string packetHeadersStr;
         public string packetTypeStr;
         public int optionalHeadersLen;
