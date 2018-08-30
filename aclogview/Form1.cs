@@ -319,7 +319,7 @@ namespace aclogview
 
         private void listView_Packets_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            if (e.Column == 0 || e.Column == 2 || e.Column == 5 || e.Column == 8 || e.Column == 9 || e.Column == 10)
+            if (e.Column == 0 || e.Column == 2 || e.Column == 5 || e.Column == 8 || e.Column == 10)
                 comparer.sortType = SortType.Uint;
             else
                 comparer.sortType = SortType.String;
@@ -331,7 +331,9 @@ namespace aclogview
                 comparer.col = 0;
             else
                 comparer.col = e.Column;
+            Cursor.Current = Cursors.WaitCursor;
             packetListItems.Sort(comparer);
+            Cursor.Current = Cursors.Default;
             if (records.Count>0)
                 listView_Packets.RedrawItems(0, records.Count - 1, false);
             updateData();
