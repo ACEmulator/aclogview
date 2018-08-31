@@ -35,6 +35,9 @@ namespace aclogview {
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.HexOpCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader13 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader15 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader14 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listviewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listView_CreatedObjects = new System.Windows.Forms.ListView();
@@ -177,7 +180,10 @@ namespace aclogview {
             this.columnHeader3,
             this.columnHeader4,
             this.columnHeader6,
-            this.HexOpCode});
+            this.HexOpCode,
+            this.columnHeader13,
+            this.columnHeader15,
+            this.columnHeader14});
             this.listView_Packets.ContextMenuStrip = this.listviewContextMenu;
             this.listView_Packets.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_Packets.FullRowSelect = true;
@@ -233,19 +239,32 @@ namespace aclogview {
             this.HexOpCode.Text = "OpCode";
             this.HexOpCode.Width = 66;
             // 
+            // columnHeader13
+            // 
+            this.columnHeader13.Text = "Pack. Seq";
+            this.columnHeader13.Width = 72;
+            // 
+            // columnHeader15
+            // 
+            this.columnHeader15.Text = "Queue";
+            // 
+            // columnHeader14
+            // 
+            this.columnHeader14.Text = "Iteration";
+            // 
             // listviewContextMenu
             // 
             this.listviewContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.copyTimeMenuItem});
             this.listviewContextMenu.Name = "listviewContextMenu";
-            this.listviewContextMenu.Size = new System.Drawing.Size(181, 48);
+            this.listviewContextMenu.Size = new System.Drawing.Size(156, 26);
             this.listviewContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.listviewContextMenu_Opening);
             this.listviewContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.listviewContextMenu_ItemClicked);
             // 
             // copyTimeMenuItem
             // 
             this.copyTimeMenuItem.Name = "copyTimeMenuItem";
-            this.copyTimeMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.copyTimeMenuItem.Size = new System.Drawing.Size(155, 22);
             this.copyTimeMenuItem.Text = "Copy time field";
             // 
             // listView_CreatedObjects
@@ -956,6 +975,9 @@ namespace aclogview {
         private System.Windows.Forms.ToolStripMenuItem TeleLoc;
         private System.Windows.Forms.ContextMenuStrip listviewContextMenu;
         private System.Windows.Forms.ToolStripMenuItem copyTimeMenuItem;
+        private System.Windows.Forms.ColumnHeader columnHeader13;
+        private System.Windows.Forms.ColumnHeader columnHeader15;
+        private System.Windows.Forms.ColumnHeader columnHeader14;
     }
 }
 

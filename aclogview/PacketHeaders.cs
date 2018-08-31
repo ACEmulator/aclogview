@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,9 +10,9 @@ public class ProtoHeader {
     public uint header_;      // Bitmask for which optional headers are present
     public uint checksum_;    // CRC
     public ushort recID_;     // Recipient ID - maps to the receivers_ (aka packet stream? can have different ip per receiver)
-    public ushort interval_;  // Has to do with flow management
+    public ushort interval_;  // time since last recieved a packet
     public ushort datalen_;   // Length of data in the packet, excluding this header
-    public ushort iteration_; // Appears to be bound to each receiever - doesn't change?
+    public ushort iteration_; // the table, another bucketing mechanism, logical grouping
 
     public static ProtoHeader read(BinaryReader binaryReader) {
         ProtoHeader newObj = new ProtoHeader();

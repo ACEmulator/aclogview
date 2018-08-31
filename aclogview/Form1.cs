@@ -223,7 +223,11 @@ namespace aclogview
                     // This one requires special handling and cannot use function.
                     if (record.opcodes.Count == 0) newItem.SubItems.Add(string.Empty);
                     else newItem.SubItems.Add(record.opcodes[0].ToString("X").Substring(4, 4));
-                    
+
+                    newItem.SubItems.Add(record.Seq.ToString());
+                    newItem.SubItems.Add(((MessageQueue)record.Queue).ToString());
+                    newItem.SubItems.Add(record.Iteration.ToString());
+
                     // Process highlighting modes
                     if (currentHighlightMode == opcodeMode && opCodesToHighlight.Count > 0)
                     {
@@ -315,7 +319,7 @@ namespace aclogview
 
         private void listView_Packets_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            if (e.Column == 0 || e.Column == 2 || e.Column == 5)
+            if (e.Column == 0 || e.Column == 2 || e.Column == 5 || e.Column == 8 || e.Column == 10)
                 comparer.sortType = SortType.Uint;
             else
                 comparer.sortType = SortType.String;
@@ -327,7 +331,9 @@ namespace aclogview
                 comparer.col = 0;
             else
                 comparer.col = e.Column;
+            Cursor.Current = Cursors.WaitCursor;
             packetListItems.Sort(comparer);
+            Cursor.Current = Cursors.Default;
             if (records.Count>0)
                 listView_Packets.RedrawItems(0, records.Count - 1, false);
             updateData();
@@ -1353,7 +1359,10 @@ namespace aclogview
 							lvi.SubItems.Add(parsed.wdesc._name.ToString());
 							lvi.SubItems.Add(parsed.wdesc._wcid.ToString());
 							lvi.SubItems.Add(parsed.wdesc._type.ToString());
-							createdListItems.Add(lvi);
+                            lvi.SubItems.Add(record.Seq.ToString());
+                            lvi.SubItems.Add(record.Queue.ToString());
+                            lvi.SubItems.Add(record.Iteration.ToString());
+                            createdListItems.Add(lvi);
 						}
 					}
                 }

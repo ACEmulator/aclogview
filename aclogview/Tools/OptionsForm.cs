@@ -12,6 +12,7 @@ namespace aclogview
         private bool _parsedDataTreeviewDisplayTooltips;
         private byte _packetsListviewTimeFormat;
         private byte _treeviewCopyAllPadding;
+        private bool _ACEStyleHeaders;
 
         public OptionsForm()
         {
@@ -29,6 +30,7 @@ namespace aclogview
             displayNodeTooltips.Checked = _parsedDataTreeviewDisplayTooltips;
             comboBox_TimeFormat.SelectedIndex = _packetsListviewTimeFormat;
             copyAllPadding.Text = _treeviewCopyAllPadding.ToString();
+            cbACEStyleHeaders.Checked = _ACEStyleHeaders;
         }
 
         private void LoadDefaultSettings()
@@ -39,6 +41,7 @@ namespace aclogview
             _parsedDataTreeviewDisplayTooltips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
             _packetsListviewTimeFormat = Settings.Default.PacketsListviewTimeFormat;
             _treeviewCopyAllPadding = Settings.Default.TreeviewCopyAllPadding;
+            _ACEStyleHeaders = Settings.Default.ACEStyleHeaders;
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -66,6 +69,7 @@ namespace aclogview
             Settings.Default.ParsedDataTreeviewDisplayTooltips = _parsedDataTreeviewDisplayTooltips;
             Settings.Default.PacketsListviewTimeFormat = _packetsListviewTimeFormat;
             Settings.Default.TreeviewCopyAllPadding = _treeviewCopyAllPadding;
+            Settings.Default.ACEStyleHeaders = _ACEStyleHeaders;
             Settings.Default.Save();
         }
 
@@ -162,6 +166,11 @@ namespace aclogview
         private void comboBox_TimeFormat_SelectedIndexChanged(object sender, EventArgs e)
         {
             _packetsListviewTimeFormat = (byte)comboBox_TimeFormat.SelectedIndex;
+        }
+
+        private void cbACEStyleHeaders_CheckedChanged(object sender, EventArgs e)
+        {
+            _ACEStyleHeaders = cbACEStyleHeaders.Checked;
         }
     }
 }

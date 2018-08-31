@@ -153,5 +153,17 @@ namespace aclogview.Properties {
                 this["TreeviewCopyAllPadding"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ACEStyleHeaders {
+            get {
+                return ((bool)(this["ACEStyleHeaders"]));
+            }
+            set {
+                this["ACEStyleHeaders"] = value;
+            }
+        }
     }
 }

@@ -35,5 +35,8 @@
     <Setting Name="TreeviewCopyAllPadding" Type="System.Byte" Scope="User">
       <Value Profile="(Default)">3</Value>
     </Setting>
+    <Setting Name="ACEStyleHeaders" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
