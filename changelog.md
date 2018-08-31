@@ -1,3 +1,9 @@
+### 2018-08-30
+[fartwhif]
+* Added seq, queue, and iteration columns to main list.
+* Added **"ACE style packet header flag nomenclature"** option to the main listview.
+* Added lookup enum for MessageQueue column.
+
 ### 2018-08-28
 [Slushnas]
 * Added microsecond time precision display to the main listview.
