@@ -259,7 +259,7 @@ namespace aclogview
             return results;
         }
 
-        private static bool readNetworkHeaders(BinaryReader binaryReader)
+        private static (bool, uint) readNetworkHeaders(BinaryReader binaryReader)
         {
             EthernetHeader ethernetHeader = EthernetHeader.read(binaryReader);
 
@@ -282,13 +282,19 @@ namespace aclogview
             bool isSend = (udpHeader.dPort >= 9000 && udpHeader.dPort <= 10013);
             bool isRecv = (udpHeader.sPort >= 9000 && udpHeader.sPort <= 10013);
 
+            uint port = 0;
+            if (isSend)
+                port = udpHeader.dPort;
+            else if (isRecv)
+                port = udpHeader.sPort;
+
             // Skip non-AC-port packets
             if (!isSend && !isRecv)
             {
                 throw new InvalidDataException();
             }
 
-            return isSend;
+            return (isSend, port);
         }
 
         private static PacketRecord readPacketData(BinaryReader binaryReader, long len, uint ts1, uint ts2, int curPacket, bool isPcapng)
@@ -296,7 +302,7 @@ namespace aclogview
             // Begin reading headers
             long packetStartPos = binaryReader.BaseStream.Position;
 
-            bool isSend = readNetworkHeaders(binaryReader);
+            (bool isSend, uint port) = readNetworkHeaders(binaryReader);
 
             long headersSize = binaryReader.BaseStream.Position - packetStartPos;
 
@@ -379,6 +385,7 @@ namespace aclogview
 			}
             packet.packetHeadersStr = packetHeadersStr.ToString();
             packet.packetTypeStr = packetTypeStr.ToString();
+            packet.ServerPort = port;
 
             return packet;
         }
@@ -388,7 +395,7 @@ namespace aclogview
             // Begin reading headers
             long packetStartPos = binaryReader.BaseStream.Position;
 
-            bool isSend = readNetworkHeaders(binaryReader);
+            (bool isSend, uint port) = readNetworkHeaders(binaryReader);
 
             long headersSize = binaryReader.BaseStream.Position - packetStartPos;
 
@@ -445,8 +452,9 @@ namespace aclogview
 								packet.Seq = pHeader.seqID_;
 								packet.Iteration = pHeader.iteration_;
 								packet.Queue = newFrag.memberHeader_.queueID;
+                                packet.ServerPort = port;
 
-								using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_)))
+                                using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_)))
 								{
 									PacketOpcode opcode = Util.readOpcode(fragDataReader);
 									packet.opcodes.Add(opcode);

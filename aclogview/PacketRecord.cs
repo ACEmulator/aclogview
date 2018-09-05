@@ -22,5 +22,6 @@ namespace aclogview
         public uint Seq;
         public uint Queue;
         public uint Iteration;
+        public uint ServerPort;
     }
 }

@@ -227,6 +227,7 @@ namespace aclogview
                     newItem.SubItems.Add(record.Seq.ToString());
                     newItem.SubItems.Add(((MessageQueue)record.Queue).ToString());
                     newItem.SubItems.Add(record.Iteration.ToString());
+                    newItem.SubItems.Add(record.ServerPort.ToString());
 
                     // Process highlighting modes
                     if (currentHighlightMode == opcodeMode && opCodesToHighlight.Count > 0)
