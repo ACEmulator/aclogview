@@ -649,14 +649,15 @@ namespace aclogview
                 if (Settings.Default.PacketsListviewTimeFormat == (byte)TimeFormat.LocalTime)
                     return Utility.EpochTimeToLocalTime(microseconds);
 
-                return $"{microseconds / (decimal)1000000}";
+                var time = $"{microseconds / (decimal) 1000000:F6}";
+                return time;
             }
             else
             {
                 if (Settings.Default.PacketsListviewTimeFormat == (byte)TimeFormat.LocalTime)
                     return Utility.EpochTimeToLocalTime(record.tsSec, record.tsUsec);
 
-                return record.tsSec + $".{record.tsUsec}";
+                return $"{record.tsSec}." + $"{record.tsUsec:D6}";
             }
         }
 
@@ -1012,7 +1013,7 @@ namespace aclogview
                 switch (clickedItem) {
                     case "ExpandAll":
                         {
-                            var currentNodeIndex = treeView_ParsedData.SelectedNode;
+                            var currentNodeIndex = treeView_ParsedData.SelectedNode ?? treeView_ParsedData.Nodes[0];
                             treeView_ParsedData.BeginUpdate();
                             treeView_ParsedData.Nodes[0].ExpandAll();
                             treeView_ParsedData.TopNode = currentNodeIndex;
