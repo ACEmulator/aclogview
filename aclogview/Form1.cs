@@ -1699,11 +1699,6 @@ namespace aclogview
             }
         }
 
-        private void listviewContextMenu_Opening(object sender, CancelEventArgs e)
-        {
-            e.Cancel = (listView_Packets.SelectedIndices.Count == 0);
-        }
-
         private void listviewContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             var clickedItem = e.ClickedItem;
@@ -1712,6 +1707,19 @@ namespace aclogview
             {
                 Clipboard.SetText(packetListItems[listView_Packets.SelectedIndices[0]].SubItems[2].Text);
             }
+        }
+
+        private void listView_Packets_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (listView_Packets.SelectedIndices.Count == 0)
+                return;
+
+            if (e.Button == MouseButtons.Right)
+            {
+                var location = listView_Packets.PointToScreen(new Point(e.X, e.Y));
+                listviewContextMenu.Show(location);
+            }
+
         }
     }
 }
