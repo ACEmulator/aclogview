@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -14,10 +14,16 @@ public class CM_Combat : MessageProcessor {
 
         PacketOpcode opcode = Util.readOpcode(messageDataReader);
         switch (opcode) {
-            case PacketOpcode.Evt_Combat__CancelAttack_ID:
+            case PacketOpcode.Evt_Combat__CancelAttack_ID: {
+                    EmptyMessage message = new EmptyMessage(opcode);
+                    message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
+                    break;
+                }
             case PacketOpcode.Evt_Combat__CommenceAttack_ID: {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
                     break;
                 }
             // TODO: Evt_Combat__UntargetedMeleeAttack_ID
@@ -103,10 +109,13 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_targetID = " + Utility.FormatHex(this.i_targetID));            
-            
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
+            rootNode.Nodes.Add("i_targetID = " + Utility.FormatHex(this.i_targetID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_ah = " + i_ah);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_power_level = " + i_power_level);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -128,9 +137,13 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target_id = " + Utility.FormatHex(this.i_targetID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_ah = " + i_ah);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_accuracy_level = " + i_accuracy_level);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -148,7 +161,9 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_mode = " + i_mode);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -169,7 +184,9 @@ public class CM_Combat : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("etype = " + (WERROR)etype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -187,7 +204,9 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target_ = " + Utility.FormatHex(this.i_target));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -207,8 +226,11 @@ public class CM_Combat : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("target = " +Utility.FormatHex(this.target));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("health = " + health);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -239,12 +261,19 @@ public class CM_Combat : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("defenders_name = " + defenders_name);
+            ContextInfo.AddToList(new ContextInfo { Length = defenders_name.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("damage_type = " + (DAMAGE_TYPE)damage_type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("severity = " + severity);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             rootNode.Nodes.Add("damage = " + damage);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("critical = " + critical);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("attackConditions = " + (AttackConditions)attack_conditions);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -277,13 +306,21 @@ public class CM_Combat : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("attackers_name = " + attackers_name);
+            ContextInfo.AddToList(new ContextInfo { Length = attackers_name.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("damage_type = " + (DAMAGE_TYPE)damage_type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("severity = " + severity);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             rootNode.Nodes.Add("damage = " + damage);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("part = " + (BodyPart)part);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("critical = " + critical);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("attackConditions = " + (AttackConditions)attack_conditions);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -304,7 +341,9 @@ public class CM_Combat : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("defenders_name = " + defenders_name);
+            ContextInfo.AddToList(new ContextInfo { Length = defenders_name.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -325,7 +364,9 @@ public class CM_Combat : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("attackers_name = " + attackers_name);
+            ContextInfo.AddToList(new ContextInfo { Length = attackers_name.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
