@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -62,7 +62,9 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("target = " + Utility.FormatHex(this.target));                   
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
+            rootNode.Nodes.Add("target = " + Utility.FormatHex(this.target));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -79,7 +81,9 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_objectID = " + Utility.FormatHex(i_objectID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -96,7 +100,9 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("etype = " + (WERROR)etype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -116,7 +122,9 @@ public class CM_Item : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("e = " + e);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -137,9 +145,13 @@ public class CM_Item : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("target = " + Utility.FormatHex(this.target));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("mana = " + mana);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("fSuccess = " + fSuccess);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
