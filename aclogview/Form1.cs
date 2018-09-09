@@ -50,6 +50,18 @@ namespace aclogview
         private string textModeCI = "Text (Case-Insensitive)";
         private string uintMode = "UINT32";
 
+        // Default column widths
+        private int defSendReceiveWidth;
+        private int defTimeWidth;
+        private int defHeadersWidth;
+        private int defTypeWidth;
+        private int defSizeWidth;
+        private int defExtraInfoWidth;
+        private int defOpcodeWidth;
+        private int defPackSeqWidth;
+        private int defQueueWidth;
+        private int defIterationWidth;
+
         public enum SortType
         {
             Uint,
@@ -74,6 +86,8 @@ namespace aclogview
 
         private async void Form1_Load(object sender, EventArgs e)
         {
+            listView_Packets.InitializeHeaderContextMenu(columnsContextMenu);
+
             Util.initReaders();
             messageProcessors.Add(new CM_Admin());
             ciSupportedMessageProcessors.Add(typeof(CM_Admin).Name);
@@ -157,6 +171,8 @@ namespace aclogview
             prop.SetValue(listView_CreatedObjects, true, null);
 
             setupTimeColumn();
+
+            fillDefaultColumnWidths();
 
             var pDocs = new ProtocolDocs();
             if (pDocs.IsTimeForUpdateCheck())
@@ -320,18 +336,17 @@ namespace aclogview
 
         private void listView_Packets_ColumnClick(object sender, ColumnClickEventArgs e)
         {
-            if (e.Column == 0 || e.Column == 2 || e.Column == 5 || e.Column == 8 || e.Column == 10)
+            if (e.Column == lineNumberColumn.Index || e.Column == timeColumn.Index
+                    || e.Column == sizeColumn.Index || e.Column == packSeqColumn.Index
+                    || e.Column == iterationColumn.Index)
                 comparer.sortType = SortType.Uint;
             else
                 comparer.sortType = SortType.String;
-            if (comparer.col == e.Column || comparer.col == 0 && e.Column == 2)
+            if (comparer.col == e.Column || comparer.col == 0 && e.Column == timeColumn.Index)
             {
                 comparer.reverse = !comparer.reverse;
             }
-            if (e.Column == 2)
-                comparer.col = 0;
-            else
-                comparer.col = e.Column;
+            comparer.col = e.Column == timeColumn.Index ? 0 : e.Column;
             Cursor.Current = Cursors.WaitCursor;
             packetListItems.Sort(comparer);
             Cursor.Current = Cursors.Default;
@@ -1585,7 +1600,7 @@ namespace aclogview
 
         private void objectsContextMenu_Opening(object sender, CancelEventArgs e)
         {
-            e.Cancel = (createdListItems.Count == 0);
+            e.Cancel = (createdListItems.Count == 0 || listView_CreatedObjects.SelectedIndices.Count == 0);
         }
 
         private void hexContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -1719,7 +1734,76 @@ namespace aclogview
                 var location = listView_Packets.PointToScreen(new Point(e.X, e.Y));
                 listviewContextMenu.Show(location);
             }
+        }
 
+        private void fillDefaultColumnWidths()
+        {
+            defSendReceiveWidth = sendReceiveColumn.Width;
+            defTimeWidth = timeColumn.Width;
+            defHeadersWidth = headersColumn.Width;
+            defTypeWidth = typeColumn.Width;
+            defSizeWidth = sizeColumn.Width;
+            defExtraInfoWidth = extraInfoColumn.Width;
+            defOpcodeWidth = hexOpcodeColumn.Width;
+            defPackSeqWidth = packSeqColumn.Width;
+            defQueueWidth = queueColumn.Width;
+            defIterationWidth = iterationColumn.Width;
+        }
+
+        private void columnsContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            if (e.ClickedItem == sendReceiveMenuItem)
+            {
+                listView_Packets.Columns[1].Width = sendReceiveMenuItem.CheckState == CheckState.Unchecked ? defSendReceiveWidth : 0;
+            }
+            else if (e.ClickedItem == timeMenuItem)
+            {
+                listView_Packets.Columns[2].Width = timeMenuItem.CheckState == CheckState.Unchecked ? defTimeWidth : 0;
+            }
+            else if (e.ClickedItem == headersMenuItem)
+            {
+                listView_Packets.Columns[3].Width = headersMenuItem.CheckState == CheckState.Unchecked ? defHeadersWidth : 0;
+            }
+            else if (e.ClickedItem == typeMenuItem)
+            {
+                listView_Packets.Columns[4].Width = typeMenuItem.CheckState == CheckState.Unchecked ? defTypeWidth : 0;
+            }
+            else if (e.ClickedItem == sizeMenuItem)
+            {
+                listView_Packets.Columns[5].Width = sizeMenuItem.CheckState == CheckState.Unchecked ? defSizeWidth : 0;
+            }
+            else if (e.ClickedItem == extraInfoMenuItem)
+            {
+                listView_Packets.Columns[6].Width = extraInfoMenuItem.CheckState == CheckState.Unchecked ? defExtraInfoWidth : 0;
+            }
+            else if (e.ClickedItem == opcodeMenuItem)
+            {
+                listView_Packets.Columns[7].Width = opcodeMenuItem.CheckState == CheckState.Unchecked ? defOpcodeWidth : 0;
+            }
+            else if (e.ClickedItem == packSeqMenuItem)
+            {
+                listView_Packets.Columns[8].Width = packSeqMenuItem.CheckState == CheckState.Unchecked ? defPackSeqWidth : 0;
+            }
+            else if (e.ClickedItem == queueMenuItem)
+            {
+                listView_Packets.Columns[9].Width = queueMenuItem.CheckState == CheckState.Unchecked ? defQueueWidth : 0;
+            }
+            else if (e.ClickedItem == iterationMenuItem)
+            {
+                listView_Packets.Columns[10].Width = iterationMenuItem.CheckState == CheckState.Unchecked ? defIterationWidth : 0;
+            }
+        }
+
+        private void listView_CreatedObjects_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (listView_CreatedObjects.SelectedIndices.Count == 0)
+                return;
+
+            if (e.Button == MouseButtons.Right)
+            {
+                var location = listView_CreatedObjects.PointToScreen(new Point(e.X, e.Y));
+                objectsContextMenu.Show(location);
+            }
         }
     }
 }

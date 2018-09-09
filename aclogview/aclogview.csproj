@@ -61,6 +61,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ContextInfo.cs" />
+    <Compile Include="CustomListView.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Enum Helpers\PropertyInt.cs" />
     <Compile Include="Enums\MessageQueue.cs" />
     <Compile Include="GotoLine.cs">
