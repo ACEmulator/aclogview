@@ -1370,7 +1370,7 @@ namespace aclogview
 					{
 						var messageCode = fragDataReader.ReadUInt32();
 
-						if (messageCode == 0xF745) // Create Object
+						if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
 						{
 							hits++;
 							var parsed = CM_Physics.CreateObject.read(fragDataReader);
@@ -1380,9 +1380,6 @@ namespace aclogview
 							lvi.SubItems.Add(parsed.wdesc._name.ToString());
 							lvi.SubItems.Add(parsed.wdesc._wcid.ToString());
 							lvi.SubItems.Add(parsed.wdesc._type.ToString());
-                            lvi.SubItems.Add(record.Seq.ToString());
-                            lvi.SubItems.Add(record.Queue.ToString());
-                            lvi.SubItems.Add(record.Iteration.ToString());
                             createdListItems.Add(lvi);
 						}
 					}
