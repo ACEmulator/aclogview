@@ -113,6 +113,7 @@ namespace aclogview
             ciSupportedMessageProcessors.Add(typeof(CM_Magic).Name);
             messageProcessors.Add(new CM_Misc());
             messageProcessors.Add(new CM_Movement());
+            ciSupportedMessageProcessors.Add(typeof(CM_Movement).Name);
             messageProcessors.Add(new CM_Physics());
             messageProcessors.Add(new CM_Qualities());
             ciSupportedMessageProcessors.Add(typeof(CM_Qualities).Name);
@@ -233,7 +234,8 @@ namespace aclogview
                 {
                     ListViewItem newItem = new ListViewItem(record.index.ToString());
                     newItem.SubItems.Add(record.isSend ? "Send" : "Recv");
-                    newItem.SubItems.Add(GetTimestampString(record));
+                    // Time column is processed in listView_Packets_RetrieveVirtualItem
+                    newItem.SubItems.Add(string.Empty);
                     newItem.SubItems.Add(record.packetHeadersStr);
                     newItem.SubItems.Add(record.packetTypeStr);                   
                     newItem.SubItems.Add(record.data.Length.ToString());

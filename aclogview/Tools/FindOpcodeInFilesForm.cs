@@ -210,53 +210,135 @@ namespace aclogview
                     if (record.data.Length <= 4)
                         continue;
 
-                    //BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data));
-
-                    //var messageCode = messageDataReader.ReadUInt32();
-
-                    /*if (messageCode == 0x02BB) // Creature Message
+                    using (BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data)))
                     {
-                        var parsed = CM_Communication.HearSpeech.read(messageDataReader);
+                        var messageCode = messageDataReader.ReadUInt32();
 
-                        //if (parsed.ChatMessageType != 0x0C)
-                        //    continue;
+                        //if (messageCode == (uint)PacketOpcode.Evt_Movement__MovementEvent_ID)
+                        //{
+                        //    var parsed = CM_Movement.MovementEvent.read(messageDataReader);
 
-                        var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText;
+                        //    if (parsed.movement_data.movementData_Unpack.movement_type == MovementTypes.Type.MoveToObject && $"{parsed.object_id:X8}".StartsWith("50"))
+                        //    {
+                        //        var output = $"{parsed.object_id:X8},{parsed.movement_data.movementData_Unpack.moveToObject:X8},{parsed.movement_data.movementData_Unpack.style},{parsed.movement_data.movementData_Unpack.movement_params.distance_to_object},{fileName},{record.index}";
 
-                        if (!specialOutputHits.ContainsKey(output))
+                        //        if (!specialOutputHits.ContainsKey(parsed.movement_data.movementData_Unpack.movement_params.distance_to_object.ToString() + parsed.movement_data.movementData_Unpack.style))
+                        //        {
+                        //            if (specialOutputHits.TryAdd(parsed.movement_data.movementData_Unpack.movement_params.distance_to_object.ToString() + parsed.movement_data.movementData_Unpack.style, 0))
+                        //                specialOutputHitsQueue.Enqueue(output);
+                        //        }
+                        //    }
+                        //}
+
+                        /*if (messageCode == 0x02BB) // Creature Message
                         {
-                            if (specialOutputHits.TryAdd(output, 0))
-                                specialOutputHitsQueue.Enqueue(output);
-                        }
-                    }*/
+                            var parsed = CM_Communication.HearSpeech.read(messageDataReader);
 
-                    /*if (messageCode == 0xF745) // Create Object
-                    {
-                        var parsed = CM_Physics.CreateObject.read(messageDataReader);
-                    }*/
+                            //if (parsed.ChatMessageType != 0x0C)
+                            //    continue;
 
-                    /*if (messageCode == 0xF7B0) // Game Event
-                    {
-                        var character = messageDataReader.ReadUInt32(); // Character
-                        var sequence = messageDataReader.ReadUInt32(); // Sequence
-                        var _event = messageDataReader.ReadUInt32(); // Event
+                            var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText;
 
-                        if (_event == 0x0147) // Group Chat
-                        {
-                            var parsed = CM_Communication.ChannelBroadcast.read(messageDataReader);
-
-                            var output = parsed.GroupChatType.ToString("X4");
                             if (!specialOutputHits.ContainsKey(output))
                             {
                                 if (specialOutputHits.TryAdd(output, 0))
                                     specialOutputHitsQueue.Enqueue(output);
                             }
-                        }
+                        }*/
 
-                        if (_event == 0x02BD) // Tell
+                        /*if (messageCode == 0xF745) // Create Object
                         {
-                            var parsed = CM_Communication.HearDirectSpeech.read(messageDataReader);
+                            var parsed = CM_Physics.CreateObject.read(messageDataReader);
+                        }*/
 
+                        /*if (messageCode == 0xF7B0) // Game Event
+                        {
+                            var character = messageDataReader.ReadUInt32(); // Character
+                            var sequence = messageDataReader.ReadUInt32(); // Sequence
+                            var _event = messageDataReader.ReadUInt32(); // Event
+
+                            if (_event == 0x0147) // Group Chat
+                            {
+                                var parsed = CM_Communication.ChannelBroadcast.read(messageDataReader);
+
+                                var output = parsed.GroupChatType.ToString("X4");
+                                if (!specialOutputHits.ContainsKey(output))
+                                {
+                                    if (specialOutputHits.TryAdd(output, 0))
+                                        specialOutputHitsQueue.Enqueue(output);
+                                }
+                            }
+
+                            if (_event == 0x02BD) // Tell
+                            {
+                                var parsed = CM_Communication.HearDirectSpeech.read(messageDataReader);
+
+                                var output = parsed.ChatMessageType.ToString("X4");
+
+                                if (!specialOutputHits.ContainsKey(output))
+                                {
+                                    if (specialOutputHits.TryAdd(output, 0))
+                                        specialOutputHitsQueue.Enqueue(output);
+                                }
+                            }
+                        }*/
+
+                        //if (messageCode == 0xF7B1) // Game Action
+                        //{
+                        //    var sequence = messageDataReader.ReadUInt32(); // Sequence
+                        //    var opcode = messageDataReader.ReadUInt32(); // Opcode
+
+                        //    if (opcode == 0x0036) // Use event
+                        //    {
+                        //        var parsed = CM_Inventory.UseEvent.read(messageDataReader);
+
+                        //        var object_id = parsed.i_object;
+
+                        //        for (int i = record.index; i > 0; i--)
+                        //        {
+                        //            using (BinaryReader comessageDataReader = new BinaryReader(new MemoryStream(records[i].data)))
+                        //            {
+                        //                var msgCode = comessageDataReader.ReadUInt32();
+
+                        //                if (msgCode == 0xF745) // Create Object
+                        //                {
+                        //                    var parsedco = CM_Physics.CreateObject.read(comessageDataReader);
+
+                        //                    if (parsedco.wdesc._type == ITEM_TYPE.TYPE_PORTAL && parsedco.object_id == object_id)
+                        //                    {
+                        //                        var output = $"{parsedco.wdesc._name.m_buffer},{fileName},{record.index}";
+
+                        //                        if (!specialOutputHits.ContainsKey(output))
+                        //                        {
+                        //                            if (specialOutputHits.TryAdd(output, 0))
+                        //                                specialOutputHitsQueue.Enqueue(output);
+                        //                        }
+                        //                        break;
+                        //                    }
+                        //                }
+                        //            }
+                        //        }
+                        //    } 
+                        //}
+
+                        /*if (messageCode == 0xF7DE) // TurbineChat
+                        {
+                            var parsed = CM_Admin.ChatServerData.read(messageDataReader);
+
+                            string output = parsed.TurbineChatType.ToString("X2");
+
+                            if (!specialOutputHits.ContainsKey(output))
+                            {
+                                if (specialOutputHits.TryAdd(output, 0))
+                                    specialOutputHitsQueue.Enqueue(output);
+                            }
+                        }*/
+
+                        /*if (messageCode == 0xF7E0) // Server Message
+                        {
+                            var parsed = CM_Communication.TextBoxString.read(messageDataReader);
+
+                            var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText + ",";
                             var output = parsed.ChatMessageType.ToString("X4");
 
                             if (!specialOutputHits.ContainsKey(output))
@@ -264,39 +346,8 @@ namespace aclogview
                                 if (specialOutputHits.TryAdd(output, 0))
                                     specialOutputHitsQueue.Enqueue(output);
                             }
-                        }
-                    }*/
-
-                    /*if (messageCode == 0xF7B1) // Game Action
-                    {
-                    }*/
-
-                    /*if (messageCode == 0xF7DE) // TurbineChat
-                    {
-                        var parsed = CM_Admin.ChatServerData.read(messageDataReader);
-
-                        string output = parsed.TurbineChatType.ToString("X2");
-
-                        if (!specialOutputHits.ContainsKey(output))
-                        {
-                            if (specialOutputHits.TryAdd(output, 0))
-                                specialOutputHitsQueue.Enqueue(output);
-                        }
-                    }*/
-
-                    /*if (messageCode == 0xF7E0) // Server Message
-                    {
-                        var parsed = CM_Communication.TextBoxString.read(messageDataReader);
-
-                        //var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText + ",";
-                        var output = parsed.ChatMessageType.ToString("X4");
-
-                        if (!specialOutputHits.ContainsKey(output))
-                        {
-                            if (specialOutputHits.TryAdd(output, 0))
-                                specialOutputHitsQueue.Enqueue(output);
-                        }
-                    }*/
+                        }*/
+                    }
                 }
                 catch
                 {

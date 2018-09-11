@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
 using aclogview;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Windows.Forms;
 
 public class CM_Movement : MessageProcessor {
 
@@ -85,9 +82,11 @@ public class CM_Movement : MessageProcessor {
         public ushort server_control_timestamp;
         public ushort teleport_timestamp;
         public ushort force_position_ts;
+        public int Length;
 
         public static JumpPack read(BinaryReader binaryReader) {
             JumpPack newObj = new JumpPack();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.extent = binaryReader.ReadSingle();
             newObj.velocity = Vector3.read(binaryReader);
             newObj.position = Position.read(binaryReader);
@@ -96,18 +95,26 @@ public class CM_Movement : MessageProcessor {
             newObj.teleport_timestamp = binaryReader.ReadUInt16();
             newObj.force_position_ts = binaryReader.ReadUInt16();
             Util.readToAlign(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("extent = " + extent);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("velocity = " + velocity);
+            ContextInfo.AddToList(new ContextInfo { Length = 12 });
             TreeNode positionNode = node.Nodes.Add("position = ");
+            ContextInfo.AddToList(new ContextInfo { Length = position.Length }, false);
             position.contributeToTreeNode(positionNode);
             node.Nodes.Add("instance_timestamp = " + instance_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("teleport_timestamp = " + teleport_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("force_position_ts = " + force_position_ts);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
         }
     }
 
@@ -123,7 +130,9 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             TreeNode jumpNode = rootNode.Nodes.Add("i_jp = ");
+            ContextInfo.AddToList(new ContextInfo{Length = i_jp.Length}, false);
             i_jp.contributeToTreeNode(jumpNode);
             jumpNode.Expand();
             treeView.Nodes.Add(rootNode);
@@ -162,16 +171,25 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             TreeNode rawMotionStateNode = rootNode.Nodes.Add("raw_motion_state = ");
+            ContextInfo.AddToList(new ContextInfo { Length = raw_motion_state.Length }, false);
             raw_motion_state.contributeToTreeNode(rawMotionStateNode);
             TreeNode posNode = rootNode.Nodes.Add("position = ");
+            ContextInfo.AddToList(new ContextInfo { Length = position.Length }, false);
             position.contributeToTreeNode(posNode);
             rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("teleport_timestamp = " + teleport_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("force_position_ts = " + force_position_ts);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("contact = " + contact);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 }, false);
             rootNode.Nodes.Add("longjump_mode = " + longjump_mode);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 }, false);
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -195,9 +213,13 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_motion = " + i_motion);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_speed = " + i_speed);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_hold_key = " + i_hold_key);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -218,8 +240,11 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_motion = " + i_motion);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_hold_key = " + i_hold_key);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -247,17 +272,22 @@ public class CM_Movement : MessageProcessor {
         public ushort teleport_timestamp;
         public ushort force_position_timestamp;
         public List<string> packedItems; // For display purposes
+        public int PositionLength;
+        public int Length;
 
         public static PositionPack read(BinaryReader binaryReader)
         {
             PositionPack newObj = new PositionPack();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.packedItems = new List<string>();
             newObj.bitfield = binaryReader.ReadUInt32();
             newObj.position = Position.readOrigin(binaryReader);
+            newObj.PositionLength += newObj.position.Length;
 
             if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoW) == 0)
             {
                 newObj.position.frame.qw = binaryReader.ReadSingle();
+                newObj.PositionLength += 4;
             }
             else
             {
@@ -266,6 +296,7 @@ public class CM_Movement : MessageProcessor {
             if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoX) == 0)
             {
                 newObj.position.frame.qx = binaryReader.ReadSingle();
+                newObj.PositionLength += 4;
             }
             else
             {
@@ -274,6 +305,7 @@ public class CM_Movement : MessageProcessor {
             if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoY) == 0)
             {
                 newObj.position.frame.qy = binaryReader.ReadSingle();
+                newObj.PositionLength += 4;
             }
             else
             {
@@ -282,6 +314,7 @@ public class CM_Movement : MessageProcessor {
             if ((newObj.bitfield & (uint)PackBitfield.OrientationHasNoZ) == 0)
             {
                 newObj.position.frame.qz = binaryReader.ReadSingle();
+                newObj.PositionLength += 4;
             }
             else
             {
@@ -310,32 +343,71 @@ public class CM_Movement : MessageProcessor {
             newObj.position_timestamp = binaryReader.ReadUInt16();
             newObj.teleport_timestamp = binaryReader.ReadUInt16();
             newObj.force_position_timestamp = binaryReader.ReadUInt16();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(this.bitfield));
+            ContextInfo.AddToList(new ContextInfo {Length = 4}, false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 bitfieldNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo {Length = 4}, false);
             }
 
+            // Now skip bitfield
+            ContextInfo.DataIndex += 4;
             TreeNode positionNode = node.Nodes.Add("position = ");
-            position.contributeToTreeNode(positionNode);
+            ContextInfo.AddToList(new ContextInfo {Length = PositionLength}, false);
+            positionNode.Nodes.Add("objcell_id = 0x" + position.objcell_id.ToString("X8"));
+            ContextInfo.AddToList(new ContextInfo {DataType = DataType.CellID});
+            TreeNode frameNode = positionNode.Nodes.Add("frame = ");
+            ContextInfo.AddToList(new ContextInfo {Length = PositionLength - 4}, false);
+            frameNode.Nodes.Add("m_fOrigin = " + position.frame.m_fOrigin);
+            ContextInfo.AddToList(new ContextInfo {Length = 12});
+            frameNode.Nodes.Add("qw = " + position.frame.qw);
+            applyRotationContextInfo((bitfield & (uint) PackBitfield.OrientationHasNoW) == 0, frameNode);
+            frameNode.Nodes.Add("qx = " + position.frame.qx);
+            applyRotationContextInfo((bitfield & (uint)PackBitfield.OrientationHasNoX) == 0, frameNode);
+            frameNode.Nodes.Add("qy = " + position.frame.qy);
+            applyRotationContextInfo((bitfield & (uint)PackBitfield.OrientationHasNoY) == 0, frameNode);
+            frameNode.Nodes.Add("qz = " + position.frame.qz);
+            applyRotationContextInfo((bitfield & (uint)PackBitfield.OrientationHasNoZ) == 0, frameNode);
+            frameNode.Nodes.Add("m_fl2gv = " + position.frame.m_fl2gv);
+            applyNonSerializedContextInfo(frameNode);
+
             if ((bitfield & (uint)PackBitfield.HasVelocity) != 0)
             {
                 node.Nodes.Add("velocity = " + velocity);
+                ContextInfo.AddToList(new ContextInfo { Length = 12 });
             }
             if ((bitfield & (uint)PackBitfield.HasPlacementID) != 0)
             {
                 node.Nodes.Add("placement_id = " + placement_id);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
-            node.Nodes.Add("has_contact = " + has_contact);
+            node.Nodes.Add("has_contact (IsGrounded) = " + has_contact);
+            ContextInfo.AddToList(new ContextInfo {}, false);
             node.Nodes.Add("instance_timestamp = " + instance_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("position_timestamp = " + position_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("teleport_timestamp = " + teleport_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("force_position_timestamp = " + force_position_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
+        }
+    }
+
+    private static void applyRotationContextInfo(bool serialized, TreeNode node)
+    {
+        if (serialized)
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+        else
+        {
+            applyNonSerializedContextInfo(node);
         }
     }
 
@@ -353,8 +425,11 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode positionPackNode = rootNode.Nodes.Add("PositionPack = ");
+            ContextInfo.AddToList(new ContextInfo { Length = positionPack.Length }, false);
             positionPack.contributeToTreeNode(positionPackNode);
             positionPackNode.Expand();
             treeView.Nodes.Add(rootNode);
@@ -382,9 +457,12 @@ public class CM_Movement : MessageProcessor {
         public float turn_speed = 1.0f;
         public List<ActionNode> actions = new List<ActionNode>();
         public List<string> packedItems = new List<string>(); // For display purposes
+        public int Length;
+        public byte endPadding;
 
         public static InterpretedMotionState read(BinaryReader binaryReader) {
             InterpretedMotionState newObj = new InterpretedMotionState();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.bitfield = binaryReader.ReadUInt32();
             if ((newObj.bitfield & (uint)PackBitfield.current_style) != 0) {
                 newObj.current_style = (MotionCommand)command_ids[binaryReader.ReadUInt16()];
@@ -421,7 +499,8 @@ public class CM_Movement : MessageProcessor {
                 newObj.actions.Add(ActionNode.read(binaryReader));
             }
 
-            Util.readToAlign(binaryReader);
+            newObj.endPadding = Util.readToAlign(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
 
             return newObj;
         }
@@ -429,26 +508,68 @@ public class CM_Movement : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 bitfieldNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, false);
             }
+            // Now skip the bitfield
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("current_style = " + current_style);
+            if ((bitfield & (uint)PackBitfield.current_style) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("forward_command = " + forward_command);
+            if ((bitfield & (uint)PackBitfield.forward_command) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("sidestep_command = " + sidestep_command);
+            if ((bitfield & (uint)PackBitfield.sidestep_command) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("turn_command = " + turn_command);
+            if ((bitfield & (uint)PackBitfield.turn_command) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("forward_speed = " + forward_speed);
+            if ((bitfield & (uint)PackBitfield.forward_speed) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("sidestep_speed = " + sidestep_speed);
+            if ((bitfield & (uint)PackBitfield.sidestep_speed) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("turn_speed = " + turn_speed);
+            if ((bitfield & (uint)PackBitfield.turn_speed) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             if (actions.Count > 0)
             {
                 TreeNode actionsNode = node.Nodes.Add("actions = ");
+                ContextInfo.AddToList(new ContextInfo { Length = actions[0].Length * actions.Count }, false);
                 for (int i = 0; i < actions.Count; ++i)
                 {
-                    TreeNode actionNode = actionsNode.Nodes.Add($"action {i + 1}");
+                    TreeNode actionNode = actionsNode.Nodes.Add($"action {i+ 1}");
+                    ContextInfo.AddToList(new ContextInfo { Length = actions[i].Length }, false);
                     actions[i].contributeToTreeNode(actionNode);
                 }
-            } 
+            }
+            ContextInfo.DataIndex += endPadding;
         }
     }
 
@@ -458,24 +579,32 @@ public class CM_Movement : MessageProcessor {
         public uint stamp;
         public int autonomous;
         public float speed;
+        public int Length;
 
         public static ActionNode read(BinaryReader binaryReader)
         {
             ActionNode newObj = new ActionNode();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.action = command_ids[binaryReader.ReadUInt16()];
             uint packedSequence = binaryReader.ReadUInt16();
             newObj.stamp = packedSequence & 0x7FFF;
             newObj.autonomous = (int)((packedSequence >> 15) & 1);
             newObj.speed = binaryReader.ReadSingle();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("action = " + (MotionCommand)action);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("stamp = " + stamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 }, false);
             node.Nodes.Add("autonomous = " + autonomous);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 }, false);
+            ContextInfo.DataIndex += 2;
             node.Nodes.Add("speed = " + speed);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -502,6 +631,7 @@ public class CM_Movement : MessageProcessor {
             disable_jump_during_link = (1 << 17),
         }
 
+        public MovementTypes.Type type;
         public uint bitfield;
         public float distance_to_object;
         public float min_distance;
@@ -509,12 +639,16 @@ public class CM_Movement : MessageProcessor {
         public float speed;
         public float walk_run_threshhold;
         public float desired_heading;
+        public int Length;
 
         public static MovementParameters read(MovementTypes.Type type, BinaryReader binaryReader) {
             MovementParameters newObj = new MovementParameters();
+            newObj.type = type;
+            var startPosition = binaryReader.BaseStream.Position;
             switch (type) {
                 case MovementTypes.Type.MoveToObject:
-                case MovementTypes.Type.MoveToPosition: {
+                case MovementTypes.Type.MoveToPosition:
+                {
                         newObj.bitfield = binaryReader.ReadUInt32();
                         newObj.distance_to_object = binaryReader.ReadSingle();
                         newObj.min_distance = binaryReader.ReadSingle();
@@ -523,64 +657,100 @@ public class CM_Movement : MessageProcessor {
                         newObj.walk_run_threshhold = binaryReader.ReadSingle();
                         newObj.desired_heading = binaryReader.ReadSingle();
                         break;
-                    }
+                }
                 case MovementTypes.Type.TurnToObject:
-                case MovementTypes.Type.TurnToHeading: {
+                case MovementTypes.Type.TurnToHeading:
+                {
                         newObj.bitfield = binaryReader.ReadUInt32();
                         newObj.speed = binaryReader.ReadSingle();
                         newObj.desired_heading = binaryReader.ReadSingle();
                         break;
-                    }
-                default: {
-                        break;
-                    }
+                }
             }
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, false);
             foreach (PackBitfield e in Enum.GetValues(typeof(PackBitfield)))
             {
                 if (((uint)bitfield & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     bitfieldNode.Nodes.Add($"{Enum.GetName(typeof(PackBitfield), e)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, false);
                 }
             }
-            node.Nodes.Add("distance_to_object = " + distance_to_object);
-            node.Nodes.Add("min_distance = " + min_distance);
-            node.Nodes.Add("fail_distance = " + fail_distance);
-            node.Nodes.Add("speed = " + speed);
-            node.Nodes.Add("walk_run_threshhold = " + walk_run_threshhold);
-            node.Nodes.Add("desired_heading = " + desired_heading);
+            // Skip bitfield
+            ContextInfo.DataIndex += 4;
+            switch (type)
+            {
+                case MovementTypes.Type.MoveToObject:
+                case MovementTypes.Type.MoveToPosition:
+                {
+                    node.Nodes.Add("distance_to_object = " + distance_to_object);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    node.Nodes.Add("min_distance = " + min_distance);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    node.Nodes.Add("fail_distance = " + fail_distance);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    node.Nodes.Add("speed = " + speed);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    node.Nodes.Add("walk_run_threshhold = " + walk_run_threshhold);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    node.Nodes.Add("desired_heading = " + desired_heading);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    break;
+                }
+                case MovementTypes.Type.TurnToObject:
+                case MovementTypes.Type.TurnToHeading:
+                {
+                    node.Nodes.Add("speed = " + speed);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    node.Nodes.Add("desired_heading = " + desired_heading);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                    break;
+                }
+            }
         }
     }
+
     // This class does not appear in the client but is added for convenience
     public class MovementData
     {
         public ushort movement_timestamp;
         public ushort server_control_timestamp;
         public byte autonomous;
+        public byte padding;
         public MovementDataUnpack movementData_Unpack;
+        public int Length;
 
         public static MovementData read(BinaryReader binaryReader)
         {
             MovementData newObj = new MovementData();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.movement_timestamp = binaryReader.ReadUInt16();
             newObj.server_control_timestamp = binaryReader.ReadUInt16();
             newObj.autonomous = binaryReader.ReadByte();
 
-            Util.readToAlign(binaryReader);
+            newObj.padding = Util.readToAlign(binaryReader);
 
             newObj.movementData_Unpack = MovementDataUnpack.read(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("movement_timestamp = " + movement_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("autonomous = " + autonomous);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
+            // Skip padding
+            ContextInfo.DataIndex += padding;
             movementData_Unpack.contributeToTreeNode(node);
         }
     }
@@ -589,7 +759,7 @@ public class CM_Movement : MessageProcessor {
     public class MovementDataUnpack
     {
         public MovementTypes.Type movement_type;
-        public ushort movement_options;
+        public byte movement_options;
         public MovementParameters movement_params = new MovementParameters();
         public MotionCommand style;
         public InterpretedMotionState interpretedMotionState = new InterpretedMotionState();
@@ -604,20 +774,19 @@ public class CM_Movement : MessageProcessor {
         public static MovementDataUnpack read(BinaryReader binaryReader)
         {
             MovementDataUnpack newObj = new MovementDataUnpack();
-            ushort pack_word = binaryReader.ReadUInt16();
-            newObj.movement_options = (ushort)(pack_word & 0xFF00);
-            newObj.movement_type = (MovementTypes.Type)((ushort)(pack_word & 0x00FF));
+            newObj.movement_type = (MovementTypes.Type)binaryReader.ReadByte();
+            newObj.movement_options = binaryReader.ReadByte();
             newObj.style = (MotionCommand)command_ids[binaryReader.ReadUInt16()];
             switch (newObj.movement_type)
             {
                 case MovementTypes.Type.Invalid:
                     {
                         newObj.interpretedMotionState = InterpretedMotionState.read(binaryReader);
-                        if ((newObj.movement_options & 0x100) != 0)
+                        if ((newObj.movement_options & 0x1) != 0)
                         {
                             newObj.stickToObject = binaryReader.ReadUInt32();
                         }
-                        if ((newObj.movement_options & 0x200) != 0)
+                        if ((newObj.movement_options & 0x2) != 0)
                         {
                             newObj.standing_longjump = true;
                         }
@@ -650,10 +819,6 @@ public class CM_Movement : MessageProcessor {
                         newObj.movement_params = MovementParameters.read(newObj.movement_type, binaryReader);
                         break;
                     }
-                default:
-                    {
-                        break;
-                    }
             }
 
             return newObj;
@@ -662,48 +827,102 @@ public class CM_Movement : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("movement_type = " + movement_type);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
+
+            TreeNode optionsNode = node.Nodes.Add("movement_options = " + Utility.FormatHex(movement_options));
+            ContextInfo.AddToList(new ContextInfo { Length = 1 }, false);
+            if ((movement_options & 0x1) != 0)
+                optionsNode.Nodes.Add("stickToObject = True");
+            else
+                optionsNode.Nodes.Add("stickToObject = False");
+            ContextInfo.AddToList(new ContextInfo { Length = 1 }, false);
+            optionsNode.Nodes.Add("standing_longjump = " + standing_longjump);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 }, false);
+            ContextInfo.DataIndex += 1;
+
             node.Nodes.Add("style = " + style);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
+
             if (movement_type == MovementTypes.Type.Invalid)
             {
-                TreeNode optionsNode = node.Nodes.Add("movement_options = " + Utility.FormatHex(movement_options));
-                if ((movement_options & 0x100) != 0)
-                {
-                    optionsNode.Nodes.Add("stickToObject = " + Utility.FormatHex(stickToObject));
-                }
-                optionsNode.Nodes.Add("standing_longjump = " + standing_longjump);
                 TreeNode motionStateNode = node.Nodes.Add("interpretedMotionState = ");
+                if ((movement_options & 0x1) != 0)
+                    ContextInfo.AddToList(new ContextInfo { Length = interpretedMotionState.Length + 4 }, false);
+                else
+                    ContextInfo.AddToList(new ContextInfo { Length = interpretedMotionState.Length }, false);
                 interpretedMotionState.contributeToTreeNode(motionStateNode);
+
+                if ((movement_options & 0x1) != 0)
+                {
+                    node.Nodes.Add("stickToObject = " + Utility.FormatHex(stickToObject));
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
+                }
             }
             else if (movement_type == MovementTypes.Type.MoveToObject)
             {
                 node.Nodes.Add("moveToObject = " + Utility.FormatHex(moveToObject));
-                TreeNode posNode = node.Nodes.Add("moveToPos = ");
-                moveToPos.contributeToTreeNode(posNode);
-                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
-                movement_params.contributeToTreeNode(moveParamsNode);
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
+                contributeMoveToPosition(node, moveToPos);
+                contributeMovementParams(node, movement_params);
                 node.Nodes.Add("my_run_rate = " + my_run_rate);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             else if (movement_type == MovementTypes.Type.MoveToPosition)
             {
-                TreeNode posNode = node.Nodes.Add("moveToPos = ");
-                moveToPos.contributeToTreeNode(posNode);
-                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
-                movement_params.contributeToTreeNode(moveParamsNode);
+                contributeMoveToPosition(node, moveToPos);
+                contributeMovementParams(node, movement_params);
                 node.Nodes.Add("my_run_rate = " + my_run_rate);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             else if (movement_type == MovementTypes.Type.TurnToObject)
             {
                 node.Nodes.Add("turnToObject = " + Utility.FormatHex(turnToObject));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
                 node.Nodes.Add("desiredHeading = " + desiredHeading);
-                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
-                movement_params.contributeToTreeNode(moveParamsNode);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                contributeMovementParams(node, movement_params);
             }
             else if (movement_type == MovementTypes.Type.TurnToHeading)
             {
-                TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
-                movement_params.contributeToTreeNode(moveParamsNode);
+                contributeMovementParams(node, movement_params);
             }
         }
+    }
+
+    private static void contributeMoveToPosition(TreeNode node, Position moveToPos)
+    {
+        TreeNode posNode = node.Nodes.Add("moveToPos = ");
+        ContextInfo.AddToList(new ContextInfo { Length = moveToPos.Length }, false);
+        posNode.Nodes.Add("objcell_id = 0x" + moveToPos.objcell_id.ToString("X8"));
+        ContextInfo.AddToList(new ContextInfo { DataType = DataType.CellID });
+        TreeNode frameNode = posNode.Nodes.Add("frame = ");
+        ContextInfo.AddToList(new ContextInfo { Length = moveToPos.Length - 4 }, false);
+        frameNode.Nodes.Add("m_fOrigin = " + moveToPos.frame.m_fOrigin);
+        ContextInfo.AddToList(new ContextInfo { Length = 12 });
+
+        frameNode.Nodes.Add("qw = " + moveToPos.frame.qw);
+        applyNonSerializedContextInfo(frameNode);
+        frameNode.Nodes.Add("qx = " + moveToPos.frame.qx);
+        applyNonSerializedContextInfo(frameNode);
+        frameNode.Nodes.Add("qy = " + moveToPos.frame.qy);
+        applyNonSerializedContextInfo(frameNode);
+        frameNode.Nodes.Add("qz = " + moveToPos.frame.qz);
+        applyNonSerializedContextInfo(frameNode);
+        frameNode.Nodes.Add("m_fl2gv = " + moveToPos.frame.m_fl2gv);
+        applyNonSerializedContextInfo(frameNode);
+    }
+
+    private static void applyNonSerializedContextInfo(TreeNode node)
+    {
+        node.Nodes[node.Nodes.Count - 1].ForeColor = Color.DimGray;
+        ContextInfo.AddToList(new ContextInfo(), updateDataIndex: false);
+    }
+
+    private static void contributeMovementParams(TreeNode node, MovementParameters movement_params)
+    {
+        TreeNode moveParamsNode = node.Nodes.Add("movement_params = ");
+        ContextInfo.AddToList(new ContextInfo { Length = movement_params.Length }, false);
+        movement_params.contributeToTreeNode(moveParamsNode);
     }
 
     public class MovementEvent : Message {
@@ -723,8 +942,11 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             movement_data.contributeToTreeNode(rootNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -743,7 +965,9 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("i_autonomy_level = " + i_autonomy_level);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -777,9 +1001,11 @@ public class CM_Movement : MessageProcessor {
         public HoldKey turn_holdkey;
         public float turn_speed = 1.0f;
         public List<ActionNode> actions;
+        public int Length;
 
         public static RawMotionState read(BinaryReader binaryReader) {
             RawMotionState newObj = new RawMotionState();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.packedItems = new List<string>();
             newObj.bitfield = binaryReader.ReadUInt32();
             if ((newObj.bitfield & (uint)PackBitfield.current_holdkey) != 0) {
@@ -835,33 +1061,95 @@ public class CM_Movement : MessageProcessor {
             }
 
             Util.readToAlign(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
 
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 bitfieldNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, false);
             }
+            // Now skip bitfield length
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("current_holdkey = " + current_holdkey);
+            if ((bitfield & (uint)PackBitfield.current_holdkey) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("current_style = " + current_style);
+            if ((bitfield & (uint)PackBitfield.current_style) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("forward_command = " + forward_command);
+            if ((bitfield & (uint)PackBitfield.forward_command) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("forward_holdkey = " + forward_holdkey);
+            if ((bitfield & (uint)PackBitfield.forward_holdkey) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("forward_speed = " + forward_speed);
+            if ((bitfield & (uint)PackBitfield.forward_speed) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("sidestep_command = " + sidestep_command);
+            if ((bitfield & (uint)PackBitfield.sidestep_command) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("sidestep_holdkey = " + sidestep_holdkey);
+            if ((bitfield & (uint)PackBitfield.sidestep_holdkey) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("sidestep_speed = " + sidestep_speed);
+            if ((bitfield & (uint)PackBitfield.sidestep_speed) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("turn_command = " + turn_command);
+            if ((bitfield & (uint)PackBitfield.turn_command) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("turn_holdkey = " + turn_holdkey);
+            if ((bitfield & (uint)PackBitfield.turn_holdkey) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             node.Nodes.Add("turn_speed = " + turn_speed);
+            if ((bitfield & (uint)PackBitfield.turn_speed) != 0)
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            else
+                applyNonSerializedContextInfo(node);
+
             if (actions.Count > 0)
             {
                 TreeNode actionsNode = node.Nodes.Add("actions = ");
+                ContextInfo.AddToList(new ContextInfo {Length = actions[0].Length * actions.Count}, false);
                 for (int i = 0; i < actions.Count; i++)
                 {
                     TreeNode actionNode = actionsNode.Nodes.Add($"action {i+1}");
+                    ContextInfo.AddToList(new ContextInfo { Length = actions[i].Length }, false);
                     actions[i].contributeToTreeNode(actionNode);
                 }
             }
@@ -878,14 +1166,11 @@ public class CM_Movement : MessageProcessor {
 
         public static AutonomousPosition read(BinaryReader binaryReader) {
             AutonomousPosition newObj = new AutonomousPosition();
-
             newObj.position = Position.read(binaryReader);
-
             newObj.instance_timestamp = binaryReader.ReadUInt16();
             newObj.server_control_timestamp = binaryReader.ReadUInt16();
             newObj.teleport_timestamp = binaryReader.ReadUInt16();
             newObj.force_position_timestamp = binaryReader.ReadUInt16();
-
             newObj.contact = binaryReader.ReadByte() != 0;
 
             Util.readToAlign(binaryReader);
@@ -896,13 +1181,20 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             TreeNode positionNode = rootNode.Nodes.Add("position = ");
+            ContextInfo.AddToList(new ContextInfo { Length = position.Length }, false);
             position.contributeToTreeNode(positionNode);
             rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("server_control_timestamp = " + server_control_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("teleport_timestamp = " + teleport_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("force_position_timestamp = " + force_position_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             rootNode.Nodes.Add("contact = " + contact);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -920,7 +1212,9 @@ public class CM_Movement : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_extent = " + i_extent);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -945,10 +1239,14 @@ public class CM_Movement : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode positionPackNode = rootNode.Nodes.Add("PositionPack = ");
+            ContextInfo.AddToList(new ContextInfo { Length = positionPack.Length }, false);
             positionPack.contributeToTreeNode(positionPackNode);
             TreeNode movementDataNode = rootNode.Nodes.Add("MovementData = ");
+            ContextInfo.AddToList(new ContextInfo { Length = movementData.Length }, false);
             movementData.contributeToTreeNode(movementDataNode);
             treeView.Nodes.Add(rootNode);
         }

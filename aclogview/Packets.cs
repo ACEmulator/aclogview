@@ -1,6 +1,7 @@
-﻿using aclogview;
+using aclogview;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -401,6 +402,7 @@ public class Frame {
         node.Nodes.Add("qz = " + qz);
         ContextInfo.AddToList(new ContextInfo { Length = 4 });
         node.Nodes.Add("m_fl2gv = " + m_fl2gv);
+        node.Nodes[node.Nodes.Count - 1].ForeColor = Color.DimGray;
         ContextInfo.AddToList(new ContextInfo {}, updateDataIndex: false);
     }
 }
