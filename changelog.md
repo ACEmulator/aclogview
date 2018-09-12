@@ -1,4 +1,14 @@
 ### 2018-09-14
+[Slushnas]
+* Added context info for CM_Movement, CM_Item, and CM_Combat.
+* Some fields that were not serialized will now be displayed in gray in the TreeView (UpdatePosition quaternions etc.).
+* Added custom ListView class to support context menus on column headers.
+* Prevented context menu opening on Created Objects listview and main listview column headers.
+* Added ability to hide columns on the main listview by right-clicking on the column headers.
+* Fixed some time format display issues.
+* Fixed an exception when clicking "Expand All" in the treeview context menu.
+
+### 2018-09-14
 [Morosity/Spazmodica]
 * Updated .NET to 4.7.1
 * Added Server port referenced for both outgoing and incoming packets
