@@ -256,7 +256,8 @@ namespace aclogview {
             //
             // columnHeader16
             //
-            this.columnHeader16.Text = "ServerPort";
+            this.columnHeader16.Text = "Server Port";
+            this.columnHeader16.Width = 65;
             // 
             // listviewContextMenu
             // 
