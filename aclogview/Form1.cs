@@ -61,6 +61,7 @@ namespace aclogview
         private int defPackSeqWidth;
         private int defQueueWidth;
         private int defIterationWidth;
+        private int defServerPortWidth;
 
         public enum SortType
         {
@@ -1705,13 +1706,17 @@ namespace aclogview
             var timeFormat = Settings.Default.PacketsListviewTimeFormat;
             if (timeFormat == (byte)TimeFormat.EpochTime)
             {
-                listView_Packets.Columns[2].Text = "Epoch Time (s)";
-                listView_Packets.Columns[2].Width = 120;
+                timeColumn.Text = "Epoch Time (s)";
+                if (timeMenuItem.Checked)
+                    timeColumn.Width = 120;
+                defTimeWidth = 120;
             }
             else if (timeFormat == (byte)TimeFormat.LocalTime)
             {
-                listView_Packets.Columns[2].Text = "Local Time";
-                listView_Packets.Columns[2].Width = 175;
+                timeColumn.Text = "Local Time";
+                if (timeMenuItem.Checked)
+                    timeColumn.Width = 175;
+                defTimeWidth = 175;
             }
         }
 
@@ -1749,49 +1754,54 @@ namespace aclogview
             defPackSeqWidth = packSeqColumn.Width;
             defQueueWidth = queueColumn.Width;
             defIterationWidth = iterationColumn.Width;
+            defServerPortWidth = serverPortColumn.Width;
         }
 
         private void columnsContextMenu_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             if (e.ClickedItem == sendReceiveMenuItem)
             {
-                listView_Packets.Columns[1].Width = sendReceiveMenuItem.CheckState == CheckState.Unchecked ? defSendReceiveWidth : 0;
+                sendReceiveColumn.Width = sendReceiveMenuItem.CheckState == CheckState.Unchecked ? defSendReceiveWidth : 0;
             }
             else if (e.ClickedItem == timeMenuItem)
             {
-                listView_Packets.Columns[2].Width = timeMenuItem.CheckState == CheckState.Unchecked ? defTimeWidth : 0;
+                timeColumn.Width = timeMenuItem.CheckState == CheckState.Unchecked ? defTimeWidth : 0;
             }
             else if (e.ClickedItem == headersMenuItem)
             {
-                listView_Packets.Columns[3].Width = headersMenuItem.CheckState == CheckState.Unchecked ? defHeadersWidth : 0;
+                headersColumn.Width = headersMenuItem.CheckState == CheckState.Unchecked ? defHeadersWidth : 0;
             }
             else if (e.ClickedItem == typeMenuItem)
             {
-                listView_Packets.Columns[4].Width = typeMenuItem.CheckState == CheckState.Unchecked ? defTypeWidth : 0;
+                typeColumn.Width = typeMenuItem.CheckState == CheckState.Unchecked ? defTypeWidth : 0;
             }
             else if (e.ClickedItem == sizeMenuItem)
             {
-                listView_Packets.Columns[5].Width = sizeMenuItem.CheckState == CheckState.Unchecked ? defSizeWidth : 0;
+                sizeColumn.Width = sizeMenuItem.CheckState == CheckState.Unchecked ? defSizeWidth : 0;
             }
             else if (e.ClickedItem == extraInfoMenuItem)
             {
-                listView_Packets.Columns[6].Width = extraInfoMenuItem.CheckState == CheckState.Unchecked ? defExtraInfoWidth : 0;
+                extraInfoColumn.Width = extraInfoMenuItem.CheckState == CheckState.Unchecked ? defExtraInfoWidth : 0;
             }
             else if (e.ClickedItem == opcodeMenuItem)
             {
-                listView_Packets.Columns[7].Width = opcodeMenuItem.CheckState == CheckState.Unchecked ? defOpcodeWidth : 0;
+                hexOpcodeColumn.Width = opcodeMenuItem.CheckState == CheckState.Unchecked ? defOpcodeWidth : 0;
             }
             else if (e.ClickedItem == packSeqMenuItem)
             {
-                listView_Packets.Columns[8].Width = packSeqMenuItem.CheckState == CheckState.Unchecked ? defPackSeqWidth : 0;
+                packSeqColumn.Width = packSeqMenuItem.CheckState == CheckState.Unchecked ? defPackSeqWidth : 0;
             }
             else if (e.ClickedItem == queueMenuItem)
             {
-                listView_Packets.Columns[9].Width = queueMenuItem.CheckState == CheckState.Unchecked ? defQueueWidth : 0;
+                queueColumn.Width = queueMenuItem.CheckState == CheckState.Unchecked ? defQueueWidth : 0;
             }
             else if (e.ClickedItem == iterationMenuItem)
             {
-                listView_Packets.Columns[10].Width = iterationMenuItem.CheckState == CheckState.Unchecked ? defIterationWidth : 0;
+                iterationColumn.Width = iterationMenuItem.CheckState == CheckState.Unchecked ? defIterationWidth : 0;
+            }
+            else if (e.ClickedItem == serverPortMenuItem)
+            {
+                serverPortColumn.Width = serverPortMenuItem.CheckState == CheckState.Unchecked ? defServerPortWidth : 0;
             }
         }
 

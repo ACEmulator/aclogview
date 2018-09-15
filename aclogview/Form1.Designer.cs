@@ -38,7 +38,7 @@ namespace aclogview {
             this.packSeqColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.queueColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.iterationColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader16 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.serverPortColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listView_CreatedObjects = new System.Windows.Forms.ListView();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -61,12 +61,13 @@ namespace aclogview {
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.CopyAll = new System.Windows.Forms.ToolStripMenuItem();
             this.TeleLoc = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.FindID = new System.Windows.Forms.ToolStripMenuItem();
+            this.listviewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.objectsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.jumpToMessageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.highlightObjectIDMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.listviewContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.copyTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.mainMenu = new System.Windows.Forms.MainMenu(this.components);
             this.menuItem_File = new System.Windows.Forms.MenuItem();
             this.menuItem_OpenAsMessages = new System.Windows.Forms.MenuItem();
@@ -107,7 +108,18 @@ namespace aclogview {
             this.checkBox_ShowObjects = new System.Windows.Forms.CheckBox();
             this.HighlightMode_comboBox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.columnsContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.sendReceiveMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.timeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.headersMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.typeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sizeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.extraInfoMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.opcodeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.packSeqMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.queueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.iterationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.serverPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -125,8 +137,8 @@ namespace aclogview {
             this.hexContextMenu.SuspendLayout();
             this.tabProtocolDocs.SuspendLayout();
             this.parsedContextMenu.SuspendLayout();
-            this.objectsContextMenu.SuspendLayout();
             this.listviewContextMenu.SuspendLayout();
+            this.objectsContextMenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).BeginInit();
             this.statusStrip.SuspendLayout();
             this.columnsContextMenu.SuspendLayout();
@@ -187,8 +199,7 @@ namespace aclogview {
             this.packSeqColumn,
             this.queueColumn,
             this.iterationColumn,
-            this.columnHeader16});
-            this.listView_Packets.ContextMenuStrip = this.listviewContextMenu;
+            this.serverPortColumn});
             this.listView_Packets.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_Packets.FullRowSelect = true;
             this.listView_Packets.HideSelection = false;
@@ -203,6 +214,7 @@ namespace aclogview {
             this.listView_Packets.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_Packets_ColumnClick);
             this.listView_Packets.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.listView_Packets_RetrieveVirtualItem);
             this.listView_Packets.SelectedIndexChanged += new System.EventHandler(this.listView_Packets_SelectedIndexChanged);
+            this.listView_Packets.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listView_Packets_MouseClick);
             // 
             // lineNumberColumn
             // 
@@ -249,20 +261,17 @@ namespace aclogview {
             this.packSeqColumn.Width = 72;
             // 
             // queueColumn
-            this.columnHeader14.Text = "Iteration";
-            //
-            // columnHeader16
-            //
-            this.columnHeader16.Text = "Server Port";
-            this.columnHeader16.Width = 65;
-            // 
-            // listviewContextMenu
             // 
             this.queueColumn.Text = "Queue";
             // 
             // iterationColumn
             // 
             this.iterationColumn.Text = "Iteration";
+            // 
+            // serverPortColumn
+            // 
+            this.serverPortColumn.Text = "Server Port";
+            this.serverPortColumn.Width = 65;
             // 
             // listView_CreatedObjects
             // 
@@ -445,7 +454,7 @@ namespace aclogview {
             this.toolStripSeparator2,
             this.FindID});
             this.parsedContextMenu.Name = "parsedContextMenu";
-            this.parsedContextMenu.Size = new System.Drawing.Size(184, 148);
+            this.parsedContextMenu.Size = new System.Drawing.Size(184, 126);
             this.parsedContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.parsedContextMenu_Opening);
             this.parsedContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.parsedContextMenu_ItemClicked);
             // 
@@ -480,11 +489,30 @@ namespace aclogview {
             this.TeleLoc.Text = "Copy ACE @teleloc";
             this.TeleLoc.Visible = false;
             // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(180, 6);
+            // 
             // FindID
             // 
             this.FindID.Name = "FindID";
             this.FindID.Size = new System.Drawing.Size(183, 22);
             this.FindID.Text = "&Find ID In Object List";
+            // 
+            // listviewContextMenu
+            // 
+            this.listviewContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyTimeMenuItem});
+            this.listviewContextMenu.Name = "listviewContextMenu";
+            this.listviewContextMenu.Size = new System.Drawing.Size(156, 26);
+            this.listviewContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.listviewContextMenu_ItemClicked);
+            // 
+            // copyTimeMenuItem
+            // 
+            this.copyTimeMenuItem.Name = "copyTimeMenuItem";
+            this.copyTimeMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.copyTimeMenuItem.Text = "Copy time field";
             // 
             // objectsContextMenu
             // 
@@ -507,20 +535,6 @@ namespace aclogview {
             this.highlightObjectIDMenuItem.Name = "highlightObjectIDMenuItem";
             this.highlightObjectIDMenuItem.Size = new System.Drawing.Size(188, 22);
             this.highlightObjectIDMenuItem.Text = "&Highlight Object ID";
-            // 
-            // listviewContextMenu
-            // 
-            this.listviewContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyTimeMenuItem});
-            this.listviewContextMenu.Name = "listviewContextMenu";
-            this.listviewContextMenu.Size = new System.Drawing.Size(156, 26);
-            this.listviewContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.listviewContextMenu_ItemClicked);
-            // 
-            // copyTimeMenuItem
-            // 
-            this.copyTimeMenuItem.Name = "copyTimeMenuItem";
-            this.copyTimeMenuItem.Size = new System.Drawing.Size(155, 22);
-            this.copyTimeMenuItem.Text = "Copy time field";
             // 
             // mainMenu
             // 
@@ -865,9 +879,10 @@ namespace aclogview {
             this.opcodeMenuItem,
             this.packSeqMenuItem,
             this.queueMenuItem,
-            this.iterationMenuItem});
+            this.iterationMenuItem,
+            this.serverPortMenuItem});
             this.columnsContextMenu.Name = "columnsContextMenu";
-            this.columnsContextMenu.Size = new System.Drawing.Size(125, 224);
+            this.columnsContextMenu.Size = new System.Drawing.Size(132, 246);
             this.columnsContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.columnsContextMenu_ItemClicked);
             // 
             // sendReceiveMenuItem
@@ -876,7 +891,7 @@ namespace aclogview {
             this.sendReceiveMenuItem.CheckOnClick = true;
             this.sendReceiveMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.sendReceiveMenuItem.Name = "sendReceiveMenuItem";
-            this.sendReceiveMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.sendReceiveMenuItem.Size = new System.Drawing.Size(131, 22);
             this.sendReceiveMenuItem.Text = "S/R";
             // 
             // timeMenuItem
@@ -885,7 +900,7 @@ namespace aclogview {
             this.timeMenuItem.CheckOnClick = true;
             this.timeMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.timeMenuItem.Name = "timeMenuItem";
-            this.timeMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.timeMenuItem.Size = new System.Drawing.Size(131, 22);
             this.timeMenuItem.Text = "Time";
             // 
             // headersMenuItem
@@ -894,7 +909,7 @@ namespace aclogview {
             this.headersMenuItem.CheckOnClick = true;
             this.headersMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.headersMenuItem.Name = "headersMenuItem";
-            this.headersMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.headersMenuItem.Size = new System.Drawing.Size(131, 22);
             this.headersMenuItem.Text = "Headers";
             // 
             // typeMenuItem
@@ -903,7 +918,7 @@ namespace aclogview {
             this.typeMenuItem.CheckOnClick = true;
             this.typeMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.typeMenuItem.Name = "typeMenuItem";
-            this.typeMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.typeMenuItem.Size = new System.Drawing.Size(131, 22);
             this.typeMenuItem.Text = "Type";
             // 
             // sizeMenuItem
@@ -912,7 +927,7 @@ namespace aclogview {
             this.sizeMenuItem.CheckOnClick = true;
             this.sizeMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.sizeMenuItem.Name = "sizeMenuItem";
-            this.sizeMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.sizeMenuItem.Size = new System.Drawing.Size(131, 22);
             this.sizeMenuItem.Text = "Size";
             // 
             // extraInfoMenuItem
@@ -921,7 +936,7 @@ namespace aclogview {
             this.extraInfoMenuItem.CheckOnClick = true;
             this.extraInfoMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.extraInfoMenuItem.Name = "extraInfoMenuItem";
-            this.extraInfoMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.extraInfoMenuItem.Size = new System.Drawing.Size(131, 22);
             this.extraInfoMenuItem.Text = "Extra Info";
             // 
             // opcodeMenuItem
@@ -930,7 +945,7 @@ namespace aclogview {
             this.opcodeMenuItem.CheckOnClick = true;
             this.opcodeMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.opcodeMenuItem.Name = "opcodeMenuItem";
-            this.opcodeMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.opcodeMenuItem.Size = new System.Drawing.Size(131, 22);
             this.opcodeMenuItem.Text = "OpCode";
             // 
             // packSeqMenuItem
@@ -939,7 +954,7 @@ namespace aclogview {
             this.packSeqMenuItem.CheckOnClick = true;
             this.packSeqMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.packSeqMenuItem.Name = "packSeqMenuItem";
-            this.packSeqMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.packSeqMenuItem.Size = new System.Drawing.Size(131, 22);
             this.packSeqMenuItem.Text = "Pack. Seq";
             // 
             // queueMenuItem
@@ -948,7 +963,7 @@ namespace aclogview {
             this.queueMenuItem.CheckOnClick = true;
             this.queueMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.queueMenuItem.Name = "queueMenuItem";
-            this.queueMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.queueMenuItem.Size = new System.Drawing.Size(131, 22);
             this.queueMenuItem.Text = "Queue";
             // 
             // iterationMenuItem
@@ -957,10 +972,17 @@ namespace aclogview {
             this.iterationMenuItem.CheckOnClick = true;
             this.iterationMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.iterationMenuItem.Name = "iterationMenuItem";
-            this.iterationMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.iterationMenuItem.Size = new System.Drawing.Size(131, 22);
             this.iterationMenuItem.Text = "Iteration";
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(180, 6);
+            // 
+            // serverPortMenuItem
+            // 
+            this.serverPortMenuItem.Checked = true;
+            this.serverPortMenuItem.CheckOnClick = true;
+            this.serverPortMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.serverPortMenuItem.Name = "serverPortMenuItem";
+            this.serverPortMenuItem.Size = new System.Drawing.Size(131, 22);
+            this.serverPortMenuItem.Text = "Server Port";
             // 
             // Form1
             // 
@@ -1005,8 +1027,8 @@ namespace aclogview {
             this.hexContextMenu.ResumeLayout(false);
             this.tabProtocolDocs.ResumeLayout(false);
             this.parsedContextMenu.ResumeLayout(false);
-            this.objectsContextMenu.ResumeLayout(false);
             this.listviewContextMenu.ResumeLayout(false);
+            this.objectsContextMenu.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_Search)).EndInit();
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
@@ -1100,7 +1122,7 @@ namespace aclogview {
         private System.Windows.Forms.ColumnHeader packSeqColumn;
         private System.Windows.Forms.ColumnHeader queueColumn;
         private System.Windows.Forms.ColumnHeader iterationColumn;
-        private System.Windows.Forms.ColumnHeader columnHeader16;
+        private System.Windows.Forms.ColumnHeader serverPortColumn;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem sendReceiveMenuItem;
         internal System.Windows.Forms.ContextMenuStrip columnsContextMenu;
@@ -1113,6 +1135,7 @@ namespace aclogview {
         private System.Windows.Forms.ToolStripMenuItem packSeqMenuItem;
         private System.Windows.Forms.ToolStripMenuItem queueMenuItem;
         private System.Windows.Forms.ToolStripMenuItem iterationMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem serverPortMenuItem;
     }
 }
 
