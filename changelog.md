@@ -1,3 +1,8 @@
+### 2018-09-14
+[Morosity/Spazmodica]
+* Updated .NET to 4.7.1
+* Added Server port referenced for both outgoing and incoming packets
+
 ### 2018-08-30
 [fartwhif]
 * Added seq, queue, and iteration columns to main list.
