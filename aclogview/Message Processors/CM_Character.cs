@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,15 +20,26 @@ public class CM_Character : MessageProcessor {
             case PacketOpcode.Evt_Character__TeleToLifestone_ID:
             case PacketOpcode.Evt_Character__LoginCompleteNotification_ID:
             case PacketOpcode.Evt_Character__RequestPing_ID:
-            case PacketOpcode.Evt_Character__ReturnPing_ID:
             case PacketOpcode.Evt_Character__ClearPlayerConsentList_ID:
             case PacketOpcode.Evt_Character__DisplayPlayerConsentList_ID:
             case PacketOpcode.Evt_Character__Suicide_ID:
             case PacketOpcode.Evt_Character__TeleToMarketplace_ID:
-            case PacketOpcode.Evt_Character__EnterPKLite_ID:
+            case PacketOpcode.Evt_Character__EnterPKLite_ID: {
+                    EmptyMessage message = new EmptyMessage(opcode);
+                    message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
+                    break;
+                }
+            case PacketOpcode.Evt_Character__ReturnPing_ID: {
+                    EmptyMessage message = new EmptyMessage(opcode);
+                    message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
+                    break;
+                }
             case PacketOpcode.Evt_Character__EnterGame_ServerReady_ID: {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo{ DataType = DataType.Opcode });
                     break;
                 }
             case PacketOpcode.Evt_Character__PlayerOptionChangedEvent_ID: {
@@ -147,13 +159,12 @@ public class CM_Character : MessageProcessor {
     }
 
     public class PlayerOptionChangedEvent : Message {
-        PlayerOption i_po;
-        int i_value;
+        public PlayerOption i_po;
+        public int i_value;
 
         public static PlayerOptionChangedEvent read(BinaryReader binaryReader) {
             PlayerOptionChangedEvent newObj = new PlayerOptionChangedEvent();
             newObj.i_po = (PlayerOption)binaryReader.ReadUInt32();
-            // TODO: These is some more logic right here - need to handle it correctly
             newObj.i_value = binaryReader.ReadInt32();
             Util.readToAlign(binaryReader);
             return newObj;
@@ -162,8 +173,11 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_po = " + i_po);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_value = " + i_value);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -319,8 +333,18 @@ public class CM_Character : MessageProcessor {
             }
             // Now skip over the header
             ContextInfo.DataIndex += 4;
-            node.Nodes.Add("options_ = " + Utility.FormatHex(options_));
-            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            var optionsNode = node.Nodes.Add("options_ = " + Utility.FormatHex(options_));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            foreach (CharacterOption option in Enum.GetValues(typeof(CharacterOption)))
+            {
+                if ((options_ & (uint)option) == (uint)option && (uint)option != 0)
+                {
+                    optionsNode.Nodes.Add($"{Enum.GetName(typeof(CharacterOption), option)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                }
+            }
+            // skip options
+            ContextInfo.DataIndex += 4;
             
             if (shortcuts_ != null) {
                 TreeNode shortcutsNode = node.Nodes.Add("shortcuts_ = ");
@@ -372,23 +396,64 @@ public class CM_Character : MessageProcessor {
             
             if ((header & (uint)PlayerModulePackHeader.PM_Packed_SpellbookFilters) != 0)
             {
-                node.Nodes.Add("spell_filters_ = " + Utility.FormatHex(spell_filters_));
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                var spellFilterNode = node.Nodes.Add("spell_filters_ = " + Utility.FormatHex(spell_filters_));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                foreach (SpellbookFilter filter in Enum.GetValues(typeof(SpellbookFilter)))
+                {
+                    if ((spell_filters_ & (uint)filter) == (uint)filter && (uint)filter != 0)
+                    {
+                        spellFilterNode.Nodes.Add($"{Enum.GetName(typeof(SpellbookFilter), filter)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                    }
+                }
+                // skip spell filters
+                ContextInfo.DataIndex += 4;
             }
             else
             {
-                node.Nodes.Add("spell_filters_ (not serialized) = " + Utility.FormatHex(spell_filters_));
+                var spellFilterNode = node.Nodes.Add("spell_filters_ = " + Utility.FormatHex(spell_filters_));
+                foreach (SpellbookFilter filter in Enum.GetValues(typeof(SpellbookFilter)))
+                {
+                    if ((spell_filters_ & (uint)filter) == (uint)filter && (uint)filter != 0)
+                    {
+                        spellFilterNode.Nodes.Add($"{Enum.GetName(typeof(SpellbookFilter), filter)}");
+                        ContextInfo.AddToList(new ContextInfo {}, updateDataIndex: false);
+                        spellFilterNode.Nodes[spellFilterNode.Nodes.Count - 1].ForeColor = Color.DimGray;
+                    }
+                }
+                node.Nodes[node.Nodes.Count - 1].ForeColor = Color.DimGray;
                 ContextInfo.AddToList(new ContextInfo {});
             }
+
             if ((header & (uint)PlayerModulePackHeader.PM_Packed_2ndCharacterOptions) != 0)
             {
-                node.Nodes.Add("options2 = " + Utility.FormatHex(options2));
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                var options2Node = node.Nodes.Add("options2 = " + Utility.FormatHex(options2));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                foreach (CharacterOptions2 option in Enum.GetValues(typeof(CharacterOptions2)))
+                {
+                    if ((options2 & (uint)option) == (uint)option && (uint)option != 0)
+                    {
+                        options2Node.Nodes.Add($"{Enum.GetName(typeof(CharacterOptions2), option)}");
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                    }
+                }
+                // skip options2
+                ContextInfo.DataIndex += 4;
             }
             else
             {
-                node.Nodes.Add("options2 (not serialized) = " + Utility.FormatHex(options2));
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                var options2Node = node.Nodes.Add("options2 = " + Utility.FormatHex(options2));
+                foreach (CharacterOptions2 option in Enum.GetValues(typeof(CharacterOptions2)))
+                {
+                    if ((options2 & (uint)option) == (uint)option && (uint)option != 0)
+                    {
+                        options2Node.Nodes.Add($"{Enum.GetName(typeof(CharacterOptions2), option)}");
+                        ContextInfo.AddToList(new ContextInfo {}, updateDataIndex: false);
+                        options2Node.Nodes[options2Node.Nodes.Count - 1].ForeColor = Color.DimGray;
+                    }
+                }
+                node.Nodes[node.Nodes.Count - 1].ForeColor = Color.DimGray;
+                ContextInfo.AddToList(new ContextInfo {});
             }
 
             if ((header & (uint)PlayerModulePackHeader.PM_Packed_TimeStampFormat) != 0)
@@ -828,7 +893,7 @@ public class CM_Character : MessageProcessor {
     }
 
     public class CharacterOptionsEvent : Message {
-        PlayerModule i_pMod;
+        public PlayerModule i_pMod;
 
         public static CharacterOptionsEvent read(BinaryReader binaryReader) {
             CharacterOptionsEvent newObj = new CharacterOptionsEvent();
@@ -839,7 +904,9 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             TreeNode playerModuleNode = rootNode.Nodes.Add("i_pMod = ");
+            ContextInfo.AddToList(new ContextInfo { Length = i_pMod.Length }, updateDataIndex: false);
             i_pMod.contributeToTreeNode(playerModuleNode);
             treeView.Nodes.Add(rootNode);
             playerModuleNode.Expand();
@@ -857,7 +924,9 @@ public class CM_Character : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             TreeNode shortcutNode = rootNode.Nodes.Add("shortcut = ");
+            ContextInfo.AddToList(new ContextInfo { Length = shortcut.Length }, updateDataIndex: false);
             shortcut.contributeToTreeNode(shortcutNode);
             treeView.Nodes.Add(rootNode);
             rootNode.ExpandAll();
@@ -880,9 +949,13 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_spid = " + i_spid);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.SpellID_uint });
             rootNode.Nodes.Add("i_index = " + i_index);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_list = " + i_list);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -903,9 +976,13 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_confirmType = " + (ConfirmationType)i_confirmType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_context = " + i_context);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_bAccepted = " + i_bAccepted);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -922,7 +999,9 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target = " + i_target);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -939,7 +1018,9 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target = " + i_target);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -956,7 +1037,9 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_index = " + i_index);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -975,8 +1058,11 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_spid = " + i_spid);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_list = " + i_list);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -993,8 +1079,19 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_options = " + i_options);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
+            var spellFilterNode = rootNode.Nodes.Add("i_options = " + Utility.FormatHex(i_options));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            foreach (SpellbookFilter filter in Enum.GetValues(typeof(SpellbookFilter)))
+            {
+                if ((i_options & (uint)filter) == (uint)filter && (uint)filter != 0)
+                {
+                    spellFilterNode.Nodes.Add($"{Enum.GetName(typeof(SpellbookFilter), filter)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                }
+            }
             treeView.Nodes.Add(rootNode);
+            rootNode.ExpandAll();
         }
     }
 
@@ -1040,22 +1137,39 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_base_palette = " + Utility.FormatHex(i_base_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_head_object = " + Utility.FormatHex(i_head_object));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_head_texture = " + Utility.FormatHex(i_head_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_default_head_texture = " + Utility.FormatHex(i_default_head_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_eyes_texture = " + Utility.FormatHex(i_eyes_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_default_eyes_texture = " + Utility.FormatHex(i_default_eyes_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_nose_texture = " + Utility.FormatHex(i_nose_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_default_nose_texture = " + Utility.FormatHex(i_default_nose_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_mouth_texture = " + Utility.FormatHex(i_mouth_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_default_mouth_texture = " + Utility.FormatHex(i_default_mouth_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_skin_palette = " + Utility.FormatHex(i_skin_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_hair_palette = " + Utility.FormatHex(i_hair_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_eyes_palette = " + Utility.FormatHex(i_eyes_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_setup_id = " + Utility.FormatHex(i_setup_id));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_option1 = " + i_option1);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_option2 = " + i_option2);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1074,8 +1188,11 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_wcid = " + i_wcid);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_amount = " + i_amount);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1096,9 +1213,13 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target = " + i_target);
+            ContextInfo.AddToList(new ContextInfo { Length = i_target.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("i_status = " + i_status);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_complaint = " + i_complaint);
+            ContextInfo.AddToList(new ContextInfo { Length = i_complaint.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1115,7 +1236,9 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_targetName = " + i_targetName);
+            ContextInfo.AddToList(new ContextInfo { Length = i_targetName.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1132,7 +1255,9 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_targetName = " + i_targetName);
+            ContextInfo.AddToList(new ContextInfo { Length = i_targetName.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1149,7 +1274,9 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_targetName = " + i_targetName);
+            ContextInfo.AddToList(new ContextInfo { Length = i_targetName.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1170,8 +1297,11 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("targetName = " + targetName);
+            ContextInfo.AddToList(new ContextInfo { Length = targetName.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("age = " + age);
+            ContextInfo.AddToList(new ContextInfo { Length = age.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1190,8 +1320,11 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("confirm = " + confirm);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("context = " + context);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1238,22 +1371,39 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("_base_palette = " + Utility.FormatHex(_base_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_head_object = " + Utility.FormatHex(_head_object));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_head_texture = " + Utility.FormatHex(_head_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_default_head_texture = " + Utility.FormatHex(_default_head_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_eyes_texture = " + Utility.FormatHex(_eyes_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_default_eyes_texture = " + Utility.FormatHex(_default_eyes_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_nose_texture = " + Utility.FormatHex(_nose_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_default_nose_texture = " + Utility.FormatHex(_default_nose_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_mouth_texture = " + Utility.FormatHex(_mouth_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_default_mouth_texture = " + Utility.FormatHex(_default_mouth_texture));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_skin_palette = " + Utility.FormatHex(_skin_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_hair_palette = " + Utility.FormatHex(_hair_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_eyes_palette = " + Utility.FormatHex(_eyes_palette));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_setup_id = " + Utility.FormatHex(_setup_id));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("option1 = " + option1);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("option2 = " + option2);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1274,9 +1424,13 @@ public class CM_Character : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("confirm = " + confirm);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("context = " + context);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("userData = " + userData);
+            ContextInfo.AddToList(new ContextInfo { Length = userData.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1296,7 +1450,9 @@ public class CM_Character : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("_error = " + (charError)_error);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }

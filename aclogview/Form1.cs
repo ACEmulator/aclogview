@@ -96,6 +96,7 @@ namespace aclogview
             ciSupportedMessageProcessors.Add(typeof(CM_Advocate).Name);
             messageProcessors.Add(new CM_Allegiance());
             messageProcessors.Add(new CM_Character());
+            ciSupportedMessageProcessors.Add(typeof(CM_Character).Name);
             messageProcessors.Add(new CM_Combat());
             ciSupportedMessageProcessors.Add(typeof(CM_Combat).Name);
             messageProcessors.Add(new CM_Communication());
