@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -176,7 +176,9 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -195,7 +197,9 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("PopUpMessage = " + PopUpMessage.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = PopUpMessage.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -214,7 +218,9 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_bAFK = " + i_bAFK);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -233,7 +239,9 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_strMessage = " + i_strMessage.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = i_strMessage.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -255,8 +263,11 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("TargetID = " + Utility.FormatHex(TargetID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -282,10 +293,15 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_add = " + i_add);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_character_id = " + Utility.FormatHex(i_character_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_character_name = " + i_character_name.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = i_character_name.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("i_msg_type = " + (SquelchTypes)i_msg_type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -307,8 +323,11 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_add = " + i_add);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_character_name = " + i_character_name.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = i_character_name.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -330,8 +349,11 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_add = " + i_add);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_msg_type = " + (SquelchTypes)i_msg_type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -353,8 +375,11 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("TargetName = " + TargetName.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = TargetName.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -401,13 +426,26 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            if (SendingBroadcast)
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
+            else
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("GroupChatType = " + (GroupChatType)GroupChatType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             if (SenderNameSize == 0 || SendingBroadcast == true) {  // Some received messages and all sent messages do not have a sender name.
+                if (SenderNameSize == 0)
+                {
+                    rootNode.Nodes.Add("SenderName = " + SenderName);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                }
                 rootNode.Nodes.Add("MessageText = " + MessageText);
+                ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             }
             else {
                 rootNode.Nodes.Add("SenderName = " + SenderName);
+                ContextInfo.AddToList(new ContextInfo { Length = SenderName.Length, DataType = DataType.Serialized_AsciiString });
                 rootNode.Nodes.Add("MessageText = " + MessageText);
+                ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             }
             treeView.Nodes.Add(rootNode);
         }
@@ -417,18 +455,22 @@ public class CM_Communication : MessageProcessor {
     {
         public uint i_character_id;
         public SquelchInfo character_info;
+        public int Length;
 
         public static CharacterHash read(BinaryReader binaryReader)
         {
             var newObj = new CharacterHash();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.i_character_id = binaryReader.ReadUInt32();
             newObj.character_info = SquelchInfo.read(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("i_character_id = " + Utility.FormatHex(i_character_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             character_info.contributeToTreeNode(node);
         }
     }
@@ -438,13 +480,16 @@ public class CM_Communication : MessageProcessor {
         public PList<uint> squelch_msgs;
         public PStringChar name;
         public uint is_zone_squelch;
+        public int Length;
 
         public static SquelchInfo read(BinaryReader binaryReader)
         {
             var newObj = new SquelchInfo();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.squelch_msgs = PList<uint>.read(binaryReader);
             newObj.name = PStringChar.read(binaryReader);
             newObj.is_zone_squelch = binaryReader.ReadUInt32();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
@@ -452,12 +497,18 @@ public class CM_Communication : MessageProcessor {
         {
             if (squelch_msgs.list.Count == 0) {
                 node.Nodes.Add("squelch_msgs = None");
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
+            // skip count header
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < squelch_msgs.list.Count; i++) {
                 node.Nodes.Add("squelch_msgs = " + (SquelchMasks)squelch_msgs.list[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             node.Nodes.Add("name = " + name);
+            ContextInfo.AddToList(new ContextInfo { Length = name.Length, DataType = DataType.Serialized_AsciiString });
             node.Nodes.Add("is_zone_squelch = " + is_zone_squelch);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -468,6 +519,7 @@ public class CM_Communication : MessageProcessor {
         public ushort character_num_buckets;
         public ushort character_table_size;
         public List<CharacterHash> character_list = new List<CharacterHash>();
+        public int character_listLength;
         public SquelchInfo global_squelch;
 
         public static SetSquelchDB read(BinaryReader binaryReader)
@@ -478,11 +530,13 @@ public class CM_Communication : MessageProcessor {
             // It appears based on pcaps that the account squelch info will always be 0 and therefore will not need to be unpacked.
             newObj.account_num_buckets = binaryReader.ReadUInt16();
             newObj.account_table_size = binaryReader.ReadUInt16();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.character_num_buckets = binaryReader.ReadUInt16();
             newObj.character_table_size = binaryReader.ReadUInt16();
             for (int i = 0; i < newObj.character_num_buckets; i++) {
                 newObj.character_list.Add(CharacterHash.read(binaryReader));
             }
+            newObj.character_listLength = (int)(binaryReader.BaseStream.Position - startPosition);
             newObj.global_squelch = SquelchInfo.read(binaryReader);
             return newObj;
         }
@@ -490,22 +544,31 @@ public class CM_Communication : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView)
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            //rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode accountNode = rootNode.Nodes.Add("account_hash = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             accountNode.Nodes.Add("num_buckets = " + account_num_buckets);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             accountNode.Nodes.Add("table_size = " + account_table_size);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             TreeNode characterhashNode = rootNode.Nodes.Add("character_hash = ");
+            ContextInfo.AddToList(new ContextInfo { Length = character_listLength }, updateDataIndex: false);
             characterhashNode.Nodes.Add("num_buckets = " + character_num_buckets);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             characterhashNode.Nodes.Add("table_size = " + character_table_size);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             // add character stuff here
             for (int i = 0; i < character_list.Count; i++) {
                 TreeNode characterNode = characterhashNode.Nodes.Add($"character {i+1} = ");
+                ContextInfo.AddToList(new ContextInfo { Length = character_list[i].Length }, updateDataIndex: false);
                 character_list[i].contributeToTreeNode(characterNode);
             }
             TreeNode globalsquelchNode = rootNode.Nodes.Add("global_squelch = ");
+            ContextInfo.AddToList(new ContextInfo { Length = global_squelch.Length }, updateDataIndex: false);
             global_squelch.contributeToTreeNode(globalsquelchNode);
             treeView.Nodes.Add(rootNode);
             rootNode.ExpandAll();
+            rootNode.EnsureVisible();
         }
     }
 
@@ -524,7 +587,9 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("emoteMessage = " + emoteMessage);
+            ContextInfo.AddToList(new ContextInfo { Length = emoteMessage.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -548,9 +613,13 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = SenderName.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("EmoteMessage = " + EmoteMessage.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = EmoteMessage.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -569,7 +638,9 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("EmoteMessage = " + EmoteMessage.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = EmoteMessage.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -592,9 +663,13 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = SenderName.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("EmoteMessage = " + EmoteMessage.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = EmoteMessage.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -632,16 +707,27 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("AllegianceChannel = " + AllegianceChannel);
+            ContextInfo.AddToList(new ContextInfo { Length = 4});
             rootNode.Nodes.Add("GeneralChannel = " + GeneralChannel);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("TradeChannel = " + TradeChannel);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("LFGChannel = " + LFGChannel);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("RoleplayChannel = " + RoleplayChannel);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("Olthoi = " + Olthoi);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("Society = " + Society);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("SocietyCelHan = " + SocietyCelHan);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("SocietyEldWeb = " + SocietyEldWeb);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("SocietyRadBlo = " + SocietyRadBlo);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -658,7 +744,9 @@ public class CM_Communication : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("etype = " + etype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -677,8 +765,11 @@ public class CM_Communication : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("etype = " + etype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("user_data = " + user_data);
+            ContextInfo.AddToList(new ContextInfo { Length = user_data.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -704,10 +795,15 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
-            rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));                        
+            ContextInfo.AddToList(new ContextInfo { Length = SenderName.Length, DataType = DataType.Serialized_AsciiString });
+            rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("ChatMessageType = " + (eChatTypes)ChatMessageType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -735,11 +831,17 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = SenderName.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("SenderID = " +Utility.FormatHex(this.SenderID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("Range = " + Range);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("ChatMessageType = " + (eChatTypes)ChatMessageType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -769,12 +871,19 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("SenderName = " + SenderName.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = SenderName.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("SenderID = " + Utility.FormatHex(this.SenderID));
-            rootNode.Nodes.Add("TargetID = " + Utility.FormatHex(this.TargetID));                    
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
+            rootNode.Nodes.Add("TargetID = " + Utility.FormatHex(this.TargetID));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("ChatMessageType = " + (eChatTypes)ChatMessageType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("secretFlags = " + secretFlags);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -794,7 +903,9 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("StringMessage = " + StringMessage.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = StringMessage.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -816,8 +927,11 @@ public class CM_Communication : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("MessageText = " + MessageText.m_buffer);
+            ContextInfo.AddToList(new ContextInfo { Length = MessageText.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("ChatMessageType = " + (eChatTypes)ChatMessageType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
