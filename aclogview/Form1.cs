@@ -116,6 +116,7 @@ namespace aclogview
             messageProcessors.Add(new CM_Magic());
             ciSupportedMessageProcessors.Add(typeof(CM_Magic).Name);
             messageProcessors.Add(new CM_Misc());
+            ciSupportedMessageProcessors.Add(typeof(CM_Misc).Name);
             messageProcessors.Add(new CM_Movement());
             ciSupportedMessageProcessors.Add(typeof(CM_Movement).Name);
             messageProcessors.Add(new CM_Physics());
