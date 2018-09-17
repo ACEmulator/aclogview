@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -129,21 +129,21 @@ public enum CharacterOptions2 {
 
 public enum SpellbookFilter {
     Undef_SpellbookFilter = 0,
-    Creature_SpellbookFilter = (1 << 1),
-    Item_SpellbookFilter = (1 << 2),
-    Life_SpellbookFilter = (1 << 3),
-    War_SpellbookFilter = (1 << 4),
-    Level_1_SpellbookFilter = (1 << 5),
-    Level_2_SpellbookFilter = (1 << 6),
-    Level_3_SpellbookFilter = (1 << 7),
-    Level_4_SpellbookFilter = (1 << 8),
-    Level_5_SpellbookFilter = (1 << 9),
-    Level_6_SpellbookFilter = (1 << 10),
-    Level_7_SpellbookFilter = (1 << 11),
-    Level_8_SpellbookFilter = (1 << 12),
-    Level_9_SpellbookFilter = (1 << 13),
-    Void_SpellbookFilter = (1 << 14),
-    Default_SpellbookFilter = (1 << 15)
+    Creature_SpellbookFilter = 0x1,
+    Item_SpellbookFilter = 0x2,
+    Life_SpellbookFilter = 0x4,
+    War_SpellbookFilter = 0x8,
+    Level_1_SpellbookFilter = 0x10,
+    Level_2_SpellbookFilter = 0x20,
+    Level_3_SpellbookFilter = 0x40,
+    Level_4_SpellbookFilter = 0x80,
+    Level_5_SpellbookFilter = 0x100,
+    Level_6_SpellbookFilter = 0x200,
+    Level_7_SpellbookFilter = 0x400,
+    Level_8_SpellbookFilter = 0x800,
+    Level_9_SpellbookFilter = 0x1000,
+    Void_SpellbookFilter = 0x2000,
+    Default_SpellbookFilter = 0x3FFF
 }
 
 namespace ACCharGenResult {
