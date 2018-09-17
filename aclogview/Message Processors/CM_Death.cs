@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -64,9 +64,13 @@ public class CM_Death : MessageProcessor
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("death_message = " + DeathMessageText);
+            ContextInfo.AddToList(new ContextInfo { Length = DeathMessageText.Length, DataType = DataType.Serialized_AsciiString });
             rootNode.Nodes.Add("victim_id = " + Utility.FormatHex(VictimId));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("killer_id = " + Utility.FormatHex(KillerId));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -85,7 +89,9 @@ public class CM_Death : MessageProcessor
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("death_message = " + DeathMessageText);
+            ContextInfo.AddToList(new ContextInfo { Length = DeathMessageText.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -104,7 +110,9 @@ public class CM_Death : MessageProcessor
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("death_message = " + DeathMessageText);
+            ContextInfo.AddToList(new ContextInfo { Length = DeathMessageText.Length, DataType = DataType.Serialized_AsciiString });
             treeView.Nodes.Add(rootNode);
         }
     }
