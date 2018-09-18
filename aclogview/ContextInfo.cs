@@ -1,8 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace aclogview
 {
@@ -62,6 +64,12 @@ namespace aclogview
             contextList.Clear();
             DataIndex = 0;
             NodeIndex = 0;
+        }
+
+        public static void applyNonSerializedContextInfo(TreeNode node)
+        {
+            node.Nodes[node.Nodes.Count - 1].ForeColor = Color.DimGray;
+            ContextInfo.AddToList(new ContextInfo(), updateDataIndex: false);
         }
     }
 

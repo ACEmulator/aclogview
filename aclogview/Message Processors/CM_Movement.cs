@@ -376,7 +376,7 @@ public class CM_Movement : MessageProcessor {
             frameNode.Nodes.Add("qz = " + position.frame.qz);
             applyRotationContextInfo((bitfield & (uint)PackBitfield.OrientationHasNoZ) == 0, frameNode);
             frameNode.Nodes.Add("m_fl2gv = " + position.frame.m_fl2gv);
-            applyNonSerializedContextInfo(frameNode);
+            ContextInfo.applyNonSerializedContextInfo(frameNode);
 
             if ((bitfield & (uint)PackBitfield.HasVelocity) != 0)
             {
@@ -407,7 +407,7 @@ public class CM_Movement : MessageProcessor {
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
         else
         {
-            applyNonSerializedContextInfo(node);
+            ContextInfo.applyNonSerializedContextInfo(node);
         }
     }
 
@@ -520,43 +520,43 @@ public class CM_Movement : MessageProcessor {
             if ((bitfield & (uint)PackBitfield.current_style) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 2 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("forward_command = " + forward_command);
             if ((bitfield & (uint)PackBitfield.forward_command) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 2 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("sidestep_command = " + sidestep_command);
             if ((bitfield & (uint)PackBitfield.sidestep_command) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 2 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("turn_command = " + turn_command);
             if ((bitfield & (uint)PackBitfield.turn_command) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 2 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("forward_speed = " + forward_speed);
             if ((bitfield & (uint)PackBitfield.forward_speed) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("sidestep_speed = " + sidestep_speed);
             if ((bitfield & (uint)PackBitfield.sidestep_speed) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("turn_speed = " + turn_speed);
             if ((bitfield & (uint)PackBitfield.turn_speed) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             if (actions.Count > 0)
             {
@@ -901,21 +901,15 @@ public class CM_Movement : MessageProcessor {
         ContextInfo.AddToList(new ContextInfo { Length = 12 });
 
         frameNode.Nodes.Add("qw = " + moveToPos.frame.qw);
-        applyNonSerializedContextInfo(frameNode);
+        ContextInfo.applyNonSerializedContextInfo(frameNode);
         frameNode.Nodes.Add("qx = " + moveToPos.frame.qx);
-        applyNonSerializedContextInfo(frameNode);
+        ContextInfo.applyNonSerializedContextInfo(frameNode);
         frameNode.Nodes.Add("qy = " + moveToPos.frame.qy);
-        applyNonSerializedContextInfo(frameNode);
+        ContextInfo.applyNonSerializedContextInfo(frameNode);
         frameNode.Nodes.Add("qz = " + moveToPos.frame.qz);
-        applyNonSerializedContextInfo(frameNode);
+        ContextInfo.applyNonSerializedContextInfo(frameNode);
         frameNode.Nodes.Add("m_fl2gv = " + moveToPos.frame.m_fl2gv);
-        applyNonSerializedContextInfo(frameNode);
-    }
-
-    private static void applyNonSerializedContextInfo(TreeNode node)
-    {
-        node.Nodes[node.Nodes.Count - 1].ForeColor = Color.DimGray;
-        ContextInfo.AddToList(new ContextInfo(), updateDataIndex: false);
+        ContextInfo.applyNonSerializedContextInfo(frameNode);
     }
 
     private static void contributeMovementParams(TreeNode node, MovementParameters movement_params)
@@ -1080,67 +1074,67 @@ public class CM_Movement : MessageProcessor {
             if ((bitfield & (uint)PackBitfield.current_holdkey) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("current_style = " + current_style);
             if ((bitfield & (uint)PackBitfield.current_style) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("forward_command = " + forward_command);
             if ((bitfield & (uint)PackBitfield.forward_command) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("forward_holdkey = " + forward_holdkey);
             if ((bitfield & (uint)PackBitfield.forward_holdkey) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("forward_speed = " + forward_speed);
             if ((bitfield & (uint)PackBitfield.forward_speed) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("sidestep_command = " + sidestep_command);
             if ((bitfield & (uint)PackBitfield.sidestep_command) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("sidestep_holdkey = " + sidestep_holdkey);
             if ((bitfield & (uint)PackBitfield.sidestep_holdkey) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("sidestep_speed = " + sidestep_speed);
             if ((bitfield & (uint)PackBitfield.sidestep_speed) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("turn_command = " + turn_command);
             if ((bitfield & (uint)PackBitfield.turn_command) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("turn_holdkey = " + turn_holdkey);
             if ((bitfield & (uint)PackBitfield.turn_holdkey) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             node.Nodes.Add("turn_speed = " + turn_speed);
             if ((bitfield & (uint)PackBitfield.turn_speed) != 0)
                 ContextInfo.AddToList(new ContextInfo { Length = 4 });
             else
-                applyNonSerializedContextInfo(node);
+                ContextInfo.applyNonSerializedContextInfo(node);
 
             if (actions.Count > 0)
             {
