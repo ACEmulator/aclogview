@@ -127,6 +127,7 @@ namespace aclogview
             ciSupportedMessageProcessors.Add(typeof(CM_Social).Name);
             messageProcessors.Add(new CM_Trade());
             messageProcessors.Add(new CM_Train());
+            ciSupportedMessageProcessors.Add(typeof(CM_Train).Name);
             messageProcessors.Add(new CM_Vendor());
             ciSupportedMessageProcessors.Add(typeof(CM_Vendor).Name);
             messageProcessors.Add(new CM_Writing());

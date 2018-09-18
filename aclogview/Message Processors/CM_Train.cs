@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using aclogview;
 
 public class CM_Train : MessageProcessor {
 
@@ -58,8 +59,11 @@ public class CM_Train : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo{ DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_atype = " + i_atype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_xp_spent = " + i_xp_spent);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -80,8 +84,11 @@ public class CM_Train : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_atype = " + i_atype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_xp_spent = " + i_xp_spent);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -102,14 +109,17 @@ public class CM_Train : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_stype = " + i_stype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_xp_spent = " + i_xp_spent);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
 
     public class TrainSkillAdvancementClass : Message {
-        public STypeSkill i_stype; // TODO: Is this the right enum?
+        public STypeSkill i_stype;
         public uint i_xp_spent;
 
         public static TrainSkillAdvancementClass read(BinaryReader binaryReader) {
@@ -124,8 +134,11 @@ public class CM_Train : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_stype = " + i_stype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("i_xp_spent = " + i_xp_spent);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
