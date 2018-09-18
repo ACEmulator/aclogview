@@ -1,6 +1,7 @@
-﻿using aclogview;
+using aclogview;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -72,10 +73,13 @@ public class CM_Examine : MessageProcessor {
         public uint _max_stamina;
         public uint _max_mana;
         public uint enchantment_bitfield;
+        public List<string> packedItems = new List<string>();
+        public int Length;
 
         public static CreatureAppraisalProfile read(BinaryReader binaryReader)
         {
             CreatureAppraisalProfile newObj = new CreatureAppraisalProfile();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj._header = binaryReader.ReadUInt32();
             newObj._health = binaryReader.ReadUInt32();
             newObj._max_health = binaryReader.ReadUInt32();
@@ -91,36 +95,69 @@ public class CM_Examine : MessageProcessor {
                 newObj._mana = binaryReader.ReadUInt32();
                 newObj._max_stamina = binaryReader.ReadUInt32();
                 newObj._max_mana = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(CreatureAppraisalProfilePackHeader.Packed_Attributes.ToString());
             }
             if ((newObj._header & (uint)CreatureAppraisalProfilePackHeader.Packed_Enchantments) != 0)
             {
-                // TODO: Decode this message further using Enchantment_BFIndex
                 newObj.enchantment_bitfield = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(CreatureAppraisalProfilePackHeader.Packed_Enchantments.ToString());
             }
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
-            node.Nodes.Add("_header = " + Utility.FormatHex(_header));
+           var headerNode = node.Nodes.Add("_header = " + Utility.FormatHex(_header));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            }
+            // skip header
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("_health = " + _health);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_max_health = " + _max_health);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             if ((_header & (uint)CreatureAppraisalProfilePackHeader.Packed_Attributes) != 0)
             {
                 node.Nodes.Add("_strength = " + _strength);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_endurance = " + _endurance);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_quickness = " + _quickness);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_coordination = " + _coordination);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_focus = " + _focus);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_self = " + _self);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_stamina = " + _stamina);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_mana = " + _mana);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_max_stamina = " + _max_stamina);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 node.Nodes.Add("_max_mana = " + _max_mana);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((_header & (uint)CreatureAppraisalProfilePackHeader.Packed_Enchantments) != 0)
             {
-                node.Nodes.Add("enchantment_bitfield = " + Utility.FormatHex(enchantment_bitfield));
+                var enchantmentNode = node.Nodes.Add("enchantment_bitfield = " + Utility.FormatHex(enchantment_bitfield));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                // Loop over the enum types and add all the applicable ones
+                foreach (Enchantment_BFIndex enchantmentType in Enum.GetValues(typeof(Enchantment_BFIndex)))
+                {
+                    if ((enchantment_bitfield & (uint)enchantmentType) != 0)
+                    {
+                            enchantmentNode.Nodes.Add(Enum.GetName(typeof(Enchantment_BFIndex), enchantmentType));
+                            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                    }
+                }
+                ContextInfo.DataIndex += 4;
             }
         }
     }
@@ -155,14 +192,23 @@ public class CM_Examine : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("_base_armor_head = " + _base_armor_head);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_chest = " + _base_armor_chest);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_groin = " + _base_armor_groin);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_bicep = " + _base_armor_bicep);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_wrist = " + _base_armor_wrist);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_hand = " + _base_armor_hand);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_thigh = " + _base_armor_thigh);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_shin = " + _base_armor_shin);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_base_armor_foot = " + _base_armor_foot);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -194,13 +240,21 @@ public class CM_Examine : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("_mod_vs_slash = " + _mod_vs_slash);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_mod_vs_pierce = " + _mod_vs_pierce);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_mod_vs_bludgeon = " + _mod_vs_bludgeon);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_mod_vs_cold = " + _mod_vs_cold);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_mod_vs_fire = " + _mod_vs_fire);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_mod_vs_acid = " + _mod_vs_acid);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_mod_vs_nether = " + _mod_vs_nether);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_mod_vs_electric = " + _mod_vs_electric);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -210,10 +264,12 @@ public class CM_Examine : MessageProcessor {
         public uint _validLocations;
         public AMMO_TYPE _ammoType;
         public List<string> packedItems = new List<string>();
+        public int Length;
 
         public static HookAppraisalProfile read(BinaryReader binaryReader)
         {
             HookAppraisalProfile newObj = new HookAppraisalProfile();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj._bitField = binaryReader.ReadUInt32();
             newObj._validLocations = binaryReader.ReadUInt32();
             newObj._ammoType = (AMMO_TYPE)binaryReader.ReadUInt32();
@@ -227,19 +283,25 @@ public class CM_Examine : MessageProcessor {
             if ((newObj._bitField & (uint) HookAppraisal_BF.BF_LOCKPICK) != 0)
                 newObj.packedItems.Add(HookAppraisal_BF.BF_LOCKPICK.ToString());
 
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             var bitfieldNode = node.Nodes.Add("_bitField = " + Utility.FormatHex(_bitField));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             foreach (string item in packedItems)
             {
                 bitfieldNode.Nodes.Add(item);
             }
             var locationsNode = node.Nodes.Add("_validLocations = " + Utility.FormatHex(_validLocations));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             CM_Inventory.InventoryLocation.contributeToTreeNode(locationsNode, _validLocations);
+            // Skip valid locations
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("_ammoType = " + _ammoType);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -275,15 +337,25 @@ public class CM_Examine : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("_damage_type = " + _damage_type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_weapon_time = " + _weapon_time);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_weapon_skill = " + _weapon_skill);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_weapon_damage = " + _weapon_damage);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_damage_variance = " + _damage_variance);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("_damage_mod = " + _damage_mod);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("_weapon_length = " + _weapon_length);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("_max_velocity = " + _max_velocity);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("_weapon_offense = " + _weapon_offense);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("_max_velocity_estimated = " + _max_velocity_estimated);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -396,109 +468,210 @@ public class CM_Examine : MessageProcessor {
         public uint _weaponEnchantment;
         public uint _resistEnchantment;
         public ArmorLevels _armorLevelsTable = new ArmorLevels();
+        public List<string> packedItems = new List<string>();
+        public int Length;
 
         public static AppraisalProfile read(BinaryReader binaryReader) {
             AppraisalProfile newObj = new AppraisalProfile();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.header = binaryReader.ReadUInt32();
             newObj.success_flag = binaryReader.ReadUInt32();
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_IntStats) != 0) {
                 newObj._intStatsTable = PackableHashTable<STypeInt, int>.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_IntStats.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_Int64Stats) != 0) {
                 newObj._int64StatsTable = PackableHashTable<STypeInt64, long>.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_Int64Stats.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_BoolStats) != 0) {
                 newObj._boolStatsTable = PackableHashTable<STypeBool, int>.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_BoolStats.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_FloatStats) != 0) {
                 newObj._floatStatsTable = PackableHashTable<STypeFloat, double>.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_FloatStats.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_StringStats) != 0) {
                 newObj._strStatsTable = PackableHashTable<STypeString, PStringChar>.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_StringStats.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_DataIDStats) != 0) {
                 newObj._didStatsTable = PackableHashTable<STypeDID, uint>.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_DataIDStats.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_SpellList) != 0)
             {
                 newObj._spellsTable = PList<uint>.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_SpellList.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_ArmorProfile) != 0)
             {
                 newObj._armorProfileTable = ArmorProfile.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_ArmorProfile.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_CreatureProfile) != 0)
             {
                 newObj._creatureProfileTable = CreatureAppraisalProfile.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_CreatureProfile.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_WeaponProfile) != 0)
             {
                 newObj._weaponProfileTable = WeaponProfile.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_WeaponProfile.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_HookProfile) != 0)
             {
                 newObj._hookProfileTable = HookAppraisalProfile.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_HookProfile.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_ArmorEnchant) != 0)
             {
                 newObj._armorEnchantment = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_ArmorEnchant.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_WeaponEnchant) != 0)
             {
                 newObj._weaponEnchantment = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_WeaponEnchant.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_ResistEnchant) != 0)
             {
                 newObj._resistEnchantment = binaryReader.ReadUInt32();
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_ResistEnchant.ToString());
             }
             if ((newObj.header & (uint)AppraisalProfilePackHeader.Packed_ArmorLevels) != 0)
             {
                 newObj._armorLevelsTable = ArmorLevels.read(binaryReader);
+                newObj.packedItems.Add(AppraisalProfilePackHeader.Packed_ArmorLevels.ToString());
             }
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
-            node.Nodes.Add("header = " + Utility.FormatHex(header));
+            var headerNode = node.Nodes.Add("header = " + Utility.FormatHex(header));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            for (int i = 0; i < packedItems.Count; i++)
+            {
+                headerNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+            }
+            // skip header
+            ContextInfo.DataIndex += 4;
             node.Nodes.Add("success_flag = " + success_flag);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode intStatsNode = node.Nodes.Add("_intStatsTable = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_IntStats) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _intStatsTable.Length }, updateDataIndex: false);
                 _intStatsTable.contributeToTreeNode(intStatsNode);
+                // skip header
+                ContextInfo.DataIndex += 4;
+                for (int i = 0; i < _intStatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { Length = 8 });
+                }
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode int64StatsNode = node.Nodes.Add("_int64StatsTable = ");
+            
             if ((header & (uint)AppraisalProfilePackHeader.Packed_Int64Stats) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _int64StatsTable.Length }, updateDataIndex: false);
                 _int64StatsTable.contributeToTreeNode(int64StatsNode);
+                // skip header
+                ContextInfo.DataIndex += 4;
+                for (int i = 0; i < _int64StatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { Length = 12 });
+                }
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode boolStatsNode = node.Nodes.Add("_boolStatsTable = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_BoolStats) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _boolStatsTable.Length }, updateDataIndex: false);
                 _boolStatsTable.contributeToTreeNode(boolStatsNode);
+                // skip header
+                ContextInfo.DataIndex += 4;
+                for (int i = 0; i < _boolStatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { Length = 8 });
+                }
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode floatStatsNode = node.Nodes.Add("_floatStatsTable = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_FloatStats) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _floatStatsTable.Length }, updateDataIndex: false);
                 _floatStatsTable.contributeToTreeNode(floatStatsNode);
+                // skip header
+                ContextInfo.DataIndex += 4;
+                for (int i = 0; i < _floatStatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { Length = 12 });
+                }
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode strStatsNode = node.Nodes.Add("_strStatsTable = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_StringStats) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _strStatsTable.Length }, updateDataIndex: false);
                 _strStatsTable.contributeToTreeNode(strStatsNode);
+                // skip header
+                ContextInfo.DataIndex += 4;
+                foreach (KeyValuePair<STypeString,PStringChar> element in _strStatsTable.hashTable)
+                {
+                    ContextInfo.AddToList(new ContextInfo { Length = element.Value.Length + 4 });
+                }
             }
+
             TreeNode didStatsNode = node.Nodes.Add("_didStatsTable = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_DataIDStats) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _didStatsTable.Length }, updateDataIndex: false);
                 _didStatsTable.contributeToTreeNode(didStatsNode);
+                // skip header
+                ContextInfo.DataIndex += 4;
+                for (int i = 0; i < _didStatsTable.hashTable.Count; i++)
+                {
+                    ContextInfo.AddToList(new ContextInfo { Length = 8 });
+                }
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode spellsNode = node.Nodes.Add("_spellBook = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_SpellList) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _spellsTable.Length }, updateDataIndex: false);
+                // Skip count header
+                ContextInfo.DataIndex += 4;
                 for (int i = 0; i < _spellsTable.list.Count; i++)
                 {
                     uint i_spell_id = _spellsTable.list[i] & 0x7FFFFFFF;
                     uint enchantment_flag = _spellsTable.list[i] & 0x80000000;
                     TreeNode spellIDNode = spellsNode.Nodes.Add($"({i_spell_id}) " + (SpellID)i_spell_id);
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     if (enchantment_flag != 0)
                     {
                         spellIDNode.Nodes.Add("enchantment_flag = On");
@@ -507,76 +680,134 @@ public class CM_Examine : MessageProcessor {
                     {
                         spellIDNode.Nodes.Add("enchantment_flag = Off");
                     }
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
+                    ContextInfo.DataIndex += 4;
                 }
+            }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
             }
 
             TreeNode armorProfileNode = node.Nodes.Add("_armorProfile = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_ArmorProfile) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = 32 }, updateDataIndex: false);
                 _armorProfileTable.contributeToTreeNode(armorProfileNode);
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode creatureProfileNode = node.Nodes.Add("_creatureProfile = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_CreatureProfile) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _creatureProfileTable.Length }, updateDataIndex: false);
                 _creatureProfileTable.contributeToTreeNode(creatureProfileNode);
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode weaponProfileNode = node.Nodes.Add("_weaponProfile = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_WeaponProfile) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = 60 }, updateDataIndex: false);
                 _weaponProfileTable.contributeToTreeNode(weaponProfileNode);
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
+
             TreeNode hooksNode = node.Nodes.Add("_hookProfile = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_HookProfile) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = _hookProfileTable.Length }, updateDataIndex: false);
                 _hookProfileTable.contributeToTreeNode(hooksNode);
+            }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
             }
 
             TreeNode armorEnchantmentNode = node.Nodes.Add("_armorEnchantments = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_ArmorEnchant) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 armorEnchantmentNode.Nodes.Add("bitfield = " + Utility.FormatHex(_armorEnchantment));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 // Loop over the enum types and add all the applicable ones
                 foreach (ArmorEnchantment_BFIndex armorEnchantmentType in Enum.GetValues(typeof(ArmorEnchantment_BFIndex)))
                 {
                     if ((_armorEnchantment & (uint)armorEnchantmentType) != 0)
                     {
                         armorEnchantmentNode.Nodes.Add(Enum.GetName(typeof(ArmorEnchantment_BFIndex), armorEnchantmentType));
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                ContextInfo.DataIndex += 4;
+            }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
             }
 
             TreeNode weaponEnchantmentNode = node.Nodes.Add("_weaponEnchanments = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_WeaponEnchant) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 weaponEnchantmentNode.Nodes.Add("bitfield = " + Utility.FormatHex(_weaponEnchantment));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 // Loop over the enum types and add all the applicable ones
                 foreach (WeaponEnchantment_BFIndex weaponEnchantmentType in Enum.GetValues(typeof(WeaponEnchantment_BFIndex)))
                 {
                     if ((_weaponEnchantment & (uint)weaponEnchantmentType) != 0)
                     {
                         weaponEnchantmentNode.Nodes.Add(Enum.GetName(typeof(WeaponEnchantment_BFIndex), weaponEnchantmentType));
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                ContextInfo.DataIndex += 4;
+            }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
             }
 
             TreeNode resistEnchantmentNode = node.Nodes.Add("_resistEnchantments = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_ResistEnchant) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 resistEnchantmentNode.Nodes.Add("bitfield = " + Utility.FormatHex(_resistEnchantment));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 // Loop over the enum types and add all the applicable ones
                 foreach (ResistanceEnchantment_BFIndex resistEnchantmentType in Enum.GetValues(typeof(ResistanceEnchantment_BFIndex)))
                 {
                     if ((_resistEnchantment & (uint)resistEnchantmentType) != 0)
                     {
                         resistEnchantmentNode.Nodes.Add(Enum.GetName(typeof(ResistanceEnchantment_BFIndex), resistEnchantmentType));
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                     }
                 }
+                ContextInfo.DataIndex += 4;
+            }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
             }
 
             TreeNode armorLevelsNode = node.Nodes.Add("_armorLevels = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_ArmorLevels) != 0)
             {
+                ContextInfo.AddToList(new ContextInfo { Length = 36 }, updateDataIndex: false);
                 _armorLevelsTable.contributeToTreeNode(armorLevelsNode);
+            }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
             }
         }
     }
@@ -595,11 +826,15 @@ public class CM_Examine : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_objid = " + Utility.FormatHex(i_objid));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode profileNode = rootNode.Nodes.Add("i_prof = ");
+            ContextInfo.AddToList(new ContextInfo { Length = i_prof.Length }, updateDataIndex: false);
             i_prof.contributeToTreeNode(profileNode);
             treeView.Nodes.Add(rootNode);
             profileNode.Expand();
         }
     }
+
 }
