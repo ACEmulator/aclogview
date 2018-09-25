@@ -642,6 +642,10 @@ public class CM_Examine : MessageProcessor {
                     ContextInfo.AddToList(new ContextInfo { Length = element.Value.Length + 4 });
                 }
             }
+            else
+            {
+                ContextInfo.applyNonSerializedContextInfo(node);
+            }
 
             TreeNode didStatsNode = node.Nodes.Add("_didStatsTable = ");
             if ((header & (uint)AppraisalProfilePackHeader.Packed_DataIDStats) != 0)
