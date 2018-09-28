@@ -1,3 +1,8 @@
+### 2018-09-28
+[Slushnas]
+* Added context info for CM_Communication, CM_Social, CM_Character, CM_Death, CM_Misc, CM_Examine, and CM_Train.
+* Fixed an issue with the SpellbookFilter enum.
+
 ### 2018-09-14
 [Slushnas]
 * Added context info for CM_Movement, CM_Item, and CM_Combat.
