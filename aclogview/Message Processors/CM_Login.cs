@@ -66,6 +66,12 @@ public class CM_Login : MessageProcessor
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
+            case PacketOpcode.Evt_DDD__RequestData_ID:
+                {
+                    DDD_RequestDataMessage message = DDD_RequestDataMessage.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
             default:
                 {
                     handled = false;
@@ -855,13 +861,15 @@ public class CM_Login : MessageProcessor
     }
 
     /// <summary>
-    /// TODO -- FINISH THIS
+    /// TODO -- FINISH THIS ... This is all sorts of wrong - OptimShi
     /// </summary>
     public class DDD_InterrogationResponseMessage : Message
     {
         public uint m_ClientLanguage;
-        public PackableHashTable<uint, uint> m_ItersWithKeys = new PackableHashTable<uint, uint>();
-        public PList<uint> m_ItersWithoutKeys;
+        //public PackableHashTable<uint, ulong> m_ItersWithKeys;
+        //public PList<ulong> m_ItersWithoutKeys;
+        public CAllIterationList m_ItersWithKeys;
+        public CAllIterationList m_ItersWithoutKeys;
         public uint m_dwFlags;
 
         public static DDD_InterrogationResponseMessage read(BinaryReader binaryReader)
@@ -869,10 +877,10 @@ public class CM_Login : MessageProcessor
             DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
             newObj.m_ClientLanguage = binaryReader.ReadUInt32();
 
-            newObj.m_ItersWithKeys = PackableHashTable<uint, uint>.read(binaryReader);
-            newObj.m_ItersWithoutKeys = PList<uint>.read(binaryReader);
+            newObj.m_ItersWithKeys = CAllIterationList.read(binaryReader);
+            newObj.m_ItersWithoutKeys = CAllIterationList.read(binaryReader);
 
-            newObj.m_dwFlags = binaryReader.ReadUInt32();
+            // newObj.m_dwFlags = binaryReader.ReadUInt32();
 
             return newObj;
         }
@@ -888,13 +896,13 @@ public class CM_Login : MessageProcessor
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
             TreeNode m_ItersWithKeysNode = rootNode.Nodes.Add("m_ItersWithKeys = ");
-            ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithKeys.Length }, updateDataIndex: false);
+            //ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithKeys.Length }, updateDataIndex: false);
             // Skip PackableHashTable count dword
-            ContextInfo.DataIndex += 4;
-            foreach (KeyValuePair<uint, uint> element in m_ItersWithKeys.hashTable)
+            ContextInfo.DataIndex += 4;/*
+            foreach (KeyValuePair<uint, ulong> element in m_ItersWithKeys.hashTable)
             {
                 m_ItersWithKeysNode.Nodes.Add($"{element.Key} = {element.Value}");
-                ContextInfo.AddToList(new ContextInfo { Length = 8 });
+                ContextInfo.AddToList(new ContextInfo { Length = 12 });
             }
             
             TreeNode m_ItersWithoutKeysNode = rootNode.Nodes.Add("m_ItersWithoutKeys = ");
@@ -904,9 +912,9 @@ public class CM_Login : MessageProcessor
             for (int i = 0; i < m_ItersWithoutKeys.list.Count; i++)
             {
                 m_ItersWithoutKeysNode.Nodes.Add(m_ItersWithoutKeys.list[i].ToString());
-                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+                ContextInfo.AddToList(new ContextInfo { Length = 8 });
             }
-
+            */
             rootNode.Nodes.Add("m_dwFlags = " + m_dwFlags);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
@@ -916,7 +924,56 @@ public class CM_Login : MessageProcessor
 
     public class CAllIterationList
     {
-        //0x4 class SmartArray<CAllIterationList::PTaggedIterationList,1> m_Lists;
+        public PList<PTaggedIterationList> m_Lists;
+        /*
+            CAllIterationList
+             +0x4 class SmartArray<CAllIterationList::PTaggedIterationList,1> m_Lists;
+
+            CAllIterationList::PTaggedIterationList
+             +0x8 __int64 idDatFile;
+             +0x10 class CMostlyConsecutiveIntSet List;
+
+            CMostlyConsecutiveIntSet
+             +0x4 class SmartArray<int,1> m_Ints;
+             +0x10 bool m_bSorted;
+        */
+
+        public PList<PTaggedIterationList> m_lists;
+
+        public static CAllIterationList read(BinaryReader binaryReader)
+        {
+            CAllIterationList newObj = new CAllIterationList();
+            newObj.m_lists = PList<PTaggedIterationList>.read(binaryReader);
+            return newObj;
+        }
+    }
+
+    public class PTaggedIterationList
+    {
+        public long idDatFile;
+        public PList<CMostlyConsecutiveIntSet> List;
+
+        public static PTaggedIterationList read(BinaryReader binaryReader)
+        {
+            PTaggedIterationList newObj = new PTaggedIterationList();
+            newObj.idDatFile = binaryReader.ReadInt32() | binaryReader.ReadInt32();
+            newObj.List = PList<CMostlyConsecutiveIntSet>.read(binaryReader);
+            return newObj;
+        }
+    }
+
+    public class CMostlyConsecutiveIntSet
+    {
+        public PList<int> m_Ints;
+        public bool m_bSorted;
+
+        public static CMostlyConsecutiveIntSet read(BinaryReader binaryReader)
+        {
+            CMostlyConsecutiveIntSet newObj = new CMostlyConsecutiveIntSet();
+            newObj.m_Ints = PList<int>.read(binaryReader);
+            newObj.m_bSorted = binaryReader.ReadBoolean();
+            return newObj;
+        }
     }
 
     public class DDD_BeginDDDMessage : Message
@@ -1020,11 +1077,9 @@ public class CM_Login : MessageProcessor
         public long m_idDatFile;
         public uint m_qdid_Type;
         public uint m_qdid_Id;
-        /*
-  +0x18 class Cache_Pack_t m_cpData;
-   +0x2C long m_idIteration;
-   +0x30 bool m_bCompressed;
-    */
+        public int m_idIteration;
+        public bool m_bCompressed;
+        public Cache_Pack_t m_cpData;
 
         public static DDD_DataMessage read(BinaryReader binaryReader)
         {
@@ -1033,8 +1088,10 @@ public class CM_Login : MessageProcessor
             newObj.m_idDatFile = binaryReader.ReadUInt32() | binaryReader.ReadUInt32();
             newObj.m_qdid_Type = binaryReader.ReadUInt32();
             newObj.m_qdid_Id = binaryReader.ReadUInt32();
+            newObj.m_idIteration = binaryReader.ReadInt32();
+            newObj.m_bCompressed = binaryReader.ReadBoolean();
 
-            //newObj.m_MissingIterations = PList<MissingIteration>.read(binaryReader);
+            newObj.m_cpData = Cache_Pack_t.read(binaryReader);
 
             return newObj;
         }
@@ -1055,17 +1112,42 @@ public class CM_Login : MessageProcessor
             rootNode.Nodes.Add("m_qdid.ID = " + Utility.FormatHex(m_qdid_Id));
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
-            /*
-            TreeNode m_MissingIterationsNode = rootNode.Nodes.Add("m_MissingIterations = ");
-            ContextInfo.AddToList(new ContextInfo { Length = m_MissingIterations.Length }, updateDataIndex: false);
-            for (int i = 0; i < m_MissingIterations.list.Count; i++)
-            {
-                TreeNode newMissingIterationNode;
-                newMissingIterationNode = m_MissingIterationsNode.Nodes.Add("MissingIteration");
-                m_MissingIterations.list[i].contributeToTreeNode(newMissingIterationNode);
-            }
-            */
+            rootNode.Nodes.Add("m_idIteration = " + m_idIteration);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+
+            rootNode.Nodes.Add("m_bCompressed = " + m_bCompressed);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
+
+            TreeNode m_cpDataNode = rootNode.Nodes.Add("m_cpData = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 + 4 + m_cpData.m_buff.Length}, updateDataIndex: false);
+            m_cpDataNode.Nodes.Add("m_iVersion = " + m_cpData.m_iVersion);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            m_cpDataNode.Nodes.Add("m_buff = " + m_cpData.m_buff);
+            ContextInfo.DataIndex += 4; // skip m_cpData.m_buff Size
+            ContextInfo.AddToList(new ContextInfo { Length = m_cpData.m_buff.Length });
+
             treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    public class Cache_Pack_t
+    {
+        public int m_iVersion;
+        public byte[] m_buff;
+        /*
+           +0x4 unsigned long m_iVersion;
+           +0x8 class SmartBuffer m_buff;
+        */
+
+        public static Cache_Pack_t read(BinaryReader binaryReader)
+        {
+            Cache_Pack_t newObj = new Cache_Pack_t();
+            newObj.m_iVersion = binaryReader.ReadInt32();
+
+            //newObj.m_buff = new byte[binaryReader.ReadInt32()];
+            newObj.m_buff = binaryReader.ReadBytes(binaryReader.ReadInt32());
+            //newObj.m_bSorted = binaryReader.ReadBoolean();
+            return newObj;
         }
     }
 
@@ -1086,4 +1168,31 @@ public class CM_Login : MessageProcessor
             treeView.Nodes.Add(rootNode);
         }
     }
+
+    public class DDD_RequestDataMessage : Message
+    {
+        public uint m_qdid_Id; // QualifiedDataID
+        public uint m_qdid_Type; // QualifiedDataID
+
+        public static DDD_RequestDataMessage read(BinaryReader binaryReader)
+        {
+            DDD_RequestDataMessage newObj = new DDD_RequestDataMessage();
+            newObj.m_qdid_Type = binaryReader.ReadUInt32();
+            newObj.m_qdid_Id = binaryReader.ReadUInt32();
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+
+            rootNode.Nodes.Add("m_qdid.Type = " + m_qdid_Type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            rootNode.Nodes.Add("m_qdid.ID = " + Utility.FormatHex(m_qdid_Id));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
 }

@@ -55,6 +55,9 @@ public class Util {
             readers.Add(typeof(CM_Inventory.ContentProfile), r => CM_Inventory.ContentProfile.read(r));
             readers.Add(typeof(CM_Login.InventoryPlacement), r => CM_Login.InventoryPlacement.read(r));
             readers.Add(typeof(CM_Login.MissingIteration), r => CM_Login.MissingIteration.read(r));
+            readers.Add(typeof(CM_Login.CAllIterationList), r => CM_Login.CAllIterationList.read(r));
+            readers.Add(typeof(CM_Login.PTaggedIterationList), r => CM_Login.PTaggedIterationList.read(r));
+            readers.Add(typeof(CM_Login.CMostlyConsecutiveIntSet), r => CM_Login.CMostlyConsecutiveIntSet.read(r));
             readers.Add(typeof(CM_House.HousePayment), r => CM_House.HousePayment.read(r));
             readers.Add(typeof(CM_Inventory.SalvageResult), r => CM_Inventory.SalvageResult.read(r));
             readers.Add(typeof(CM_Writing.PageData), r => CM_Writing.PageData.read(r));
