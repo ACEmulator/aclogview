@@ -866,27 +866,25 @@ public class CM_Login : MessageProcessor
     public class DDD_InterrogationResponseMessage : Message
     {
         public uint m_ClientLanguage;
-        //public PackableHashTable<uint, ulong> m_ItersWithKeys;
-        //public PList<ulong> m_ItersWithoutKeys;
         public CAllIterationList m_ItersWithKeys;
         public CAllIterationList m_ItersWithoutKeys;
         public uint m_dwFlags;
 
-        public static DDD_InterrogationResponseMessage read(BinaryReader binaryReader)
-        {
-            DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
-            newObj.m_ClientLanguage = binaryReader.ReadUInt32();
+         public static DDD_InterrogationResponseMessage read(BinaryReader binaryReader)
+         {
+             DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
+             newObj.m_ClientLanguage = binaryReader.ReadUInt32();
 
-            newObj.m_ItersWithKeys = CAllIterationList.read(binaryReader);
-            newObj.m_ItersWithoutKeys = CAllIterationList.read(binaryReader);
+             newObj.m_ItersWithKeys = CAllIterationList.read(binaryReader);
+             newObj.m_ItersWithoutKeys = CAllIterationList.read(binaryReader);
 
-            // newObj.m_dwFlags = binaryReader.ReadUInt32();
+             newObj.m_dwFlags = binaryReader.ReadUInt32();
 
-            return newObj;
-        }
+             return newObj;
+         }
 
-        public override void contributeToTreeView(TreeView treeView)
-        {
+         public override void contributeToTreeView(TreeView treeView)
+         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
 
@@ -896,25 +894,41 @@ public class CM_Login : MessageProcessor
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
             TreeNode m_ItersWithKeysNode = rootNode.Nodes.Add("m_ItersWithKeys = ");
-            //ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithKeys.Length }, updateDataIndex: false);
-            // Skip PackableHashTable count dword
-            ContextInfo.DataIndex += 4;/*
-            foreach (KeyValuePair<uint, ulong> element in m_ItersWithKeys.hashTable)
-            {
-                m_ItersWithKeysNode.Nodes.Add($"{element.Key} = {element.Value}");
-                ContextInfo.AddToList(new ContextInfo { Length = 12 });
-            }
-            
-            TreeNode m_ItersWithoutKeysNode = rootNode.Nodes.Add("m_ItersWithoutKeys = ");
-            ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithoutKeys.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithKeys.m_Lists.Length }, updateDataIndex: false);
             // Skip PackableHashTable count dword
             ContextInfo.DataIndex += 4;
-            for (int i = 0; i < m_ItersWithoutKeys.list.Count; i++)
+            for (int i = 0; i < m_ItersWithKeys.m_Lists.list.Count; i++)
             {
-                m_ItersWithoutKeysNode.Nodes.Add(m_ItersWithoutKeys.list[i].ToString());
-                ContextInfo.AddToList(new ContextInfo { Length = 8 });
+                TreeNode m_ListsNode = m_ItersWithKeysNode.Nodes.Add("m_Lists");
+                m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Type);
+                m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Id);
+                TreeNode listNode = m_ListsNode.Nodes.Add("List");
+                TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
+                for (int j = 0; j < m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count; j++)
+                {
+                    mIntsNode.Nodes.Add(m_ItersWithKeys.m_Lists.list[i].List.m_Ints[j].ToString());
+                }
+                mIntsNode.Nodes.Add("m_bSorted = " + m_ItersWithKeys.m_Lists.list[i].List.m_bSorted);
             }
-            */
+
+            TreeNode m_ItersWithoutKeysNode = rootNode.Nodes.Add("m_ItersWithoutKeys = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithoutKeys.m_Lists.Length }, updateDataIndex: false);
+            // Skip PackableHashTable count dword
+            ContextInfo.DataIndex += 4;
+            for (int i = 0; i < m_ItersWithoutKeys.m_Lists.list.Count; i++)
+            {
+                TreeNode m_ListsNode = m_ItersWithoutKeysNode.Nodes.Add("m_Lists");
+                m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Type);
+                m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Id);
+                TreeNode listNode = m_ListsNode.Nodes.Add("List");
+                TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
+                for (int j = 0; j < m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count; j++)
+                {
+                    mIntsNode.Nodes.Add(m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints[j].ToString());
+                }
+                mIntsNode.Nodes.Add("m_bSorted = " + m_ItersWithoutKeys.m_Lists.list[i].List.m_bSorted);
+            }
+
             rootNode.Nodes.Add("m_dwFlags = " + m_dwFlags);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
@@ -924,11 +938,9 @@ public class CM_Login : MessageProcessor
 
     public class CAllIterationList
     {
+        //   SmartArray<CAllIterationList::PTaggedIterationList,1> m_Lists;
         public PList<PTaggedIterationList> m_Lists;
         /*
-            CAllIterationList
-             +0x4 class SmartArray<CAllIterationList::PTaggedIterationList,1> m_Lists;
-
             CAllIterationList::PTaggedIterationList
              +0x8 __int64 idDatFile;
              +0x10 class CMostlyConsecutiveIntSet List;
@@ -938,40 +950,43 @@ public class CM_Login : MessageProcessor
              +0x10 bool m_bSorted;
         */
 
-        public PList<PTaggedIterationList> m_lists;
-
         public static CAllIterationList read(BinaryReader binaryReader)
         {
             CAllIterationList newObj = new CAllIterationList();
-            newObj.m_lists = PList<PTaggedIterationList>.read(binaryReader);
+            newObj.m_Lists = PList<PTaggedIterationList>.read(binaryReader);
             return newObj;
         }
     }
 
     public class PTaggedIterationList
     {
-        public long idDatFile;
-        public PList<CMostlyConsecutiveIntSet> List;
+        public int idDatFile_Type;
+        public int idDatFile_Id;
+        public CMostlyConsecutiveIntSet List;
 
         public static PTaggedIterationList read(BinaryReader binaryReader)
         {
             PTaggedIterationList newObj = new PTaggedIterationList();
-            newObj.idDatFile = binaryReader.ReadInt32() | binaryReader.ReadInt32();
-            newObj.List = PList<CMostlyConsecutiveIntSet>.read(binaryReader);
+            newObj.idDatFile_Type = binaryReader.ReadInt32();
+            newObj.idDatFile_Id = binaryReader.ReadInt32();
+            newObj.List = CMostlyConsecutiveIntSet.read(binaryReader);
             return newObj;
         }
     }
 
     public class CMostlyConsecutiveIntSet
     {
-        public PList<int> m_Ints;
+        public List<int> m_Ints = new List<int>();
         public bool m_bSorted;
 
         public static CMostlyConsecutiveIntSet read(BinaryReader binaryReader)
         {
             CMostlyConsecutiveIntSet newObj = new CMostlyConsecutiveIntSet();
-            newObj.m_Ints = PList<int>.read(binaryReader);
+            newObj.m_Ints.Add(binaryReader.ReadInt32());
+            newObj.m_Ints.Add(binaryReader.ReadInt32());
             newObj.m_bSorted = binaryReader.ReadBoolean();
+            Util.readToAlign(binaryReader);
+
             return newObj;
         }
     }
