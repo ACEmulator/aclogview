@@ -908,7 +908,7 @@ public class CM_Login : MessageProcessor
                 {
                     mIntsNode.Nodes.Add(m_ItersWithKeys.m_Lists.list[i].List.m_Ints[j].ToString());
                 }
-                mIntsNode.Nodes.Add("m_bSorted = " + m_ItersWithKeys.m_Lists.list[i].List.m_bSorted);
+                listNode.Nodes.Add("m_bSorted = " + m_ItersWithKeys.m_Lists.list[i].List.m_bSorted);
             }
 
             TreeNode m_ItersWithoutKeysNode = rootNode.Nodes.Add("m_ItersWithoutKeys = ");
@@ -938,17 +938,7 @@ public class CM_Login : MessageProcessor
 
     public class CAllIterationList
     {
-        //   SmartArray<CAllIterationList::PTaggedIterationList,1> m_Lists;
         public PList<PTaggedIterationList> m_Lists;
-        /*
-            CAllIterationList::PTaggedIterationList
-             +0x8 __int64 idDatFile;
-             +0x10 class CMostlyConsecutiveIntSet List;
-
-            CMostlyConsecutiveIntSet
-             +0x4 class SmartArray<int,1> m_Ints;
-             +0x10 bool m_bSorted;
-        */
 
         public static CAllIterationList read(BinaryReader binaryReader)
         {
@@ -994,8 +984,6 @@ public class CM_Login : MessageProcessor
     public class DDD_BeginDDDMessage : Message
     {
         public uint m_cbDataExpected;
-
-        // SmartArray<MissingIteration,1 > m_MissingIterations
         public PList<MissingIteration> m_MissingIterations;
 
         public static DDD_BeginDDDMessage read(BinaryReader binaryReader)
@@ -1024,7 +1012,6 @@ public class CM_Login : MessageProcessor
             ContextInfo.DataIndex += 4;
             for (int i = 0; i<m_MissingIterations.list.Count; i++)
             {
-                //ContextInfo.AddToList();
                 int ContextLength = 8 + 4 + m_MissingIterations.list[i].IDsToDownload.Length + m_MissingIterations.list[i].IDsToPurge.Length;
                 ContextInfo.AddToList(new ContextInfo { Length = ContextLength }, updateDataIndex: false);
                 TreeNode newMissingIterationNode;
@@ -1038,10 +1025,6 @@ public class CM_Login : MessageProcessor
 
     public class MissingIteration
     {
-        //+0x8 __int64 idDatFile;
-        //+0x10 long idIteration;
-        //+0x14 class SmartArray<QualifiedDataID,1> IDsToDownload;
-        //+0x20 class SmartArray<QualifiedDataID,1> IDsToPurge;
         public long idDatFile;
         public int idIteration;
         public PList<uint> IDsToDownload;
@@ -1149,19 +1132,12 @@ public class CM_Login : MessageProcessor
     {
         public int m_iVersion;
         public byte[] m_buff;
-        /*
-           +0x4 unsigned long m_iVersion;
-           +0x8 class SmartBuffer m_buff;
-        */
 
         public static Cache_Pack_t read(BinaryReader binaryReader)
         {
             Cache_Pack_t newObj = new Cache_Pack_t();
             newObj.m_iVersion = binaryReader.ReadInt32();
-
-            //newObj.m_buff = new byte[binaryReader.ReadInt32()];
             newObj.m_buff = binaryReader.ReadBytes(binaryReader.ReadInt32());
-            //newObj.m_bSorted = binaryReader.ReadBoolean();
             return newObj;
         }
     }
