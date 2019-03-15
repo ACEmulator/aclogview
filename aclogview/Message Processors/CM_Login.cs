@@ -298,7 +298,7 @@ public class CM_Login : MessageProcessor
 
         public CBaseQualities CBaseQualities;
         public uint header;
-        public WeenieType _weenie_type;
+        public bool _hasHealth;
         public AttributeCache _attribCache;
         public PackableHashTable<STypeSkill, Skill> _skillStatsTable = new PackableHashTable<STypeSkill, Skill>();
         public PackableHashTable<uint, float> _spell_book = new PackableHashTable<uint, float>();
@@ -312,7 +312,7 @@ public class CM_Login : MessageProcessor
             var startPosition = binaryReader.BaseStream.Position;
             newObj.CBaseQualities = CBaseQualities.read(binaryReader);
             newObj.header = binaryReader.ReadUInt32();
-            newObj._weenie_type = (WeenieType)binaryReader.ReadUInt32();
+            newObj._hasHealth = (bool)binaryReader.ReadUInt32();
             if ((newObj.header & (uint)QualitiesPackHeader.Packed_AttributeCache) != 0)
             {
                 newObj._attribCache = AttributeCache.read(binaryReader);
@@ -353,7 +353,7 @@ public class CM_Login : MessageProcessor
             }
             // Now skip the header
             ContextInfo.DataIndex += 4;
-            node.Nodes.Add("_weenie_type = " + _weenie_type);
+            node.Nodes.Add("_hasHealth = " + _hasHealth);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
             if ((header & (uint)QualitiesPackHeader.Packed_AttributeCache) != 0)
