@@ -312,7 +312,7 @@ public class CM_Login : MessageProcessor
             var startPosition = binaryReader.BaseStream.Position;
             newObj.CBaseQualities = CBaseQualities.read(binaryReader);
             newObj.header = binaryReader.ReadUInt32();
-            newObj._hasHealth = (bool)binaryReader.ReadUInt32();
+            newObj._hasHealth = Convert.ToBoolean(binaryReader.ReadUInt32());
             if ((newObj.header & (uint)QualitiesPackHeader.Packed_AttributeCache) != 0)
             {
                 newObj._attribCache = AttributeCache.read(binaryReader);
