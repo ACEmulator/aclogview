@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,12 +21,12 @@ public enum AllegianceVersion {
 }
 
 public enum AllegianceIndex {
-    Undef_AllegianceIndex = 0,
-    LoggedIn_AllegianceIndex = (1 << 0),
-    Update_AllegianceIndex = (1 << 1),
-    HasAllegianceAge_AllegianceIndex = (1 << 2),
-    HasPackedLevel_AllegianceIndex = (1 << 3),
-    MayPassupExperience_AllegianceIndex = (1 << 4)
+    Undef_AllegianceIndex = 0x0,
+    LoggedIn_AllegianceIndex = 0x1,
+    Update_AllegianceIndex = 0x2,
+    HasAllegianceAge_AllegianceIndex = 0x4,
+    HasPackedLevel_AllegianceIndex = 0x8,
+    MayPassupExperience_AllegianceIndex = 0x10
 }
 
 public enum eAllegianceHouseAction {

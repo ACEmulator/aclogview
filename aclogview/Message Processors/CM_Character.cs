@@ -211,9 +211,9 @@ public class CM_Character : MessageProcessor {
         public int Length;
 
         public static ShortCutManager read(BinaryReader binaryReader) {
+            ShortCutManager newObj = new ShortCutManager();
             var startPosition = binaryReader.BaseStream.Position;
             uint numShortcuts = binaryReader.ReadUInt32();
-            ShortCutManager newObj = new ShortCutManager();
             for (int i = 0; i < numShortcuts; ++i) {
                 newObj.shortCuts_.Add(ShortCutData.read(binaryReader));
             }
