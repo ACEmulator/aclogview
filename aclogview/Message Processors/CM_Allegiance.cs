@@ -854,12 +854,8 @@ public class CM_Allegiance : MessageProcessor {
 
         public static AllegianceInfoResponseEvent read(BinaryReader binaryReader) {
             AllegianceInfoResponseEvent newObj = new AllegianceInfoResponseEvent();
-            // Get character object ID so we can display correct order of patron/self/vassals
-            binaryReader.BaseStream.Position -= 12;
-            var characterId = binaryReader.ReadUInt32();
-            binaryReader.BaseStream.Position += 8;
             newObj.target = binaryReader.ReadUInt32();
-            newObj.prof = AllegianceProfile.read(binaryReader, characterId);
+            newObj.prof = AllegianceProfile.read(binaryReader, newObj.target);
             return newObj;
         }
 
