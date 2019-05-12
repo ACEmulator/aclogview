@@ -1,4 +1,4 @@
-﻿using aclogview;
+using aclogview;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
@@ -31,6 +31,7 @@ public class CM_Fellowship : MessageProcessor {
                 {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
                     break;
                 }
 
@@ -41,9 +42,14 @@ public class CM_Fellowship : MessageProcessor {
                     break;
                 }
             case PacketOpcode.Evt_Fellowship__Quit_ID:
-            case PacketOpcode.Evt_Fellowship__Dismiss_ID:
                 {
                     FellowshipQuit message = FellowshipQuit.read(messageDataReader);
+                    message.contributeToTreeView(outputTreeView);
+                    break;
+                }
+            case PacketOpcode.Evt_Fellowship__Dismiss_ID:
+                {
+                    FellowshipDismiss message = FellowshipDismiss.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -61,7 +67,7 @@ public class CM_Fellowship : MessageProcessor {
                 }
             case PacketOpcode.Evt_Fellowship__UpdateFellow_ID:
                 {
-                    FellowshipUpdate message = FellowshipUpdate.read(messageDataReader);
+                    UpdateFellow message = UpdateFellow.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
@@ -104,19 +110,55 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_name = " + i_name);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Serialized_AsciiString, Length = i_name.Length });
             rootNode.Nodes.Add("i_share_xp = " + i_share_xp);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
 
+    // Client to server and server to client message
     public class FellowshipQuit : Message
     {
-        public uint player_id;
+        // Player ID is actually a "disband" boolean when the client sends this message
+        public uint player_id_or_disband;
+        public bool clientToServer;
 
         public static FellowshipQuit read(BinaryReader binaryReader)
         {
             FellowshipQuit newObj = new FellowshipQuit();
+            newObj.clientToServer = binaryReader.BaseStream.Position == 12;
+            newObj.player_id_or_disband = binaryReader.ReadUInt32();
+            Util.readToAlign(binaryReader);
+            return newObj;
+        }
+
+        public override void contributeToTreeView(TreeView treeView)
+        {
+            TreeNode rootNode = new TreeNode(this.GetType().Name);
+            rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = clientToServer ? DataType.ClientToServerHeader : DataType.ServerToClientHeader });
+            if (clientToServer)
+                rootNode.Nodes.Add("disband = " + player_id_or_disband);
+            else
+                rootNode.Nodes.Add("player_id = " + Utility.FormatHex(player_id_or_disband));
+            ContextInfo.AddToList(new ContextInfo { DataType = clientToServer ? DataType.Undefined: DataType.ObjectID, Length = 4 });
+            treeView.Nodes.Add(rootNode);
+        }
+    }
+
+    // Client to server and server to client message
+    public class FellowshipDismiss : Message
+    {
+        public uint player_id;
+        public bool clientToServer;
+
+        public static FellowshipDismiss read(BinaryReader binaryReader)
+        {
+            FellowshipDismiss newObj = new FellowshipDismiss();
+            newObj.clientToServer = binaryReader.BaseStream.Position == 12;
             newObj.player_id = binaryReader.ReadUInt32();
             Util.readToAlign(binaryReader);
             return newObj;
@@ -126,7 +168,9 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = clientToServer ? DataType.ClientToServerHeader : DataType.ServerToClientHeader });
             rootNode.Nodes.Add("player_id = " + Utility.FormatHex(player_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -138,6 +182,7 @@ public class CM_Fellowship : MessageProcessor {
         public static FellowshipRecruit read(BinaryReader binaryReader)
         {
             FellowshipRecruit newObj = new FellowshipRecruit();
+           
             newObj.player_id = binaryReader.ReadUInt32();
             Util.readToAlign(binaryReader);
             return newObj;
@@ -147,7 +192,9 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("player_id = " + Utility.FormatHex(player_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -185,32 +232,50 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             TreeNode FellowshipTableNode = rootNode.Nodes.Add("_fellowship_table");
+            ContextInfo.AddToList(new ContextInfo { Length = _fellowship_table.Length }, updateDataIndex: false);
+            ContextInfo.DataIndex += 4;
             foreach (KeyValuePair<uint, Fellow> element in _fellowship_table.hashTable)
             {
-                TreeNode FellowNode = FellowshipTableNode.Nodes.Add("fellow = ");
+                TreeNode FellowNode = FellowshipTableNode.Nodes.Add($"fellow {Utility.FormatHex(element.Key)} = ");
+                ContextInfo.AddToList(new ContextInfo { Length = element.Value.Length + 4 }, updateDataIndex: false);
+                ContextInfo.DataIndex += 4;
                 element.Value.contributeToTreeNode(FellowNode);
             }
 
             rootNode.Nodes.Add("_name = " + _name);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Serialized_AsciiString, Length = _name.Length });
             rootNode.Nodes.Add("_leader = " + Utility.FormatHex(_leader));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("_share_xp = " + _share_xp);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_even_xp_split = " + _even_xp_split);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_open_fellow = " + _open_fellow);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("_locked = " + _locked);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode FellowsDepartedNode = rootNode.Nodes.Add("_fellows_departed = ");
+            ContextInfo.AddToList(new ContextInfo { Length = _fellows_departed.Length }, updateDataIndex: false);
+            ContextInfo.DataIndex += 4;
             foreach (KeyValuePair<uint, int> element in _fellows_departed.hashTable)
             {
                 TreeNode FellowNode = FellowsDepartedNode.Nodes.Add("fellow = ");
+                ContextInfo.AddToList(new ContextInfo { Length = 8 }, updateDataIndex: false);
                 FellowNode.Nodes.Add("fellow_id = " + Utility.FormatHex(element.Key));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
                 FellowNode.Nodes.Add("return_time = " + element.Value);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
 
             TreeNode UnknownNode = rootNode.Nodes.Add("LockedFellowshipList = ");
+            ContextInfo.AddToList(new ContextInfo { Length = unk.Length }, updateDataIndex: false);
+            ContextInfo.DataIndex += 4;
             foreach (KeyValuePair<PStringChar, LockedFellowshipList> element in unk.hashTable)
             {
-                TreeNode UnknownSubNode = UnknownNode.Nodes.Add(element.Key.ToString());
+                TreeNode UnknownSubNode = UnknownNode.Nodes.Add("lock_name = " + element.Key);
+                ContextInfo.AddToList(new ContextInfo { Length = element.Key.Length });
                 element.Value.contributeToTreeNode(UnknownSubNode);
             }
 
@@ -231,10 +296,12 @@ public class CM_Fellowship : MessageProcessor {
         public uint _current_mana;
         public uint _share_loot;
         public PStringChar _name;
+        public int Length;
 
         public static Fellow read(BinaryReader binaryReader)
         {
             Fellow newObj = new Fellow();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj._cp_cache = binaryReader.ReadUInt32();
             newObj._lum_cache = binaryReader.ReadUInt32();
             newObj._level = binaryReader.ReadUInt32();
@@ -249,22 +316,34 @@ public class CM_Fellowship : MessageProcessor {
 
             newObj._share_loot = binaryReader.ReadUInt32();
             newObj._name = PStringChar.read(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("_cp_cache = " + _cp_cache);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_lum_cache = " + _lum_cache);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_level = " + _level);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_max_health = " + _max_health);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_max_stamina = " + _max_stamina);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_max_mana = " + _max_mana);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_current_health = " + _current_health);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_current_stamina = " + _current_stamina);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_current_mana = " + _current_mana);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_share_loot = " + _share_loot);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_name = " + _name);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Serialized_AsciiString, Length = _name.Length });
         }
     }
 
@@ -273,6 +352,7 @@ public class CM_Fellowship : MessageProcessor {
     /// </summary>
     public class LockedFellowshipList
     {
+        // unknown_1 was always 0 in pcaps
         public uint unknown_1;
         public uint unknown_2;
         public uint unknown_3;
@@ -293,10 +373,15 @@ public class CM_Fellowship : MessageProcessor {
         public void contributeToTreeNode(TreeNode node)
         {
             node.Nodes.Add("unknown_1 = " + unknown_1);
-            node.Nodes.Add("unknown_2 = " + unknown_2);
-            node.Nodes.Add("unknown_3 = " + unknown_3);
-            node.Nodes.Add("timestamp__guessedname = " + timestamp);
-            node.Nodes.Add("unknown_4 = " + unknown_4);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            node.Nodes.Add("unknown_2 = " + Utility.FormatHex(unknown_2));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            node.Nodes.Add("unknown_3 = " + Utility.FormatHex(unknown_3));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            node.Nodes.Add("unknown_timestamp = " + timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            node.Nodes.Add("unknown_sequence = " + unknown_4);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -308,15 +393,15 @@ public class CM_Fellowship : MessageProcessor {
         FELLOWSHIP_UPDATE_VITALS,
     }
 
-    public class FellowshipUpdate : Message
+    public class UpdateFellow : Message
     {
         public uint i_iidPlayer;
         public Fellow fellow;
         public uint i_uiUpdateType;
 
-        public static FellowshipUpdate read(BinaryReader binaryReader)
+        public static UpdateFellow read(BinaryReader binaryReader)
         {
-            FellowshipUpdate newObj = new FellowshipUpdate();
+            UpdateFellow newObj = new UpdateFellow();
             newObj.i_iidPlayer = binaryReader.ReadUInt32();
             newObj.fellow = Fellow.read(binaryReader);
             newObj.i_uiUpdateType = binaryReader.ReadUInt32();
@@ -327,15 +412,16 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_iidPlayer = " + Utility.FormatHex(i_iidPlayer));
-
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode FellowNode = rootNode.Nodes.Add("Fellow");
             FellowNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { Length = fellow.Length }, updateDataIndex: false);
             fellow.contributeToTreeNode(FellowNode);
 
             rootNode.Nodes.Add("i_uiUpdateType = " + (FellowshipUpdateType)i_uiUpdateType);
-
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -355,7 +441,9 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_target = " + Utility.FormatHex(i_target));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -377,7 +465,9 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_open = " + i_open);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -397,7 +487,9 @@ public class CM_Fellowship : MessageProcessor {
         {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_on = " + i_on);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
