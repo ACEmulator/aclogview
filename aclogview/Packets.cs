@@ -61,6 +61,7 @@ public class Util {
             readers.Add(typeof(CM_House.HousePayment), r => CM_House.HousePayment.read(r));
             readers.Add(typeof(CM_Inventory.SalvageResult), r => CM_Inventory.SalvageResult.read(r));
             readers.Add(typeof(CM_Writing.PageData), r => CM_Writing.PageData.read(r));
+            readers.Add(typeof(CM_House.GuestInfo), r => CM_House.GuestInfo.read(r));
         }
     }
 
