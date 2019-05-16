@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using aclogview;
 using static CM_Inventory;
@@ -17,10 +12,17 @@ public class CM_Trade : MessageProcessor {
         switch (opcode) {
             case PacketOpcode.Evt_Trade__CloseTradeNegotiations_ID:
             case PacketOpcode.Evt_Trade__DeclineTrade_ID:
-            case PacketOpcode.Evt_Trade__ResetTrade_ID:
+            case PacketOpcode.Evt_Trade__ResetTrade_ID: {
+                    EmptyMessage message = new EmptyMessage(opcode);
+                    message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
+                    break;
+                }
+
             case PacketOpcode.Evt_Trade__Recv_ClearTradeAcceptance_ID: {
                     EmptyMessage message = new EmptyMessage(opcode);
                     message.contributeToTreeView(outputTreeView);
+                    ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
                     break;
                 }
             case PacketOpcode.Evt_Trade__OpenTradeNegotiations_ID: {
@@ -33,19 +35,19 @@ public class CM_Trade : MessageProcessor {
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
-            // TODO: PacketOpcode.Evt_Trade__RemoveFromTrade_ID
+            // TODO: PacketOpcode.Evt_Trade__RemoveFromTrade_ID (retired)
             case PacketOpcode.Evt_Trade__AcceptTrade_ID: {
                     AcceptTrade message = AcceptTrade.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
-            // TODO: PacketOpcode.Evt_Trade__DumpTrade_ID
+            // TODO: PacketOpcode.Evt_Trade__DumpTrade_ID (retired)
             case PacketOpcode.Evt_Trade__Recv_RegisterTrade_ID: {
                     Recv_RegisterTrade message = Recv_RegisterTrade.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
                 }
-            case PacketOpcode.Evt_Trade__Recv_OpenTrade_ID: {
+            case PacketOpcode.Evt_Trade__Recv_OpenTrade_ID: { // (retired)
                     Recv_OpenTrade message = Recv_OpenTrade.read(messageDataReader);
                     message.contributeToTreeView(outputTreeView);
                     break;
@@ -107,7 +109,9 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_other = " + Utility.FormatHex(i_other));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -128,8 +132,11 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             rootNode.Nodes.Add("i_item = " + Utility.FormatHex(i_item));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("i_loc = " + i_loc);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -143,9 +150,11 @@ public class CM_Trade : MessageProcessor {
         public uint _p_accepted;
         public PList<ContentProfile> _self_list;
         public PList<ContentProfile> _partner_list;
+        public int Length;
 
         public static Trade read(BinaryReader binaryReader) {
             Trade newObj = new Trade();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj._partner = binaryReader.ReadUInt32();
             newObj._stamp = binaryReader.ReadDouble();
             newObj._status = binaryReader.ReadUInt32();
@@ -154,26 +163,39 @@ public class CM_Trade : MessageProcessor {
             newObj._p_accepted = binaryReader.ReadUInt32();
             newObj._self_list = PList<ContentProfile>.read(binaryReader);
             newObj._partner_list = PList<ContentProfile>.read(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("_partner = " + Utility.FormatHex(_partner));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             node.Nodes.Add("_stamp = " + _stamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             node.Nodes.Add("_status = " + (TradeStatusEnum)_status);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_initiator = " + _initiator);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_accepted = " + _accepted);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             node.Nodes.Add("_p_accepted = " + _p_accepted);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode selfListNode = node.Nodes.Add("_self_list = ");
+            ContextInfo.AddToList(new ContextInfo { Length = _self_list.Length }, updateDataIndex: false);
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < _self_list.list.Count; i++)
             {
                 TreeNode itemNode = selfListNode.Nodes.Add($"item {i+1} = ");
+                ContextInfo.AddToList(new ContextInfo { Length = 8 }, updateDataIndex: false);
                 _self_list.list[i].contributeToTreeNode(itemNode);
             }
             TreeNode partnerListNode = node.Nodes.Add("_partner_list = ");
+            ContextInfo.AddToList(new ContextInfo { Length = _partner_list.Length }, updateDataIndex: false);
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < _partner_list.list.Count; i++)
             {
                 TreeNode itemNode = partnerListNode.Nodes.Add($"item {i+1} = ");
+                ContextInfo.AddToList(new ContextInfo { Length = 8 }, updateDataIndex: false);
                 _partner_list.list[i].contributeToTreeNode(itemNode);
             }
         }
@@ -191,7 +213,9 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ClientToServerHeader });
             TreeNode stuffNode = rootNode.Nodes.Add("i_stuff = ");
+            ContextInfo.AddToList(new ContextInfo { Length = i_stuff.Length }, updateDataIndex: false);
             i_stuff.contributeToTreeNode(stuffNode);
             stuffNode.Expand();
             treeView.Nodes.Add(rootNode);
@@ -214,9 +238,13 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("initiator = " + Utility.FormatHex(initiator));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("partner = " + Utility.FormatHex(partner));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("stamp = " + stamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 8 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -233,7 +261,9 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("source = " + source);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -250,7 +280,9 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("etype = " + (WERROR)etype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -271,9 +303,13 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("item = " + Utility.FormatHex(item));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("id = " + (TradeListIDEnum)id);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("loc = " + loc);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -292,8 +328,11 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("i_iidItem = " + i_iidItem);
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
+            rootNode.Nodes.Add("i_iidItem = " + Utility.FormatHex(i_iidItem));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("id = " + id);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -310,7 +349,9 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("source = " + Utility.FormatHex(source));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -327,7 +368,9 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("source = " + Utility.FormatHex(source));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -344,7 +387,9 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("source = " + Utility.FormatHex(source));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -363,8 +408,11 @@ public class CM_Trade : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ServerToClientHeader });
             rootNode.Nodes.Add("i_iidItem = " + Utility.FormatHex(i_iidItem));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("etype = " + (WERROR)etype);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
