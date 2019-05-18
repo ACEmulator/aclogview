@@ -103,8 +103,7 @@ public class Util {
                 str += Encoding.Unicode.GetString(binaryReader.ReadBytes(2));
             }
         }
-        // Note: I had to comment this out to avoid alignment issues. (Slushnas)
-        //readToAlign(binaryReader);
+
         return str;
     }
 

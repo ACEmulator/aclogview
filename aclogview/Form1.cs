@@ -72,8 +72,6 @@ namespace aclogview
             LocalTime
         }
 
-        // TODO: Remove after context info is added to all message processors
-        public List<string> ciSupportedMessageProcessors = new List<string>();
 
         public Form1(string[] args)
         {
@@ -88,54 +86,31 @@ namespace aclogview
 
             Util.initReaders();
             messageProcessors.Add(new CM_Admin());
-            ciSupportedMessageProcessors.Add(typeof(CM_Admin).Name);
             messageProcessors.Add(new CM_Advocate());
-            ciSupportedMessageProcessors.Add(typeof(CM_Advocate).Name);
             messageProcessors.Add(new CM_Allegiance());
-            ciSupportedMessageProcessors.Add(typeof(CM_Allegiance).Name);
             messageProcessors.Add(new CM_Character());
-            ciSupportedMessageProcessors.Add(typeof(CM_Character).Name);
             messageProcessors.Add(new CM_Combat());
-            ciSupportedMessageProcessors.Add(typeof(CM_Combat).Name);
             messageProcessors.Add(new CM_Communication());
-            ciSupportedMessageProcessors.Add(typeof(CM_Communication).Name);
             messageProcessors.Add(new CM_Death());
-            ciSupportedMessageProcessors.Add(typeof(CM_Death).Name);
             messageProcessors.Add(new CM_Examine());
-            ciSupportedMessageProcessors.Add(typeof(CM_Examine).Name);
             messageProcessors.Add(new CM_Fellowship());
-            ciSupportedMessageProcessors.Add(typeof(CM_Fellowship).Name);
             messageProcessors.Add(new CM_Game());
-            ciSupportedMessageProcessors.Add(typeof(CM_Game).Name);
             messageProcessors.Add(new CM_House());
-            ciSupportedMessageProcessors.Add(typeof(CM_House).Name);
             messageProcessors.Add(new CM_Inventory());
-            ciSupportedMessageProcessors.Add(typeof(CM_Inventory).Name);
             messageProcessors.Add(new CM_Item());
-            ciSupportedMessageProcessors.Add(typeof(CM_Item).Name);
             messageProcessors.Add(new CM_Login());
-            ciSupportedMessageProcessors.Add(typeof(CM_Login).Name);
             messageProcessors.Add(new CM_Magic());
-            ciSupportedMessageProcessors.Add(typeof(CM_Magic).Name);
             messageProcessors.Add(new CM_Misc());
-            ciSupportedMessageProcessors.Add(typeof(CM_Misc).Name);
             messageProcessors.Add(new CM_Movement());
-            ciSupportedMessageProcessors.Add(typeof(CM_Movement).Name);
             messageProcessors.Add(new CM_Physics());
             messageProcessors.Add(new CM_Qualities());
-            ciSupportedMessageProcessors.Add(typeof(CM_Qualities).Name);
             messageProcessors.Add(new CM_Social());
-            ciSupportedMessageProcessors.Add(typeof(CM_Social).Name);
             messageProcessors.Add(new CM_Trade());
-            ciSupportedMessageProcessors.Add(typeof(CM_Trade).Name);
             messageProcessors.Add(new CM_Train());
-            ciSupportedMessageProcessors.Add(typeof(CM_Train).Name);
             messageProcessors.Add(new CM_Vendor());
-            ciSupportedMessageProcessors.Add(typeof(CM_Vendor).Name);
             messageProcessors.Add(new CM_Writing());
-            ciSupportedMessageProcessors.Add(typeof(CM_Writing).Name);
             messageProcessors.Add(new Proto_UI());
-            ciSupportedMessageProcessors.Add(typeof(Proto_UI).Name);
+
             Globals.UseHex = checkBoxUseHex.Checked;
             projectDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
             treeView_ParsedData.ShowNodeToolTips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
@@ -544,10 +519,6 @@ namespace aclogview
                                 if (accepted)
                                 {
                                     handled = true;
-                                    // TODO: Remove after all message processors have context info
-                                    if (!ciSupportedMessageProcessors.Contains(messageProcessor.ToString()))
-                                        ContextInfo.Reset();
-                                    //
                                     if (messageDataReader.BaseStream.Position != messageDataReader.BaseStream.Length)
                                     {
                                         treeView_ParsedData.Nodes.Add(new TreeNode("WARNING: Packet not fully read!"));

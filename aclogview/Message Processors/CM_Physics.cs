@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview;
@@ -91,21 +89,29 @@ public class CM_Physics : MessageProcessor {
 
     public class Subpalette {
         public uint subID;
-        public uint offset;
-        public uint numcolors;
+        public byte offset;
+        public byte numcolors;
+        public int subIDLength;
+        public int Length;
 
         public static Subpalette read(BinaryReader binaryReader) {
             Subpalette newObj = new Subpalette();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.subID = Util.readDataIDOfKnownType(0x4000000, binaryReader);
+            newObj.subIDLength = (int)(binaryReader.BaseStream.Position - startPosition);
             newObj.offset = binaryReader.ReadByte();
             newObj.numcolors = binaryReader.ReadByte();
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("subID = " + Utility.FormatHex(subID));
+            ContextInfo.AddToList(new ContextInfo { Length = subIDLength });
             node.Nodes.Add("offset = " + offset);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             node.Nodes.Add("numcolors = " + numcolors);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
         }
     }
 
@@ -113,90 +119,165 @@ public class CM_Physics : MessageProcessor {
         public byte part_index;
         public uint old_tex_id;
         public uint new_tex_id;
+        public int oldTexLength;
+        public int newTexLength;
+        public int Length;
 
         public static TextureMapChange read(BinaryReader binaryReader) {
             TextureMapChange newObj = new TextureMapChange();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.part_index = binaryReader.ReadByte();
+            var oldStartPosition = binaryReader.BaseStream.Position;
             newObj.old_tex_id = Util.readDataIDOfKnownType(0x5000000, binaryReader);
+            newObj.oldTexLength = (int)(binaryReader.BaseStream.Position - oldStartPosition);
+            var newStartPosition = binaryReader.BaseStream.Position;
             newObj.new_tex_id = Util.readDataIDOfKnownType(0x5000000, binaryReader);
+            newObj.newTexLength = (int)(binaryReader.BaseStream.Position - newStartPosition);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
+
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("part_index = " + part_index);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             node.Nodes.Add("old_tex_id = " + Utility.FormatHex(old_tex_id));
+            ContextInfo.AddToList(new ContextInfo { Length = oldTexLength });
             node.Nodes.Add("new_tex_id = " + Utility.FormatHex(new_tex_id));
+            ContextInfo.AddToList(new ContextInfo { Length = newTexLength });
         }
     }
 
     public class AnimPartChange {
         public byte part_index;
         public uint part_id;
+        public int Length;
 
         public static AnimPartChange read(BinaryReader binaryReader) {
             AnimPartChange newObj = new AnimPartChange();
+            var startPosition = binaryReader.BaseStream.Position;
             newObj.part_index = binaryReader.ReadByte();
             newObj.part_id = Util.readDataIDOfKnownType(0x1000000, binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("part_index = " + part_index);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
             node.Nodes.Add("part_id = " + Utility.FormatHex(part_id));
+            ContextInfo.AddToList(new ContextInfo { Length = Length - 1 });
         }
     }
 
-    public class ObjDesc {
+    public class ObjDesc
+    {
+        public byte version;
         public uint paletteID;
+        public byte num_subpalettes;
+        public byte numTMCs; // Texture map changes
+        public byte numAPCs; // Anim part changes
         public List<Subpalette> subpalettes = new List<Subpalette>(); // NOTE: This should be sorted on insertion or something, see ObjDesc::AddSubpalette
         public List<TextureMapChange> tmChanges = new List<TextureMapChange>();
         public List<AnimPartChange> apChanges = new List<AnimPartChange>();
+        public int paletteIDLength;
+        public int subpalettesLength;
+        public int tmChangesLength;
+        public int apChangesLength;
+        public int Length;
+        public byte Padding;
 
         public static ObjDesc read(BinaryReader binaryReader) {
             ObjDesc newObj = new ObjDesc();
-            binaryReader.ReadByte(); // Unk, should always be == 17
+            var startPosition = binaryReader.BaseStream.Position;
+            newObj.version = binaryReader.ReadByte(); // Should always be == 17
+            newObj.num_subpalettes = binaryReader.ReadByte();
+            newObj.numTMCs = binaryReader.ReadByte();
+            newObj.numAPCs = binaryReader.ReadByte();
 
-            byte numPalettes = binaryReader.ReadByte();
-            byte numTMCs = binaryReader.ReadByte();
-            byte numAPCs = binaryReader.ReadByte();
-
-            if (numPalettes > 0) {
+            if (newObj.num_subpalettes > 0) {
+                var paletteIDPosition = binaryReader.BaseStream.Position;
                 newObj.paletteID = Util.readDataIDOfKnownType(0x4000000, binaryReader);
-                for (int i = 0; i < numPalettes; ++i) {
+                newObj.paletteIDLength = (int)(binaryReader.BaseStream.Position - paletteIDPosition);
+                for (int i = 0; i < newObj.num_subpalettes; ++i) {
                     newObj.subpalettes.Add(Subpalette.read(binaryReader));
                 }
+                newObj.subpalettesLength = (int)(binaryReader.BaseStream.Position - paletteIDPosition);
             }
-
-            if (numTMCs > 0) {
-                for (int i = 0; i < numTMCs; ++i) {
+            if (newObj.numTMCs > 0) {
+                var startTMCPosition = binaryReader.BaseStream.Position;
+                for (int i = 0; i < newObj.numTMCs; ++i) {
                     newObj.tmChanges.Add(TextureMapChange.read(binaryReader));
                 }
+                newObj.tmChangesLength = (int)(binaryReader.BaseStream.Position - startTMCPosition);
             }
-
-            if (numAPCs > 0) {
-                for (int i = 0; i < numAPCs; ++i) {
+            if (newObj.numAPCs > 0) {
+                var startAPCPosition = binaryReader.BaseStream.Position;
+                for (int i = 0; i < newObj.numAPCs; ++i) {
                     newObj.apChanges.Add(AnimPartChange.read(binaryReader));
                 }
+                newObj.apChangesLength = (int)(binaryReader.BaseStream.Position - startAPCPosition);
+
             }
 
-            Util.readToAlign(binaryReader);
+            newObj.Padding = Util.readToAlign(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
 
             return newObj;
         }
 
-        public void contributeToTreeNode(TreeNode node) {
-            TreeNode paletteNode = node.Nodes.Add("subpalettes = ");
-            foreach (Subpalette subpalette in subpalettes) {
-                subpalette.contributeToTreeNode(paletteNode);
+        public void contributeToTreeNode(TreeNode node)
+        {
+            node.Nodes.Add("version = " + version);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
+            node.Nodes.Add("num_subpalettes = " + num_subpalettes);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
+            node.Nodes.Add("numTMCs = " + numTMCs);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
+            node.Nodes.Add("num_APCs = " + numAPCs);
+            ContextInfo.AddToList(new ContextInfo { Length = 1 });
+
+            TreeNode subpalettesNode = node.Nodes.Add("subpalettes = ");
+            ContextInfo.AddToList(new ContextInfo { Length = subpalettesLength }, updateDataIndex: false);
+            if (num_subpalettes > 0)
+            {
+                TreeNode paletteIDNode = subpalettesNode.Nodes.Add("paletteID = " + Utility.FormatHex(paletteID));
+                ContextInfo.AddToList(new ContextInfo { Length = paletteIDLength });
+                for (int i = 0; i < num_subpalettes; i++)
+                {
+                    TreeNode subpaletteNode = paletteIDNode.Nodes.Add($"subpalette {i+1} = ");
+                    ContextInfo.AddToList(new ContextInfo { Length = subpalettes[i].Length }, updateDataIndex: false);
+                    subpalettes[i].contributeToTreeNode(subpaletteNode);
+                }
             }
+            else
+            {
+                subpalettesNode.ForeColor = Color.DimGray;
+            }
+
             TreeNode textureNode = node.Nodes.Add("tmChanges = ");
-            foreach (TextureMapChange tmChange in tmChanges) {
-                tmChange.contributeToTreeNode(textureNode);
+            ContextInfo.AddToList(new ContextInfo { Length = tmChangesLength }, updateDataIndex: false);
+            if (numTMCs == 0)
+                textureNode.ForeColor = Color.DimGray;
+            for (int i = 0; i < numTMCs; i++)
+            {
+                TreeNode changeNode = textureNode.Nodes.Add($"change {i+1} = ");
+                ContextInfo.AddToList(new ContextInfo { Length = tmChanges[i].Length }, updateDataIndex: false);
+                tmChanges[i].contributeToTreeNode(changeNode);
             }
+
             TreeNode animpartNode = node.Nodes.Add("apChanges = ");
-            foreach (AnimPartChange apChange in apChanges) {
-                apChange.contributeToTreeNode(animpartNode);
+            ContextInfo.AddToList(new ContextInfo { Length = apChangesLength }, updateDataIndex: false);
+            if (numAPCs == 0)
+                animpartNode.ForeColor = Color.DimGray;
+            for (int i = 0; i < numAPCs; i++)
+            {
+                TreeNode changeNode = animpartNode.Nodes.Add($"change {i + 1} = ");
+                ContextInfo.AddToList(new ContextInfo { Length = apChanges[i].Length }, updateDataIndex: false);
+                apChanges[i].contributeToTreeNode(changeNode);
             }
+
+            ContextInfo.DataIndex += Padding;
         }
     }
 
@@ -213,7 +294,9 @@ public class CM_Physics : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("id = " + Utility.FormatHex(id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             node.Nodes.Add("location_id = " + location_id);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
         }
     }
 
@@ -265,10 +348,14 @@ public class CM_Physics : MessageProcessor {
         public float default_script_intensity;
         public ushort[] timestamps = new ushort[9];
         public List<string> packedItems; // For display purposes
+        public int Length;
+        public int Padding;
 
         public static PhysicsDesc read(BinaryReader binaryReader) {
             PhysicsDesc newObj = new PhysicsDesc();
             newObj.packedItems = new List<string>();
+            var startPosition = binaryReader.BaseStream.Position;
+
             newObj.bitfield = binaryReader.ReadUInt32();
             newObj.state = binaryReader.ReadUInt32();
 
@@ -378,90 +465,123 @@ public class CM_Physics : MessageProcessor {
                 newObj.timestamps[i] = binaryReader.ReadUInt16();
             }
 
-            Util.readToAlign(binaryReader);
+            newObj.Padding = Util.readToAlign(binaryReader);
+            newObj.Length = (int)(binaryReader.BaseStream.Position - startPosition);
 
             return newObj;
         }
 
         public void contributeToTreeNode(TreeNode node) {
             TreeNode bitfieldNode = node.Nodes.Add("bitfield = " + Utility.FormatHex(bitfield));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             for (int i = 0; i < packedItems.Count; i++)
             {
                 bitfieldNode.Nodes.Add(packedItems[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             }
+            ContextInfo.DataIndex += 4;
             TreeNode stateNode = node.Nodes.Add("state = " + Utility.FormatHex(state));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (PhysicsState e in Enum.GetValues(typeof(PhysicsState)))
             {
                 if (((uint)state & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     stateNode.Nodes.Add($"{Enum.GetName(typeof(PhysicsState), e)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
-            
+            ContextInfo.DataIndex += 4;
             if ((bitfield & (uint)PhysicsDescInfo.MOVEMENT) != 0) {
                 TreeNode movementNode = node.Nodes.Add($"movement_buffer (length: {buff_length}) = ");
+                ContextInfo.AddToList(new ContextInfo { Length = (int)buff_length + 4 }, updateDataIndex: false);
+                ContextInfo.DataIndex += 4;
                 movement_buffer.contributeToTreeNode(movementNode);
                 node.Nodes.Add("autonomous_movement = " + autonomous_movement);
-            } else if ((bitfield & (uint)PhysicsDescInfo.ANIMFRAME_ID) != 0) {
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
+            }
+            else if ((bitfield & (uint)PhysicsDescInfo.ANIMFRAME_ID) != 0) {
                 node.Nodes.Add("animframe_id = " + animframe_id);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.POSITION) != 0) {
                 TreeNode posNode = node.Nodes.Add("pos = ");
+                ContextInfo.AddToList(new ContextInfo { Length = pos.Length }, updateDataIndex: false);
                 pos.contributeToTreeNode(posNode);
             }
             if ((bitfield & (uint)PhysicsDescInfo.MTABLE) != 0) {
                 node.Nodes.Add("mtable_id = " + Utility.FormatHex(mtable_id));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.STABLE) != 0) {
                 node.Nodes.Add("stable_id = " + Utility.FormatHex(stable_id));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.PETABLE) != 0) {
                 node.Nodes.Add("phstable_id = " + Utility.FormatHex(phstable_id));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.CSetup) != 0) {
                 node.Nodes.Add("setup_id = " + Utility.FormatHex(setup_id));
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.PARENT) != 0) {
                 node.Nodes.Add("parent_id = " + Utility.FormatHex(parent_id));
+                ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
                 node.Nodes.Add("location_id = " + location_id);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.CHILDREN) != 0) {
                 TreeNode childrenNode = node.Nodes.Add("children = ");
+                ContextInfo.AddToList(new ContextInfo { Length = children.Count * 8 + 4 }, updateDataIndex: false);
+                ContextInfo.DataIndex += 4;
                 foreach (ChildInfo childInfo in children) {
                     childInfo.contributeToTreeNode(childrenNode);
                 }
             }
             if ((bitfield & (uint)PhysicsDescInfo.OBJSCALE) != 0) {
                 node.Nodes.Add("object_scale = " + object_scale);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.FRICTION) != 0) {
                 node.Nodes.Add("friction = " + friction);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.ELASTICITY) != 0) {
                 node.Nodes.Add("elasticity = " + elasticity);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.TRANSLUCENCY) != 0) {
                 node.Nodes.Add("translucency = " + translucency);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.VELOCITY) != 0) {
                 node.Nodes.Add("velocity = " + velocity);
+                ContextInfo.AddToList(new ContextInfo { Length = 12 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.ACCELERATION) != 0) {
                 node.Nodes.Add("acceleration = " + acceleration);
+                ContextInfo.AddToList(new ContextInfo { Length = 12 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.OMEGA) != 0) {
                 node.Nodes.Add("omega = " + omega);
+                ContextInfo.AddToList(new ContextInfo { Length = 12 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.DEFAULT_SCRIPT) != 0) {
                 node.Nodes.Add("default_script = " + default_script);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             if ((bitfield & (uint)PhysicsDescInfo.DEFAULT_SCRIPT_INTENSITY) != 0) {
                 node.Nodes.Add("default_script_intensity = " + default_script_intensity);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
             }
             TreeNode timestampsNode = node.Nodes.Add("timestamps = ");
+            ContextInfo.AddToList(new ContextInfo { Length = timestamps.Length * 2 }, updateDataIndex: false);
             for (int i = 0; i < timestamps.Length; ++i) {
                 timestampsNode.Nodes.Add("[" + (PhysicsTimeStamp)i + "] = " + timestamps[i]);
+                ContextInfo.AddToList(new ContextInfo { Length = 2 });
             }
+
+            ContextInfo.DataIndex += Padding;
         }
     }
 
@@ -1503,7 +1623,9 @@ public class CM_Physics : MessageProcessor {
 
         public void contributeToTreeNode(TreeNode node) {
             node.Nodes.Add("ts1 = " + ts1);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             node.Nodes.Add("ts2 = " + ts2);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
         }
     }
 
@@ -1522,11 +1644,15 @@ public class CM_Physics : MessageProcessor {
 
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
-            rootNode.Expand();            
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode descNode = rootNode.Nodes.Add("desc = ");
+            ContextInfo.AddToList(new ContextInfo { Length = desc.Length }, updateDataIndex: false);
             desc.contributeToTreeNode(descNode);
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             timestamps.contributeToTreeNode(timestampsNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -1550,12 +1676,17 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode objdescNode = rootNode.Nodes.Add("objdesc = ");
+            ContextInfo.AddToList(new ContextInfo { Length = objdesc.Length }, updateDataIndex: false);
             objdesc.contributeToTreeNode(objdescNode);
             TreeNode physicsdescNode = rootNode.Nodes.Add("physicsdesc = ");
+            ContextInfo.AddToList(new ContextInfo { Length = physicsdesc.Length }, updateDataIndex: false);
             physicsdesc.contributeToTreeNode(physicsdescNode);
             TreeNode wdescNode = rootNode.Nodes.Add("wdesc = ");
+            ContextInfo.AddToList(new ContextInfo { Length = wdesc.Length }, updateDataIndex: false);
             wdesc.contributeToTreeNode(wdescNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -1573,7 +1704,9 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1593,8 +1726,11 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("instance_timestamp = " + instance_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1619,11 +1755,17 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
-            rootNode.Nodes.Add("child_id = " + Utility.FormatHex(this.child_id));          
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
+            rootNode.Nodes.Add("child_id = " + Utility.FormatHex(child_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("child_location = " + child_location);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("placement_id = " + placement_id);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             timestamps.contributeToTreeNode(timestampsNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -1643,8 +1785,11 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             timestamps.contributeToTreeNode(timestampsNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -1666,16 +1811,22 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode stateNode = rootNode.Nodes.Add("new_state = " + Utility.FormatHex(new_state));
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             foreach (PhysicsState e in Enum.GetValues(typeof(PhysicsState)))
             {
                 if (((uint)new_state & (uint)e) == (uint)e && (uint)e != 0)
                 {
                     stateNode.Nodes.Add($"{Enum.GetName(typeof(PhysicsState), e)}");
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
                 }
             }
+            ContextInfo.DataIndex += 4;
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             timestamps.contributeToTreeNode(timestampsNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -1699,10 +1850,15 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("velocity = " + velocity);
+            ContextInfo.AddToList(new ContextInfo { Length = 12 });
             rootNode.Nodes.Add("omega = " + omega);
+            ContextInfo.AddToList(new ContextInfo { Length = 12 });
             TreeNode timestampsNode = rootNode.Nodes.Add("timestamps = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 }, updateDataIndex: false);
             timestamps.contributeToTreeNode(timestampsNode);
             treeView.Nodes.Add(rootNode);
         }
@@ -1724,9 +1880,13 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("sound = " + "(" + sound + ") " + (SoundType)sound);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("volume = " + volume);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1744,7 +1904,9 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("physics_timestamp = " + physics_timestamp);
+            ContextInfo.AddToList(new ContextInfo { Length = 2 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1763,8 +1925,11 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("script_id = " + script_id);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1785,9 +1950,13 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
-            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
+            rootNode.Nodes.Add("object_id = " + Utility.FormatHex(object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             rootNode.Nodes.Add("script_type = " + script_type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             rootNode.Nodes.Add("mod = " + mod);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
             treeView.Nodes.Add(rootNode);
         }
     }
@@ -1810,12 +1979,17 @@ public class CM_Physics : MessageProcessor {
         public override void contributeToTreeView(TreeView treeView) {
             TreeNode rootNode = new TreeNode(this.GetType().Name);
             rootNode.Expand();
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("object_id = " + Utility.FormatHex(this.object_id));
+            ContextInfo.AddToList(new ContextInfo { DataType = DataType.ObjectID });
             TreeNode objdescNode = rootNode.Nodes.Add("objdesc = ");
+            ContextInfo.AddToList(new ContextInfo { Length = objdesc.Length }, updateDataIndex: false);
             objdesc.contributeToTreeNode(objdescNode);
             TreeNode physicsdescNode = rootNode.Nodes.Add("physicsdesc = ");
+            ContextInfo.AddToList(new ContextInfo { Length = physicsdesc.Length }, updateDataIndex: false);
             physicsdesc.contributeToTreeNode(physicsdescNode);
             TreeNode wdescNode = rootNode.Nodes.Add("wdesc = ");
+            ContextInfo.AddToList(new ContextInfo { Length = wdesc.Length }, updateDataIndex: false);
             wdesc.contributeToTreeNode(wdescNode);
             treeView.Nodes.Add(rootNode);
         }
