@@ -1,3 +1,9 @@
+### 2019-05-18
+[Slushnas]
+* Fixed display issue with AllegianceInfoResponseEvent.
+* Added some missing messages to CM_Game.
+* Added context info to CM_Fellowship, CM_Game, CM_House, CM_Trade, and CM_Physics.
+
 ### 2019-05-08
 [Slushnas]
 * Fixed display grouping of Monarch/Patron/Self/Vassals in AllegianceUpdate messages.
