@@ -57,8 +57,8 @@ namespace aclogview.Tools.Parsers
                             {
                                 var output = $"{parsed.object_id:X8},{parsed.movement_data.movementData_Unpack.moveToObject:X8},{parsed.movement_data.movementData_Unpack.style},{parsed.movement_data.movementData_Unpack.movement_params.distance_to_object},{fileName},{record.index}";
 
-                                if (SpecialOutputHits.TryAdd(parsed.movement_data.movementData_Unpack.movement_params.distance_to_object.ToString() + parsed.movement_data.movementData_Unpack.style, 0)) ;
-                                result.SpecialOutput.Add(output);
+                                if (SpecialOutputHits.TryAdd(parsed.movement_data.movementData_Unpack.movement_params.distance_to_object.ToString() + parsed.movement_data.movementData_Unpack.style, 0))
+                                    result.SpecialOutput.Add(output);
                             }
                         }
 
@@ -71,8 +71,8 @@ namespace aclogview.Tools.Parsers
 
                             var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText;
 
-                            if (SpecialOutputHits.TryAdd(output, 0)) ;
-                            result.SpecialOutput.Add(output);
+                            if (SpecialOutputHits.TryAdd(output, 0))
+                                result.SpecialOutput.Add(output);
                         }
 
                         if (messageCode == 0xF745) // Create Object

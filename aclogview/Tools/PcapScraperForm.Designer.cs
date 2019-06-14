@@ -42,6 +42,7 @@
             this.txtOutputFolder = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.chkMultiThread = new System.Windows.Forms.CheckBox();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -163,11 +164,24 @@
             this.timer1.Interval = 200;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // chkMultiThread
+            // 
+            this.chkMultiThread.AutoSize = true;
+            this.chkMultiThread.Checked = true;
+            this.chkMultiThread.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkMultiThread.Location = new System.Drawing.Point(384, 85);
+            this.chkMultiThread.Name = "chkMultiThread";
+            this.chkMultiThread.Size = new System.Drawing.Size(134, 17);
+            this.chkMultiThread.TabIndex = 21;
+            this.chkMultiThread.Text = "Multi-Threaded Search";
+            this.chkMultiThread.UseVisualStyleBackColor = true;
+            // 
             // PcapScraperForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.chkMultiThread);
             this.Controls.Add(this.btnChangeOutputFolder);
             this.Controls.Add(this.txtOutputFolder);
             this.Controls.Add(this.label4);
@@ -201,5 +215,6 @@
         private System.Windows.Forms.TextBox txtOutputFolder;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.CheckBox chkMultiThread;
     }
 }

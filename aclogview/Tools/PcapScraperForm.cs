@@ -136,24 +136,32 @@ namespace aclogview.Tools
             foreach (var scraper in scrapers)
                 scraper.Reset();
 
-            Parallel.ForEach(filesToProcess, (currentFile) =>
+            if (chkMultiThread.Checked)
+                Parallel.ForEach(filesToProcess, ProcessFile);
+            else
             {
-                if (searchAborted || Disposing || IsDisposed)
-                    return;
-
-                var records = PCapReader.LoadPcap(currentFile, true, ref searchAborted, out _);
-
-                foreach (var scraper in scrapers)
-                    scraper.ProcessFileRecords(currentFile, records, ref searchAborted);
-
-                Interlocked.Increment(ref filesProcessed);
-            });
+                foreach (var currentFile in filesToProcess)
+                    ProcessFile(currentFile);
+            }
 
             if (!Directory.Exists(txtOutputFolder.Text))
                 Directory.CreateDirectory(txtOutputFolder.Text);
 
             foreach (var scraper in scrapers)
                 scraper.WriteOutput(txtOutputFolder.Text);
+        }
+
+        private void ProcessFile(string fileName)
+        {
+            if (searchAborted || Disposing || IsDisposed)
+                return;
+
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, out _);
+
+            foreach (var scraper in scrapers)
+                scraper.ProcessFileRecords(fileName, records, ref searchAborted);
+
+            Interlocked.Increment(ref filesProcessed);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
