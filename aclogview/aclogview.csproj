@@ -175,6 +175,21 @@
     <Compile Include="Message Processors\Proto_UI.cs" />
     <Compile Include="Enums\Spells.cs" />
     <Compile Include="Enums\StatTypes.cs" />
+    <Compile Include="Tools\Parsers\OpcodeFinder.cs" />
+    <Compile Include="Tools\Scrapers\HeatMapScraper.cs" />
+    <Compile Include="Tools\Scrapers\PacketSizeScraperC2S.cs" />
+    <Compile Include="Tools\Parsers\SampleParser.cs" />
+    <Compile Include="Tools\Parsers\TextSearcher.cs" />
+    <Compile Include="Tools\Scrapers\PacketTypesCountScraper.cs" />
+    <Compile Include="Tools\Scrapers\Scraper.cs" />
+    <Compile Include="Tools\Scrapers\VendorBuySellAmountScraperC2S.cs" />
+    <Compile Include="Tools\PcapScraperForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\PcapScraperForm.Designer.cs">
+      <DependentUpon>PcapScraperForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\ToolUtil.cs" />
     <Compile Include="TreeviewState.cs" />
     <Compile Include="Tools\TextPopup.cs">
       <SubType>Form</SubType>
@@ -214,6 +229,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Tools\PcapScraperForm.resx">
+      <DependentUpon>PcapScraperForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Tools\TextPopup.resx">
       <DependentUpon>TextPopup.cs</DependentUpon>
     </EmbeddedResource>

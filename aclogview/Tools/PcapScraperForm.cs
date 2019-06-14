@@ -1,22 +1,20 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview.Properties;
-using aclogview.Tools.Parsers;
+using aclogview.Tools.Scrapers;
 
 namespace aclogview.Tools
 {
-    public partial class FindTextInFilesForm : Form
+    public partial class PcapScraperForm : Form
     {
-        public FindTextInFilesForm()
+        public PcapScraperForm()
         {
             InitializeComponent();
         }
@@ -26,13 +24,7 @@ namespace aclogview.Tools
             base.OnLoad(e);
 
             txtSearchPathRoot.Text = Settings.Default.FindOpcodeInFilesRoot;
-
-            typeof(DataGridView).InvokeMember("DoubleBuffered", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.SetProperty, null, dataGridView1, new object[] { true });
-            dataGridView1.RowHeadersVisible = false;
-            dataGridView1.AllowUserToAddRows = false;
-            dataGridView1.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dataGridView1.Columns[0].ValueType = typeof(int);
-            dataGridView1.Columns[1].ValueType = typeof(int);
+            txtOutputFolder.Text = Settings.Default.FragDatFileOutputFolder;
 
             // Center to our owner, if we have one
             if (Owner != null)
@@ -44,6 +36,7 @@ namespace aclogview.Tools
             searchAborted = true;
 
             Settings.Default.FindOpcodeInFilesRoot = txtSearchPathRoot.Text;
+            Settings.Default.FragDatFileOutputFolder = txtOutputFolder.Text;
 
             base.OnClosing(e);
         }
@@ -58,72 +51,51 @@ namespace aclogview.Tools
             }
         }
 
-        private void searchText_KeyPress(object sender, KeyPressEventArgs e)
+        private void btnChangeOutputFolder_Click(object sender, EventArgs e)
         {
-            if (e.KeyChar == (char)Keys.Enter)
+            using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
             {
-                e.Handled = true;
-                btnStartSearch.PerformClick();
+                if (openFolder.ShowDialog() == DialogResult.OK)
+                    txtOutputFolder.Text = openFolder.SelectedPath;
             }
         }
 
-        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        // Manage your scrapers here
+        // Comment out ones you do not wish to run
+        // Add/Uncomment ones that you do want to run
+        // todo: Auto populate checkboxes or a checkbox table so the user can select at runtime what scrapers they want
+        // todo: use reflection to load the above based on Scraper type
+        private readonly List<Scraper> scrapers = new List<Scraper>
         {
-            if (e.RowIndex == -1)
-                return;
-
-            var fileName = (string)dataGridView1.Rows[e.RowIndex].Cells[3].Value;
-            if (caseSensitive)
-            {
-                System.Diagnostics.Process.Start(Application.ExecutablePath, "-f" + '"' + fileName + '"' + " --cst " + '"' + textToSearchFor + '"');
-            }
-            else
-            {
-                System.Diagnostics.Process.Start(Application.ExecutablePath, "-f" + '"' + fileName + '"' + " --cit " + '"' + textToSearchFor + '"');
-            }
-        }
-
-
-        private readonly TextSearcher parser = new TextSearcher();
+            new PacketSizeScraperC2S(),
+            new VendorBuySellAmountScraperC2S(),
+            new PacketTypesCountScraper(),
+            new HeatMapScraper(),
+        };
 
         private List<string> filesToProcess = new List<string>();
-
-        private string textToSearchFor;
-        private bool caseSensitive;
 
         private int filesProcessed;
         private int totalHits;
         private int totalExceptions;
         private bool searchAborted;
 
-        private readonly ConcurrentBag<TextSearcherResult> processFileResults = new ConcurrentBag<TextSearcherResult>();
-
         private void btnStartSearch_Click(object sender, EventArgs e)
         {
-            dataGridView1.RowCount = 0;
-            richTextBox1.Clear();
-
             try
             {
                 btnStartSearch.Enabled = false;
 
                 filesToProcess = ToolUtil.GetPcapsInFolder(txtSearchPathRoot.Text);
 
-                textToSearchFor = searchText.Text;
-                caseSensitive = checkBox_CaseSensitive.Checked;
-
                 filesProcessed = 0;
                 totalHits = 0;
                 totalExceptions = 0;
                 searchAborted = false;
 
-                while (!processFileResults.IsEmpty)
-                    processFileResults.TryTake(out _);
-
                 toolStripStatusLabel1.Text = "Files Processed: 0 of " + filesToProcess.Count;
 
                 txtSearchPathRoot.Enabled = false;
-                searchText.Enabled = false;
                 btnChangeSearchPathRoot.Enabled = false;
                 btnStopSearch.Enabled = true;
 
@@ -152,10 +124,7 @@ namespace aclogview.Tools
 
             timer1.Stop();
 
-            timer1_Tick(null, null);
-
             txtSearchPathRoot.Enabled = true;
-            searchText.Enabled = true;
             btnChangeSearchPathRoot.Enabled = true;
             btnStartSearch.Enabled = true;
             btnStopSearch.Enabled = false;
@@ -164,44 +133,31 @@ namespace aclogview.Tools
 
         private void DoSearch()
         {
+            foreach (var scraper in scrapers)
+                scraper.Reset();
+
             Parallel.ForEach(filesToProcess, (currentFile) =>
             {
                 if (searchAborted || Disposing || IsDisposed)
                     return;
 
-                try
-                {
-                    var records = PCapReader.LoadPcap(currentFile, true, ref searchAborted, out _);
+                var records = PCapReader.LoadPcap(currentFile, true, ref searchAborted, out _);
 
-                    var result = parser.ProcessFileRecords(currentFile, records, ref searchAborted, textToSearchFor, caseSensitive);
+                foreach (var scraper in scrapers)
+                    scraper.ProcessFileRecords(currentFile, records, ref searchAborted);
 
-                    for (int i = 0; i < result.Hits; i++)
-                        Interlocked.Increment(ref totalHits);
-
-                    Interlocked.Increment(ref filesProcessed);
-
-                    processFileResults.Add(result);
-                }
-                catch { }
+                Interlocked.Increment(ref filesProcessed);
             });
+
+            if (!Directory.Exists(txtOutputFolder.Text))
+                Directory.CreateDirectory(txtOutputFolder.Text);
+
+            foreach (var scraper in scrapers)
+                scraper.WriteOutput(txtOutputFolder.Text);
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            while (!processFileResults.IsEmpty)
-            {
-                if (processFileResults.TryTake(out var result))
-                {
-                    var length = new FileInfo(result.FileName).Length;
-
-                    if (result.Hits > 0 || result.Exceptions > 0)
-                        dataGridView1.Rows.Add(result.Hits, result.Exceptions, length, result.FileName);
-
-                    foreach (var specialOutput in result.SpecialOutput)
-                        richTextBox1.AppendText(specialOutput);
-                }
-            }
-
             toolStripStatusLabel1.Text = "Files Processed: " + filesProcessed.ToString("N0") + " of " + filesToProcess.Count.ToString("N0");
 
             toolStripStatusLabel2.Text = "Total Hits: " + totalHits.ToString("N0");

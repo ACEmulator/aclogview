@@ -8,7 +8,7 @@ namespace aclogview
 {
     static class PCapReader
     {
-        public static List<PacketRecord> LoadPcap(string fileName, bool asMessages, ref bool abort, ref bool isPcapng)
+        public static List<PacketRecord> LoadPcap(string fileName, bool asMessages, ref bool abort, out bool isPcapng)
         {
             using (FileStream fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
@@ -38,8 +38,7 @@ namespace aclogview
                     return 1;
                 if (a.memberHeader_.blobNum < b.memberHeader_.blobNum)
                     return -1;
-                else
-                    return 0;
+                return 0;
             }
         }
 

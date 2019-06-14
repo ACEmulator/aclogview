@@ -8,6 +8,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 using aclogview.Properties;
+using aclogview.Tools;
 
 namespace aclogview
 {
@@ -73,7 +74,7 @@ namespace aclogview
         }
 
 
-        private readonly List<string> filesToProcess = new List<string>();
+        private List<string> filesToProcess = new List<string>();
         private int filesProcessed;
         private int fragmentsProcessed;
         private int totalHits;
@@ -107,8 +108,7 @@ namespace aclogview
 
                 ResetVariables();
 
-                filesToProcess.AddRange(Directory.GetFiles(txtSearchPathRoot.Text, "*.pcap", SearchOption.AllDirectories));
-                filesToProcess.AddRange(Directory.GetFiles(txtSearchPathRoot.Text, "*.pcapng", SearchOption.AllDirectories));
+                filesToProcess = ToolUtil.GetPcapsInFolder(txtSearchPathRoot.Text);
 
                 txtSearchPathRoot.Enabled = false;
                 btnChangeSearchPathRoot.Enabled = false;
@@ -196,8 +196,7 @@ namespace aclogview
         {
             // NOTE: If you want to get fully constructed/merged messages instead of fragments:
             // Pass true below and use record.data as the full message, instead of individual record.frags
-            var isPcapng = false;
-            var records = PCapReader.LoadPcap(fileName, false, ref searchAborted, ref isPcapng);
+            var records = PCapReader.LoadPcap(fileName, false, ref searchAborted, out var isPcapng);
 
             // Temperorary objects
             var allFrags = new List<FragDatListFile.FragDatInfo>();

@@ -1,4 +1,4 @@
-﻿namespace aclogview
+namespace aclogview.Tools
 {
     partial class FindTextInFilesForm
     {

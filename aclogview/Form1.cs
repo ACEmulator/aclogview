@@ -8,7 +8,10 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
+
 using aclogview.Properties;
+using aclogview.Tools;
+
 using Be.Windows.Forms;
 
 namespace aclogview
@@ -210,7 +213,7 @@ namespace aclogview
             }
 
             bool abort = false;
-            records = PCapReader.LoadPcap(fileName, asMessages, ref abort, ref isPcapng);
+            records = PCapReader.LoadPcap(fileName, asMessages, ref abort, out isPcapng);
 
             if (!dontList)
             {
@@ -491,7 +494,8 @@ namespace aclogview
             }
         }
 
-        private void updateTree() {
+        private void updateTree()
+        {
             treeView_ParsedData.Nodes.Clear();
             ContextInfo.Reset();
 
@@ -774,77 +778,27 @@ namespace aclogview
         }
 
 
-        private void menuItem_ToolCount_Click(object sender, EventArgs e) {
-            List<string> files = null;
+        private void menuItem_ToolFindOpcodeInFiles_Click(object sender, EventArgs e)
+        {
+            var form = new FindOpcodeInFilesForm();
+            form.Show(this);
+        }
 
-            using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
-            {
-                if (openFolder.ShowDialog() != DialogResult.OK)
-                    return;
+        private void menuItem_ToolFindTextInFiles_Click(object sender, EventArgs e)
+        {
+            var form = new FindTextInFilesForm();
+            form.Show(this);
+        }
 
-                files = new List<string>();
-                files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
-                files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
-            }
-
-            OrderedDictionary opcodeOccurrences = new OrderedDictionary();
-
-            foreach (PacketOpcode opcode in Enum.GetValues(typeof(PacketOpcode)))
-                opcodeOccurrences[opcode] = 0;
-
-            foreach (string file in files)
-            {
-                loadPcap(file, false, true);
-
-                foreach (PacketRecord record in records)
-                {
-                    foreach (PacketOpcode opcode in record.opcodes)
-                    {
-                        if (opcodeOccurrences.Contains(opcode))
-                            opcodeOccurrences[opcode] = (Int32)opcodeOccurrences[opcode] + 1;
-                        else
-                            opcodeOccurrences[opcode] = 1;
-                    }
-                }
-            }
-
-            long totalCount = 0;
-            StringBuilder occurencesString = new StringBuilder();
-            foreach (DictionaryEntry entry in opcodeOccurrences)
-            {
-                occurencesString.Append(entry.Key);
-                occurencesString.Append(" = ");
-                occurencesString.Append(entry.Value);
-                occurencesString.Append("\r\n");
-
-                totalCount += (Int32)entry.Value;
-            }
-
-            occurencesString.Append("\r\n\r\nTotal Count = ");
-            occurencesString.Append(totalCount);
-            occurencesString.Append("\r\n");
-
-            using (TextPopup popup = new TextPopup())
-            {
-                popup.setText(occurencesString.ToString());
-                popup.setText(occurencesString.ToString() + "\r\n\r\n" + String.Join("\r\n", files));
-                popup.ShowDialog();
-            }
+        private void menuItem_ToolPcapScraper_Click(object sender, EventArgs e)
+        {
+            var form = new PcapScraperForm();
+            form.Show(this);
         }
 
         private void menuItem_ToolBad_Click(object sender, EventArgs e)
         {
-            List<string> files = null;
-
-            using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
-            {
-                if (openFolder.ShowDialog() != DialogResult.OK)
-                    return;
-
-                files = new List<string>();
-                files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
-                files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
-            }
+            var files = ToolUtil.GetPcapsInFolder();
 
             OrderedDictionary opcodeOccurrences = new OrderedDictionary();
 
@@ -903,89 +857,36 @@ namespace aclogview
             }
         }
 
-        private void menuItem_ToolHeatmap_Click(object sender, EventArgs e)
-        {
-            List<string> files = null;
-
-            using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
-            {
-                if (openFolder.ShowDialog() != DialogResult.OK)
-                    return;
-
-                files = new List<string>();
-                files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcap", SearchOption.AllDirectories));
-                files.AddRange(Directory.GetFiles(openFolder.SelectedPath, "*.pcapng", SearchOption.AllDirectories));
-            }
-
-            uint packetCount = 0;
-            uint messageCount = 0;
-            uint[,] heatmap = new uint[256, 256];
-            foreach (string file in files)
-            {
-                loadPcap(file, false, true);
-
-                foreach (PacketRecord record in records)
-                {
-                    packetCount++;
-                    foreach (BlobFrag frag in record.frags)
-                    {
-                        if (frag.memberHeader_.blobNum == 0)
-                            messageCount++;
-
-                        if (frag.dat_.Length > 20)
-                        {
-                            //BinaryReader fragDataReader = new BinaryReader(new MemoryStream(frag.dat_));
-                            //fragDataReader.ReadUInt32();
-                            //fragDataReader.ReadUInt32();
-                            //if ((PacketOpcode)fragDataReader.ReadUInt32() == PacketOpcode.Evt_Movement__AutonomousPosition_ID)
-                            if ((PacketOpcode)BitConverter.ToInt32(frag.dat_, 8) == PacketOpcode.Evt_Movement__AutonomousPosition_ID)
-                            {
-                                uint objcell_id = unchecked((uint)BitConverter.ToInt32(frag.dat_, 12));//fragDataReader.ReadUInt32();
-                                uint x = (objcell_id >> 24) & 0xFF;
-                                uint y = 255 - ((objcell_id >> 16) & 0xFF);
-                                heatmap[x, y] = 1;
-                            }
-                        }
-                    }
-                }
-            }
-
-            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            using (Stream imageStream = assembly.GetManifestResourceStream("aclogview.map.png"))
-            using (Bitmap heatmapImg = new Bitmap(imageStream))
-            {
-                for (int y = 0; y < 256; ++y)
-                {
-                    for (int x = 0; x < 256; ++x)
-                    {
-                        if (heatmap[x, y] > 0)
-                        {
-                            Color curColor = heatmapImg.GetPixel(x, y);
-                            heatmapImg.SetPixel(x, y, Color.FromArgb(255, Math.Min(255, 200 + curColor.R), curColor.G, curColor.B));
-                        }
-                    }
-                }
-
-                using (ImagePopup popup = new ImagePopup())
-                {
-                    popup.Text = "Coverage Map - " + packetCount + " packets, " + messageCount + " messages";
-                    popup.ClientSize = new Size(512, 512);
-                    popup.setImage(heatmapImg);
-                    popup.ShowDialog();
-                }
-            }
-        }
-
-        private void menuItem_ToolFindOpcodeInFiles_Click(object sender, EventArgs e)
-        {
-            var form = new FindOpcodeInFilesForm();
-            form.Show(this);
-        }
-
         private void menuItem_ToolFragDatListTool_Click(object sender, EventArgs e)
         {
             var form = new FragDatListToolForm();
             form.Show(this);
+        }
+
+        private void menuItem_Options_Click(object sender, EventArgs e)
+        {
+            using (var form = new OptionsForm())
+            {
+                form.ShowDialog();
+                listView_Packets.BeginUpdate();
+                setupTimeColumn();
+                listView_Packets.EndUpdate();
+                if (treeView_ParsedData.Nodes.Count == 0) return;
+                // Treeview gets redrawn when toggling tooltips so save and restore our state
+                var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
+                var savedTopNode = treeView_ParsedData.GetTopNode();
+                treeView_ParsedData.BeginUpdate();
+                treeView_ParsedData.ShowNodeToolTips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
+                treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
+                treeView_ParsedData.SetTopNode(savedTopNode);
+                treeView_ParsedData.EndUpdate();
+            }
+        }
+
+        private async void menuItem_CheckUpdates_Click(object sender, EventArgs e)
+        {
+            var pDocs = new ProtocolDocs { ShowUpToDateMessage = true };
+            await pDocs.UpdateIfNeededAsync();
         }
 
         private void menuItem_About_Click(object sender, EventArgs e)
@@ -1166,14 +1067,6 @@ namespace aclogview
             }
         }
 
-        private void textBox_Search_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                btnHighlight_Click(this, new EventArgs());
-            }
-        }
-
         private void btnHighlight_Click(object sender, EventArgs e)
         {
             var searchString = textBox_Search.Text;
@@ -1338,7 +1231,7 @@ namespace aclogview
             int exceptions = 0;
             bool searchAborted = false;
 
-            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, ref isPcapng);
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, out isPcapng);
 
             foreach (PacketRecord record in records)
             {
@@ -1513,12 +1406,6 @@ namespace aclogview
             return matches;
         }
 
-        private void menuItem_ToolFindTextInFiles_Click(object sender, EventArgs e)
-        {
-            var form = new FindTextInFilesForm();
-            form.Show(this);
-        }
-
         private void listView_CreatedObjects_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
         {
             if (e.ItemIndex < createdListItems.Count)
@@ -1652,32 +1539,6 @@ namespace aclogview
             {
                 protocolWebBrowser.DocumentText = "";
                 currentSelOpcode = 0;
-            }
-        }
-
-        private async void menuItem_CheckUpdates_Click(object sender, EventArgs e)
-        {
-            var pDocs = new ProtocolDocs {ShowUpToDateMessage = true};
-            await pDocs.UpdateIfNeededAsync();
-        }
-
-        private void menuItem_Options_Click(object sender, EventArgs e)
-        {
-            using (var form = new OptionsForm())
-            {
-                form.ShowDialog();
-                listView_Packets.BeginUpdate();
-                setupTimeColumn();
-                listView_Packets.EndUpdate();
-                if (treeView_ParsedData.Nodes.Count == 0) return;
-                // Treeview gets redrawn when toggling tooltips so save and restore our state
-                var savedExpansionState = treeView_ParsedData.Nodes.GetExpansionState();
-                var savedTopNode = treeView_ParsedData.GetTopNode();
-                treeView_ParsedData.BeginUpdate();
-                treeView_ParsedData.ShowNodeToolTips = Settings.Default.ParsedDataTreeviewDisplayTooltips;
-                treeView_ParsedData.Nodes.SetExpansionState(savedExpansionState);
-                treeView_ParsedData.SetTopNode(savedTopNode);
-                treeView_ParsedData.EndUpdate();
             }
         }
 

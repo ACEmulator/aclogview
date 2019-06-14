@@ -1,3 +1,10 @@
+### 2019-06-15
+[Mag-nus]
+* Created a framework to run multiple pcap scrapers simultaneously
+* Menu item "Heatmap" has been removed and can now be run by menu item "Pcap Scraper"
+* Menu item "Packet Type Counts" has been removed and can now be run by menu item "Pcap Scraper"
+* The logic for OpcodeFinder and TextSearchers has been separated from the UI
+
 ### 2019-05-18
 [Slushnas]
 * Fixed display issue with AllegianceInfoResponseEvent.

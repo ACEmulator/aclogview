@@ -11,9 +11,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using aclogview.Properties;
-using System.Text;
+using aclogview.Tools.Parsers;
 
-namespace aclogview
+namespace aclogview.Tools
 {
     public partial class FindOpcodeInFilesForm : Form
     {
@@ -51,17 +51,6 @@ namespace aclogview
             base.OnClosing(e);
         }
 
-        int OpCode
-        {
-            get
-            {
-                int value;
-
-                int.TryParse(txtOpcode.Text, NumberStyles.HexNumber, null, out value);
-
-                return value;
-            }
-        }
 
         private void btnChangeSearchPathRoot_Click(object sender, EventArgs e)
         {
@@ -72,55 +61,69 @@ namespace aclogview
             }
         }
 
+        private void txtOpcode_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true;
+                btnStartSearch.PerformClick();
+            }
+        }
 
-        private readonly List<string> filesToProcess = new List<string>();
+        int OpCode
+        {
+            get
+            {
+                int.TryParse(txtOpcode.Text, NumberStyles.HexNumber, null, out var value);
+
+                return value;
+            }
+        }
+
+        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex == -1)
+                return;
+
+            var fileName = (string)dataGridView1.Rows[e.RowIndex].Cells[3].Value;
+
+            System.Diagnostics.Process.Start(Application.ExecutablePath, "-f" + '"' + fileName + '"' + " -o " + opCodeToSearchFor);
+        }
+
+
+        private readonly OpcodeFinder parser = new OpcodeFinder();
+
+        private List<string> filesToProcess = new List<string>();
+
         private int opCodeToSearchFor;
+
         private int filesProcessed;
         private int totalHits;
         private int totalExceptions;
         private bool searchAborted;
 
-        private class ProcessFileResult
-        {
-            public string FileName;
-            public int Hits;
-            public int Exceptions;
-        }
-
-        private readonly ConcurrentBag<ProcessFileResult> processFileResults = new ConcurrentBag<ProcessFileResult>();
-        
-        private readonly ConcurrentDictionary<string, int> specialOutputHits = new ConcurrentDictionary<string, int>();
-        private readonly ConcurrentQueue<string> specialOutputHitsQueue = new ConcurrentQueue<string>();
+        private readonly ConcurrentBag<OpcodeFinderResult> processFileResults = new ConcurrentBag<OpcodeFinderResult>();
 
         private void btnStartSearch_Click(object sender, EventArgs e)
         {
             dataGridView1.RowCount = 0;
+            richTextBox1.Clear();
 
             try
             {
                 btnStartSearch.Enabled = false;
 
-                filesToProcess.Clear();
+                filesToProcess = ToolUtil.GetPcapsInFolder(txtSearchPathRoot.Text);
+
                 opCodeToSearchFor = OpCode;
+
                 filesProcessed = 0;
                 totalHits = 0;
                 totalExceptions = 0;
                 searchAborted = false;
 
-                ProcessFileResult result;
                 while (!processFileResults.IsEmpty)
-                    processFileResults.TryTake(out result);
-
-
-                specialOutputHits.Clear();
-                string specialOutputHitsResult;
-                while (!specialOutputHitsQueue.IsEmpty)
-                    specialOutputHitsQueue.TryDequeue(out specialOutputHitsResult);
-                richTextBox1.Clear();
-
-
-                filesToProcess.AddRange(Directory.GetFiles(txtSearchPathRoot.Text, "*.pcap", SearchOption.AllDirectories));
-                filesToProcess.AddRange(Directory.GetFiles(txtSearchPathRoot.Text, "*.pcapng", SearchOption.AllDirectories));
+                    processFileResults.TryTake(out _);
 
                 toolStripStatusLabel1.Text = "Files Processed: 0 of " + filesToProcess.Count;
 
@@ -166,250 +169,49 @@ namespace aclogview
 
         private void DoSearch()
         {
-            Parallel.ForEach(filesToProcess, (currentFile) =>
+            Parallel.ForEach(filesToProcess, currentFile =>
             {
                 if (searchAborted || Disposing || IsDisposed)
                     return;
 
                 try
                 {
-                    ProcessFile(currentFile);
+                    var records = PCapReader.LoadPcap(currentFile, true, ref searchAborted, out _);
+
+                    var result = parser.ProcessFileRecords(currentFile, records, ref searchAborted, opCodeToSearchFor);
+
+                    for (int i = 0; i < result.Hits; i++)
+                        Interlocked.Increment(ref totalHits);
+
+                    Interlocked.Increment(ref filesProcessed);
+
+                    processFileResults.Add(result);
                 }
                 catch { }
             });
         }
 
-        private void ProcessFile(string fileName)
-        {
-            int hits = 0;
-            int exceptions = 0;
-            bool isPcapng = false;
-
-            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, ref isPcapng);
-
-            foreach (PacketRecord record in records)
-            {
-                if (searchAborted || Disposing || IsDisposed)
-                    return;
-
-                if (record.opcodes.Contains((PacketOpcode)opCodeToSearchFor))
-                {
-                    hits++;
-
-                    Interlocked.Increment(ref totalHits);
-                }
-
-                // ********************************************************************
-                // ************************ CUSTOM SEARCH CODE ************************ 
-                // ********************************************************************
-                // Custom search code that can output information to Special Output
-                // Below are several commented out examples on how you can search through bulk pcaps for targeted data, and output detailed information to the output tab.
-
-                try
-                {
-                    if (record.data.Length <= 4)
-                        continue;
-
-                    using (BinaryReader messageDataReader = new BinaryReader(new MemoryStream(record.data)))
-                    {
-                        var messageCode = messageDataReader.ReadUInt32();
-
-                        //if (messageCode == (uint)PacketOpcode.Evt_Movement__MovementEvent_ID)
-                        //{
-                        //    var parsed = CM_Movement.MovementEvent.read(messageDataReader);
-
-                        //    if (parsed.movement_data.movementData_Unpack.movement_type == MovementTypes.Type.MoveToObject && $"{parsed.object_id:X8}".StartsWith("50"))
-                        //    {
-                        //        var output = $"{parsed.object_id:X8},{parsed.movement_data.movementData_Unpack.moveToObject:X8},{parsed.movement_data.movementData_Unpack.style},{parsed.movement_data.movementData_Unpack.movement_params.distance_to_object},{fileName},{record.index}";
-
-                        //        if (!specialOutputHits.ContainsKey(parsed.movement_data.movementData_Unpack.movement_params.distance_to_object.ToString() + parsed.movement_data.movementData_Unpack.style))
-                        //        {
-                        //            if (specialOutputHits.TryAdd(parsed.movement_data.movementData_Unpack.movement_params.distance_to_object.ToString() + parsed.movement_data.movementData_Unpack.style, 0))
-                        //                specialOutputHitsQueue.Enqueue(output);
-                        //        }
-                        //    }
-                        //}
-
-                        /*if (messageCode == 0x02BB) // Creature Message
-                        {
-                            var parsed = CM_Communication.HearSpeech.read(messageDataReader);
-
-                            //if (parsed.ChatMessageType != 0x0C)
-                            //    continue;
-
-                            var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText;
-
-                            if (!specialOutputHits.ContainsKey(output))
-                            {
-                                if (specialOutputHits.TryAdd(output, 0))
-                                    specialOutputHitsQueue.Enqueue(output);
-                            }
-                        }*/
-
-                        /*if (messageCode == 0xF745) // Create Object
-                        {
-                            var parsed = CM_Physics.CreateObject.read(messageDataReader);
-                        }*/
-
-                        /*if (messageCode == 0xF7B0) // Game Event
-                        {
-                            var character = messageDataReader.ReadUInt32(); // Character
-                            var sequence = messageDataReader.ReadUInt32(); // Sequence
-                            var _event = messageDataReader.ReadUInt32(); // Event
-
-                            if (_event == 0x0147) // Group Chat
-                            {
-                                var parsed = CM_Communication.ChannelBroadcast.read(messageDataReader);
-
-                                var output = parsed.GroupChatType.ToString("X4");
-                                if (!specialOutputHits.ContainsKey(output))
-                                {
-                                    if (specialOutputHits.TryAdd(output, 0))
-                                        specialOutputHitsQueue.Enqueue(output);
-                                }
-                            }
-
-                            if (_event == 0x02BD) // Tell
-                            {
-                                var parsed = CM_Communication.HearDirectSpeech.read(messageDataReader);
-
-                                var output = parsed.ChatMessageType.ToString("X4");
-
-                                if (!specialOutputHits.ContainsKey(output))
-                                {
-                                    if (specialOutputHits.TryAdd(output, 0))
-                                        specialOutputHitsQueue.Enqueue(output);
-                                }
-                            }
-                        }*/
-
-                        //if (messageCode == 0xF7B1) // Game Action
-                        //{
-                        //    var sequence = messageDataReader.ReadUInt32(); // Sequence
-                        //    var opcode = messageDataReader.ReadUInt32(); // Opcode
-
-                        //    if (opcode == 0x0036) // Use event
-                        //    {
-                        //        var parsed = CM_Inventory.UseEvent.read(messageDataReader);
-
-                        //        var object_id = parsed.i_object;
-
-                        //        for (int i = record.index; i > 0; i--)
-                        //        {
-                        //            using (BinaryReader comessageDataReader = new BinaryReader(new MemoryStream(records[i].data)))
-                        //            {
-                        //                var msgCode = comessageDataReader.ReadUInt32();
-
-                        //                if (msgCode == 0xF745) // Create Object
-                        //                {
-                        //                    var parsedco = CM_Physics.CreateObject.read(comessageDataReader);
-
-                        //                    if (parsedco.wdesc._type == ITEM_TYPE.TYPE_PORTAL && parsedco.object_id == object_id)
-                        //                    {
-                        //                        var output = $"{parsedco.wdesc._name.m_buffer},{fileName},{record.index}";
-
-                        //                        if (!specialOutputHits.ContainsKey(output))
-                        //                        {
-                        //                            if (specialOutputHits.TryAdd(output, 0))
-                        //                                specialOutputHitsQueue.Enqueue(output);
-                        //                        }
-                        //                        break;
-                        //                    }
-                        //                }
-                        //            }
-                        //        }
-                        //    } 
-                        //}
-
-                        /*if (messageCode == 0xF7DE) // TurbineChat
-                        {
-                            var parsed = CM_Admin.ChatServerData.read(messageDataReader);
-
-                            string output = parsed.TurbineChatType.ToString("X2");
-
-                            if (!specialOutputHits.ContainsKey(output))
-                            {
-                                if (specialOutputHits.TryAdd(output, 0))
-                                    specialOutputHitsQueue.Enqueue(output);
-                            }
-                        }*/
-
-                        /*if (messageCode == 0xF7E0) // Server Message
-                        {
-                            var parsed = CM_Communication.TextBoxString.read(messageDataReader);
-
-                            var output = parsed.ChatMessageType.ToString("X4") + " " + parsed.MessageText + ",";
-                            var output = parsed.ChatMessageType.ToString("X4");
-
-                            if (!specialOutputHits.ContainsKey(output))
-                            {
-                                if (specialOutputHits.TryAdd(output, 0))
-                                    specialOutputHitsQueue.Enqueue(output);
-                            }
-                        }*/
-                    }
-                }
-                catch
-                {
-                    // Do something with the exception maybe
-                    exceptions++;
-
-                    Interlocked.Increment(ref totalExceptions);
-                }
-            }
-
-            Interlocked.Increment(ref filesProcessed);
-
-            processFileResults.Add(new ProcessFileResult() { FileName = fileName, Hits = hits, Exceptions = exceptions });
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
-            ProcessFileResult result;
             while (!processFileResults.IsEmpty)
             {
-                if (processFileResults.TryTake(out result))
+                if (processFileResults.TryTake(out var result))
                 {
                     var length = new FileInfo(result.FileName).Length;
 
                     if (result.Hits > 0 || result.Exceptions > 0)
                         dataGridView1.Rows.Add(result.Hits, result.Exceptions, length, result.FileName);
+
+                    foreach (var specialOutput in result.SpecialOutput)
+                        richTextBox1.AppendText(specialOutput);
                 }
             }
-
-            string specialOutputHitsQueueResult;
-            StringBuilder specialOutput = new StringBuilder();
-            while (!specialOutputHitsQueue.IsEmpty)
-            {
-                if (specialOutputHitsQueue.TryDequeue(out specialOutputHitsQueueResult))
-                    specialOutput.AppendLine(specialOutputHitsQueueResult);
-            }
-            richTextBox1.AppendText(specialOutput.ToString());
 
             toolStripStatusLabel1.Text = "Files Processed: " + filesProcessed.ToString("N0") + " of " + filesToProcess.Count.ToString("N0");
 
             toolStripStatusLabel2.Text = "Total Hits: " + totalHits.ToString("N0");
 
             toolStripStatusLabel3.Text = "Message Exceptions: " + totalExceptions.ToString("N0");
-        }
-
-        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex == -1)
-                return;
-
-            var fileName = (string)dataGridView1.Rows[e.RowIndex].Cells[3].Value;
-
-            System.Diagnostics.Process.Start(Application.ExecutablePath, "-f" + '"' + fileName + '"' + " -o " + opCodeToSearchFor);
-        }
-
-        private void txtOpcode_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == (char)Keys.Enter)
-            {
-                e.Handled = true;
-                btnStartSearch.PerformClick();
-            }
         }
     }
 }
