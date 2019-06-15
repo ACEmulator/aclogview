@@ -9,6 +9,8 @@ namespace aclogview.Tools.Scrapers
 {
     class PacketSizeScraperC2S : Scraper
     {
+        public override string Description => "Finds all packet sizes for every Opcode";
+
         private readonly ConcurrentDictionary<uint, uint> codeHits = new ConcurrentDictionary<uint, uint>();
         private readonly ConcurrentDictionary<uint, uint> codeMaxLengths = new ConcurrentDictionary<uint, uint>();
         private readonly ConcurrentDictionary<uint, HashSet<int>> codeLengths = new ConcurrentDictionary<uint, HashSet<int>>();

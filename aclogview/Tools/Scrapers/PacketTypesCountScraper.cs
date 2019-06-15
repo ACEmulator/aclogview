@@ -9,6 +9,8 @@ namespace aclogview.Tools.Scrapers
 {
     class PacketTypesCountScraper : Scraper
     {
+        public override string Description => "Counts the number of packets seen by Opcode";
+
         readonly OrderedDictionary opcodeOccurrences = new OrderedDictionary();
 
         public override void Reset()

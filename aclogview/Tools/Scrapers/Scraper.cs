@@ -6,6 +6,8 @@ namespace aclogview.Tools.Scrapers
 {
     abstract class Scraper
     {
+        public abstract string Description { get; }
+
         public virtual void Reset()
         {
         }

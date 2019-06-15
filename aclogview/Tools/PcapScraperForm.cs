@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,6 +27,17 @@ namespace aclogview.Tools
 
             txtSearchPathRoot.Text = Settings.Default.FindOpcodeInFilesRoot;
             txtOutputFolder.Text = Settings.Default.FragDatFileOutputFolder;
+
+            // Use reflection to get all of our Scraper classes
+            var scrapers = new List<Scraper>();
+            foreach (Type type in Assembly.GetAssembly(typeof(Scraper)).GetTypes().Where(myType => myType.IsClass && !myType.IsAbstract && myType.IsSubclassOf(typeof(Scraper))))
+                scrapers.Add((Scraper)Activator.CreateInstance(type));
+
+            foreach (var scraper in scrapers)
+            {
+                var index = dataGridView1.Rows.Add(false, scraper.GetType().Name, scraper.Description);
+                dataGridView1.Rows[index].Tag = scraper;
+            }
 
             // Center to our owner, if we have one
             if (Owner != null)
@@ -60,18 +73,7 @@ namespace aclogview.Tools
             }
         }
 
-        // Manage your scrapers here
-        // Comment out ones you do not wish to run
-        // Add/Uncomment ones that you do want to run
-        // todo: Auto populate checkboxes or a checkbox table so the user can select at runtime what scrapers they want
-        // todo: use reflection to load the above based on Scraper type
-        private readonly List<Scraper> scrapers = new List<Scraper>
-        {
-            new PacketSizeScraperC2S(),
-            new VendorBuySellAmountScraperC2S(),
-            new PacketTypesCountScraper(),
-            new HeatMapScraper(),
-        };
+        private readonly List<Scraper> scrapers = new List<Scraper>();
 
         private List<string> filesToProcess = new List<string>();
 
@@ -86,6 +88,13 @@ namespace aclogview.Tools
             {
                 btnStartSearch.Enabled = false;
 
+                scrapers.Clear();
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    if (Convert.ToBoolean(((DataGridViewCheckBoxCell)row.Cells[0]).Value))
+                        scrapers.Add((Scraper)row.Tag);
+                }
+
                 filesToProcess = ToolUtil.GetPcapsInFolder(txtSearchPathRoot.Text);
 
                 filesProcessed = 0;
@@ -97,6 +106,7 @@ namespace aclogview.Tools
 
                 txtSearchPathRoot.Enabled = false;
                 btnChangeSearchPathRoot.Enabled = false;
+                dataGridView1.Enabled = false;
                 btnStopSearch.Enabled = true;
 
                 timer1.Start();
@@ -126,6 +136,7 @@ namespace aclogview.Tools
 
             txtSearchPathRoot.Enabled = true;
             btnChangeSearchPathRoot.Enabled = true;
+            dataGridView1.Enabled = true;
             btnStartSearch.Enabled = true;
             btnStopSearch.Enabled = false;
         }

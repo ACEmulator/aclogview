@@ -8,6 +8,8 @@ namespace aclogview.Tools.Scrapers
 {
     class HeatMapScraper : Scraper
     {
+        public override string Description => "Generates a PNG showing all the pcapped locations over Dereth";
+
         long packetCount;
         long messageCount;
 

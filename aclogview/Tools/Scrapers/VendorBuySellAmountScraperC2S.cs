@@ -6,6 +6,8 @@ namespace aclogview.Tools.Scrapers
 {
     class VendorBuySellAmountScraperC2S : Scraper
     {
+        public override string Description => "Finds the vendor buy/sell item and amount maximums from actual players";
+
         private uint buyMaxItemCount;
         private uint buyMaxAmountSingle;
         private uint buyMaxAmountTotal;
