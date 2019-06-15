@@ -26,6 +26,19 @@ namespace aclogview {
             this.components = new System.ComponentModel.Container();
             this.splitContainer_Main = new System.Windows.Forms.SplitContainer();
             this.splitContainer_Top = new System.Windows.Forms.SplitContainer();
+            this.listView_Packets = new CustomListView();
+            this.lineNumberColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.sendReceiveColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.timeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.headersColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.typeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.sizeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.extraInfoColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.hexOpcodeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.packSeqColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.queueColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.iterationColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.serverPortColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listView_CreatedObjects = new System.Windows.Forms.ListView();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -35,11 +48,13 @@ namespace aclogview {
             this.splitContainer_Bottom = new System.Windows.Forms.SplitContainer();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabHexView = new System.Windows.Forms.TabPage();
+            this.hexBox1 = new Be.Windows.Forms.HexBox();
             this.hexContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyTextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.copyHexMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabProtocolDocs = new System.Windows.Forms.TabPage();
             this.protocolWebBrowser = new System.Windows.Forms.WebBrowser();
+            this.treeView_ParsedData = new BufferedTreeView();
             this.parsedContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ExpandAll = new System.Windows.Forms.ToolStripMenuItem();
             this.CollapseAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -104,21 +119,6 @@ namespace aclogview {
             this.queueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.iterationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.hexBox1 = new Be.Windows.Forms.HexBox();
-            this.listView_Packets = new CustomListView();
-            this.lineNumberColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.sendReceiveColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.timeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.headersColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.typeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.sizeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.extraInfoColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.hexOpcodeColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.packSeqColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.queueColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.iterationColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.serverPortColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.treeView_ParsedData = new BufferedTreeView();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -183,6 +183,94 @@ namespace aclogview {
             this.splitContainer_Top.Size = new System.Drawing.Size(1520, 262);
             this.splitContainer_Top.SplitterDistance = 931;
             this.splitContainer_Top.TabIndex = 1;
+            // 
+            // listView_Packets
+            // 
+            this.listView_Packets.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.lineNumberColumn,
+            this.sendReceiveColumn,
+            this.timeColumn,
+            this.headersColumn,
+            this.typeColumn,
+            this.sizeColumn,
+            this.extraInfoColumn,
+            this.hexOpcodeColumn,
+            this.packSeqColumn,
+            this.queueColumn,
+            this.iterationColumn,
+            this.serverPortColumn});
+            this.listView_Packets.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_Packets.FullRowSelect = true;
+            this.listView_Packets.HideSelection = false;
+            this.listView_Packets.Location = new System.Drawing.Point(0, 0);
+            this.listView_Packets.MultiSelect = false;
+            this.listView_Packets.Name = "listView_Packets";
+            this.listView_Packets.Size = new System.Drawing.Size(1516, 258);
+            this.listView_Packets.TabIndex = 0;
+            this.listView_Packets.UseCompatibleStateImageBehavior = false;
+            this.listView_Packets.View = System.Windows.Forms.View.Details;
+            this.listView_Packets.VirtualMode = true;
+            this.listView_Packets.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_Packets_ColumnClick);
+            this.listView_Packets.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.listView_Packets_RetrieveVirtualItem);
+            this.listView_Packets.SelectedIndexChanged += new System.EventHandler(this.listView_Packets_SelectedIndexChanged);
+            this.listView_Packets.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listView_Packets_MouseClick);
+            // 
+            // lineNumberColumn
+            // 
+            this.lineNumberColumn.Text = "#";
+            this.lineNumberColumn.Width = 50;
+            // 
+            // sendReceiveColumn
+            // 
+            this.sendReceiveColumn.Text = "S/R";
+            this.sendReceiveColumn.Width = 50;
+            // 
+            // timeColumn
+            // 
+            this.timeColumn.Text = "Epoch Time (s)";
+            this.timeColumn.Width = 84;
+            // 
+            // headersColumn
+            // 
+            this.headersColumn.Text = "Headers";
+            this.headersColumn.Width = 220;
+            // 
+            // typeColumn
+            // 
+            this.typeColumn.Text = "Type";
+            this.typeColumn.Width = 309;
+            // 
+            // sizeColumn
+            // 
+            this.sizeColumn.Text = "Size";
+            // 
+            // extraInfoColumn
+            // 
+            this.extraInfoColumn.Text = "Extra Info";
+            this.extraInfoColumn.Width = 66;
+            // 
+            // hexOpcodeColumn
+            // 
+            this.hexOpcodeColumn.Text = "OpCode";
+            this.hexOpcodeColumn.Width = 66;
+            // 
+            // packSeqColumn
+            // 
+            this.packSeqColumn.Text = "Pack. Seq";
+            this.packSeqColumn.Width = 72;
+            // 
+            // queueColumn
+            // 
+            this.queueColumn.Text = "Queue";
+            // 
+            // iterationColumn
+            // 
+            this.iterationColumn.Text = "Iteration";
+            // 
+            // serverPortColumn
+            // 
+            this.serverPortColumn.Text = "Server Port";
+            this.serverPortColumn.Width = 65;
             // 
             // listView_CreatedObjects
             // 
@@ -273,6 +361,32 @@ namespace aclogview {
             this.tabHexView.Text = "Hex View";
             this.tabHexView.UseVisualStyleBackColor = true;
             // 
+            // hexBox1
+            // 
+            this.hexBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.hexBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            // 
+            // 
+            // 
+            this.hexBox1.BuiltInContextMenu.CopyMenuItemText = "Copy";
+            this.hexBox1.BuiltInContextMenu.SelectAllMenuItemText = "Select All";
+            this.hexBox1.ContextMenuStrip = this.hexContextMenu;
+            this.hexBox1.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.hexBox1.GroupSize = 8;
+            this.hexBox1.LineInfoVisible = true;
+            this.hexBox1.Location = new System.Drawing.Point(3, 3);
+            this.hexBox1.Name = "hexBox1";
+            this.hexBox1.ReadOnly = true;
+            this.hexBox1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            this.hexBox1.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(60)))), ((int)(((byte)(188)))), ((int)(((byte)(255)))));
+            this.hexBox1.Size = new System.Drawing.Size(1056, 378);
+            this.hexBox1.StringViewVisible = true;
+            this.hexBox1.TabIndex = 1;
+            this.hexBox1.UseFixedBytesPerLine = true;
+            this.hexBox1.VScrollBarVisible = true;
+            // 
             // hexContextMenu
             // 
             this.hexContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -303,7 +417,7 @@ namespace aclogview {
             this.tabProtocolDocs.Controls.Add(this.protocolWebBrowser);
             this.tabProtocolDocs.Location = new System.Drawing.Point(4, 22);
             this.tabProtocolDocs.Name = "tabProtocolDocs";
-            this.tabProtocolDocs.Size = new System.Drawing.Size(1062, 384);
+            this.tabProtocolDocs.Size = new System.Drawing.Size(1059, 380);
             this.tabProtocolDocs.TabIndex = 1;
             this.tabProtocolDocs.Text = "Protocol Documentation";
             this.tabProtocolDocs.UseVisualStyleBackColor = true;
@@ -314,8 +428,19 @@ namespace aclogview {
             this.protocolWebBrowser.Location = new System.Drawing.Point(0, 0);
             this.protocolWebBrowser.MinimumSize = new System.Drawing.Size(20, 20);
             this.protocolWebBrowser.Name = "protocolWebBrowser";
-            this.protocolWebBrowser.Size = new System.Drawing.Size(1062, 384);
+            this.protocolWebBrowser.Size = new System.Drawing.Size(1059, 380);
             this.protocolWebBrowser.TabIndex = 0;
+            // 
+            // treeView_ParsedData
+            // 
+            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
+            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
+            this.treeView_ParsedData.Name = "treeView_ParsedData";
+            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
+            this.treeView_ParsedData.TabIndex = 0;
+            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
+            this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
             // 
             // parsedContextMenu
             // 
@@ -850,131 +975,6 @@ namespace aclogview {
             this.serverPortMenuItem.Name = "serverPortMenuItem";
             this.serverPortMenuItem.Size = new System.Drawing.Size(131, 22);
             this.serverPortMenuItem.Text = "Server Port";
-            // 
-            // hexBox1
-            // 
-            this.hexBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.hexBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            // 
-            // 
-            // 
-            this.hexBox1.BuiltInContextMenu.CopyMenuItemText = "Copy";
-            this.hexBox1.BuiltInContextMenu.SelectAllMenuItemText = "Select All";
-            this.hexBox1.ContextMenuStrip = this.hexContextMenu;
-            this.hexBox1.Font = new System.Drawing.Font("Courier New", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.hexBox1.GroupSize = 8;
-            this.hexBox1.LineInfoVisible = true;
-            this.hexBox1.Location = new System.Drawing.Point(3, 3);
-            this.hexBox1.Name = "hexBox1";
-            this.hexBox1.ReadOnly = true;
-            this.hexBox1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            this.hexBox1.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(60)))), ((int)(((byte)(188)))), ((int)(((byte)(255)))));
-            this.hexBox1.Size = new System.Drawing.Size(1056, 378);
-            this.hexBox1.StringViewVisible = true;
-            this.hexBox1.TabIndex = 1;
-            this.hexBox1.UseFixedBytesPerLine = true;
-            this.hexBox1.VScrollBarVisible = true;
-            // 
-            // listView_Packets
-            // 
-            this.listView_Packets.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.lineNumberColumn,
-            this.sendReceiveColumn,
-            this.timeColumn,
-            this.headersColumn,
-            this.typeColumn,
-            this.sizeColumn,
-            this.extraInfoColumn,
-            this.hexOpcodeColumn,
-            this.packSeqColumn,
-            this.queueColumn,
-            this.iterationColumn,
-            this.serverPortColumn});
-            this.listView_Packets.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView_Packets.FullRowSelect = true;
-            this.listView_Packets.HideSelection = false;
-            this.listView_Packets.Location = new System.Drawing.Point(0, 0);
-            this.listView_Packets.MultiSelect = false;
-            this.listView_Packets.Name = "listView_Packets";
-            this.listView_Packets.Size = new System.Drawing.Size(1516, 258);
-            this.listView_Packets.TabIndex = 0;
-            this.listView_Packets.UseCompatibleStateImageBehavior = false;
-            this.listView_Packets.View = System.Windows.Forms.View.Details;
-            this.listView_Packets.VirtualMode = true;
-            this.listView_Packets.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_Packets_ColumnClick);
-            this.listView_Packets.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.listView_Packets_RetrieveVirtualItem);
-            this.listView_Packets.SelectedIndexChanged += new System.EventHandler(this.listView_Packets_SelectedIndexChanged);
-            this.listView_Packets.MouseClick += new System.Windows.Forms.MouseEventHandler(this.listView_Packets_MouseClick);
-            // 
-            // lineNumberColumn
-            // 
-            this.lineNumberColumn.Text = "#";
-            this.lineNumberColumn.Width = 50;
-            // 
-            // sendReceiveColumn
-            // 
-            this.sendReceiveColumn.Text = "S/R";
-            this.sendReceiveColumn.Width = 50;
-            // 
-            // timeColumn
-            // 
-            this.timeColumn.Text = "Epoch Time (s)";
-            this.timeColumn.Width = 84;
-            // 
-            // headersColumn
-            // 
-            this.headersColumn.Text = "Headers";
-            this.headersColumn.Width = 220;
-            // 
-            // typeColumn
-            // 
-            this.typeColumn.Text = "Type";
-            this.typeColumn.Width = 309;
-            // 
-            // sizeColumn
-            // 
-            this.sizeColumn.Text = "Size";
-            // 
-            // extraInfoColumn
-            // 
-            this.extraInfoColumn.Text = "Extra Info";
-            this.extraInfoColumn.Width = 66;
-            // 
-            // hexOpcodeColumn
-            // 
-            this.hexOpcodeColumn.Text = "OpCode";
-            this.hexOpcodeColumn.Width = 66;
-            // 
-            // packSeqColumn
-            // 
-            this.packSeqColumn.Text = "Pack. Seq";
-            this.packSeqColumn.Width = 72;
-            // 
-            // queueColumn
-            // 
-            this.queueColumn.Text = "Queue";
-            // 
-            // iterationColumn
-            // 
-            this.iterationColumn.Text = "Iteration";
-            // 
-            // serverPortColumn
-            // 
-            this.serverPortColumn.Text = "Server Port";
-            this.serverPortColumn.Width = 65;
-            // 
-            // treeView_ParsedData
-            // 
-            this.treeView_ParsedData.ContextMenuStrip = this.parsedContextMenu;
-            this.treeView_ParsedData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView_ParsedData.Location = new System.Drawing.Point(0, 0);
-            this.treeView_ParsedData.Name = "treeView_ParsedData";
-            this.treeView_ParsedData.Size = new System.Drawing.Size(438, 410);
-            this.treeView_ParsedData.TabIndex = 0;
-            this.treeView_ParsedData.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_ParsedData_AfterSelect);
-            this.treeView_ParsedData.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.treeView_ParsedData_NodeMouseClick);
             // 
             // Form1
             // 

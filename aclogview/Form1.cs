@@ -185,7 +185,8 @@ namespace aclogview
         // For the created objects listview
         List<ListViewItem> createdListItems = new List<ListViewItem>();
 
-        private void loadPcap(string fileName, bool asMessages, bool dontList = false) {
+        private void loadPcap(string fileName, bool asMessages, bool dontList = false)
+        {
             Cursor.Current = Cursors.WaitCursor;
             Text = "AC Log View - " + Path.GetFileName(fileName);
             pcapFilePath = Path.GetFullPath(fileName);
