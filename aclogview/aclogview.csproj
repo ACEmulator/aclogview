@@ -57,6 +57,9 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -188,11 +191,12 @@
     <Compile Include="Enums\Spells.cs" />
     <Compile Include="Enums\StatTypes.cs" />
     <Compile Include="Tools\Parsers\OpcodeFinder.cs" />
-    <Compile Include="Tools\Scrapers\HeatMapScraper.cs" />
+    <Compile Include="Tools\Scrapers\HeatMapGenerator.cs" />
     <Compile Include="Tools\Scrapers\PacketSizeScraperC2S.cs" />
     <Compile Include="Tools\Parsers\SampleParser.cs" />
     <Compile Include="Tools\Parsers\TextSearcher.cs" />
     <Compile Include="Tools\Scrapers\PacketTypesCountScraper.cs" />
+    <Compile Include="Tools\Scrapers\PlayerExporter.cs" />
     <Compile Include="Tools\Scrapers\Scraper.cs" />
     <Compile Include="Tools\Scrapers\VendorBuySellAmountScraperC2S.cs" />
     <Compile Include="Tools\PcapScraperForm.cs">

@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace aclogview.Tools.Scrapers
 {
-    class HeatMapScraper : Scraper
+    class HeatMapGenerator : Scraper
     {
         public override string Description => "Generates a PNG showing all the pcapped locations over Dereth";
 

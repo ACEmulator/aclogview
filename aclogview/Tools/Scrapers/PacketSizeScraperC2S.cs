@@ -66,7 +66,8 @@ namespace aclogview.Tools.Scrapers
                             codeLengths[messageCode].Add(record.data.Length);
                         }
 
-                        if (messageCode == 0xF7B1) // Game Action
+                        if (messageCode == (uint)PacketOpcode.ORDERED_EVENT) // 0xF7B1 (Game Action)
+                            if (messageCode == 0xF7B1) // Game Action
                         {
                             var sequence = binaryReader.ReadUInt32();
                             var opCode = binaryReader.ReadUInt32();

@@ -111,10 +111,9 @@ namespace aclogview
 
         private static List<PacketRecord> loadPcapPacketRecords(BinaryReader binaryReader, bool asMessages, ref bool abort)
         {
-            List<PacketRecord> results = new List<PacketRecord>();
+            /*PcapHeader pcapHeader = */PcapHeader.read(binaryReader);
 
-            /*PcapHeader pcapHeader = */
-            PcapHeader.read(binaryReader);
+            List<PacketRecord> results = new List<PacketRecord>();
 
             int curPacket = 0;
 

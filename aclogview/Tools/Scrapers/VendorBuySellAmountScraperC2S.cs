@@ -48,12 +48,12 @@ namespace aclogview.Tools.Scrapers
                     {
                         var messageCode = binaryReader.ReadUInt32();
 
-                        if (messageCode == 0xF7B1) // Game Action
+                        if (messageCode == (uint)PacketOpcode.ORDERED_EVENT) // 0xF7B1 (Game Action)
                         {
                             var sequence = binaryReader.ReadUInt32();
                             var opCode = binaryReader.ReadUInt32();
 
-                            if (opCode == 0x005F) // buy
+                            if (opCode == (uint)PacketOpcode.Evt_Vendor__Buy_ID) // 0x005F
                             {
                                 var vendorGuid = binaryReader.ReadUInt32();
                                 uint itemcount = binaryReader.ReadUInt32();
@@ -79,7 +79,7 @@ namespace aclogview.Tools.Scrapers
                                         buyMaxAmountTotal = total;
                                 }
                             }
-                            else if (opCode == 0x0060) // sell
+                            else if (opCode == (uint)PacketOpcode.Evt_Vendor__Sell_ID) // 0x0060
                             {
                                 var vendorGuid = binaryReader.ReadUInt32();
                                 uint itemcount = binaryReader.ReadUInt32();
