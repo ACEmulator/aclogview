@@ -32,6 +32,10 @@ namespace aclogview.Tools.Scrapers
             // TODO: player.Character.CharacterPropertiesQuestRegistry
             // TODO: player.Character.HairTexture
             // TODO: player.Character.DefaultHairTexture
+
+            // TODO: Verify attributes, they seem to be not exporting/importing correctly
+            // TODO: Why do the characters look black/white? Is it because we're not exporting/importing inventory yet?
+            // TODO: Some exports seem to have trouble in import with the EchnantmentRegistry failing the Database Save()
         }
 
         private readonly ConcurrentDictionary<uint, Player> players = new ConcurrentDictionary<uint, Player>();
@@ -75,9 +79,18 @@ namespace aclogview.Tools.Scrapers
                         if (serverName == null)
                             continue;
 
+                        // This could be seen multiple times if the first time the player tries to enter, they get a "Your character is already in world" message
                         if (messageCode == (uint)PacketOpcode.CHARACTER_ENTER_GAME_EVENT) // 0xF657
                         {
                             var message = Proto_UI.EnterWorld.read(binaryReader);
+
+                            if (player != null && player.Biota.Id != message.gid)
+                            {
+                                player = null;
+                                playerLoginCompleted = false;
+                                throw new Exception("This shouldn't happen");
+                            }
+
                             player = new Player(serverName, message.gid);
                             playerLoginCompleted = false;
                             continue;
@@ -154,9 +167,9 @@ namespace aclogview.Tools.Scrapers
                                 AddOrUpdateAttribute(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute.Focus, message.CACQualities._attribCache._focus);
                                 AddOrUpdateAttribute(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute.Self, message.CACQualities._attribCache._self);
 
-                                AddOrUpdateAttribute2nd(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.Health, message.CACQualities._attribCache._health);
-                                AddOrUpdateAttribute2nd(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.Stamina, message.CACQualities._attribCache._stamina);
-                                AddOrUpdateAttribute2nd(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.Mana, message.CACQualities._attribCache._mana);
+                                AddOrUpdateAttribute2nd(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, message.CACQualities._attribCache._health);
+                                AddOrUpdateAttribute2nd(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, message.CACQualities._attribCache._stamina);
+                                AddOrUpdateAttribute2nd(player.Biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, message.CACQualities._attribCache._mana);
 
                                 foreach (var value in message.CACQualities._skillStatsTable.hashTable)
                                     AddOrUpdateSkill(player.Biota, value.Key, value.Value, rwLock);
@@ -340,6 +353,7 @@ namespace aclogview.Tools.Scrapers
                         else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttributeLevel_ID)
                         {
                             // This doesn't happen in retail
+                            throw new Exception("This shouldn't happen");
                         }
                         else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2nd_ID)
                         {
