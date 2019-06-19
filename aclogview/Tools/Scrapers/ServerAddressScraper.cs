@@ -10,7 +10,16 @@ namespace aclogview.Tools.Scrapers
     {
         public override string Description => "Server Address Scraper";
 
-        private readonly Dictionary<string, HashSet<IPAddress>> servers = new Dictionary<string, HashSet<IPAddress>>();
+        private readonly Dictionary<string, HashSet<IPAddress>> listByName = new Dictionary<string, HashSet<IPAddress>>();
+        private readonly Dictionary<IPAddress, HashSet<string>> listByAddress = new Dictionary<IPAddress, HashSet<string>>();
+
+        public override void Reset()
+        {
+            listByName.Clear();
+            listByAddress.Clear();
+
+            base.Reset();
+        }
 
         public override void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
@@ -45,24 +54,40 @@ namespace aclogview.Tools.Scrapers
                         {
                             var sAddr = new IPAddress(record.ipHeader.sAddr.bytes);
 
-                            lock (servers)
+                            lock (listByName)
                             {
-                                if (servers.TryGetValue(serverName, out var value))
+                                if (listByName.TryGetValue(serverName, out var value))
                                     value.Add(sAddr);
                                 else
-                                    servers[serverName] = new HashSet<IPAddress> { sAddr };
+                                    listByName[serverName] = new HashSet<IPAddress> { sAddr };
+                            }
+
+                            lock (listByAddress)
+                            {
+                                if (listByAddress.TryGetValue(sAddr, out var value))
+                                    value.Add(serverName);
+                                else
+                                    listByAddress[sAddr] = new HashSet<string> {serverName};
                             }
                         }
                         else
                         {
                             var dAddr = new IPAddress(record.ipHeader.dAddr.bytes);
 
-                            lock (servers)
+                            lock (listByName)
                             {
-                                if (servers.TryGetValue(serverName, out var value))
+                                if (listByName.TryGetValue(serverName, out var value))
                                     value.Add(dAddr);
                                 else
-                                    servers[serverName] = new HashSet<IPAddress> { dAddr };
+                                    listByName[serverName] = new HashSet<IPAddress> { dAddr };
+                            }
+
+                            lock (listByAddress)
+                            {
+                                if (listByAddress.TryGetValue(dAddr, out var value))
+                                    value.Add(serverName);
+                                else
+                                    listByAddress[dAddr] = new HashSet<string> { serverName };
                             }
                         }
                     }
@@ -82,12 +107,31 @@ namespace aclogview.Tools.Scrapers
         {
             var sb = new StringBuilder();
 
-            foreach (var kvp in servers)
+            sb.AppendLine("List by Name:");
+            sb.AppendLine();
+
+            foreach (var kvp in listByName)
             {
                 sb.AppendLine(kvp.Key);
 
                 foreach (var value in kvp.Value)
                     sb.AppendLine(value.ToString());
+
+                sb.AppendLine();
+            }
+
+
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("List by Address:");
+            sb.AppendLine();
+
+            foreach (var kvp in listByAddress)
+            {
+                sb.AppendLine(kvp.Key.ToString());
+
+                foreach (var value in kvp.Value)
+                    sb.AppendLine(value);
 
                 sb.AppendLine();
             }

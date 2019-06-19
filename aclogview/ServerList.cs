@@ -8,7 +8,15 @@ namespace aclogview
     {
         public static List<Server> Servers = new List<Server>
         {
-            // todo
+            new Server("Darktide",      new HashSet<string> { "198.252.160.71", "198.252.160.72"}, true),
+            new Server("Frostfell",     new HashSet<string> { "198.252.160.73", "198.252.160.74"}, true),
+            new Server("Harvestgain",   new HashSet<string> { "198.252.160.75"}, true),
+            new Server("Leafcull",      new HashSet<string> { "198.252.160.76"}, true),
+            new Server("Morningthaw",   new HashSet<string> { "198.252.160.77"}, true),
+            new Server("Solclaim",      new HashSet<string> { "198.252.160.78"}, true),
+            new Server("Thistledown",   new HashSet<string> { "198.252.160.79"}, true),
+            new Server("Verdantine",    new HashSet<string> { "198.252.160.80"}, true),
+            new Server("WintersEbb",    new HashSet<string> { "198.252.160.81"}, true),
         };
 
         public static Server FindBy(string name)
