@@ -173,6 +173,17 @@ namespace aclogview.Tools
 
             var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, out _);
 
+            if (chkExcludeNonRetailPcaps.Checked)
+            {
+                if (records.Count > 0)
+                {
+                    var servers = ServerList.FindBy(records[0].ipHeader, records[0].isSend);
+
+                    if (servers.Count != 1 || !servers[0].IsRetail)
+                        return;
+                }
+            }
+
             foreach (var scraper in scrapers)
             {
                 if (searchAborted || Disposing || IsDisposed)

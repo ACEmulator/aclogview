@@ -30,6 +30,7 @@ namespace aclogview.Tools
         {
             this.components = new System.ComponentModel.Container();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -47,7 +48,7 @@ namespace aclogview.Tools
             this.columnEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.columnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.chkExcludeNonRetailPcaps = new System.Windows.Forms.CheckBox();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -64,6 +65,12 @@ namespace aclogview.Tools
             this.statusStrip1.Size = new System.Drawing.Size(784, 22);
             this.statusStrip1.TabIndex = 14;
             this.statusStrip1.Text = "statusStrip1";
+            // 
+            // toolStripStatusLabel4
+            // 
+            this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
+            this.toolStripStatusLabel4.Size = new System.Drawing.Size(42, 17);
+            this.toolStripStatusLabel4.Text = "Status:";
             // 
             // toolStripStatusLabel1
             // 
@@ -220,17 +227,24 @@ namespace aclogview.Tools
             this.columnDescription.Name = "columnDescription";
             this.columnDescription.ReadOnly = true;
             // 
-            // toolStripStatusLabel4
+            // chkExcludeNonRetailPcaps
             // 
-            this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
-            this.toolStripStatusLabel4.Size = new System.Drawing.Size(42, 17);
-            this.toolStripStatusLabel4.Text = "Status:";
+            this.chkExcludeNonRetailPcaps.AutoSize = true;
+            this.chkExcludeNonRetailPcaps.Checked = true;
+            this.chkExcludeNonRetailPcaps.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(219, 85);
+            this.chkExcludeNonRetailPcaps.Name = "chkExcludeNonRetailPcaps";
+            this.chkExcludeNonRetailPcaps.Size = new System.Drawing.Size(150, 17);
+            this.chkExcludeNonRetailPcaps.TabIndex = 23;
+            this.chkExcludeNonRetailPcaps.Text = "Exclude Non-Retail Pcaps";
+            this.chkExcludeNonRetailPcaps.UseVisualStyleBackColor = true;
             // 
             // PcapScraperForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.chkExcludeNonRetailPcaps);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.chkMultiThread);
             this.Controls.Add(this.btnChangeOutputFolder);
@@ -273,5 +287,6 @@ namespace aclogview.Tools
         private System.Windows.Forms.DataGridViewTextBoxColumn columnName;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnDescription;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
+        private System.Windows.Forms.CheckBox chkExcludeNonRetailPcaps;
     }
 }
