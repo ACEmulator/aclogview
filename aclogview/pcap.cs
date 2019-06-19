@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -96,6 +96,14 @@ class IpAddress {
         IpAddress newObj = new IpAddress();
         newObj.bytes = binaryReader.ReadBytes(4);
         return newObj;
+    }
+
+    public override string ToString()
+    {
+        if (bytes.Length == 4)
+            return bytes[0] + "." + bytes[1] + "." + bytes[2] + "." + bytes[3];
+
+        return base.ToString();
     }
 }
 

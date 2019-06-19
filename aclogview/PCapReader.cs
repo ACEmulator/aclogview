@@ -257,7 +257,7 @@ namespace aclogview
             return results;
         }
 
-        private static (bool, uint) readNetworkHeaders(BinaryReader binaryReader)
+        private static (IpHeader, bool, uint) readNetworkHeaders(BinaryReader binaryReader)
         {
             EthernetHeader ethernetHeader = EthernetHeader.read(binaryReader);
 
@@ -292,7 +292,7 @@ namespace aclogview
                 throw new InvalidDataException();
             }
 
-            return (isSend, port);
+            return (ipHeader, isSend, port);
         }
 
         private static PacketRecord readPacketData(BinaryReader binaryReader, long len, uint ts1, uint ts2, int curPacket, bool isPcapng)
@@ -300,7 +300,7 @@ namespace aclogview
             // Begin reading headers
             long packetStartPos = binaryReader.BaseStream.Position;
 
-            (bool isSend, uint port) = readNetworkHeaders(binaryReader);
+            (IpHeader ipHeader, bool isSend, uint port) = readNetworkHeaders(binaryReader);
 
             long headersSize = binaryReader.BaseStream.Position - packetStartPos;
 
@@ -309,8 +309,14 @@ namespace aclogview
             StringBuilder packetTypeStr = new StringBuilder();
 
             PacketRecord packet = new PacketRecord();
+
             packet.index = curPacket;
+
+            packet.ipHeader = ipHeader;
+            packet.ServerPort = port;
+
             packet.isSend = isSend;
+
             if (isPcapng)
             {
                 packet.tsLow = ts1;
@@ -321,6 +327,7 @@ namespace aclogview
                 packet.tsSec = ts1;
                 packet.tsUsec = ts2;
             }
+
             packet.extraInfo = "";
             packet.data = binaryReader.ReadBytes((int)(len - headersSize));
 			using (BinaryReader packetReader = new BinaryReader(new MemoryStream(packet.data)))
@@ -383,7 +390,6 @@ namespace aclogview
 			}
             packet.packetHeadersStr = packetHeadersStr.ToString();
             packet.packetTypeStr = packetTypeStr.ToString();
-            packet.ServerPort = port;
 
             return packet;
         }
@@ -393,7 +399,7 @@ namespace aclogview
             // Begin reading headers
             long packetStartPos = binaryReader.BaseStream.Position;
 
-            (bool isSend, uint port) = readNetworkHeaders(binaryReader);
+            (IpHeader ipHeader, bool isSend, uint port) = readNetworkHeaders(binaryReader);
 
             long headersSize = binaryReader.BaseStream.Position - packetStartPos;
 
@@ -429,13 +435,16 @@ namespace aclogview
 								packet = new PacketRecord();
 								incompletePacketMap.Add(blobID, packet);
 								packet.Seq = pHeader.seqID_;
-								packet.Iteration = pHeader.iteration_;
 								packet.Queue = newFrag.memberHeader_.queueID;
-							}
+                                packet.Iteration = pHeader.iteration_;
+                            }
 
 							if (newFrag.memberHeader_.blobNum == 0)
-							{
-								packet.isSend = isSend;
+                            {
+                                packet.ipHeader = ipHeader;
+                                packet.ServerPort = port;
+                                packet.isSend = isSend;
+
 							    if (isPcapng)
 							    {
 							        packet.tsLow = ts1;
@@ -446,11 +455,11 @@ namespace aclogview
 							        packet.tsSec = ts1;
 							        packet.tsUsec = ts2;
                                 }
+
 								packet.extraInfo = "";
 								packet.Seq = pHeader.seqID_;
-								packet.Iteration = pHeader.iteration_;
 								packet.Queue = newFrag.memberHeader_.queueID;
-                                packet.ServerPort = port;
+                                packet.Iteration = pHeader.iteration_;
 
                                 using (BinaryReader fragDataReader = new BinaryReader(new MemoryStream(newFrag.dat_)))
 								{

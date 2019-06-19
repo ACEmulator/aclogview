@@ -5,11 +5,21 @@ namespace aclogview
     class PacketRecord
     {
         public int index;
+
+        public IpHeader ipHeader;
+        public uint ServerPort;
+
         public bool isSend;
+
+        // !isPcapng
         public uint tsSec;
         public uint tsUsec;
+
+        // isPcapng
         public uint tsHigh;
         public uint tsLow;
+
+
         public string packetHeadersStr;
         public string packetTypeStr;
         public int optionalHeadersLen;
@@ -22,6 +32,5 @@ namespace aclogview
         public uint Seq;
         public uint Queue;
         public uint Iteration;
-        public uint ServerPort;
     }
 }
