@@ -102,8 +102,7 @@ namespace aclogview.Tools
                 totalExceptions = 0;
                 searchAborted = false;
 
-                toolStripStatusLabel4.Text = "Status: Processing Files";
-                toolStripStatusLabel1.Text = "Files Processed: 0 of " + filesToProcess.Count;
+                UpdateToolStrip("Processing Files");
 
                 txtSearchPathRoot.Enabled = false;
                 btnChangeSearchPathRoot.Enabled = false;
@@ -118,12 +117,7 @@ namespace aclogview.Tools
                     DoSearch();
 
                     if (!Disposing && !IsDisposed)
-                    {
                         btnStopSearch.BeginInvoke((Action)(() => btnStopSearch_Click(null, null)));
-
-                        if (searchAborted)
-                            toolStripStatusLabel4.Text = "Status: Scrape Aborted";
-                    }
                 });
             }
             catch (Exception ex)
@@ -161,16 +155,15 @@ namespace aclogview.Tools
                     ProcessFile(currentFile);
             }
 
-            if (searchAborted || Disposing || IsDisposed)
-                return;
-
             if (!Directory.Exists(txtOutputFolder.Text))
                 Directory.CreateDirectory(txtOutputFolder.Text);
 
-            toolStripStatusLabel4.Text = "Status: Writing Output";
+            UpdateToolStrip("Writing Output ...");
 
             foreach (var scraper in scrapers)
                 scraper.WriteOutput(txtOutputFolder.Text, ref searchAborted);
+
+            UpdateToolStrip("Writing Output Complete");
         }
 
         private void ProcessFile(string fileName)
@@ -193,6 +186,14 @@ namespace aclogview.Tools
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            UpdateToolStrip();
+        }
+
+        private void UpdateToolStrip(string status = null)
+        {
+            if (status != null)
+                toolStripStatusLabel4.Text = "Status: " + status;
+
             toolStripStatusLabel1.Text = "Files Processed: " + filesProcessed.ToString("N0") + " of " + filesToProcess.Count.ToString("N0");
 
             toolStripStatusLabel2.Text = "Total Hits: " + totalHits.ToString("N0");

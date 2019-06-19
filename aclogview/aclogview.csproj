@@ -88,6 +88,8 @@
     <Compile Include="GotoLine.Designer.cs">
       <DependentUpon>GotoLine.cs</DependentUpon>
     </Compile>
+    <Compile Include="Server.cs" />
+    <Compile Include="ServerList.cs" />
     <Compile Include="Tools\OptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -199,6 +201,7 @@
     <Compile Include="Tools\Scrapers\PacketTypesCountScraper.cs" />
     <Compile Include="Tools\Scrapers\PlayerExporter.cs" />
     <Compile Include="Tools\Scrapers\Scraper.cs" />
+    <Compile Include="Tools\Scrapers\ServerAddressScraper.cs" />
     <Compile Include="Tools\Scrapers\VendorBuySellAmountScraperC2S.cs" />
     <Compile Include="Tools\PcapScraperForm.cs">
       <SubType>Form</SubType>
