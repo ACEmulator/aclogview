@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 
+using aclogview.ACE_Helpers;
 using aclogview.Properties;
 using aclogview.Tools;
 

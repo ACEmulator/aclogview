@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace aclogview
+namespace aclogview.ACE_Helpers
 {
     class ACETeleloc
     {

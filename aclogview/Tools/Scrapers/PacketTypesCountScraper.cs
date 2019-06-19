@@ -41,7 +41,7 @@ namespace aclogview.Tools.Scrapers
             }
         }
 
-        public override void WriteOutput(string destinationRoot)
+        public override void WriteOutput(string destinationRoot, ref bool searchAborted)
         {
             long totalCount = 0;
 

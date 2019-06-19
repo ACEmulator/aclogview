@@ -54,7 +54,7 @@ namespace aclogview.Tools.Scrapers
             }
         }
 
-        public override void WriteOutput(string destinationRoot)
+        public override void WriteOutput(string destinationRoot, ref bool searchAborted)
         {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

@@ -102,6 +102,7 @@ namespace aclogview.Tools
                 totalExceptions = 0;
                 searchAborted = false;
 
+                toolStripStatusLabel4.Text = "Status: Processing Files";
                 toolStripStatusLabel1.Text = "Files Processed: 0 of " + filesToProcess.Count;
 
                 txtSearchPathRoot.Enabled = false;
@@ -117,7 +118,12 @@ namespace aclogview.Tools
                     DoSearch();
 
                     if (!Disposing && !IsDisposed)
+                    {
                         btnStopSearch.BeginInvoke((Action)(() => btnStopSearch_Click(null, null)));
+
+                        if (searchAborted)
+                            toolStripStatusLabel4.Text = "Status: Scrape Aborted";
+                    }
                 });
             }
             catch (Exception ex)
@@ -155,11 +161,16 @@ namespace aclogview.Tools
                     ProcessFile(currentFile);
             }
 
+            if (searchAborted || Disposing || IsDisposed)
+                return;
+
             if (!Directory.Exists(txtOutputFolder.Text))
                 Directory.CreateDirectory(txtOutputFolder.Text);
 
+            toolStripStatusLabel4.Text = "Status: Writing Output";
+
             foreach (var scraper in scrapers)
-                scraper.WriteOutput(txtOutputFolder.Text);
+                scraper.WriteOutput(txtOutputFolder.Text, ref searchAborted);
         }
 
         private void ProcessFile(string fileName)
@@ -170,7 +181,12 @@ namespace aclogview.Tools
             var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, out _);
 
             foreach (var scraper in scrapers)
+            {
+                if (searchAborted || Disposing || IsDisposed)
+                    return;
+
                 scraper.ProcessFileRecords(fileName, records, ref searchAborted);
+            }
 
             Interlocked.Increment(ref filesProcessed);
         }

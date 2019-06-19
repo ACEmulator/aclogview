@@ -71,7 +71,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ACETeleloc.cs" />
+    <Compile Include="ACE Helpers\ACETeleloc.cs" />
+    <Compile Include="ACE Helpers\ACEBiotaCreator.cs" />
     <Compile Include="BufferedTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -276,6 +277,7 @@
       <Name>Be.Windows.Forms.HexBox</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

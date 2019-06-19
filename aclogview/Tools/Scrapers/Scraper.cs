@@ -17,7 +17,7 @@ namespace aclogview.Tools.Scrapers
         /// </summary>
         public abstract void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted);
 
-        public abstract void WriteOutput(string destinationRoot);
+        public abstract void WriteOutput(string destinationRoot, ref bool searchAborted);
 
         protected string GetFileName(string destinationRoot, string extension = ".txt")
         {

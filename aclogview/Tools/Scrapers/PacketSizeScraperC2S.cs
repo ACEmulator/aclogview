@@ -97,7 +97,7 @@ namespace aclogview.Tools.Scrapers
             }
         }
 
-        public override void WriteOutput(string destinationRoot)
+        public override void WriteOutput(string destinationRoot, ref bool searchAborted)
         {
             var sb = new StringBuilder();
 

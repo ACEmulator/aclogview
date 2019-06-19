@@ -1,4 +1,4 @@
-﻿namespace aclogview.Tools
+namespace aclogview.Tools
 {
     partial class PcapScraperForm
     {
@@ -47,6 +47,7 @@
             this.columnEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.columnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -54,6 +55,7 @@
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel4,
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel2,
             this.toolStripStatusLabel3});
@@ -65,6 +67,7 @@
             // 
             // toolStripStatusLabel1
             // 
+            this.toolStripStatusLabel1.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(89, 17);
             this.toolStripStatusLabel1.Text = "Files Processed:";
@@ -172,8 +175,6 @@
             // chkMultiThread
             // 
             this.chkMultiThread.AutoSize = true;
-            this.chkMultiThread.Checked = true;
-            this.chkMultiThread.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkMultiThread.Location = new System.Drawing.Point(384, 85);
             this.chkMultiThread.Name = "chkMultiThread";
             this.chkMultiThread.Size = new System.Drawing.Size(134, 17);
@@ -218,6 +219,12 @@
             this.columnDescription.HeaderText = "Description";
             this.columnDescription.Name = "columnDescription";
             this.columnDescription.ReadOnly = true;
+            // 
+            // toolStripStatusLabel4
+            // 
+            this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
+            this.toolStripStatusLabel4.Size = new System.Drawing.Size(42, 17);
+            this.toolStripStatusLabel4.Text = "Status:";
             // 
             // PcapScraperForm
             // 
@@ -265,5 +272,6 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn columnEnabled;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnName;
         private System.Windows.Forms.DataGridViewTextBoxColumn columnDescription;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
     }
 }
