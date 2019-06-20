@@ -22,8 +22,11 @@ namespace aclogview.Tools.Scrapers
             heatmap = new uint[256, 256];
         }
 
-        public override void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
+            int hits = 0;
+            int messageExceptions = 0;
+
             foreach (PacketRecord record in records)
             {
                 Interlocked.Increment(ref packetCount);
@@ -41,6 +44,8 @@ namespace aclogview.Tools.Scrapers
                         //if ((PacketOpcode)fragDataReader.ReadUInt32() == PacketOpcode.Evt_Movement__AutonomousPosition_ID)
                         if ((PacketOpcode)BitConverter.ToInt32(frag.dat_, 8) == PacketOpcode.Evt_Movement__AutonomousPosition_ID)
                         {
+                            hits++;
+
                             uint objcell_id = unchecked((uint)BitConverter.ToInt32(frag.dat_, 12));//fragDataReader.ReadUInt32();
 
                             uint x = (objcell_id >> 24) & 0xFF;
@@ -52,6 +57,8 @@ namespace aclogview.Tools.Scrapers
                     }
                 }
             }
+
+            return (hits, messageExceptions);
         }
 
         public override void WriteOutput(string destinationRoot, ref bool searchAborted)

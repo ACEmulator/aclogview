@@ -78,7 +78,8 @@ namespace aclogview.Tools
         private List<string> filesToProcess = new List<string>();
 
         private int filesProcessed;
-        private int totalHits;
+        private readonly Object resultsLockObject = new Object();
+        private long totalHits;
         private int totalExceptions;
         private bool searchAborted;
 
@@ -189,7 +190,13 @@ namespace aclogview.Tools
                 if (searchAborted || Disposing || IsDisposed)
                     return;
 
-                scraper.ProcessFileRecords(fileName, records, ref searchAborted);
+                var results = scraper.ProcessFileRecords(fileName, records, ref searchAborted);
+
+                lock (resultsLockObject)
+                {
+                    totalHits += results.hits;
+                    totalExceptions += results.messageExceptions;
+                }
             }
 
             Interlocked.Increment(ref filesProcessed);

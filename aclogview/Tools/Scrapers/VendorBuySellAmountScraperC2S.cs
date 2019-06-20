@@ -28,12 +28,15 @@ namespace aclogview.Tools.Scrapers
         /// <summary>
         /// This can be called by multiple thread simultaneously
         /// </summary>
-        public override void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
+            int hits = 0;
+            int messageExceptions = 0;
+
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return;
+                    return (hits, messageExceptions);
 
                 try
                 {
@@ -55,6 +58,8 @@ namespace aclogview.Tools.Scrapers
 
                             if (opCode == (uint)PacketOpcode.Evt_Vendor__Buy_ID) // 0x005F
                             {
+                                hits++;
+
                                 var vendorGuid = binaryReader.ReadUInt32();
                                 uint itemcount = binaryReader.ReadUInt32();
 
@@ -81,6 +86,8 @@ namespace aclogview.Tools.Scrapers
                             }
                             else if (opCode == (uint)PacketOpcode.Evt_Vendor__Sell_ID) // 0x0060
                             {
+                                hits++;
+
                                 var vendorGuid = binaryReader.ReadUInt32();
                                 uint itemcount = binaryReader.ReadUInt32();
 
@@ -108,11 +115,18 @@ namespace aclogview.Tools.Scrapers
                         }
                     }
                 }
-                catch
+                catch (InvalidDataException)
                 {
+                    // This is a pcap parse error
+                }
+                catch (Exception ex)
+                {
+                    messageExceptions++;
                     // Do something with the exception maybe
                 }
             }
+
+            return (hits, messageExceptions);
         }
 
         public override void WriteOutput(string destinationRoot, ref bool searchAborted)

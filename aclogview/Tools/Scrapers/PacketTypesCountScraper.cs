@@ -24,14 +24,19 @@ namespace aclogview.Tools.Scrapers
         /// <summary>
         /// This can be called by multiple thread simultaneously
         /// </summary>
-        public override void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
+            int hits = 0;
+            int messageExceptions = 0;
+
             foreach (PacketRecord record in records)
             {
                 foreach (PacketOpcode opcode in record.opcodes)
                 {
                     lock (opcodeOccurrences)
                     {
+                        hits++;
+
                         if (opcodeOccurrences.Contains(opcode))
                             opcodeOccurrences[opcode] = (Int32)opcodeOccurrences[opcode] + 1;
                         else
@@ -39,6 +44,8 @@ namespace aclogview.Tools.Scrapers
                     }
                 }
             }
+
+            return (hits, messageExceptions);
         }
 
         public override void WriteOutput(string destinationRoot, ref bool searchAborted)

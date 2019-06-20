@@ -15,7 +15,7 @@ namespace aclogview.Tools.Scrapers
         /// <summary>
         /// This can be called by multiple thread simultaneously
         /// </summary>
-        public abstract void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted);
+        public abstract (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted);
 
         public abstract void WriteOutput(string destinationRoot, ref bool searchAborted);
 

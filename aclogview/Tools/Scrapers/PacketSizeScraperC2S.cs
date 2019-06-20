@@ -33,12 +33,15 @@ namespace aclogview.Tools.Scrapers
         /// <summary>
         /// This can be called by multiple thread simultaneously
         /// </summary>
-        public override void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
+            int hits = 0;
+            int messageExceptions = 0;
+
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return;
+                    return (hits, messageExceptions);
 
                 try
                 {
@@ -51,6 +54,8 @@ namespace aclogview.Tools.Scrapers
                     using (var memoryStream = new MemoryStream(record.data))
                     using (var binaryReader = new BinaryReader(memoryStream))
                     {
+                        hits++;
+
                         var messageCode = binaryReader.ReadUInt32();
 
                         if (!codeHits.ContainsKey(messageCode))
@@ -67,34 +72,43 @@ namespace aclogview.Tools.Scrapers
                         }
 
                         if (messageCode == (uint)PacketOpcode.ORDERED_EVENT) // 0xF7B1 (Game Action)
-                            if (messageCode == 0xF7B1) // Game Action
                         {
-                            var sequence = binaryReader.ReadUInt32();
-                            var opCode = binaryReader.ReadUInt32();
-
-                            // We subtract 12 bytes from the record.data.Length to remove the header information
-                            var recordLength = record.data.Length - 12;
-
-                            if (!gameActionHits.ContainsKey(opCode))
+                            if (messageCode == 0xF7B1) // Game Action
                             {
-                                gameActionHits[opCode] = 1;
-                                gameActionMaxLengths[opCode] = (uint)recordLength;
-                                gameActionLengths[opCode] = new HashSet<int> { recordLength };
-                            }
-                            else
-                            {
-                                gameActionHits[opCode]++;
-                                gameActionMaxLengths[opCode] = Math.Max((uint)recordLength, gameActionMaxLengths[opCode]);
-                                gameActionLengths[opCode].Add(recordLength);
+                                var sequence = binaryReader.ReadUInt32();
+                                var opCode = binaryReader.ReadUInt32();
+
+                                // We subtract 12 bytes from the record.data.Length to remove the header information
+                                var recordLength = record.data.Length - 12;
+
+                                if (!gameActionHits.ContainsKey(opCode))
+                                {
+                                    gameActionHits[opCode] = 1;
+                                    gameActionMaxLengths[opCode] = (uint)recordLength;
+                                    gameActionLengths[opCode] = new HashSet<int> { recordLength };
+                                }
+                                else
+                                {
+                                    gameActionHits[opCode]++;
+                                    gameActionMaxLengths[opCode] = Math.Max((uint)recordLength, gameActionMaxLengths[opCode]);
+                                    gameActionLengths[opCode].Add(recordLength);
+                                }
                             }
                         }
                     }
                 }
-                catch
+                catch (InvalidDataException)
                 {
+                    // This is a pcap parse error
+                }
+                catch (Exception ex)
+                {
+                    messageExceptions++;
                     // Do something with the exception maybe
                 }
             }
+
+            return (hits, messageExceptions);
         }
 
         public override void WriteOutput(string destinationRoot, ref bool searchAborted)

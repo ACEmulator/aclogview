@@ -21,14 +21,17 @@ namespace aclogview.Tools.Scrapers
             base.Reset();
         }
 
-        public override void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
+            int hits = 0;
+            int messageExceptions = 0;
+
             string serverName = null;
 
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return;
+                    return (hits, messageExceptions);
 
                 try
                 {
@@ -57,17 +60,29 @@ namespace aclogview.Tools.Scrapers
                             lock (listByName)
                             {
                                 if (listByName.TryGetValue(serverName, out var value))
-                                    value.Add(sAddr);
+                                {
+                                    if (value.Add(sAddr))
+                                        hits++;
+                                }
                                 else
-                                    listByName[serverName] = new HashSet<IPAddress> { sAddr };
+                                {
+                                    hits++;
+                                    listByName[serverName] = new HashSet<IPAddress> {sAddr};
+                                }
                             }
 
                             lock (listByAddress)
                             {
                                 if (listByAddress.TryGetValue(sAddr, out var value))
-                                    value.Add(serverName);
+                                {
+                                    if (value.Add(serverName))
+                                        hits++;
+                                }
                                 else
+                                {
+                                    hits++;
                                     listByAddress[sAddr] = new HashSet<string> {serverName};
+                                }
                             }
                         }
                         else
@@ -77,17 +92,29 @@ namespace aclogview.Tools.Scrapers
                             lock (listByName)
                             {
                                 if (listByName.TryGetValue(serverName, out var value))
-                                    value.Add(dAddr);
+                                {
+                                    if (value.Add(dAddr))
+                                        hits++;
+                                }
                                 else
-                                    listByName[serverName] = new HashSet<IPAddress> { dAddr };
+                                {
+                                    hits++;
+                                    listByName[serverName] = new HashSet<IPAddress> {dAddr};
+                                }
                             }
 
                             lock (listByAddress)
                             {
                                 if (listByAddress.TryGetValue(dAddr, out var value))
-                                    value.Add(serverName);
+                                {
+                                    if (value.Add(serverName))
+                                        hits++;
+                                }
                                 else
-                                    listByAddress[dAddr] = new HashSet<string> { serverName };
+                                {
+                                    hits++;
+                                    listByAddress[dAddr] = new HashSet<string> {serverName};
+                                }
                             }
                         }
                     }
@@ -98,9 +125,12 @@ namespace aclogview.Tools.Scrapers
                 }
                 catch (Exception ex)
                 {
+                    messageExceptions++;
                     // Do something with the exception maybe
                 }
             }
+
+            return (hits, messageExceptions);
         }
 
         public override void WriteOutput(string destinationRoot, ref bool searchAborted)

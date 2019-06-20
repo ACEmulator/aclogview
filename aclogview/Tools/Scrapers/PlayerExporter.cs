@@ -17,6 +17,7 @@ namespace aclogview.Tools.Scrapers
 
         class Player
         {
+            public readonly uint TSec;
             public readonly string ServerName;
 
             public readonly Biota Biota = new Biota();
@@ -39,8 +40,9 @@ namespace aclogview.Tools.Scrapers
                 return false;
             }
 
-            public Player(string serverName, uint guid)
+            public Player(uint tsec, string serverName, uint guid)
             {
+                TSec = tsec;
                 ServerName = serverName;
 
                 Biota.Id = guid;
@@ -66,8 +68,11 @@ namespace aclogview.Tools.Scrapers
             players.Clear();
         }
 
-        public override void ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
+            int hits = 0;
+            int messageExceptions = 0;
+
             string serverName = null;
             bool playerLoginCompleted = false;
 
@@ -79,7 +84,7 @@ namespace aclogview.Tools.Scrapers
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return;
+                    return (hits, messageExceptions);
 
                 try
                 {
@@ -113,7 +118,7 @@ namespace aclogview.Tools.Scrapers
                                 throw new Exception("This shouldn't happen");
                             }
 
-                            player = new Player(serverName, message.gid);
+                            player = new Player(record.tsSec, serverName, message.gid);
                             playerLoginCompleted = false;
                             continue;
                         }
@@ -126,7 +131,10 @@ namespace aclogview.Tools.Scrapers
                             var message = Proto_UI.LogOff.read(binaryReader);
 
                             if (message.gid == player.Biota.Id)
+                            {
+                                hits++;
                                 players[player.Biota.Id] = player;
+                            }
 
                             player = null;
                             playerLoginCompleted = false;
@@ -160,10 +168,8 @@ namespace aclogview.Tools.Scrapers
                                 if (opCode == (uint)PacketOpcode.PLAYER_DESCRIPTION_EVENT)
                                 {
                                     var message = CM_Login.PlayerDescription.read(binaryReader);
-                                    ;
 
-                                    ACEBiotaCreator.Update(message, player.Character, player.Biota, player.Inventory,
-                                        player.Equipment, rwLock);
+                                    ACEBiotaCreator.Update(message, player.Character, player.Biota, player.Inventory, player.Equipment, rwLock);
 
                                 }
                                 else if (opCode == (uint)PacketOpcode.Evt_Social__FriendsUpdate_ID)
@@ -177,7 +183,11 @@ namespace aclogview.Tools.Scrapers
 
                                     player.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook { TitleId = (uint)message.mDisplayTitle });
                                     foreach (var value in message.mTitleList.list)
-                                        player.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook { TitleId = (uint)value });
+                                    {
+                                        // sometimes the display title is also duplicated in the list
+                                        if (!player.Character.CharacterPropertiesTitleBook.Any(r => r.TitleId == (uint)value))
+                                            player.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook {TitleId = (uint) value});
+                                    }
                                 }
                                 else if (opCode == (uint)PacketOpcode.Evt_Social__SendClientContractTrackerTable_ID)
                                 {
@@ -347,12 +357,18 @@ namespace aclogview.Tools.Scrapers
                 }
                 catch (Exception ex)
                 {
+                    messageExceptions++;
                     // Do something with the exception maybe
                 }
             }
 
             if (player != null)
+            {
+                hits++;
                 players[player.Biota.Id] = player;
+            }
+
+            return (hits, messageExceptions);
         }
 
         public override void WriteOutput(string destinationRoot, ref bool searchAborted)
@@ -362,8 +378,10 @@ namespace aclogview.Tools.Scrapers
 
             foreach (var kvp in players)
             {
-                if (searchAborted)
-                    return;
+                // Comment this out if you still want to write output for aborted searches
+                // PlayerExporter.WriteOutput can be a lenghty process, so you may not want to enable this
+                //if (searchAborted)
+                //    return;
 
                 // biota is corrupt
                 if (kvp.Value.Biota.BiotaPropertiesDID.Count == 0)
@@ -390,6 +408,8 @@ namespace aclogview.Tools.Scrapers
 
                 // Character
                 {
+                    kvp.Value.Character.Name = name;
+
                     var defaultFileName = kvp.Value.Character.Id.ToString("X8") + " " + name + " - Character.sql";
 
                     var fileName = Path.Combine(directory, defaultFileName);
