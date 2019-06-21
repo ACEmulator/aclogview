@@ -173,7 +173,7 @@ namespace aclogview.ACE_Helpers
                 equipment.Add((value.iid_, value.loc_, value.priority_));
         }
 
-        public static void Update(CM_Physics.CreateObject message, Biota biota, ReaderWriterLockSlim rwLock, bool includeMetaData = false)
+        public static void Update(CM_Physics.CreateObject message, Biota biota, ReaderWriterLockSlim rwLock, bool includeMetaData)
         {
             biota.WeenieClassId = message.wdesc._wcid;
 
@@ -366,7 +366,6 @@ namespace aclogview.ACE_Helpers
             {
                 if ((message.physicsdesc.bitfield & (uint)CM_Physics.PhysicsDesc.PhysicsDescInfo.MOVEMENT) != 0)
                 {
-                    throw new NotImplementedException();
                     // message.physicsdesc.CMS is not implemented
                     //result.SetProperty((ACE.Entity.Enum.Properties.PropertyString)8006, Value = ConvertMovementBufferToString(message.physicsdesc.CMS) });
                     biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInt)8007, message.physicsdesc.autonomous_movement, rwLock, out _);
@@ -591,7 +590,12 @@ namespace aclogview.ACE_Helpers
 
         public static ACE.Entity.Enum.WeenieType DetermineWeenieType(Biota biota, ReaderWriterLockSlim rwLock)
         {
-            var objectDescriptionFlag = (ACE.Entity.Enum.ObjectDescriptionFlag)biota.GetProperty((ACE.Entity.Enum.Properties.PropertyDataId)8003, rwLock);
+            var objectDescriptionFlagProperty = biota.GetProperty((ACE.Entity.Enum.Properties.PropertyDataId) 8003, rwLock);
+
+            if (objectDescriptionFlagProperty == null)
+                return ACE.Entity.Enum.WeenieType.Undef;
+
+            var objectDescriptionFlag = (ACE.Entity.Enum.ObjectDescriptionFlag)objectDescriptionFlagProperty;
 
             if (objectDescriptionFlag.HasFlag(ACE.Entity.Enum.ObjectDescriptionFlag.LifeStone))
                 return ACE.Entity.Enum.WeenieType.LifeStone;
@@ -623,7 +627,12 @@ namespace aclogview.ACE_Helpers
             if (biota.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.ValidLocations, rwLock) == (int)ACE.Entity.Enum.EquipMask.MissileAmmo)
                 return ACE.Entity.Enum.WeenieType.Ammunition;
 
-            var itemType = (ACE.Entity.Enum.ItemType)biota.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.ItemType, rwLock);
+            var itemTypeProperty = biota.GetProperty(ACE.Entity.Enum.Properties.PropertyInt.ItemType, rwLock);
+
+            if (itemTypeProperty == null)
+                return ACE.Entity.Enum.WeenieType.Undef;
+
+            var itemType = (ACE.Entity.Enum.ItemType)itemTypeProperty;
 
             switch (itemType)
             {

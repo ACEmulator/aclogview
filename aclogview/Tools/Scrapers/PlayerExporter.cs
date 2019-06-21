@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 
 using ACE.Database.Models.Shard;
@@ -15,57 +15,110 @@ namespace aclogview.Tools.Scrapers
     {
         public override string Description => "Exports players and their inventory";
 
-        class Player
+        // TODO: player.Character.CharacterPropertiesQuestRegistry
+        // TODO: player.Character.HairTexture
+        // TODO: player.Character.DefaultHairTexture
+
+        // TODO: Verify attributes, they seem to be not exporting/importing correctly
+        // TODO: Some exports seem to have trouble in import with the EchnantmentRegistry failing the Database Save()
+
+        class WorldObjectItem
         {
+            public readonly Biota Biota = new Biota();
+            public readonly string Name;
+
+            public bool AppraiseInfoReceived;
+
+            public WorldObjectItem(uint guid, string name)
+            {
+                Biota.Id = guid;
+                Name = name;
+            }
+        }
+
+        class LoginEvent
+        {
+            public readonly string FileName;
             public readonly uint TSec;
-            public readonly string ServerName;
 
             public readonly Biota Biota = new Biota();
             public readonly Character Character = new Character();
-            public readonly Dictionary<uint, Biota> WorldObjects = new Dictionary<uint, Biota>();
 
             public readonly List<(uint guid, uint containerProperties)> Inventory = new List<(uint guid, uint containerProperties)>();
             public readonly List<(uint guid, uint location, uint priority)> Equipment = new List<(uint guid, uint location, uint priority)>();
 
-            public bool IsPossedItem(uint guid)
+            public readonly Dictionary<uint, HashSet<uint>> ViewContentsEvents = new Dictionary<uint, HashSet<uint>>();
+            public bool PlayerLoginCompleted = false;
+
+            public readonly Dictionary<uint, WorldObjectItem> WorldObjects = new Dictionary<uint, WorldObjectItem>();
+
+            public LoginEvent(string fileName, uint tsec, uint guid)
             {
-                foreach (var entry in Inventory)
-                    if (entry.guid == guid)
-                        return true;
-
-                foreach (var entry in Equipment)
-                    if (entry.guid == guid)
-                        return true;
-
-                return false;
-            }
-
-            public Player(uint tsec, string serverName, uint guid)
-            {
+                FileName = fileName;
                 TSec = tsec;
-                ServerName = serverName;
 
                 Biota.Id = guid;
                 Character.Id = guid;
             }
 
-            // TODO: player.Character.CharacterPropertiesQuestRegistry
-            // TODO: player.Character.HairTexture
-            // TODO: player.Character.DefaultHairTexture
+            public bool IsPossedItem(uint guid)
+            {
+                foreach (var entry in Inventory)
+                {
+                    if (entry.guid == guid)
+                        return true;
 
-            // TODO: Verify attributes, they seem to be not exporting/importing correctly
-            // TODO: Some exports seem to have trouble in import with the EchnantmentRegistry failing the Database Save()
+                    if (ViewContentsEvents.TryGetValue(entry.guid, out var value))
+                    {
+                        if (value.Contains(guid))
+                            return true;
+                    }
+                }
 
-            // Notes: In current ACE shard, no biota stores data in anim_part, pallete, or texture_map
-            // I'm still not sure why we have those tables in shard.
-            // The information for the player that comes from the physics message comes from where?
+                foreach (var entry in Equipment)
+                {
+                    if (entry.guid == guid)
+                        return true;
+                }
+
+                return false;
+            }
         }
 
-        private readonly ConcurrentDictionary<uint, Player> players = new ConcurrentDictionary<uint, Player>();
+        class Player
+        {
+            public readonly List<LoginEvent> LoginEvents = new List<LoginEvent>();
+
+            /// <summary>
+            /// Searches all possessions to find the last one recorded that also has AppraiseInfoReceived
+            /// </summary>
+            public WorldObjectItem GetBestPossession(uint guid, string name = null)
+            {
+                WorldObjectItem best = null;
+
+                var sortedLoginEvents = LoginEvents.OrderBy(r => r.TSec).ToList();
+
+                foreach (var loginEvent in sortedLoginEvents)
+                {
+                    if (loginEvent.WorldObjects.TryGetValue(guid, out var woi))
+                    {
+                        if (woi.Name != name)
+                            continue;
+
+                        if (best == null || woi.AppraiseInfoReceived)
+                            best = woi;
+                    }
+                }
+
+                return best;
+            }
+        }
+
+        private readonly Dictionary<string, Dictionary<uint, Player>> playersByServer = new Dictionary<string, Dictionary<uint, Player>>();
 
         public override void Reset()
         {
-            players.Clear();
+            playersByServer.Clear();
         }
 
         public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
@@ -73,13 +126,21 @@ namespace aclogview.Tools.Scrapers
             int hits = 0;
             int messageExceptions = 0;
 
-            string serverName = null;
-            bool playerLoginCompleted = false;
+            string serverName = "Unknown";
 
-            Player player = null;
+            LoginEvent loginEvent = null;
+
             var rwLock = new ReaderWriterLockSlim();
 
-            var viewContentsEvents = new Dictionary<uint, HashSet<uint>>();
+            // Determine the server name using the Server List.
+            // This will be overriden if a Evt_Login__WorldInfo_ID is received
+            if (records.Count > 0)
+            {
+                var servers = ServerList.FindBy(records[0].ipHeader, records[0].isSend);
+
+                if (servers.Count == 1 && servers[0].IsRetail)
+                    serverName = servers[0].Name;
+            }
 
             foreach (PacketRecord record in records)
             {
@@ -103,41 +164,21 @@ namespace aclogview.Tools.Scrapers
                             continue;
                         }
 
-                        if (serverName == null)
-                            continue;
-
                         // This could be seen multiple times if the first time the player tries to enter, they get a "Your character is already in world" message
                         if (messageCode == (uint)PacketOpcode.CHARACTER_ENTER_GAME_EVENT) // 0xF657
                         {
                             var message = Proto_UI.EnterWorld.read(binaryReader);
 
-                            if (player != null && player.Biota.Id != message.gid)
-                            {
-                                player = null;
-                                playerLoginCompleted = false;
-                                throw new Exception("This shouldn't happen");
-                            }
-
-                            player = new Player(record.tsSec, serverName, message.gid);
-                            playerLoginCompleted = false;
+                            loginEvent = new LoginEvent(fileName, record.tsSec, message.gid);
                             continue;
                         }
 
-                        if (player == null)
+                        if (loginEvent == null)
                             continue;
 
                         if (messageCode == (uint)PacketOpcode.CHARACTER_EXIT_GAME_EVENT)
                         {
-                            var message = Proto_UI.LogOff.read(binaryReader);
-
-                            if (message.gid == player.Biota.Id)
-                            {
-                                hits++;
-                                players[player.Biota.Id] = player;
-                            }
-
-                            player = null;
-                            playerLoginCompleted = false;
+                            loginEvent = null;
                             continue;
                         }
 
@@ -150,7 +191,7 @@ namespace aclogview.Tools.Scrapers
                             if (opCode == (uint)PacketOpcode.Evt_Character__LoginCompleteNotification_ID)
                             {
                                 // At this point, we should stop building/updating the player/character and only update the possessed items
-                                playerLoginCompleted = true;
+                                loginEvent.PlayerLoginCompleted = true;
                             }
                         }
 
@@ -163,13 +204,29 @@ namespace aclogview.Tools.Scrapers
                             var opCode = binaryReader.ReadUInt32();
 
                             // We only process player create/update messages for player biotas during the login process
-                            if (!playerLoginCompleted)
+                            if (!loginEvent.PlayerLoginCompleted)
                             {
                                 if (opCode == (uint)PacketOpcode.PLAYER_DESCRIPTION_EVENT)
                                 {
+                                    hits++;
+
                                     var message = CM_Login.PlayerDescription.read(binaryReader);
 
-                                    ACEBiotaCreator.Update(message, player.Character, player.Biota, player.Inventory, player.Equipment, rwLock);
+                                    ACEBiotaCreator.Update(message, loginEvent.Character, loginEvent.Biota, loginEvent.Inventory, loginEvent.Equipment, rwLock);
+
+                                    if (!playersByServer.TryGetValue(serverName, out var server))
+                                    {
+                                        server = new Dictionary<uint, Player>();
+                                        playersByServer[serverName] = server;
+                                    }
+
+                                    if (!server.TryGetValue(loginEvent.Biota.Id, out var player))
+                                    {
+                                        player = new Player();
+                                        server[loginEvent.Biota.Id] = player;
+                                    }
+
+                                    player.LoginEvents.Add(loginEvent);
 
                                 }
                                 else if (opCode == (uint)PacketOpcode.Evt_Social__FriendsUpdate_ID)
@@ -181,13 +238,10 @@ namespace aclogview.Tools.Scrapers
                                 {
                                     var message = CM_Social.CharacterTitleTable.read(binaryReader);
 
-                                    player.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook { TitleId = (uint)message.mDisplayTitle });
+                                    loginEvent.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.CharacterTitleId, (int)message.mDisplayTitle, rwLock, out _);
+
                                     foreach (var value in message.mTitleList.list)
-                                    {
-                                        // sometimes the display title is also duplicated in the list
-                                        if (!player.Character.CharacterPropertiesTitleBook.Any(r => r.TitleId == (uint)value))
-                                            player.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook {TitleId = (uint) value});
-                                    }
+                                        loginEvent.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook { TitleId = (uint)value });
                                 }
                                 else if (opCode == (uint)PacketOpcode.Evt_Social__SendClientContractTrackerTable_ID)
                                 {
@@ -204,7 +258,7 @@ namespace aclogview.Tools.Scrapers
                                             TimeWhenRepeats = (ulong)value.Value._time_when_repeats,
                                             Version = value.Value._version,
                                         };
-                                        player.Character.CharacterPropertiesContract.Add(contract);
+                                        loginEvent.Character.CharacterPropertiesContract.Add(contract);
                                     }
                                 }
                                 else if (opCode == (uint)PacketOpcode.ALLEGIANCE_UPDATE_EVENT)
@@ -220,8 +274,8 @@ namespace aclogview.Tools.Scrapers
                                     foreach (var value in message.contents_list.list)
                                         hashSet.Add(value.m_iid); // We don't use m_uContainerProperties
 
-                                    if (!viewContentsEvents.ContainsKey(message.i_container)) // We only store the first ViewContentsEvent
-                                        viewContentsEvents[message.i_container] = hashSet;
+                                    if (!loginEvent.ViewContentsEvents.ContainsKey(message.i_container)) // We only store the first ViewContentsEvent
+                                        loginEvent.ViewContentsEvents[message.i_container] = hashSet;
                                 }
                             }
 
@@ -229,11 +283,15 @@ namespace aclogview.Tools.Scrapers
                             {
                                 var message = CM_Examine.SetAppraiseInfo.read(binaryReader);
 
-                                if (message.i_objid == player.Biota.Id)
-                                    ACEBiotaCreator.Update(message, player.Biota, rwLock);
+                                if (message.i_objid == loginEvent.Biota.Id)
+                                    ACEBiotaCreator.Update(message, loginEvent.Biota, rwLock);
 
-                                if (player.WorldObjects.TryGetValue(message.i_objid, out var value))
-                                    ACEBiotaCreator.Update(message, value, rwLock);
+                                // If this is an inventory item, update it
+                                if (loginEvent.WorldObjects.TryGetValue(message.i_objid, out var value))
+                                {
+                                    ACEBiotaCreator.Update(message, value.Biota, rwLock);
+                                    value.AppraiseInfoReceived = true;
+                                }
                             }
                         }
 
@@ -242,90 +300,91 @@ namespace aclogview.Tools.Scrapers
                             var message = CM_Physics.CreateObject.read(binaryReader);
 
                             // We only process player create/update messages for player biotas during the login process
-                            if (!playerLoginCompleted)
+                            if (!loginEvent.PlayerLoginCompleted)
                             {
-                                if (message.object_id == player.Biota.Id)
+                                if (message.object_id == loginEvent.Biota.Id)
                                 {
-                                    ACEBiotaCreator.Update(message, player.Biota, rwLock, true);
+                                    ACEBiotaCreator.Update(message, loginEvent.Biota, rwLock, true);
 
                                     var position = new ACE.Entity.Position(message.physicsdesc.pos.objcell_id, message.physicsdesc.pos.frame.m_fOrigin.x, message.physicsdesc.pos.frame.m_fOrigin.y, message.physicsdesc.pos.frame.m_fOrigin.z, message.physicsdesc.pos.frame.qx, message.physicsdesc.pos.frame.qy, message.physicsdesc.pos.frame.qz, message.physicsdesc.pos.frame.qw);
-                                    player.Biota.SetPosition(ACE.Entity.Enum.Properties.PositionType.Location, position, rwLock, out _);
+                                    loginEvent.Biota.SetPosition(ACE.Entity.Enum.Properties.PositionType.Location, position, rwLock, out _);
                                 }
                             }
 
-                            if (!player.WorldObjects.ContainsKey(message.object_id) && (player.IsPossedItem(message.object_id) || viewContentsEvents.Any(r => r.Value.Contains(message.object_id))))
+                            // Record inventory items
+                            if (!loginEvent.WorldObjects.ContainsKey(message.object_id) && loginEvent.IsPossedItem(message.object_id))
                             {
-                                var item = new Biota { Id = message.object_id };
-                                ACEBiotaCreator.Update(message, item, rwLock, true);
-                                player.WorldObjects[message.object_id] = item;
+                                var item = new WorldObjectItem(message.object_id, message.wdesc._name.m_buffer);
+                                ACEBiotaCreator.Update(message, item.Biota, rwLock, true);
+                                loginEvent.WorldObjects[message.object_id] = item;
                             }
                         }
 
                         // We only process player create/update messages for player biotas during the login process
-                        if (!playerLoginCompleted)
+                        if (!loginEvent.PlayerLoginCompleted)
                         {
                             if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateInt_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeInt, int>.read(0, binaryReader);
-                                player.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInt)message.stype, message.val, rwLock, out _);
+                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInt)message.stype, message.val, rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateInt64_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeInt64, long>.read(0, binaryReader);
-                                player.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInt64)message.stype, message.val, rwLock, out _);
+                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInt64)message.stype, message.val, rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateBool_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeBool, int>.read(0, binaryReader);
-                                player.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyBool)message.stype, (message.val != 0), rwLock, out _);
+                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyBool)message.stype, (message.val != 0), rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateFloat_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeFloat, double>.read(0, binaryReader);
-                                player.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyFloat)message.stype, message.val, rwLock, out _);
+                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyFloat)message.stype, message.val, rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateString_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateStringEvent.read(0, binaryReader);
-                                player.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyString)message.stype, message.val.m_buffer, rwLock, out _);
+                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyString)message.stype, message.val.m_buffer, rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateDataID_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeDID, uint>.read(0, binaryReader);
-                                player.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyDataId)message.stype, message.val, rwLock, out _);
+                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyDataId)message.stype, message.val, rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateInstanceID_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeIID, uint>.read(0, binaryReader);
-                                player.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInstanceId)message.stype, message.val, rwLock, out _);
+                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInstanceId)message.stype, message.val, rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdatePosition_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypePosition, Position>.read(0, binaryReader);
                                 var position = new ACE.Entity.Position(message.val.objcell_id, message.val.frame.m_fOrigin.x, message.val.frame.m_fOrigin.y, message.val.frame.m_fOrigin.z, message.val.frame.qx, message.val.frame.qy, message.val.frame.qz, message.val.frame.qw);
-                                player.Biota.SetPosition((ACE.Entity.Enum.Properties.PositionType)message.stype, position, rwLock, out _);
+                                loginEvent.Biota.SetPosition((ACE.Entity.Enum.Properties.PositionType)message.stype, position, rwLock, out _);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateSkill_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeSkill, Skill>.read(0, binaryReader);
-                                ACEBiotaCreator.AddSOrUpdatekill(player.Biota, message.stype, message.val, rwLock);
+                                ACEBiotaCreator.AddSOrUpdatekill(loginEvent.Biota, message.stype, message.val, rwLock);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateSkillLevel_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeSkill, int>.read(0, binaryReader);
-                                var entity = player.Biota.GetOrAddSkill((ushort)message.stype, rwLock, out _);
+                                var entity = loginEvent.Biota.GetOrAddSkill((ushort)message.stype, rwLock, out _);
                                 entity.PP = (uint)message.val; // TODO is this setting PP?
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateSkillAC_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(0, binaryReader);
-                                var entity = player.Biota.GetOrAddSkill((ushort)message.stype, rwLock, out _);
+                                var entity = loginEvent.Biota.GetOrAddSkill((ushort)message.stype, rwLock, out _);
                                 entity.SAC = (uint)message.val;
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttribute_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeAttribute, Attribute>.read(0, binaryReader);
-                                ACEBiotaCreator.AddOrUpdateAttribute(player.Biota, (ACE.Entity.Enum.Properties.PropertyAttribute)message.stype, message.val);
+                                ACEBiotaCreator.AddOrUpdateAttribute(loginEvent.Biota, (ACE.Entity.Enum.Properties.PropertyAttribute)message.stype, message.val);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttributeLevel_ID)
                             {
@@ -335,16 +394,16 @@ namespace aclogview.Tools.Scrapers
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2nd_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute>.read(0, binaryReader);
-                                ACEBiotaCreator.AddOrUpdateAttribute2nd(player.Biota, (ACE.Entity.Enum.Properties.PropertyAttribute2nd)message.stype, message.val);
+                                ACEBiotaCreator.AddOrUpdateAttribute2nd(loginEvent.Biota, (ACE.Entity.Enum.Properties.PropertyAttribute2nd)message.stype, message.val);
                             }
                             else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2ndLevel_ID)
                             {
                                 var message = CM_Qualities.PrivateUpdateQualityEvent<STypeAttribute2nd, int>.read(0, binaryReader);
-                                var entity = player.Biota.BiotaPropertiesAttribute2nd.ToList().FirstOrDefault(r => r.Type == (ushort)message.stype);
+                                var entity = loginEvent.Biota.BiotaPropertiesAttribute2nd.ToList().FirstOrDefault(r => r.Type == (ushort)message.stype);
                                 if (entity == null)
                                 {
                                     entity = new BiotaPropertiesAttribute2nd { Type = (ushort)message.stype };
-                                    player.Biota.BiotaPropertiesAttribute2nd.Add(entity);
+                                    loginEvent.Biota.BiotaPropertiesAttribute2nd.Add(entity);
                                 }
                                 entity.CurrentLevel = (uint)message.val;
                             }
@@ -362,74 +421,133 @@ namespace aclogview.Tools.Scrapers
                 }
             }
 
-            if (player != null)
-            {
-                hits++;
-                players[player.Biota.Id] = player;
-            }
-
             return (hits, messageExceptions);
         }
 
-        public override void WriteOutput(string destinationRoot, ref bool searchAborted)
+        public override void WriteOutput(string destinationRoot, ref bool writeOuptputAborted)
         {
             var biotaWriter = new ACE.Database.SQLFormatters.Shard.BiotaSQLWriter();
             var characterWriter = new ACE.Database.SQLFormatters.Shard.CharacterSQLWriter();
 
-            foreach (var kvp in players)
+            var rwLock = new ReaderWriterLockSlim();
+
+            foreach (var server in playersByServer)
             {
-                // Comment this out if you still want to write output for aborted searches
-                // PlayerExporter.WriteOutput can be a lenghty process, so you may not want to enable this
-                //if (searchAborted)
-                //    return;
+                var serverDirectory = Path.Combine(destinationRoot, "Player Exports", server.Key);
 
-                // biota is corrupt
-                if (kvp.Value.Biota.BiotaPropertiesDID.Count == 0)
-                    continue;
-
-                var name = kvp.Value.Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
-
-                var directory = Path.Combine(destinationRoot, "Player Exports", kvp.Value.ServerName, name);
-
-                if (!Directory.Exists(directory))
-                    Directory.CreateDirectory(directory);
-
-                // Biota
+                foreach (var player in server.Value)
                 {
-                    var defaultFileName = biotaWriter.GetDefaultFileName(kvp.Value.Biota);
+                    var name = player.Value.LoginEvents[0].Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
 
-                    var fileName = Path.Combine(directory, defaultFileName);
+                    var playerDirectory = Path.Combine(serverDirectory, name);
 
-                    kvp.Value.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(kvp.Value.Biota, new ReaderWriterLockSlim());
+                    foreach (var loginEvent in player.Value.LoginEvents)
+                    {
+                        if (writeOuptputAborted)
+                            return;
 
-                    using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                        biotaWriter.CreateSQLINSERTStatement(kvp.Value.Biota, outputFile);
-                }
+                        // biota is corrupt
+                        if (loginEvent.Biota.BiotaPropertiesDID.Count == 0)
+                            continue;
 
-                // Character
-                {
-                    kvp.Value.Character.Name = name;
+                        var loginEventDirectory = Path.Combine(playerDirectory, loginEvent.TSec.ToString());
 
-                    var defaultFileName = kvp.Value.Character.Id.ToString("X8") + " " + name + " - Character.sql";
+                        if (!Directory.Exists(loginEventDirectory))
+                            Directory.CreateDirectory(loginEventDirectory);
 
-                    var fileName = Path.Combine(directory, defaultFileName);
+                        var sb = new StringBuilder();
 
-                    using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                        characterWriter.CreateSQLINSERTStatement(kvp.Value.Character, outputFile);
-                }
+                        sb.AppendLine("Source: " + loginEvent.FileName);
+                        sb.AppendLine();
 
-                foreach (var wo in kvp.Value.WorldObjects)
-                {
-                    var defaultFileName = biotaWriter.GetDefaultFileName(wo.Value);
+                        // Biota
+                        {
+                            var defaultFileName = biotaWriter.GetDefaultFileName(loginEvent.Biota);
 
-                    defaultFileName = String.Concat(defaultFileName.Split(Path.GetInvalidFileNameChars()));
+                            var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
-                    var fileName = Path.Combine(directory, defaultFileName);
+                            loginEvent.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
 
-                   //wo.Value.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(wo.Value, new ReaderWriterLockSlim());
+                            using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                                biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
+                        }
 
-                    using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                        biotaWriter.CreateSQLINSERTStatement(wo.Value, outputFile);
+                        // Character
+                        {
+                            loginEvent.Character.Name = name;
+
+                            var defaultFileName = loginEvent.Character.Id.ToString("X8") + " " + name + " - Character.sql";
+
+                            var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+
+                            using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                                characterWriter.CreateSQLINSERTStatement(loginEvent.Character, outputFile);
+                        }
+
+                        // Posessions
+                        foreach (var woi in loginEvent.WorldObjects)
+                        {
+                            var woiBeingUsed = woi.Value;
+
+                            if (!woi.Value.AppraiseInfoReceived)
+                            {
+                                var result = player.Value.GetBestPossession(woi.Key, woi.Value.Name);
+
+                                if (result != woiBeingUsed)
+                                {
+                                    // todo log that the item was replaced with a better match from a different session
+                                    woiBeingUsed = result;
+                                }
+                            }
+
+                            var defaultFileName = biotaWriter.GetDefaultFileName(woiBeingUsed.Biota);
+
+                            defaultFileName = String.Concat(defaultFileName.Split(Path.GetInvalidFileNameChars()));
+
+                            var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+
+                            woiBeingUsed.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
+
+                            if (woiBeingUsed.Biota.WeenieType == 0)
+                            {
+                                sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} failed to determine weenie type and was not exported.");
+                                continue;
+                            }
+
+                            if (!woiBeingUsed.AppraiseInfoReceived)
+                                sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} did not receive full appraisal info. Item has incomplete data.");
+
+                            using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                                biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
+                        }
+
+                        // Determine missing possessions
+                        var possessions = new HashSet<uint>();
+                        foreach (var value in loginEvent.Inventory)
+                            possessions.Add(value.guid);
+                        foreach (var value in loginEvent.Equipment)
+                            possessions.Add(value.guid);
+                        foreach (var container in loginEvent.ViewContentsEvents)
+                        {
+                            if (possessions.Contains(container.Key))
+                            {
+                                foreach (var child in container.Value)
+                                    possessions.Add(child);
+                            }
+                        }
+
+                        sb.AppendLine();
+
+                        foreach (var value in possessions)
+                        {
+                            if (!loginEvent.WorldObjects.ContainsKey(value))
+                                sb.AppendLine($"{value:X8} is a possessed item but was not found");
+                        }
+
+
+                        var resutlsFileName = Path.Combine(loginEventDirectory, "results.txt");
+                        File.WriteAllText(resutlsFileName, sb.ToString());
+                    }
                 }
             }
         }

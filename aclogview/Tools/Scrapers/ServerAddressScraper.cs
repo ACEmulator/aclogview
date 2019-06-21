@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -133,7 +133,7 @@ namespace aclogview.Tools.Scrapers
             return (hits, messageExceptions);
         }
 
-        public override void WriteOutput(string destinationRoot, ref bool searchAborted)
+        public override void WriteOutput(string destinationRoot, ref bool writeOuptputAborted)
         {
             var sb = new StringBuilder();
 

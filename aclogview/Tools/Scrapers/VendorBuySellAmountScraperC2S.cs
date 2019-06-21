@@ -129,7 +129,7 @@ namespace aclogview.Tools.Scrapers
             return (hits, messageExceptions);
         }
 
-        public override void WriteOutput(string destinationRoot, ref bool searchAborted)
+        public override void WriteOutput(string destinationRoot, ref bool writeOuptputAborted)
         {
             var output = $"buyMaxItemCount: {buyMaxItemCount}, buyMaxAmountSingle: {buyMaxAmountSingle}, buyMaxAmountTotal: {buyMaxAmountTotal}, sellMaxItemCount: {sellMaxItemCount}, sellMaxAmountSingle: {sellMaxAmountSingle}, sellMaxAmountTotal: {sellMaxAmountTotal}";
 

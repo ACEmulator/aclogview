@@ -82,6 +82,7 @@ namespace aclogview.Tools
         private long totalHits;
         private int totalExceptions;
         private bool searchAborted;
+        private bool writeOutputAborted;
 
         private void btnStartSearch_Click(object sender, EventArgs e)
         {
@@ -102,6 +103,7 @@ namespace aclogview.Tools
                 totalHits = 0;
                 totalExceptions = 0;
                 searchAborted = false;
+                writeOutputAborted = false;
 
                 UpdateToolStrip("Processing Files");
 
@@ -131,7 +133,17 @@ namespace aclogview.Tools
 
         private void btnStopSearch_Click(object sender, EventArgs e)
         {
+            if (!searchAborted && btnStopSearch.Text == "Stop Scrape")
+            {
+                searchAborted = true;
+                btnStopSearch.Text = "Stop Write Output";
+                return;
+            }
+
+            btnStopSearch.Text = "Stop Scrape";
+
             searchAborted = true;
+            writeOutputAborted = true;
 
             timer1.Stop();
 
@@ -156,13 +168,25 @@ namespace aclogview.Tools
                     ProcessFile(currentFile);
             }
 
+            if (writeOutputAborted || Disposing || IsDisposed)
+                return;
+
             if (!Directory.Exists(txtOutputFolder.Text))
                 Directory.CreateDirectory(txtOutputFolder.Text);
 
             UpdateToolStrip("Writing Output ...");
 
             foreach (var scraper in scrapers)
-                scraper.WriteOutput(txtOutputFolder.Text, ref searchAborted);
+            {
+                try
+                {
+                    scraper.WriteOutput(txtOutputFolder.Text, ref writeOutputAborted);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), scraper.GetType().Name);
+                }
+            }
 
             UpdateToolStrip("Writing Output Complete");
         }
