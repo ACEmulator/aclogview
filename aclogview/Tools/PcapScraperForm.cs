@@ -47,6 +47,7 @@ namespace aclogview.Tools
         protected override void OnClosing(CancelEventArgs e)
         {
             searchAborted = true;
+            writeOutputAborted = true;
 
             Settings.Default.FindOpcodeInFilesRoot = txtSearchPathRoot.Text;
             Settings.Default.FragDatFileOutputFolder = txtOutputFolder.Text;
@@ -83,6 +84,7 @@ namespace aclogview.Tools
         private int totalExceptions;
         private bool searchAborted;
         private bool writeOutputAborted;
+        private bool searchCompleted;
 
         private void btnStartSearch_Click(object sender, EventArgs e)
         {
@@ -104,6 +106,7 @@ namespace aclogview.Tools
                 totalExceptions = 0;
                 searchAborted = false;
                 writeOutputAborted = false;
+                searchCompleted = false;
 
                 UpdateToolStrip("Processing Files");
 
@@ -119,8 +122,10 @@ namespace aclogview.Tools
                     // Do the actual search here
                     DoSearch();
 
+                    searchCompleted = true;
+
                     if (!Disposing && !IsDisposed)
-                        btnStopSearch.BeginInvoke((Action)(() => btnStopSearch_Click(null, null)));
+                        BeginInvoke((Action)(() => btnStopSearch_Click(null, null)));
                 });
             }
             catch (Exception ex)
@@ -133,25 +138,36 @@ namespace aclogview.Tools
 
         private void btnStopSearch_Click(object sender, EventArgs e)
         {
-            if (!searchAborted && btnStopSearch.Text == "Stop Scrape")
+            if (!searchCompleted)
             {
-                searchAborted = true;
-                btnStopSearch.Text = "Stop Write Output";
-                return;
+                if (!searchAborted && !writeOutputAborted)
+                {
+                    searchAborted = true;
+                    btnStopSearch.Text = "Stop Writing Output";
+                    return;
+                }
+
+                if (!writeOutputAborted)
+                {
+                    writeOutputAborted = true;
+                    btnStopSearch.Text = "Stopping Write Output";
+                    btnStopSearch.Enabled = false;
+                    return;
+                }
             }
 
-            btnStopSearch.Text = "Stop Scrape";
+            if (searchCompleted)
+            {
+                btnStopSearch.Text = "Stop Scrape";
 
-            searchAborted = true;
-            writeOutputAborted = true;
+                timer1.Stop();
 
-            timer1.Stop();
-
-            txtSearchPathRoot.Enabled = true;
-            btnChangeSearchPathRoot.Enabled = true;
-            dataGridView1.Enabled = true;
-            btnStartSearch.Enabled = true;
-            btnStopSearch.Enabled = false;
+                txtSearchPathRoot.Enabled = true;
+                btnChangeSearchPathRoot.Enabled = true;
+                dataGridView1.Enabled = true;
+                btnStartSearch.Enabled = true;
+                btnStopSearch.Enabled = false;
+            }
         }
 
 
@@ -168,27 +184,7 @@ namespace aclogview.Tools
                     ProcessFile(currentFile);
             }
 
-            if (writeOutputAborted || Disposing || IsDisposed)
-                return;
-
-            if (!Directory.Exists(txtOutputFolder.Text))
-                Directory.CreateDirectory(txtOutputFolder.Text);
-
-            UpdateToolStrip("Writing Output ...");
-
-            foreach (var scraper in scrapers)
-            {
-                try
-                {
-                    scraper.WriteOutput(txtOutputFolder.Text, ref writeOutputAborted);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString(), scraper.GetType().Name);
-                }
-            }
-
-            UpdateToolStrip("Writing Output Complete");
+            WriteOutput();
         }
 
         private void ProcessFile(string fileName)
@@ -224,6 +220,40 @@ namespace aclogview.Tools
             }
 
             Interlocked.Increment(ref filesProcessed);
+        }
+
+        private void WriteOutput()
+        {
+            if (writeOutputAborted || Disposing || IsDisposed)
+                return;
+
+            if (!Directory.Exists(txtOutputFolder.Text))
+                Directory.CreateDirectory(txtOutputFolder.Text);
+
+            UpdateToolStrip("Writing Output ...");
+
+            foreach (var scraper in scrapers)
+            {
+                if (writeOutputAborted || Disposing || IsDisposed)
+                    break;
+
+                try
+                {
+                    scraper.WriteOutput(txtOutputFolder.Text, ref writeOutputAborted);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString(), scraper.GetType().Name);
+                }
+            }
+
+            if (Disposing || IsDisposed)
+                return;
+
+            if (writeOutputAborted)
+                UpdateToolStrip("Writing Output Aborted");
+            else
+                UpdateToolStrip("Writing Output Complete");
         }
 
         private void timer1_Tick(object sender, EventArgs e)

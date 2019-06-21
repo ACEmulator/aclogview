@@ -48,7 +48,7 @@ namespace aclogview.Tools.Scrapers
             public readonly List<(uint guid, uint location, uint priority)> Equipment = new List<(uint guid, uint location, uint priority)>();
 
             public readonly Dictionary<uint, HashSet<uint>> ViewContentsEvents = new Dictionary<uint, HashSet<uint>>();
-            public bool PlayerLoginCompleted = false;
+            public bool PlayerLoginCompleted;
 
             public readonly Dictionary<uint, WorldObjectItem> WorldObjects = new Dictionary<uint, WorldObjectItem>();
 
@@ -426,6 +426,55 @@ namespace aclogview.Tools.Scrapers
 
         public override void WriteOutput(string destinationRoot, ref bool writeOuptputAborted)
         {
+            var playerExportsFolder = Path.Combine(destinationRoot, "Player Exports");
+
+            if (!Directory.Exists(playerExportsFolder))
+                Directory.CreateDirectory(playerExportsFolder);
+
+
+            var notes = new StringBuilder();
+            notes.AppendLine("The following command will import all the sql files into your retail shard. It can take many hours");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"c:\\Output\\Player Exports\\*.sql\"') do mysql --user=root --password=password ace_shard_retail < \"%f\"");
+
+            // Find guid collisions across servers
+            Dictionary<string, HashSet<uint>> guidsByServer = new Dictionary<string, HashSet<uint>>();
+            foreach (var server in playersByServer)
+            {
+                var guids = new HashSet<uint>();
+                guidsByServer.Add(server.Key, guids);
+
+                foreach (var player in server.Value)
+                {
+                    guids.Add(player.Key);
+                    foreach (var loginEvent in player.Value.LoginEvents)
+                    {
+                        foreach (var wo in loginEvent.WorldObjects)
+                            guids.Add(wo.Key);
+                    }
+                }
+            }
+
+            var keys = guidsByServer.Keys.ToList();
+            for (int i = 0; i < keys.Count - 1; i++)
+            {
+                for (int j = i + 1; j < keys.Count; j++)
+                {
+                    var intersections = new HashSet<uint>(guidsByServer[keys[i]]);
+                    intersections.IntersectWith(guidsByServer[keys[j]]);
+                    if (intersections.Count > 0)
+                    {
+                        notes.AppendLine();
+                        notes.AppendLine(keys[i] + " IntersectWith " + keys[j]);
+                        foreach (var intersect in intersections)
+                            notes.AppendLine(intersect.ToString("X8"));
+                    }
+                }
+            }
+
+            var notesFileName = Path.Combine(playerExportsFolder, "notes.txt");
+            File.WriteAllText(notesFileName, notes.ToString());
+
+
             var biotaWriter = new ACE.Database.SQLFormatters.Shard.BiotaSQLWriter();
             var characterWriter = new ACE.Database.SQLFormatters.Shard.CharacterSQLWriter();
 
@@ -433,7 +482,7 @@ namespace aclogview.Tools.Scrapers
 
             foreach (var server in playersByServer)
             {
-                var serverDirectory = Path.Combine(destinationRoot, "Player Exports", server.Key);
+                var serverDirectory = Path.Combine(playerExportsFolder, server.Key);
 
                 foreach (var player in server.Value)
                 {
@@ -489,6 +538,7 @@ namespace aclogview.Tools.Scrapers
                         {
                             var woiBeingUsed = woi.Value;
 
+                            // If we don't have appraise info for this WO, try to find one that does
                             if (!woi.Value.AppraiseInfoReceived)
                             {
                                 var result = player.Value.GetBestPossession(woi.Key, woi.Value.Name);

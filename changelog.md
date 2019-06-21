@@ -12,6 +12,7 @@
 * ServerAddressScraper added
 * PacketSizeScraperC2S added
 * PlayerExporter added
+* Account/CharacterList exporter added
 
 ### 2019-05-18
 [Slushnas]
