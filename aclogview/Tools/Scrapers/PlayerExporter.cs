@@ -8,6 +8,7 @@ using System.Threading;
 using ACE.Database.Models.Shard;
 
 using aclogview.ACE_Helpers;
+using ACE.Database;
 
 namespace aclogview.Tools.Scrapers
 {
@@ -427,6 +428,8 @@ namespace aclogview.Tools.Scrapers
 
                         loginEvent.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
 
+                        ShardDatabase.SetBiotaPopulatedCollections(loginEvent.Biota);
+
                         using (StreamWriter outputFile = new StreamWriter(fileName, false))
                             biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
                     }
@@ -476,6 +479,8 @@ namespace aclogview.Tools.Scrapers
 
                         if (!woiBeingUsed.AppraiseInfoReceived)
                             sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} did not receive full appraisal info. Item has incomplete data.");
+
+                        ShardDatabase.SetBiotaPopulatedCollections(woiBeingUsed.Biota);
 
                         using (StreamWriter outputFile = new StreamWriter(fileName, false))
                             biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
