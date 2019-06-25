@@ -36,7 +36,7 @@ namespace aclogview.ACE_Helpers
             entity.LevelFromCP = attribute._level_from_cp;
         }
 
-        public static void AddSOrUpdatekill(Biota biota, STypeSkill skillType, Skill skill, ReaderWriterLockSlim rwLock)
+        public static void AddOrUpdatekill(Biota biota, STypeSkill skillType, Skill skill, ReaderWriterLockSlim rwLock)
         {
             var entity = biota.GetOrAddSkill((ushort)skillType, rwLock, out _);
             entity.InitLevel = skill._init_level;
@@ -98,6 +98,9 @@ namespace aclogview.ACE_Helpers
                 biota.SetPosition((ACE.Entity.Enum.Properties.PositionType)kvp.Key, position, rwLock, out _);
             }
 
+            var name = biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
+            biota.SetProperty(ACE.Entity.Enum.Properties.PropertyString.PCAPRecordedCharacterName, name, rwLock, out _);
+
             AddOrUpdateAttribute(biota, ACE.Entity.Enum.Properties.PropertyAttribute.Strength, message.CACQualities._attribCache._strength);
             AddOrUpdateAttribute(biota, ACE.Entity.Enum.Properties.PropertyAttribute.Endurance, message.CACQualities._attribCache._endurance);
             AddOrUpdateAttribute(biota, ACE.Entity.Enum.Properties.PropertyAttribute.Quickness, message.CACQualities._attribCache._quickness);
@@ -105,12 +108,12 @@ namespace aclogview.ACE_Helpers
             AddOrUpdateAttribute(biota, ACE.Entity.Enum.Properties.PropertyAttribute.Focus, message.CACQualities._attribCache._focus);
             AddOrUpdateAttribute(biota, ACE.Entity.Enum.Properties.PropertyAttribute.Self, message.CACQualities._attribCache._self);
 
-            AddOrUpdateAttribute2nd(biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxHealth, message.CACQualities._attribCache._health);
-            AddOrUpdateAttribute2nd(biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxStamina, message.CACQualities._attribCache._stamina);
-            AddOrUpdateAttribute2nd(biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.MaxMana, message.CACQualities._attribCache._mana);
+            AddOrUpdateAttribute2nd(biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.Health, message.CACQualities._attribCache._health);
+            AddOrUpdateAttribute2nd(biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.Stamina, message.CACQualities._attribCache._stamina);
+            AddOrUpdateAttribute2nd(biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.Mana, message.CACQualities._attribCache._mana);
 
             foreach (var value in message.CACQualities._skillStatsTable.hashTable)
-                AddSOrUpdatekill(biota, value.Key, value.Value, rwLock);
+                AddOrUpdatekill(biota, value.Key, value.Value, rwLock);
 
             foreach (var value in message.CACQualities._spell_book.hashTable)
             {
@@ -163,8 +166,8 @@ namespace aclogview.ACE_Helpers
 
             character.CharacterOptions2 = (int)message.PlayerModule.options2;
 
-            //message.PlayerModule.m_colGameplayOptions.
-            // TODO: player.Character.GameplayOptions
+            // This is just window placement. For now, we don't bother exporting it
+            // TODO: message.PlayerModule.m_colGameplayOptions -> player.Character.GameplayOptions
 
             foreach (var value in message.clist.list)
                 inventory.Add((value.m_iid, value.m_uContainerProperties));
@@ -517,12 +520,13 @@ namespace aclogview.ACE_Helpers
                 biota.SetProperty((ACE.Entity.Enum.Properties.PropertyString)kvp.Key, kvp.Value.m_buffer, rwLock, out _);
             foreach (var kvp in message.i_prof._didStatsTable.hashTable)
                 biota.SetProperty((ACE.Entity.Enum.Properties.PropertyDataId)kvp.Key, kvp.Value, rwLock, out _);
-            foreach (var x in message.i_prof._spellsTable.list)
+
+            foreach (var spell in message.i_prof._spellsTable.list)
             {
-                if ((int)x < 0)
+                if ((int)spell < 0) // This filters out spells that were cast on the item. If it's a cast spell, the MSB will be set
                     continue;
-                if (biota.BiotaPropertiesSpellBook.Any(y => y.Spell == (int)x))
-                    biota.BiotaPropertiesSpellBook.Add(new BiotaPropertiesSpellBook { Spell = (int)x, Probability = 2f });
+                if (biota.BiotaPropertiesSpellBook.All(y => y.Spell != (int)spell))
+                    biota.BiotaPropertiesSpellBook.Add(new BiotaPropertiesSpellBook {Spell = (int)spell, Probability = 2f});
             }
 
             if ((message.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_ArmorProfile) != 0)
@@ -583,8 +587,15 @@ namespace aclogview.ACE_Helpers
             {
             }
 
+            // todo message.i_prof._armorEnchantment
+
+            // todo message.i_prof._weaponEnchantment
+
+            // todo message.i_prof._resistEnchantment
+
             if ((message.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_ArmorLevels) != 0)
             {
+                // todo
             }
         }
 

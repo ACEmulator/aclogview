@@ -19,9 +19,6 @@ namespace aclogview.Tools.Scrapers
         // TODO: player.Character.HairTexture
         // TODO: player.Character.DefaultHairTexture
 
-        // TODO: Verify attributes, they seem to be not exporting/importing correctly
-        // TODO: Some exports seem to have trouble in import with the EchnantmentRegistry failing the Database Save()
-
         class WorldObjectItem
         {
             public readonly Biota Biota = new Biota();
@@ -170,6 +167,7 @@ namespace aclogview.Tools.Scrapers
                             var message = Proto_UI.EnterWorld.read(binaryReader);
 
                             loginEvent = new LoginEvent(fileName, record.tsSec, message.gid);
+                            loginEvent.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyString.PCAPRecordedServerName, serverName, rwLock, out _);
                             continue;
                         }
 
@@ -319,102 +317,13 @@ namespace aclogview.Tools.Scrapers
                                 loginEvent.WorldObjects[message.object_id] = item;
                             }
                         }
-
-                        // We only process player create/update messages for player biotas during the login process
-                        if (!loginEvent.PlayerLoginCompleted)
-                        {
-                            if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateInt_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeInt, int>.read(0, binaryReader);
-                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInt)message.stype, message.val, rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateInt64_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeInt64, long>.read(0, binaryReader);
-                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInt64)message.stype, message.val, rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateBool_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeBool, int>.read(0, binaryReader);
-                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyBool)message.stype, (message.val != 0), rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateFloat_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeFloat, double>.read(0, binaryReader);
-                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyFloat)message.stype, message.val, rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateString_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateStringEvent.read(0, binaryReader);
-                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyString)message.stype, message.val.m_buffer, rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateDataID_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeDID, uint>.read(0, binaryReader);
-                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyDataId)message.stype, message.val, rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateInstanceID_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeIID, uint>.read(0, binaryReader);
-                                loginEvent.Biota.SetProperty((ACE.Entity.Enum.Properties.PropertyInstanceId)message.stype, message.val, rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdatePosition_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypePosition, Position>.read(0, binaryReader);
-                                var position = new ACE.Entity.Position(message.val.objcell_id, message.val.frame.m_fOrigin.x, message.val.frame.m_fOrigin.y, message.val.frame.m_fOrigin.z, message.val.frame.qx, message.val.frame.qy, message.val.frame.qz, message.val.frame.qw);
-                                loginEvent.Biota.SetPosition((ACE.Entity.Enum.Properties.PositionType)message.stype, position, rwLock, out _);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateSkill_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeSkill, Skill>.read(0, binaryReader);
-                                ACEBiotaCreator.AddSOrUpdatekill(loginEvent.Biota, message.stype, message.val, rwLock);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateSkillLevel_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeSkill, int>.read(0, binaryReader);
-                                var entity = loginEvent.Biota.GetOrAddSkill((ushort)message.stype, rwLock, out _);
-                                entity.PP = (uint)message.val; // TODO is this setting PP?
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateSkillAC_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeSkill, SKILL_ADVANCEMENT_CLASS>.read(0, binaryReader);
-                                var entity = loginEvent.Biota.GetOrAddSkill((ushort)message.stype, rwLock, out _);
-                                entity.SAC = (uint)message.val;
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttribute_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeAttribute, Attribute>.read(0, binaryReader);
-                                ACEBiotaCreator.AddOrUpdateAttribute(loginEvent.Biota, (ACE.Entity.Enum.Properties.PropertyAttribute)message.stype, message.val);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttributeLevel_ID)
-                            {
-                                // This doesn't happen in retail
-                                throw new Exception("This shouldn't happen");
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2nd_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeAttribute2nd, SecondaryAttribute>.read(0, binaryReader);
-                                ACEBiotaCreator.AddOrUpdateAttribute2nd(loginEvent.Biota, (ACE.Entity.Enum.Properties.PropertyAttribute2nd)message.stype, message.val);
-                            }
-                            else if (messageCode == (uint)PacketOpcode.Evt_Qualities__PrivateUpdateAttribute2ndLevel_ID)
-                            {
-                                var message = CM_Qualities.PrivateUpdateQualityEvent<STypeAttribute2nd, int>.read(0, binaryReader);
-                                var entity = loginEvent.Biota.BiotaPropertiesAttribute2nd.ToList().FirstOrDefault(r => r.Type == (ushort)message.stype);
-                                if (entity == null)
-                                {
-                                    entity = new BiotaPropertiesAttribute2nd { Type = (ushort)message.stype };
-                                    loginEvent.Biota.BiotaPropertiesAttribute2nd.Add(entity);
-                                }
-                                entity.CurrentLevel = (uint)message.val;
-                            }
-                        }
                     }
                 }
                 catch (InvalidDataException)
                 {
                     // This is a pcap parse error
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     messageExceptions++;
                     // Do something with the exception maybe
@@ -486,118 +395,118 @@ namespace aclogview.Tools.Scrapers
 
                 foreach (var player in server.Value)
                 {
-                    var name = player.Value.LoginEvents[0].Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
+                    if (writeOuptputAborted)
+                        return;
+
+                    // We only export the last login event
+                    var loginEvent = player.Value.LoginEvents.Last();
+
+                    // biota is corrupt
+                    if (loginEvent.Biota.BiotaPropertiesDID.Count == 0)
+                        continue;
+
+                    var name = loginEvent.Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
 
                     var playerDirectory = Path.Combine(serverDirectory, name);
 
-                    foreach (var loginEvent in player.Value.LoginEvents)
+                    var loginEventDirectory = Path.Combine(playerDirectory, loginEvent.TSec.ToString());
+
+                    if (!Directory.Exists(loginEventDirectory))
+                        Directory.CreateDirectory(loginEventDirectory);
+
+                    var sb = new StringBuilder();
+
+                    sb.AppendLine("Source: " + loginEvent.FileName);
+                    sb.AppendLine();
+
+                    // Biota
                     {
-                        if (writeOuptputAborted)
-                            return;
+                        var defaultFileName = biotaWriter.GetDefaultFileName(loginEvent.Biota);
 
-                        // biota is corrupt
-                        if (loginEvent.Biota.BiotaPropertiesDID.Count == 0)
-                            continue;
+                        var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
-                        var loginEventDirectory = Path.Combine(playerDirectory, loginEvent.TSec.ToString());
+                        loginEvent.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
 
-                        if (!Directory.Exists(loginEventDirectory))
-                            Directory.CreateDirectory(loginEventDirectory);
-
-                        var sb = new StringBuilder();
-
-                        sb.AppendLine("Source: " + loginEvent.FileName);
-                        sb.AppendLine();
-
-                        // Biota
-                        {
-                            var defaultFileName = biotaWriter.GetDefaultFileName(loginEvent.Biota);
-
-                            var fileName = Path.Combine(loginEventDirectory, defaultFileName);
-
-                            loginEvent.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
-
-                            using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                                biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
-                        }
-
-                        // Character
-                        {
-                            loginEvent.Character.Name = name;
-
-                            var defaultFileName = loginEvent.Character.Id.ToString("X8") + " " + name + " - Character.sql";
-
-                            var fileName = Path.Combine(loginEventDirectory, defaultFileName);
-
-                            using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                                characterWriter.CreateSQLINSERTStatement(loginEvent.Character, outputFile);
-                        }
-
-                        // Posessions
-                        foreach (var woi in loginEvent.WorldObjects)
-                        {
-                            var woiBeingUsed = woi.Value;
-
-                            // If we don't have appraise info for this WO, try to find one that does
-                            if (!woi.Value.AppraiseInfoReceived)
-                            {
-                                var result = player.Value.GetBestPossession(woi.Key, woi.Value.Name);
-
-                                if (result != woiBeingUsed)
-                                {
-                                    // todo log that the item was replaced with a better match from a different session
-                                    woiBeingUsed = result;
-                                }
-                            }
-
-                            var defaultFileName = biotaWriter.GetDefaultFileName(woiBeingUsed.Biota);
-
-                            defaultFileName = String.Concat(defaultFileName.Split(Path.GetInvalidFileNameChars()));
-
-                            var fileName = Path.Combine(loginEventDirectory, defaultFileName);
-
-                            woiBeingUsed.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
-
-                            if (woiBeingUsed.Biota.WeenieType == 0)
-                            {
-                                sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} failed to determine weenie type and was not exported.");
-                                continue;
-                            }
-
-                            if (!woiBeingUsed.AppraiseInfoReceived)
-                                sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} did not receive full appraisal info. Item has incomplete data.");
-
-                            using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                                biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
-                        }
-
-                        // Determine missing possessions
-                        var possessions = new HashSet<uint>();
-                        foreach (var value in loginEvent.Inventory)
-                            possessions.Add(value.guid);
-                        foreach (var value in loginEvent.Equipment)
-                            possessions.Add(value.guid);
-                        foreach (var container in loginEvent.ViewContentsEvents)
-                        {
-                            if (possessions.Contains(container.Key))
-                            {
-                                foreach (var child in container.Value)
-                                    possessions.Add(child);
-                            }
-                        }
-
-                        sb.AppendLine();
-
-                        foreach (var value in possessions)
-                        {
-                            if (!loginEvent.WorldObjects.ContainsKey(value))
-                                sb.AppendLine($"{value:X8} is a possessed item but was not found");
-                        }
-
-
-                        var resutlsFileName = Path.Combine(loginEventDirectory, "results.txt");
-                        File.WriteAllText(resutlsFileName, sb.ToString());
+                        using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                            biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
                     }
+
+                    // Character
+                    {
+                        loginEvent.Character.Name = name;
+
+                        var defaultFileName = loginEvent.Character.Id.ToString("X8") + " " + name + " - Character.sql";
+
+                        var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+
+                        using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                            characterWriter.CreateSQLINSERTStatement(loginEvent.Character, outputFile);
+                    }
+
+                    // Posessions
+                    foreach (var woi in loginEvent.WorldObjects)
+                    {
+                        var woiBeingUsed = woi.Value;
+
+                        // If we don't have appraise info for this WO, try to find one that does
+                        if (!woi.Value.AppraiseInfoReceived)
+                        {
+                            var result = player.Value.GetBestPossession(woi.Key, woi.Value.Name);
+
+                            if (result != woiBeingUsed)
+                            {
+                                // todo log that the item was replaced with a better match from a different session
+                                woiBeingUsed = result;
+                            }
+                        }
+
+                        var defaultFileName = biotaWriter.GetDefaultFileName(woiBeingUsed.Biota);
+
+                        defaultFileName = String.Concat(defaultFileName.Split(Path.GetInvalidFileNameChars()));
+
+                        var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+
+                        woiBeingUsed.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
+
+                        if (woiBeingUsed.Biota.WeenieType == 0)
+                        {
+                            sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} failed to determine weenie type and was not exported.");
+                            continue;
+                        }
+
+                        if (!woiBeingUsed.AppraiseInfoReceived)
+                            sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} did not receive full appraisal info. Item has incomplete data.");
+
+                        using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                            biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
+                    }
+
+                    // Determine missing possessions
+                    var possessions = new HashSet<uint>();
+                    foreach (var value in loginEvent.Inventory)
+                        possessions.Add(value.guid);
+                    foreach (var value in loginEvent.Equipment)
+                        possessions.Add(value.guid);
+                    foreach (var container in loginEvent.ViewContentsEvents)
+                    {
+                        if (possessions.Contains(container.Key))
+                        {
+                            foreach (var child in container.Value)
+                                possessions.Add(child);
+                        }
+                    }
+
+                    sb.AppendLine();
+
+                    foreach (var value in possessions)
+                    {
+                        if (!loginEvent.WorldObjects.ContainsKey(value))
+                            sb.AppendLine($"{value:X8} is a possessed item but was not found");
+                    }
+
+
+                    var resutlsFileName = Path.Combine(loginEventDirectory, "results.txt");
+                    File.WriteAllText(resutlsFileName, sb.ToString());
                 }
             }
         }
