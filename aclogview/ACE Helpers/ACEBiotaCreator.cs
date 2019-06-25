@@ -36,7 +36,7 @@ namespace aclogview.ACE_Helpers
             entity.LevelFromCP = attribute._level_from_cp;
         }
 
-        public static void AddOrUpdatekill(Biota biota, STypeSkill skillType, Skill skill, ReaderWriterLockSlim rwLock)
+        public static void AddOrUpdateSkill(Biota biota, STypeSkill skillType, Skill skill, ReaderWriterLockSlim rwLock)
         {
             var entity = biota.GetOrAddSkill((ushort)skillType, rwLock, out _);
             entity.InitLevel = skill._init_level;
@@ -113,7 +113,7 @@ namespace aclogview.ACE_Helpers
             AddOrUpdateAttribute2nd(biota, ACE.Entity.Enum.Properties.PropertyAttribute2nd.Mana, message.CACQualities._attribCache._mana);
 
             foreach (var value in message.CACQualities._skillStatsTable.hashTable)
-                AddOrUpdatekill(biota, value.Key, value.Value, rwLock);
+                AddOrUpdateSkill(biota, value.Key, value.Value, rwLock);
 
             foreach (var value in message.CACQualities._spell_book.hashTable)
             {
