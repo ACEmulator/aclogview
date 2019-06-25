@@ -523,10 +523,17 @@ namespace aclogview.ACE_Helpers
 
             foreach (var spell in message.i_prof._spellsTable.list)
             {
-                if ((int)spell < 0) // This filters out spells that were cast on the item. If it's a cast spell, the MSB will be set
-                    continue;
-                if (biota.BiotaPropertiesSpellBook.All(y => y.Spell != (int)spell))
-                    biota.BiotaPropertiesSpellBook.Add(new BiotaPropertiesSpellBook {Spell = (int)spell, Probability = 2f});
+                if ((spell & 0x80000000) != 0) // These are enchantments
+                {
+                    var enchantment = (spell & 0x7FFFFFFF);
+                    if (biota.BiotaPropertiesEnchantmentRegistry.All(y => y.SpellId != (int)enchantment))
+                        biota.BiotaPropertiesEnchantmentRegistry.Add(new BiotaPropertiesEnchantmentRegistry{ SpellId = (int)enchantment });
+                }
+                else
+                {
+                    if (biota.BiotaPropertiesSpellBook.All(y => y.Spell != (int)spell))
+                        biota.BiotaPropertiesSpellBook.Add(new BiotaPropertiesSpellBook { Spell = (int)spell, Probability = 2f });
+                }
             }
 
             if ((message.i_prof.header & (uint)CM_Examine.AppraisalProfile.AppraisalProfilePackHeader.Packed_ArmorProfile) != 0)
