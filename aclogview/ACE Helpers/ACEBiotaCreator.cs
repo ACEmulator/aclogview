@@ -348,16 +348,18 @@ namespace aclogview.ACE_Helpers
 
             if (message.objdesc.tmChanges.Count > 0)
             {
+                byte order = 0;
                 biota.BiotaPropertiesTextureMap.Clear();
                 foreach (var texture in message.objdesc.tmChanges)
-                    biota.BiotaPropertiesTextureMap.Add(new BiotaPropertiesTextureMap { Index = texture.part_index, OldId = texture.old_tex_id, NewId = texture.new_tex_id });
+                    biota.BiotaPropertiesTextureMap.Add(new BiotaPropertiesTextureMap { Index = texture.part_index, OldId = texture.old_tex_id, NewId = texture.new_tex_id, Order = order++ });
             }
 
             if (message.objdesc.apChanges.Count > 0)
             {
+                byte order = 0;
                 biota.BiotaPropertiesAnimPart.Clear();
                 foreach (var animPart in message.objdesc.apChanges)
-                    biota.BiotaPropertiesAnimPart.Add(new BiotaPropertiesAnimPart { Index = animPart.part_index, AnimationId = animPart.part_id });
+                    biota.BiotaPropertiesAnimPart.Add(new BiotaPropertiesAnimPart { Index = animPart.part_index, AnimationId = animPart.part_id, Order = order++ });
             }
 
             if (includeMetaData)
@@ -517,7 +519,11 @@ namespace aclogview.ACE_Helpers
             foreach (var kvp in message.i_prof._floatStatsTable.hashTable)
                 biota.SetProperty((ACE.Entity.Enum.Properties.PropertyFloat)kvp.Key, kvp.Value, rwLock, out _);
             foreach (var kvp in message.i_prof._strStatsTable.hashTable)
-                biota.SetProperty((ACE.Entity.Enum.Properties.PropertyString)kvp.Key, kvp.Value.m_buffer, rwLock, out _);
+            {
+                if (kvp.Value.m_buffer == null) continue; // Not sure why some strings are null
+                biota.SetProperty((ACE.Entity.Enum.Properties.PropertyString) kvp.Key, kvp.Value.m_buffer, rwLock, out _);
+            }
+
             foreach (var kvp in message.i_prof._didStatsTable.hashTable)
                 biota.SetProperty((ACE.Entity.Enum.Properties.PropertyDataId)kvp.Key, kvp.Value, rwLock, out _);
 

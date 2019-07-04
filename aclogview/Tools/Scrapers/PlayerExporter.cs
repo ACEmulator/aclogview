@@ -44,7 +44,7 @@ namespace aclogview.Tools.Scrapers
             public readonly List<(uint guid, uint containerProperties)> Inventory = new List<(uint guid, uint containerProperties)>();
             public readonly List<(uint guid, uint location, uint priority)> Equipment = new List<(uint guid, uint location, uint priority)>();
 
-            public readonly Dictionary<uint, HashSet<uint>> ViewContentsEvents = new Dictionary<uint, HashSet<uint>>();
+            public readonly Dictionary<uint, List<uint>> ViewContentsEvents = new Dictionary<uint, List<uint>>();
             public bool PlayerLoginCompleted;
 
             public readonly Dictionary<uint, WorldObjectItem> WorldObjects = new Dictionary<uint, WorldObjectItem>();
@@ -267,13 +267,13 @@ namespace aclogview.Tools.Scrapers
                                 {
                                     var message = CM_Inventory.ViewContents.read(binaryReader);
 
-                                    var hashSet = new HashSet<uint>();
+                                    var list = new List<uint>();
 
                                     foreach (var value in message.contents_list.list)
-                                        hashSet.Add(value.m_iid); // We don't use m_uContainerProperties
+                                        list.Add(value.m_iid); // We don't use m_uContainerProperties
 
                                     if (!loginEvent.ViewContentsEvents.ContainsKey(message.i_container)) // We only store the first ViewContentsEvent
-                                        loginEvent.ViewContentsEvents[message.i_container] = hashSet;
+                                        loginEvent.ViewContentsEvents[message.i_container] = list;
                                 }
                             }
 
@@ -461,6 +461,28 @@ namespace aclogview.Tools.Scrapers
                                 woiBeingUsed = result;
                             }
                         }
+
+                        // Update the PlacementPosition and Container
+                        for (int i = 0; i < loginEvent.Inventory.Count ; i++)
+                        {
+                            if (loginEvent.Inventory[i].guid == woiBeingUsed.Biota.Id)
+                            {
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.PlacementPosition, i, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Container, loginEvent.Biota.Id, rwLock, out _);
+                                goto processed;
+                            }
+                        }
+                        foreach (var container in loginEvent.ViewContentsEvents)
+                        {
+                            var index = container.Value.IndexOf(woiBeingUsed.Biota.Id);
+                            if (index != -1)
+                            {
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.PlacementPosition, index, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Container, container.Key, rwLock, out _);
+                                goto processed;
+                            }
+                        }
+                        processed:
 
                         var defaultFileName = biotaWriter.GetDefaultFileName(woiBeingUsed.Biota);
 
