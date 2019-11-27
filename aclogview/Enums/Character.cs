@@ -90,7 +90,7 @@ public enum CharacterOption {
     DisableHouseRestrictionEffects_CharacterOption = (1 << 25),
     DragItemOnPlayerOpensSecureTrade_CharacterOption = (1 << 26),
     DisplayAllegianceLogonNotifications_CharacterOption = (1 << 27),
-    UseChargeAttack_CharacterOption = (1 << 29),
+    UseChargeAttack_CharacterOption = (1 << 28),
     AutoAcceptFellowRequest_CharacterOption = (1 << 29),
     HearAllegianceChat_CharacterOption = (1 << 30),
     UseCraftSuccessDialog_CharacterOption = (1 << 31),
