@@ -243,21 +243,8 @@ namespace aclogview.Tools.Scrapers
                                 }
                                 else if (opCode == (uint)PacketOpcode.Evt_Social__SendClientContractTrackerTable_ID)
                                 {
-                                    var message = CM_Social.SendClientContractTrackerTable.read(binaryReader);
-
-                                    foreach (var value in message._contractTrackerHash.hashTable)
-                                    {
-                                        var contract = new CharacterPropertiesContract
-                                        {
-                                            // value.Key what's this?
-                                            ContractId = value.Value._contract_id,
-                                            Stage = value.Value._contract_stage,
-                                            TimeWhenDone = (ulong)value.Value._time_when_done,
-                                            TimeWhenRepeats = (ulong)value.Value._time_when_repeats,
-                                            Version = value.Value._version,
-                                        };
-                                        loginEvent.Character.CharacterPropertiesContract.Add(contract);
-                                    }
+                                    // Skip this
+                                    // player.Character.CharacterPropertiesContractRegistry
                                 }
                                 else if (opCode == (uint)PacketOpcode.ALLEGIANCE_UPDATE_EVENT)
                                 {
@@ -343,7 +330,15 @@ namespace aclogview.Tools.Scrapers
 
             var notes = new StringBuilder();
             notes.AppendLine("The following command will import all the sql files into your retail shard. It can take many hours");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"c:\\Output\\Player Exports\\*.sql\"') do mysql --user=root --password=password ace_shard_retail < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Darktide\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_dt < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Frostfell\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_ff < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Harvestgain\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_hg < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Leafcull\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_lc < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Morningthaw\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_mt < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Solclaim\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_sc < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Thistledown\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_td < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Verdantine\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_vt < \"%f\"");
+            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\WintersEbb\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_we < \"%f\"");
 
             // Find guid collisions across servers
             Dictionary<string, HashSet<uint>> guidsByServer = new Dictionary<string, HashSet<uint>>();
@@ -416,8 +411,23 @@ namespace aclogview.Tools.Scrapers
 
                     var sb = new StringBuilder();
 
-                    sb.AppendLine("Source: " + loginEvent.FileName);
-                    sb.AppendLine();
+                    sb.AppendLine("Source: ");
+                    sb.AppendLine(loginEvent.FileName);
+
+                    if (player.Value.LoginEvents.Count > 1)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine("Alternate sources:");
+                        foreach (var value in player.Value.LoginEvents)
+                        {
+                            if (loginEvent == value)
+                                continue;
+                            sb.AppendLine(value.FileName);
+                        }
+                    }
+
+                    var failedExportsUnknownWeenie = new HashSet<string>();
+                    var partialExportsNoAppraisalInfo = new HashSet<string>();
 
                     // Biota
                     {
@@ -462,13 +472,18 @@ namespace aclogview.Tools.Scrapers
                             }
                         }
 
-                        // Update the PlacementPosition and Container
+                        // Update the InventoryOrder and Container
                         for (int i = 0; i < loginEvent.Inventory.Count ; i++)
                         {
                             if (loginEvent.Inventory[i].guid == woiBeingUsed.Biota.Id)
                             {
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.PlacementPosition, i, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Owner, loginEvent.Biota.Id, rwLock, out _);
                                 woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Container, loginEvent.Biota.Id, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.InventoryOrder, i, rwLock, out _);
+
+                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInt.CurrentWieldedLocation, out _, rwLock);
+                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Wielder, out _, rwLock);
+
                                 goto processed;
                             }
                         }
@@ -477,8 +492,13 @@ namespace aclogview.Tools.Scrapers
                             var index = container.Value.IndexOf(woiBeingUsed.Biota.Id);
                             if (index != -1)
                             {
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.PlacementPosition, index, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Owner, container.Key, rwLock, out _);
                                 woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Container, container.Key, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.InventoryOrder, index, rwLock, out _);
+
+                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInt.CurrentWieldedLocation, out _, rwLock);
+                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Wielder, out _, rwLock);
+
                                 goto processed;
                             }
                         }
@@ -494,17 +514,33 @@ namespace aclogview.Tools.Scrapers
 
                         if (woiBeingUsed.Biota.WeenieType == 0)
                         {
-                            sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} failed to determine weenie type and was not exported.");
+                            failedExportsUnknownWeenie.Add($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name}");
                             continue;
                         }
 
                         if (!woiBeingUsed.AppraiseInfoReceived)
-                            sb.AppendLine($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name} did not receive full appraisal info. Item has incomplete data.");
+                            partialExportsNoAppraisalInfo.Add($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name}");
 
                         SetBiotaPopulatedCollections(woiBeingUsed.Biota);
 
                         using (StreamWriter outputFile = new StreamWriter(fileName, false))
                             biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
+                    }
+
+                    if (failedExportsUnknownWeenie.Count > 0)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine("Failed Exports - Unable to determine weenie type:");
+                        foreach (var value in failedExportsUnknownWeenie)
+                            sb.AppendLine(value);
+                    }
+
+                    if (partialExportsNoAppraisalInfo.Count > 0)
+                    {
+                        sb.AppendLine();
+                        sb.AppendLine("Partial Exports - Missing appraisal info:");
+                        foreach (var value in partialExportsNoAppraisalInfo)
+                            sb.AppendLine(value);
                     }
 
                     // Determine missing possessions
@@ -523,11 +559,11 @@ namespace aclogview.Tools.Scrapers
                     }
 
                     sb.AppendLine();
-
+                    sb.AppendLine("Missing Exports - Possessed items that were not found:");
                     foreach (var value in possessions)
                     {
                         if (!loginEvent.WorldObjects.ContainsKey(value))
-                            sb.AppendLine($"{value:X8} is a possessed item but was not found");
+                            sb.AppendLine($"{value:X8}");
                     }
 
 
