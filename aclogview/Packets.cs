@@ -213,6 +213,11 @@ public class PStringChar {
     public static PStringChar read(BinaryReader binaryReader) {
         PStringChar newObj = new PStringChar();
         var startPosition = binaryReader.BaseStream.Position;
+        if (startPosition == binaryReader.BaseStream.Length)
+        {
+            newObj.Length = 0;
+            return newObj;
+        }
         uint size = binaryReader.ReadUInt16();
         if (size == ushort.MaxValue) {
             binaryReader.BaseStream.Seek(-2, SeekOrigin.Current);
