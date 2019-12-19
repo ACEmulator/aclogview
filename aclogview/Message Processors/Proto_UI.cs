@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -492,6 +493,8 @@ public class Proto_UI : MessageProcessor {
             rootNode.Expand();
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
             rootNode.Nodes.Add("additionalReasonText = " + additionalReasonText);
+            if (additionalReasonText.Length == 0)
+                rootNode.Nodes[rootNode.Nodes.Count - 1].ForeColor = Color.DimGray;
             ContextInfo.AddToList(new ContextInfo { Length = additionalReasonText.Length });
             treeView.Nodes.Add(rootNode);
         }
