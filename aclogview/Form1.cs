@@ -155,6 +155,9 @@ namespace aclogview
 
                 if (options.InputFile != null)
                     loadPcap(options.InputFile, options.AsMessages);
+
+                if (args.Length == 1 && !args[0].StartsWith("-") && File.Exists(args[0]))
+                    loadPcap(args[0], options.AsMessages);
             }
             // Turn on listview double buffering to prevent flickering
             var prop = listView_Packets.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
