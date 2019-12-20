@@ -428,8 +428,10 @@ namespace aclogview
                         selectedIndex = selectedNode.Index;
                     }
 
-                    while (dataConsumed < data.Length)
+                    var consumedDiff = 1;
+                    while (dataConsumed < data.Length && consumedDiff > 0)
                     {
+                        consumedDiff = dataConsumed;
                         if (dataConsumed < 20)
                         {
                             // Protocol header
@@ -489,6 +491,7 @@ namespace aclogview
                                 }
                             }
                         }
+                        consumedDiff = dataConsumed - consumedDiff;
                     }
                     hexBox1.ResumeLayout();
                 }

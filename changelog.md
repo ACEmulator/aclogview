@@ -1,3 +1,7 @@
+### 2019-12-19
+[fartwhif]
+* Fix infinite loop when viewing a packet marked with a parsing exception under extra info column
+
 ### 2019-06-20
 [Mag-nus]
 * The logic for OpcodeFinder and TextSearchers has been separated from the UI
