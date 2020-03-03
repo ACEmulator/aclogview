@@ -58,7 +58,7 @@ namespace aclogview.Tools.Scrapers
                 Character.Id = guid;
             }
 
-            public bool IsPossedItem(uint guid)
+            public bool IsPossessedItem(uint guid)
             {
                 foreach (var entry in Inventory)
                 {
@@ -212,19 +212,22 @@ namespace aclogview.Tools.Scrapers
 
                                     ACEBiotaCreator.Update(message, loginEvent.Character, loginEvent.Biota, loginEvent.Inventory, loginEvent.Equipment, rwLock);
 
-                                    if (!playersByServer.TryGetValue(serverName, out var server))
+                                    lock (playersByServer)
                                     {
-                                        server = new Dictionary<uint, Player>();
-                                        playersByServer[serverName] = server;
-                                    }
+                                        if (!playersByServer.TryGetValue(serverName, out var server))
+                                        {
+                                            server = new Dictionary<uint, Player>();
+                                            playersByServer[serverName] = server;
+                                        }
 
-                                    if (!server.TryGetValue(loginEvent.Biota.Id, out var player))
-                                    {
-                                        player = new Player();
-                                        server[loginEvent.Biota.Id] = player;
-                                    }
+                                        if (!server.TryGetValue(loginEvent.Biota.Id, out var player))
+                                        {
+                                            player = new Player();
+                                            server[loginEvent.Biota.Id] = player;
+                                        }
 
-                                    player.LoginEvents.Add(loginEvent);
+                                        player.LoginEvents.Add(loginEvent);
+                                    }
 
                                 }
                                 else if (opCode == (uint)PacketOpcode.Evt_Social__FriendsUpdate_ID)
@@ -297,7 +300,7 @@ namespace aclogview.Tools.Scrapers
                             }
 
                             // Record inventory items
-                            if (!loginEvent.WorldObjects.ContainsKey(message.object_id) && loginEvent.IsPossedItem(message.object_id))
+                            if (!loginEvent.WorldObjects.ContainsKey(message.object_id) && loginEvent.IsPossessedItem(message.object_id))
                             {
                                 var item = new WorldObjectItem(message.object_id, message.wdesc._name.m_buffer);
                                 ACEBiotaCreator.Update(message, item.Biota, rwLock, true);
@@ -320,7 +323,7 @@ namespace aclogview.Tools.Scrapers
             return (hits, messageExceptions);
         }
 
-        public override void WriteOutput(string destinationRoot, ref bool writeOuptputAborted)
+        public override void WriteOutput(string destinationRoot, ref bool writeOutputAborted)
         {
             var playerExportsFolder = Path.Combine(destinationRoot, "Player Exports");
 
@@ -390,14 +393,14 @@ namespace aclogview.Tools.Scrapers
 
                 foreach (var player in server.Value)
                 {
-                    if (writeOuptputAborted)
+                    if (writeOutputAborted)
                         return;
 
                     // We only export the last login event
-                    var loginEvent = player.Value.LoginEvents.Last();
+                    var loginEvent = player.Value.LoginEvents.Where(r => r.Biota.BiotaPropertiesDID.Count > 0).OrderBy(r => r.TSec).LastOrDefault();
 
-                    // biota is corrupt
-                    if (loginEvent.Biota.BiotaPropertiesDID.Count == 0)
+                    // no valid result
+                    if (loginEvent == null)
                         continue;
 
                     var name = loginEvent.Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
@@ -455,7 +458,7 @@ namespace aclogview.Tools.Scrapers
                             characterWriter.CreateSQLINSERTStatement(loginEvent.Character, outputFile);
                     }
 
-                    // Posessions
+                    // Possessions
                     foreach (var woi in loginEvent.WorldObjects)
                     {
                         var woiBeingUsed = woi.Value;
