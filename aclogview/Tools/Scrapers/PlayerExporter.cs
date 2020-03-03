@@ -84,6 +84,9 @@ namespace aclogview.Tools.Scrapers
 
         class Player
         {
+            public Position LastPosition;
+            public uint LastPositionTSec;
+
             public readonly List<LoginEvent> LoginEvents = new List<LoginEvent>();
 
             /// <summary>
@@ -307,6 +310,36 @@ namespace aclogview.Tools.Scrapers
                                 loginEvent.WorldObjects[message.object_id] = item;
                             }
                         }
+
+                        // Make sure we have the latest player position
+                        if (messageCode == (uint)PacketOpcode.Evt_Movement__UpdatePosition_ID)
+                        {
+                            var message = CM_Movement.UpdatePosition.read(binaryReader);
+
+                            if ((message.object_id & 0x50000000) == 0x50000000) // Make sure it's a player GUID
+                            {
+                                lock (playersByServer)
+                                {
+                                    if (!playersByServer.TryGetValue(serverName, out var server))
+                                    {
+                                        server = new Dictionary<uint, Player>();
+                                        playersByServer[serverName] = server;
+                                    }
+
+                                    if (!server.TryGetValue(loginEvent.Biota.Id, out var player))
+                                    {
+                                        player = new Player();
+                                        server[loginEvent.Biota.Id] = player;
+                                    }
+
+                                    if (player.LastPositionTSec < record.tsSec)
+                                    {
+                                        player.LastPosition = message.positionPack.position;
+                                        player.LastPositionTSec = record.tsSec;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 catch (InvalidDataException)
@@ -421,7 +454,7 @@ namespace aclogview.Tools.Scrapers
                     {
                         sb.AppendLine();
                         sb.AppendLine("Alternate sources:");
-                        foreach (var value in player.Value.LoginEvents)
+                        foreach (var value in player.Value.LoginEvents.OrderBy(r => r.TSec))
                         {
                             if (loginEvent == value)
                                 continue;
@@ -439,6 +472,16 @@ namespace aclogview.Tools.Scrapers
                         var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
                         loginEvent.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
+
+                        // Update to the latest position seen
+                        if (player.Value.LastPosition != null)
+                        {
+                            var newPosition = new ACE.Entity.Position(player.Value.LastPosition.objcell_id,
+                                player.Value.LastPosition.frame.m_fOrigin.x, player.Value.LastPosition.frame.m_fOrigin.y, player.Value.LastPosition.frame.m_fOrigin.z,
+                                player.Value.LastPosition.frame.qx, player.Value.LastPosition.frame.qy, player.Value.LastPosition.frame.qz, player.Value.LastPosition.frame.qw);
+
+                            loginEvent.Biota.SetPosition(ACE.Entity.Enum.Properties.PositionType.Location, newPosition, rwLock, out _);
+                        }
 
                         SetBiotaPopulatedCollections(loginEvent.Biota);
 
