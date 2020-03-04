@@ -338,15 +338,15 @@ namespace aclogview
 					
 					packet.Seq = pHeader.seqID_;
 					packet.Iteration = pHeader.iteration_;
-
-					packet.optionalHeadersLen = readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader);
+                    string extrInf = string.Empty;
+                    packet.optionalHeadersLen = readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader, ref extrInf);
 
 					if (packetReader.BaseStream.Position == packetReader.BaseStream.Length)
 						packetTypeStr.Append("<Header Only>");
 
 					uint HAS_FRAGS_MASK = 0x4; // See SharedNet::SplitPacketData
-
-					if ((pHeader.header_ & HAS_FRAGS_MASK) != 0)
+                   
+                    if ((pHeader.header_ & HAS_FRAGS_MASK) != 0)
 					{
 						while (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
 						{
@@ -376,7 +376,9 @@ namespace aclogview
 					}
 
 					if (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
-						packet.extraInfo = "Didnt read entire packet! " + packet.extraInfo;
+						extrInf += "Didnt read entire packet!; ";
+
+                    packet.extraInfo = extrInf;
 				}
 				catch (OutOfMemoryException e)
 				{
@@ -416,10 +418,10 @@ namespace aclogview
 					ProtoHeader pHeader = ProtoHeader.read(packetReader);
 
 					uint HAS_FRAGS_MASK = 0x4; // See SharedNet::SplitPacketData
-
+                    string extrInf = string.Empty;
 					if ((pHeader.header_ & HAS_FRAGS_MASK) != 0)
 					{
-						readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader);
+						readOptionalHeaders(pHeader.header_, packetHeadersStr, packetReader, ref extrInf);
 
 						while (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
 						{
@@ -455,8 +457,7 @@ namespace aclogview
 							        packet.tsSec = ts1;
 							        packet.tsUsec = ts2;
                                 }
-
-								packet.extraInfo = "";
+                                packet.extraInfo = "";
 								packet.Seq = pHeader.seqID_;
 								packet.Queue = newFrag.memberHeader_.queueID;
                                 packet.Iteration = pHeader.iteration_;
@@ -480,8 +481,11 @@ namespace aclogview
 						}
 
 						if (packetReader.BaseStream.Position != packetReader.BaseStream.Length)
-							packet.extraInfo = "Didnt read entire packet! " + packet.extraInfo;
-					}
+							extrInf += "Didnt read entire packet!; ";
+                        
+                        packet.extraInfo = extrInf;
+
+                    }
 				}
 				catch (OutOfMemoryException e)
 				{
@@ -541,7 +545,7 @@ namespace aclogview
             return result.Aggregate((a, b) => a + " | " + b);
         }
         private static ACEPacketHeaderFlags[] HideACEPacketHeaderFlags = { ACEPacketHeaderFlags.EncryptedChecksum, ACEPacketHeaderFlags.BlobFragments };
-        private static int readOptionalHeaders(uint header_, StringBuilder packetHeadersStr, BinaryReader packetReader)
+        private static int readOptionalHeaders(uint header_, StringBuilder packetHeadersStr, BinaryReader packetReader, ref string extraInfo)
         {
             long readStartPos = packetReader.BaseStream.Position;
 
@@ -594,7 +598,7 @@ namespace aclogview
 
             if ((header_ & NakHeader.mask) != 0)
             {
-                /*CSeqIDListHeader nakSeqIDs = */NakHeader.read(packetReader);
+                /*CSeqIDListHeader nakSeqIDs = */NakHeader.read(packetReader, ref extraInfo);
                 if (!aceHeads)
                 {
                     if (packetHeadersStr.Length != 0)
@@ -605,7 +609,7 @@ namespace aclogview
 
             if ((header_ & EmptyAckHeader.mask) != 0)
             {
-                /*CSeqIDListHeader ackSeqIDs = */EmptyAckHeader.read(packetReader);
+                /*CSeqIDListHeader ackSeqIDs = */EmptyAckHeader.read(packetReader, ref extraInfo);
                 if (!aceHeads)
                 {
                     if (packetHeadersStr.Length != 0)

@@ -115,11 +115,21 @@ public class CReferralStruct {
 public class CSeqIDListHeader : COptionalHeader {
     public uint[] seqIDs;
 
-    public static CSeqIDListHeader read(BinaryReader binaryReader) {
+    public static CSeqIDListHeader read(BinaryReader binaryReader, ref string extraInfo) {
         CSeqIDListHeader newObj = new CSeqIDListHeader();
         uint num = binaryReader.ReadUInt32();
+        var arrayByteRealLen = binaryReader.BaseStream.Length - binaryReader.BaseStream.Position;
+        var diff = arrayByteRealLen - (num * 4);
+        if (diff < 0)
+        {
+            uint seqShort = (uint)Math.Ceiling(Math.Abs((double)((double)diff / (double)4))); //number of sequence IDs short
+            long extrBytes = arrayByteRealLen - ((num - seqShort) * 4);
+            extraInfo += $"NAK SeqID list truncated from {num} to {num - seqShort} IDs with {extrBytes} of {arrayByteRealLen} bytes remaining, ( {num * 4} bytes expected ); ";
+            num = num - seqShort;
+        }
         newObj.seqIDs = new uint[num];
-        for (uint i = 0; i < num; ++i) {
+        for (uint i = 0; i < num; ++i)
+        {
             newObj.seqIDs[i] = binaryReader.ReadUInt32();
         }
         return newObj;
