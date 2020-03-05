@@ -612,6 +612,13 @@ namespace aclogview.ACE_Helpers
             }
         }
 
+        public static void Update(ACE.Entity.Enum.Properties.PositionType positionType, Position position, Biota biota, ReaderWriterLockSlim rwLock)
+        {
+            var newPosition = new ACE.Entity.Position(position.objcell_id, position.frame.m_fOrigin.x, position.frame.m_fOrigin.y, position.frame.m_fOrigin.z, position.frame.qx, position.frame.qy, position.frame.qz, position.frame.qw);
+
+            biota.SetPosition(positionType, newPosition, rwLock, out _);
+        }
+
         public static ACE.Entity.Enum.WeenieType DetermineWeenieType(Biota biota, ReaderWriterLockSlim rwLock)
         {
             var objectDescriptionFlagProperty = biota.GetProperty((ACE.Entity.Enum.Properties.PropertyDataId) 8003, rwLock);

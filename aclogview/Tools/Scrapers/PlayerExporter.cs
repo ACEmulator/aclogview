@@ -82,11 +82,8 @@ namespace aclogview.Tools.Scrapers
             }
         }
 
-        class Player
+        class PlayerLogins
         {
-            public Position LastPosition;
-            public uint LastPositionTSec;
-
             public readonly List<LoginEvent> LoginEvents = new List<LoginEvent>();
 
             /// <summary>
@@ -114,11 +111,26 @@ namespace aclogview.Tools.Scrapers
             }
         }
 
-        private readonly Dictionary<string, Dictionary<uint, Player>> playersByServer = new Dictionary<string, Dictionary<uint, Player>>();
+        private readonly Dictionary<string, Dictionary<uint, PlayerLogins>> playerLoginsByServer = new Dictionary<string, Dictionary<uint, PlayerLogins>>();
+
+        class BiotaEx
+        {
+            public Position LastPosition;
+            public uint LastPositionTSec;
+
+            public CM_Physics.CreateObject LastCreateObject;
+            public uint LastCreateObjectTSec;
+
+            public CM_Examine.SetAppraiseInfo LastAppraisalProfile;
+            public uint LastAppraisalProfileTSec;
+        }
+
+        private readonly Dictionary<string, Dictionary<uint, BiotaEx>> biotasByServer = new Dictionary<string, Dictionary<uint, BiotaEx>>();
 
         public override void Reset()
         {
-            playersByServer.Clear();
+            playerLoginsByServer.Clear();
+            biotasByServer.Clear();
         }
 
         public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
@@ -164,6 +176,12 @@ namespace aclogview.Tools.Scrapers
                             continue;
                         }
 
+                        if (messageCode == (uint)PacketOpcode.CHARACTER_EXIT_GAME_EVENT) // 0xF653
+                        {
+                            loginEvent = null;
+                            continue;
+                        }
+
                         // This could be seen multiple times if the first time the player tries to enter, they get a "Your character is already in world" message
                         if (messageCode == (uint)PacketOpcode.CHARACTER_ENTER_GAME_EVENT) // 0xF657
                         {
@@ -174,92 +192,172 @@ namespace aclogview.Tools.Scrapers
                             continue;
                         }
 
-                        if (loginEvent == null)
-                            continue;
-
-                        if (messageCode == (uint)PacketOpcode.CHARACTER_EXIT_GAME_EVENT)
+                        if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID) // 0xF745
                         {
-                            loginEvent = null;
+                            var message = CM_Physics.CreateObject.read(binaryReader);
+
+                            if (loginEvent != null)
+                            {
+                                // We only process player create/update messages for player biotas during the login process
+                                if (!loginEvent.PlayerLoginCompleted && message.object_id == loginEvent.Biota.Id)
+                                {
+                                    ACEBiotaCreator.Update(message, loginEvent.Biota, rwLock, true);
+
+                                    var position = new ACE.Entity.Position(message.physicsdesc.pos.objcell_id, message.physicsdesc.pos.frame.m_fOrigin.x, message.physicsdesc.pos.frame.m_fOrigin.y, message.physicsdesc.pos.frame.m_fOrigin.z, message.physicsdesc.pos.frame.qx, message.physicsdesc.pos.frame.qy, message.physicsdesc.pos.frame.qz, message.physicsdesc.pos.frame.qw);
+                                    loginEvent.Biota.SetPosition(ACE.Entity.Enum.Properties.PositionType.Location, position, rwLock, out _);
+                                }
+
+                                // Record inventory items
+                                if (!loginEvent.WorldObjects.ContainsKey(message.object_id) && loginEvent.IsPossessedItem(message.object_id))
+                                {
+                                    var item = new WorldObjectItem(message.object_id, message.wdesc._name.m_buffer);
+                                    ACEBiotaCreator.Update(message, item.Biota, rwLock, true);
+                                    loginEvent.WorldObjects[message.object_id] = item;
+                                }
+                            }
+
+                            if (message.object_id >= 0x50000000 && message.object_id <= 0x5FFFFFFF) // Make sure it's a player GUID
+                            {
+                                // Update the global biota infos
+                                lock (biotasByServer)
+                                {
+                                    if (!biotasByServer.TryGetValue(serverName, out var biotaServer))
+                                    {
+                                        biotaServer = new Dictionary<uint, BiotaEx>();
+                                        biotasByServer[serverName] = biotaServer;
+                                    }
+
+                                    if (!biotaServer.TryGetValue(message.object_id, out var biotaEx))
+                                    {
+                                        biotaEx = new BiotaEx();
+                                        biotaServer[message.object_id] = biotaEx;
+                                    }
+
+                                    if (biotaEx.LastCreateObjectTSec < record.tsSec)
+                                    {
+                                        biotaEx.LastCreateObject = message;
+                                        biotaEx.LastCreateObjectTSec = record.tsSec;
+                                    }
+                                }
+                            }
+
                             continue;
+                        }
+
+                        if (messageCode == (uint)PacketOpcode.Evt_Movement__UpdatePosition_ID) // 0xF748
+                        {
+                            var message = CM_Movement.UpdatePosition.read(binaryReader);
+
+                            if (message.object_id >= 0x50000000 && message.object_id <= 0x5FFFFFFF) // Make sure it's a player GUID
+                            {
+                                // Update the global biota infos
+                                lock (biotasByServer)
+                                {
+                                    if (!biotasByServer.TryGetValue(serverName, out var biotaServer))
+                                    {
+                                        biotaServer = new Dictionary<uint, BiotaEx>();
+                                        biotasByServer[serverName] = biotaServer;
+                                    }
+
+                                    if (!biotaServer.TryGetValue(message.object_id, out var biotaEx))
+                                    {
+                                        biotaEx = new BiotaEx();
+                                        biotaServer[message.object_id] = biotaEx;
+                                    }
+
+                                    if (biotaEx.LastPositionTSec < record.tsSec)
+                                    {
+                                        biotaEx.LastPosition = message.positionPack.position;
+                                        biotaEx.LastPositionTSec = record.tsSec;
+                                    }
+                                }
+                            }
                         }
 
                         if (messageCode == (uint)PacketOpcode.ORDERED_EVENT) // 0xF7B1 Game Action
                         {
-                            /*var sequence = */
-                            binaryReader.ReadUInt32();
+                            /*var sequence = */binaryReader.ReadUInt32();
                             var opCode = binaryReader.ReadUInt32();
 
                             if (opCode == (uint)PacketOpcode.Evt_Character__LoginCompleteNotification_ID)
                             {
                                 // At this point, we should stop building/updating the player/character and only update the possessed items
-                                loginEvent.PlayerLoginCompleted = true;
+                                if (loginEvent != null)
+                                    loginEvent.PlayerLoginCompleted = true;
                             }
+
+                            continue;
                         }
 
                         if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT) // 0xF7B0 Game Event
                         {
-                            /*var guid = */
-                            binaryReader.ReadUInt32();
-                            /*var sequence = */
-                            binaryReader.ReadUInt32();
+                            /*var guid = */binaryReader.ReadUInt32();
+                            /*var sequence = */binaryReader.ReadUInt32();
                             var opCode = binaryReader.ReadUInt32();
 
-                            // We only process player create/update messages for player biotas during the login process
-                            if (!loginEvent.PlayerLoginCompleted)
+                            if (opCode == (uint)PacketOpcode.PLAYER_DESCRIPTION_EVENT)
                             {
-                                if (opCode == (uint)PacketOpcode.PLAYER_DESCRIPTION_EVENT)
+                                var message = CM_Login.PlayerDescription.read(binaryReader);
+
+                                // We only process player create/update messages for player biotas during the login process
+                                if (loginEvent != null && !loginEvent.PlayerLoginCompleted)
                                 {
                                     hits++;
 
-                                    var message = CM_Login.PlayerDescription.read(binaryReader);
-
                                     ACEBiotaCreator.Update(message, loginEvent.Character, loginEvent.Biota, loginEvent.Inventory, loginEvent.Equipment, rwLock);
 
-                                    lock (playersByServer)
+                                    lock (playerLoginsByServer)
                                     {
-                                        if (!playersByServer.TryGetValue(serverName, out var server))
+                                        if (!playerLoginsByServer.TryGetValue(serverName, out var server))
                                         {
-                                            server = new Dictionary<uint, Player>();
-                                            playersByServer[serverName] = server;
+                                            server = new Dictionary<uint, PlayerLogins>();
+                                            playerLoginsByServer[serverName] = server;
                                         }
 
                                         if (!server.TryGetValue(loginEvent.Biota.Id, out var player))
                                         {
-                                            player = new Player();
+                                            player = new PlayerLogins();
                                             server[loginEvent.Biota.Id] = player;
                                         }
 
                                         player.LoginEvents.Add(loginEvent);
                                     }
-
                                 }
-                                else if (opCode == (uint)PacketOpcode.Evt_Social__FriendsUpdate_ID)
-                                {
-                                    // Skip this
-                                    // player.Character.CharacterPropertiesFriendList
-                                }
-                                else if (opCode == (uint)PacketOpcode.Evt_Social__CharacterTitleTable_ID)
-                                {
-                                    var message = CM_Social.CharacterTitleTable.read(binaryReader);
+                            }
+                            else if (opCode == (uint)PacketOpcode.Evt_Social__FriendsUpdate_ID)
+                            {
+                                // Skip this
+                                // player.Character.CharacterPropertiesFriendList
+                            }
+                            else if (opCode == (uint)PacketOpcode.Evt_Social__CharacterTitleTable_ID)
+                            {
+                                var message = CM_Social.CharacterTitleTable.read(binaryReader);
 
+                                // We only process player create/update messages for player biotas during the login process
+                                if (loginEvent != null && !loginEvent.PlayerLoginCompleted)
+                                {
                                     loginEvent.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.CharacterTitleId, (int)message.mDisplayTitle, rwLock, out _);
 
                                     foreach (var value in message.mTitleList.list)
                                         loginEvent.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook { TitleId = (uint)value });
                                 }
-                                else if (opCode == (uint)PacketOpcode.Evt_Social__SendClientContractTrackerTable_ID)
-                                {
-                                    // Skip this
-                                    // player.Character.CharacterPropertiesContractRegistry
-                                }
-                                else if (opCode == (uint)PacketOpcode.ALLEGIANCE_UPDATE_EVENT)
-                                {
-                                    // Skip this
-                                }
-                                else if (opCode == (uint)PacketOpcode.VIEW_CONTENTS_EVENT)
-                                {
-                                    var message = CM_Inventory.ViewContents.read(binaryReader);
+                            }
+                            else if (opCode == (uint)PacketOpcode.Evt_Social__SendClientContractTrackerTable_ID)
+                            {
+                                // Skip this
+                                // player.Character.CharacterPropertiesContractRegistry
+                            }
+                            else if (opCode == (uint)PacketOpcode.ALLEGIANCE_UPDATE_EVENT)
+                            {
+                                // Skip this
+                            }
+                            else if (opCode == (uint)PacketOpcode.VIEW_CONTENTS_EVENT)
+                            {
+                                var message = CM_Inventory.ViewContents.read(binaryReader);
 
+                                // We only process player create/update messages for player biotas during the login process
+                                if (loginEvent != null && !loginEvent.PlayerLoginCompleted)
+                                {
                                     var list = new List<uint>();
 
                                     foreach (var value in message.contents_list.list)
@@ -274,71 +372,46 @@ namespace aclogview.Tools.Scrapers
                             {
                                 var message = CM_Examine.SetAppraiseInfo.read(binaryReader);
 
-                                if (message.i_objid == loginEvent.Biota.Id)
-                                    ACEBiotaCreator.Update(message, loginEvent.Biota, rwLock);
-
-                                // If this is an inventory item, update it
-                                if (loginEvent.WorldObjects.TryGetValue(message.i_objid, out var value))
+                                if (loginEvent != null)
                                 {
-                                    ACEBiotaCreator.Update(message, value.Biota, rwLock);
-                                    value.AppraiseInfoReceived = true;
-                                }
-                            }
-                        }
+                                    if (message.i_objid == loginEvent.Biota.Id)
+                                        ACEBiotaCreator.Update(message, loginEvent.Biota, rwLock);
 
-                        if (messageCode == (uint)PacketOpcode.Evt_Physics__CreateObject_ID)
-                        {
-                            var message = CM_Physics.CreateObject.read(binaryReader);
-
-                            // We only process player create/update messages for player biotas during the login process
-                            if (!loginEvent.PlayerLoginCompleted)
-                            {
-                                if (message.object_id == loginEvent.Biota.Id)
-                                {
-                                    ACEBiotaCreator.Update(message, loginEvent.Biota, rwLock, true);
-
-                                    var position = new ACE.Entity.Position(message.physicsdesc.pos.objcell_id, message.physicsdesc.pos.frame.m_fOrigin.x, message.physicsdesc.pos.frame.m_fOrigin.y, message.physicsdesc.pos.frame.m_fOrigin.z, message.physicsdesc.pos.frame.qx, message.physicsdesc.pos.frame.qy, message.physicsdesc.pos.frame.qz, message.physicsdesc.pos.frame.qw);
-                                    loginEvent.Biota.SetPosition(ACE.Entity.Enum.Properties.PositionType.Location, position, rwLock, out _);
-                                }
-                            }
-
-                            // Record inventory items
-                            if (!loginEvent.WorldObjects.ContainsKey(message.object_id) && loginEvent.IsPossessedItem(message.object_id))
-                            {
-                                var item = new WorldObjectItem(message.object_id, message.wdesc._name.m_buffer);
-                                ACEBiotaCreator.Update(message, item.Biota, rwLock, true);
-                                loginEvent.WorldObjects[message.object_id] = item;
-                            }
-                        }
-
-                        // Make sure we have the latest player position
-                        if (messageCode == (uint)PacketOpcode.Evt_Movement__UpdatePosition_ID)
-                        {
-                            var message = CM_Movement.UpdatePosition.read(binaryReader);
-
-                            if ((message.object_id & 0x50000000) == 0x50000000) // Make sure it's a player GUID
-                            {
-                                lock (playersByServer)
-                                {
-                                    if (!playersByServer.TryGetValue(serverName, out var server))
+                                    // If this is an inventory item, update it
+                                    if (loginEvent.WorldObjects.TryGetValue(message.i_objid, out var value))
                                     {
-                                        server = new Dictionary<uint, Player>();
-                                        playersByServer[serverName] = server;
+                                        ACEBiotaCreator.Update(message, value.Biota, rwLock);
+                                        value.AppraiseInfoReceived = true;
                                     }
+                                }
 
-                                    if (!server.TryGetValue(loginEvent.Biota.Id, out var player))
+                                if (message.i_objid >= 0x50000000 && message.i_objid <= 0x5FFFFFFF) // Make sure it's a player GUID
+                                {
+                                    // Update the global biota infos
+                                    lock (biotasByServer)
                                     {
-                                        player = new Player();
-                                        server[loginEvent.Biota.Id] = player;
-                                    }
+                                        if (!biotasByServer.TryGetValue(serverName, out var biotaServer))
+                                        {
+                                            biotaServer = new Dictionary<uint, BiotaEx>();
+                                            biotasByServer[serverName] = biotaServer;
+                                        }
 
-                                    if (player.LastPositionTSec < record.tsSec)
-                                    {
-                                        player.LastPosition = message.positionPack.position;
-                                        player.LastPositionTSec = record.tsSec;
+                                        if (!biotaServer.TryGetValue(message.i_objid, out var biotaEx))
+                                        {
+                                            biotaEx = new BiotaEx();
+                                            biotaServer[message.i_objid] = biotaEx;
+                                        }
+
+                                        if (biotaEx.LastAppraisalProfileTSec < record.tsSec)
+                                        {
+                                            biotaEx.LastAppraisalProfile = message;
+                                            biotaEx.LastAppraisalProfileTSec = record.tsSec;
+                                        }
                                     }
                                 }
                             }
+
+                            continue;
                         }
                     }
                 }
@@ -378,7 +451,7 @@ namespace aclogview.Tools.Scrapers
 
             // Find guid collisions across servers
             Dictionary<string, HashSet<uint>> guidsByServer = new Dictionary<string, HashSet<uint>>();
-            foreach (var server in playersByServer)
+            foreach (var server in playerLoginsByServer)
             {
                 var guids = new HashSet<uint>();
                 guidsByServer.Add(server.Key, guids);
@@ -395,6 +468,7 @@ namespace aclogview.Tools.Scrapers
             }
 
             var keys = guidsByServer.Keys.ToList();
+            keys.Sort();
             for (int i = 0; i < keys.Count - 1; i++)
             {
                 for (int j = i + 1; j < keys.Count; j++)
@@ -420,7 +494,8 @@ namespace aclogview.Tools.Scrapers
 
             var rwLock = new ReaderWriterLockSlim();
 
-            foreach (var server in playersByServer)
+            // Export players by login event
+            foreach (var server in playerLoginsByServer)
             {
                 var serverDirectory = Path.Combine(playerExportsFolder, server.Key);
 
@@ -438,9 +513,9 @@ namespace aclogview.Tools.Scrapers
 
                     var name = loginEvent.Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
 
-                    var playerDirectory = Path.Combine(serverDirectory, name);
+                    var playerDirectoryRoot = Path.Combine(serverDirectory, name);
 
-                    var loginEventDirectory = Path.Combine(playerDirectory, loginEvent.TSec.ToString());
+                    var loginEventDirectory = Path.Combine(playerDirectoryRoot, loginEvent.TSec.ToString());
 
                     if (!Directory.Exists(loginEventDirectory))
                         Directory.CreateDirectory(loginEventDirectory);
@@ -454,7 +529,7 @@ namespace aclogview.Tools.Scrapers
                     {
                         sb.AppendLine();
                         sb.AppendLine("Alternate sources:");
-                        foreach (var value in player.Value.LoginEvents.OrderBy(r => r.TSec))
+                        foreach (var value in player.Value.LoginEvents.OrderBy(r => r.TSec).ThenBy(r => r.FileName))
                         {
                             if (loginEvent == value)
                                 continue;
@@ -471,17 +546,11 @@ namespace aclogview.Tools.Scrapers
 
                         var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
-                        loginEvent.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
-
                         // Update to the latest position seen
-                        if (player.Value.LastPosition != null)
-                        {
-                            var newPosition = new ACE.Entity.Position(player.Value.LastPosition.objcell_id,
-                                player.Value.LastPosition.frame.m_fOrigin.x, player.Value.LastPosition.frame.m_fOrigin.y, player.Value.LastPosition.frame.m_fOrigin.z,
-                                player.Value.LastPosition.frame.qx, player.Value.LastPosition.frame.qy, player.Value.LastPosition.frame.qz, player.Value.LastPosition.frame.qw);
+                        if (biotasByServer.TryGetValue(server.Key, out var biotaServer) && biotaServer.TryGetValue(player.Key, out var biotaEx) && biotaEx.LastPosition != null)
+                            ACEBiotaCreator.Update(ACE.Entity.Enum.Properties.PositionType.Location, biotaEx.LastPosition, loginEvent.Biota, rwLock);
 
-                            loginEvent.Biota.SetPosition(ACE.Entity.Enum.Properties.PositionType.Location, newPosition, rwLock, out _);
-                        }
+                        loginEvent.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
 
                         SetBiotaPopulatedCollections(loginEvent.Biota);
 
@@ -519,7 +588,7 @@ namespace aclogview.Tools.Scrapers
                         }
 
                         // Update the InventoryOrder and Container
-                        for (int i = 0; i < loginEvent.Inventory.Count ; i++)
+                        for (int i = 0; i < loginEvent.Inventory.Count; i++)
                         {
                             if (loginEvent.Inventory[i].guid == woiBeingUsed.Biota.Id)
                             {
@@ -533,6 +602,7 @@ namespace aclogview.Tools.Scrapers
                                 goto processed;
                             }
                         }
+
                         foreach (var container in loginEvent.ViewContentsEvents)
                         {
                             var index = container.Value.IndexOf(woiBeingUsed.Biota.Id);
@@ -548,6 +618,7 @@ namespace aclogview.Tools.Scrapers
                                 goto processed;
                             }
                         }
+
                         processed:
 
                         var defaultFileName = biotaWriter.GetDefaultFileName(woiBeingUsed.Biota);
@@ -556,7 +627,7 @@ namespace aclogview.Tools.Scrapers
 
                         var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
-                        woiBeingUsed.Biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
+                        woiBeingUsed.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
 
                         if (woiBeingUsed.Biota.WeenieType == 0)
                         {
@@ -615,6 +686,62 @@ namespace aclogview.Tools.Scrapers
 
                     var resutlsFileName = Path.Combine(loginEventDirectory, "results.txt");
                     File.WriteAllText(resutlsFileName, sb.ToString());
+                }
+            }
+
+
+            // Export player biotas that don't have login events
+            foreach (var server in biotasByServer)
+            {
+                var serverDirectory = Path.Combine(playerExportsFolder, server.Key);
+
+                foreach (var biotaEx in server.Value)
+                {
+                    if (writeOutputAborted)
+                        return;
+
+                    // Was this biota captured by a login event?
+                    if (playerLoginsByServer.TryGetValue(server.Key, out var playerLoginServer) && playerLoginServer.ContainsKey(biotaEx.Key))
+                        continue;
+
+                    if (biotaEx.Value.LastCreateObject == null)
+                        continue;
+
+                    var biota = new Biota();
+
+                    biota.Id = biotaEx.Key;
+
+                    ACEBiotaCreator.Update(biotaEx.Value.LastCreateObject, biota, rwLock, true);
+
+                    if (biotaEx.Value.LastAppraisalProfile != null)
+                        ACEBiotaCreator.Update(biotaEx.Value.LastAppraisalProfile, biota, rwLock);
+
+                    var name = biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
+
+                    var playerDirectoryRoot = Path.Combine(serverDirectory, name);
+
+                    var playerDirectoryInstance = Path.Combine(playerDirectoryRoot, "0");
+
+                    if (!Directory.Exists(playerDirectoryInstance))
+                        Directory.CreateDirectory(playerDirectoryInstance);
+
+                    // Biota
+                    {
+                        var defaultFileName = biotaWriter.GetDefaultFileName(biota);
+
+                        var fileName = Path.Combine(playerDirectoryInstance, defaultFileName);
+
+                        // Update to the latest position seen
+                        if (biotaEx.Value.LastPosition != null)
+                            ACEBiotaCreator.Update(ACE.Entity.Enum.Properties.PositionType.Location, biotaEx.Value.LastPosition, biota, rwLock);
+
+                        biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(biota, rwLock);
+
+                        SetBiotaPopulatedCollections(biota);
+
+                        using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                            biotaWriter.CreateSQLINSERTStatement(biota, outputFile);
+                    }
                 }
             }
         }
