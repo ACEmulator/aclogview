@@ -1,3 +1,4 @@
+using aclogview.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,12 +19,23 @@ namespace aclogview.Tools
             InitializeComponent();
         }
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            tbCreatureName.Text = Settings.Default.CreatureNameCombat;
+
+        }
+
+        // CreatureNameCombat
+
         private void btnOK_Click(object sender, EventArgs e)
         {
 
             if (tbCreatureName.Text =="")
                 MessageBox.Show("Creature Name is blank", "Warning!");
             creatureName = tbCreatureName.Text;
+            Settings.Default.CreatureNameCombat = tbCreatureName.Text;
         }
     }
 }
