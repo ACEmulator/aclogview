@@ -195,6 +195,7 @@
     <Compile Include="Enums\StatTypes.cs" />
     <Compile Include="Tools\Parsers\OpcodeFinder.cs" />
     <Compile Include="Tools\Scrapers\AccountExporter.cs" />
+    <Compile Include="Tools\Scrapers\CombatDamageGiven.cs" />
     <Compile Include="Tools\Scrapers\HeatMapGenerator.cs" />
     <Compile Include="Tools\Scrapers\PacketSizeScraperC2S.cs" />
     <Compile Include="Tools\Parsers\SampleParser.cs" />

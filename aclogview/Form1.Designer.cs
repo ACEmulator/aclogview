@@ -393,7 +393,7 @@ namespace aclogview {
             this.copyTextMenuItem,
             this.copyHexMenuItem});
             this.hexContextMenu.Name = "hexContextMenu";
-            this.hexContextMenu.Size = new System.Drawing.Size(214, 48);
+            this.hexContextMenu.Size = new System.Drawing.Size(215, 48);
             this.hexContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.hexContextMenu_Opening);
             this.hexContextMenu.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.hexContextMenu_ItemClicked);
             // 
@@ -401,7 +401,7 @@ namespace aclogview {
             // 
             this.copyTextMenuItem.Name = "copyTextMenuItem";
             this.copyTextMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyTextMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.copyTextMenuItem.Size = new System.Drawing.Size(214, 22);
             this.copyTextMenuItem.Text = "Copy as &Text";
             // 
             // copyHexMenuItem
@@ -409,7 +409,7 @@ namespace aclogview {
             this.copyHexMenuItem.Name = "copyHexMenuItem";
             this.copyHexMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.C)));
-            this.copyHexMenuItem.Size = new System.Drawing.Size(213, 22);
+            this.copyHexMenuItem.Size = new System.Drawing.Size(214, 22);
             this.copyHexMenuItem.Text = "Copy as &Hex";
             // 
             // tabProtocolDocs
