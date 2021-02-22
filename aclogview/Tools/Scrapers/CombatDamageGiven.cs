@@ -13,18 +13,18 @@ namespace aclogview.Tools.Scrapers
         public override string Description => "Exports Damage given to a creature by a player";
 
         private uint damageDone = 0;
-        private uint damageType = 0;
+        private string damageType = "";
         private bool crititcalHit = false;
         private string creatureName = "Rynthid Minion";
+        private string combatInfo = "";
 
         public override void Reset()
         {
             damageDone = 0;
-            damageType = 0;
+            damageType = "";
             crititcalHit = false;
         }
     
-
         public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
         {
             int hits = 0;
@@ -49,24 +49,37 @@ namespace aclogview.Tools.Scrapers
                     {
                         var messageCode = binaryReader.ReadUInt32();
 
+                        
                         // if (messageCode == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // 0x01B1
-                        if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT) // 0x01B1
+                        if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT) // 0x7BD
                         {
-                            // var message = CM_Login.Login__CharacterSet.read(binaryReader);
-                            // var message = CM_Combat.AttackerNotificationEvent.read(binaryReader);
-                            var message = CM_Combat.AttackerNotificationEvent.read(binaryReader);
 
-                            lock (this)
+                            var character = binaryReader.ReadUInt32(); // Character
+                            var sequence = binaryReader.ReadUInt32(); // Sequence
+                            var _event = binaryReader.ReadUInt32(); // Event
+
+
+                            if (_event == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // Tell
                             {
-                                if (message.defenders_name.ToString() == creatureName)
+
+                                
+                                var parsedCombatAttack = CM_Combat.AttackerNotificationEvent.read(binaryReader);
+
+                                lock (this)
                                 {
-                                    hits++;
-                                    damageDone = message.damage;
-                                    damageType = message.damage_type;
-                                    if (message.critical == 1)
-                                        crititcalHit = true;
+                                    if (parsedCombatAttack.defenders_name.ToString() == creatureName)
+                                    {
+                                        hits++;
+                                        damageDone = parsedCombatAttack.damage;
+                                        damageType = DamageType(parsedCombatAttack.damage_type);
+                                        if (parsedCombatAttack.critical == 1)
+                                            crititcalHit = true;
+                                        combatInfo += $"{damageDone},{damageType},{crititcalHit}\r\n";
+
+                                    }
                                 }
                             }
+                            Reset();
                         }
                     }
                 }
@@ -89,11 +102,43 @@ namespace aclogview.Tools.Scrapers
             var sb = new StringBuilder();
             string header = $"Combat Damage for {creatureName} \r\n" +
                             $"Damage,DamageType,Critical\r\n";
-            string combatInfo = $"{damageDone},{damageType},{crititcalHit}";
+            //string combatInfo = $"{damageDone},{damageType},{crititcalHit}";
 
             var fileName = GetFileName(destinationRoot, ".csv");
             File.WriteAllText(fileName, header + combatInfo);
         }
 
+        private string DamageType (uint dtype)
+        {
+            string damageType = "";
+            switch (dtype)
+            {
+                case 1:
+                    damageType = "Slashing";
+                    break;
+                case 2:
+                    damageType = "Piercing";
+                    break;
+                case 4:
+                    damageType = "Bludgeoning";
+                    break;
+                case 8:
+                    damageType = "Cold";
+                    break;
+                case 10:
+                    damageType = "Fire";
+                    break;
+                case 20:
+                    damageType = "Acid";
+                    break;
+                case 40:
+                    damageType = "Electric";
+                    break;
+
+                default:
+                    break;
+            }
+            return damageType;
+        }
     }
 }
