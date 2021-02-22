@@ -86,8 +86,6 @@ namespace aclogview.Tools
         private bool writeOutputAborted;
         private bool searchCompleted;
 
-        public string formCreatureName = "";
-
         private void btnStartSearch_Click(object sender, EventArgs e)
         {
             try
@@ -109,7 +107,7 @@ namespace aclogview.Tools
                 searchAborted = false;
                 writeOutputAborted = false;
                 searchCompleted = false;
-                formCreatureName = tbCreatureName.Text;
+                
 
                 UpdateToolStrip("Processing Files");
 
@@ -212,12 +210,6 @@ namespace aclogview.Tools
                 if (searchAborted || Disposing || IsDisposed)
                     return;
 
-                if (scraper.ToString() == "CombatDamageGiven")
-                {
-                    if (formCreatureName == "")
-                        MessageBox.Show("Creature Name is blank", "Warning!", (MessageBoxButtons)MessageBoxIcon.Exclamation);
-                    break;
-                }
                 var results = scraper.ProcessFileRecords(fileName, records, ref searchAborted);
 
                 lock (resultsLockObject)

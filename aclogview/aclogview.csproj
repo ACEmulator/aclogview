@@ -90,6 +90,12 @@
     </Compile>
     <Compile Include="Server.cs" />
     <Compile Include="ServerList.cs" />
+    <Compile Include="Tools\CreatureName.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\CreatureName.Designer.cs">
+      <DependentUpon>CreatureName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\OptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -222,6 +228,9 @@
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="GotoLine.resx">
       <DependentUpon>GotoLine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\CreatureName.resx">
+      <DependentUpon>CreatureName.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>

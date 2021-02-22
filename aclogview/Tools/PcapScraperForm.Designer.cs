@@ -49,8 +49,6 @@ namespace aclogview.Tools
             this.columnName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.columnDescription = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.chkExcludeNonRetailPcaps = new System.Windows.Forms.CheckBox();
-            this.tbCreatureName = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
@@ -184,7 +182,7 @@ namespace aclogview.Tools
             // chkMultiThread
             // 
             this.chkMultiThread.AutoSize = true;
-            this.chkMultiThread.Location = new System.Drawing.Point(386, 85);
+            this.chkMultiThread.Location = new System.Drawing.Point(248, 105);
             this.chkMultiThread.Name = "chkMultiThread";
             this.chkMultiThread.Size = new System.Drawing.Size(134, 17);
             this.chkMultiThread.TabIndex = 21;
@@ -234,38 +232,18 @@ namespace aclogview.Tools
             this.chkExcludeNonRetailPcaps.AutoSize = true;
             this.chkExcludeNonRetailPcaps.Checked = true;
             this.chkExcludeNonRetailPcaps.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(227, 85);
+            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(92, 105);
             this.chkExcludeNonRetailPcaps.Name = "chkExcludeNonRetailPcaps";
             this.chkExcludeNonRetailPcaps.Size = new System.Drawing.Size(150, 17);
             this.chkExcludeNonRetailPcaps.TabIndex = 23;
             this.chkExcludeNonRetailPcaps.Text = "Exclude Non-Retail Pcaps";
             this.chkExcludeNonRetailPcaps.UseVisualStyleBackColor = true;
             // 
-            // tbCreatureName
-            // 
-            this.tbCreatureName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbCreatureName.Location = new System.Drawing.Point(225, 111);
-            this.tbCreatureName.Name = "tbCreatureName";
-            this.tbCreatureName.Size = new System.Drawing.Size(247, 20);
-            this.tbCreatureName.TabIndex = 24;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 115);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(197, 13);
-            this.label2.TabIndex = 25;
-            this.label2.Text = "Creature Name (only for CombatScraper)";
-            // 
             // PcapScraperForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.tbCreatureName);
             this.Controls.Add(this.chkExcludeNonRetailPcaps);
             this.Controls.Add(this.dataGridView1);
             this.Controls.Add(this.chkMultiThread);
@@ -310,7 +288,5 @@ namespace aclogview.Tools
         private System.Windows.Forms.DataGridViewTextBoxColumn columnDescription;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
         private System.Windows.Forms.CheckBox chkExcludeNonRetailPcaps;
-        private System.Windows.Forms.TextBox tbCreatureName;
-        private System.Windows.Forms.Label label2;
     }
 }

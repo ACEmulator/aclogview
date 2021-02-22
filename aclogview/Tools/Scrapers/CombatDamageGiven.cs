@@ -4,18 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace aclogview.Tools.Scrapers
 {
     class CombatDamageGiven :Scraper
     {
 
-        public override string Description => "Exports Damage given to a creature by a player";
+        public override string Description => "Exports Damage given to a creature by a player from a melee or missile weapon";
 
         private uint damageDone = 0;
         private string damageType = "";
         private bool crititcalHit = false;
-        private string creatureName = "Rynthid Minion";
+        private string creatureName = "";
         private string combatInfo = "";
 
         public override void Reset()
@@ -29,7 +30,21 @@ namespace aclogview.Tools.Scrapers
         {
             int hits = 0;
             int messageExceptions = 0;
-            
+
+            using (CreatureName form = new CreatureName())
+            {
+                DialogResult dr = form.ShowDialog();
+                if (dr == DialogResult.OK)
+                {
+                    creatureName = form.creatureName;
+                    if (creatureName == "")
+                        return (hits, messageExceptions);
+                }
+                else
+                {
+                    return (hits, messageExceptions);
+                }
+            }
 
             foreach (PacketRecord record in records)
             {
@@ -49,8 +64,6 @@ namespace aclogview.Tools.Scrapers
                     {
                         var messageCode = binaryReader.ReadUInt32();
 
-                        
-                        // if (messageCode == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // 0x01B1
                         if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT) // 0x7BD
                         {
 
@@ -58,11 +71,9 @@ namespace aclogview.Tools.Scrapers
                             var sequence = binaryReader.ReadUInt32(); // Sequence
                             var _event = binaryReader.ReadUInt32(); // Event
 
-
                             if (_event == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // Tell
                             {
 
-                                
                                 var parsedCombatAttack = CM_Combat.AttackerNotificationEvent.read(binaryReader);
 
                                 lock (this)
@@ -104,8 +115,9 @@ namespace aclogview.Tools.Scrapers
                             $"Damage,DamageType,Critical\r\n";
             //string combatInfo = $"{damageDone},{damageType},{crititcalHit}";
 
-            var fileName = GetFileName(destinationRoot, ".csv");
-            File.WriteAllText(fileName, header + combatInfo);
+            var fileName = GetFileNameCombat(destinationRoot, creatureName, ".csv");
+            if (creatureName != "")
+                File.WriteAllText(fileName, header + combatInfo);
         }
 
         private string DamageType (uint dtype)
@@ -125,20 +137,26 @@ namespace aclogview.Tools.Scrapers
                 case 8:
                     damageType = "Cold";
                     break;
-                case 10:
+                case 16:
                     damageType = "Fire";
                     break;
-                case 20:
+                case 32:
                     damageType = "Acid";
                     break;
-                case 40:
+                case 64:
                     damageType = "Electric";
                     break;
-
                 default:
+                    damageType = "Unknown";
                     break;
             }
             return damageType;
+        }
+        protected string GetFileNameCombat(string destinationRoot, string creature, string extension = ".txt")
+        {
+            if (creature == "")
+                creature = "BlankCreature";
+            return Path.Combine(destinationRoot, creature + "-" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss") + " " + GetType().Name + extension);
         }
     }
 }
