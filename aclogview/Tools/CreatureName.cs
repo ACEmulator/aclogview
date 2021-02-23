@@ -37,5 +37,10 @@ namespace aclogview.Tools
             creatureName = tbCreatureName.Text;
             Settings.Default.CreatureNameCombat = tbCreatureName.Text;
         }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            
+        }
     }
 }

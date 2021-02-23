@@ -18,12 +18,13 @@ namespace aclogview.Tools.Scrapers
         private bool crititcalHit = false;
         private string creatureName = "";
         private string combatInfo = "";
-
+        private bool haveCreatureName = false;
         public override void Reset()
         {
             damageDone = 0;
             damageType = "";
             crititcalHit = false;
+            //haveCreatureName = false;
         }
     
         public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
@@ -31,18 +32,23 @@ namespace aclogview.Tools.Scrapers
             int hits = 0;
             int messageExceptions = 0;
 
-            using (CreatureName form = new CreatureName())
+            if (haveCreatureName == false)
             {
-                DialogResult dr = form.ShowDialog();
-                if (dr == DialogResult.OK)
+                using (CreatureName form = new CreatureName())
                 {
-                    creatureName = form.creatureName;
-                    if (creatureName == "")
-                        return (hits, messageExceptions);
-                }
-                else
-                {
-                    return (hits, messageExceptions);
+                    DialogResult dr = form.ShowDialog();
+                    if (dr == DialogResult.OK)
+                    {
+                        creatureName = form.creatureName;
+                        haveCreatureName = true;
+                        if (creatureName == "")
+                            return (hits, messageExceptions);
+                    }
+                    else
+                    {
+                        searchAborted = true;
+                        //return (hits, messageExceptions);
+                    }
                 }
             }
 
@@ -118,6 +124,8 @@ namespace aclogview.Tools.Scrapers
             var fileName = GetFileNameCombat(destinationRoot, creatureName, ".csv");
             if (creatureName != "")
                 File.WriteAllText(fileName, header + combatInfo);
+
+            haveCreatureName = false;
         }
 
         private string DamageType (uint dtype)
