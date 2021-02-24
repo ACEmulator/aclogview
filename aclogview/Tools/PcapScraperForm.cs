@@ -272,5 +272,7 @@ namespace aclogview.Tools
 
             toolStripStatusLabel3.Text = "Message Exceptions: " + totalExceptions.ToString("N0");
         }
+
+
     }
 }

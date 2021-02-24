@@ -1665,6 +1665,12 @@ namespace aclogview
                 objectsContextMenu.Show(location);
             }
         }
+
+        private void menuItem5_Click(object sender, EventArgs e)
+        {
+            var form = new CombatScraper();
+            form.Show(this);
+        }
     }
 }
 

@@ -90,6 +90,12 @@
     </Compile>
     <Compile Include="Server.cs" />
     <Compile Include="ServerList.cs" />
+    <Compile Include="Tools\CombatScraper.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\CombatScraper.Designer.cs">
+      <DependentUpon>CombatScraper.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\CreatureName.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -228,6 +234,9 @@
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="GotoLine.resx">
       <DependentUpon>GotoLine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\CombatScraper.resx">
+      <DependentUpon>CombatScraper.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\CreatureName.resx">
       <DependentUpon>CreatureName.cs</DependentUpon>

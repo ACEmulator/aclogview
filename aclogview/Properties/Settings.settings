@@ -38,7 +38,19 @@
     <Setting Name="ACEStyleHeaders" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="CreatureNameCombat" Type="System.String" Scope="User">
+    <Setting Name="CreatureNameCombat1" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CreatureNameCombat2" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CreatureNameCombat3" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CreatureNameCombat4" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="CreatureNameCombat5" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
   </Settings>

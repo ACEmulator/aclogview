@@ -8,10 +8,10 @@ using System.Windows.Forms;
 
 namespace aclogview.Tools.Scrapers
 {
-    class CombatDamageGiven :Scraper
+    class CombatDamageGiven
     {
 
-        public override string Description => "Exports Damage given to a creature by a player from a melee or missile weapon";
+        public string Description => "Exports Damage given to a creature by a player from a melee or missile weapon";
 
         private uint damageDone = 0;
         private string damageType = "";
@@ -19,7 +19,7 @@ namespace aclogview.Tools.Scrapers
         private string creatureName = "";
         private string combatInfo = "";
         private bool haveCreatureName = false;
-        public override void Reset()
+        public void Reset()
         {
             damageDone = 0;
             damageType = "";
@@ -27,35 +27,35 @@ namespace aclogview.Tools.Scrapers
             //haveCreatureName = false;
         }
     
-        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public (int hits, int messageExceptions, string combatInfo) ProcessFileRecords(string fileName, List<PacketRecord> records, List<string> creatureNames, ref bool searchAborted)
         {
             int hits = 0;
             int messageExceptions = 0;
-
-            if (haveCreatureName == false)
-            {
-                using (CreatureName form = new CreatureName())
-                {
-                    DialogResult dr = form.ShowDialog();
-                    if (dr == DialogResult.OK)
-                    {
-                        creatureName = form.creatureName;
-                        haveCreatureName = true;
-                        if (creatureName == "")
-                            return (hits, messageExceptions);
-                    }
-                    else
-                    {
-                        searchAborted = true;
-                        //return (hits, messageExceptions);
-                    }
-                }
-            }
+            string combatInfoResults = "";
+            //if (haveCreatureName == false)
+            //{
+            //    using (CreatureName form = new CreatureName())
+            //    {
+            //        DialogResult dr = form.ShowDialog();
+            //        if (dr == DialogResult.OK)
+            //        {
+            //            creatureName = form.creatureName;
+            //            haveCreatureName = true;
+            //            if (creatureName == "")
+            //                return (hits, messageExceptions);
+            //        }
+            //        else
+            //        {
+            //            searchAborted = true;
+            //            //return (hits, messageExceptions);
+            //        }
+            //    }
+            //}
 
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return (hits, messageExceptions);
+                    return (hits, messageExceptions, combatInfoResults);
 
                 try
                 {
@@ -84,14 +84,15 @@ namespace aclogview.Tools.Scrapers
 
                                 lock (this)
                                 {
-                                    if (parsedCombatAttack.defenders_name.ToString() == creatureName)
+                                    //if (parsedCombatAttack.defenders_name.ToString() == creatureName)
+                                    if (creatureNames.Contains(parsedCombatAttack.defenders_name.ToString()) == true)
                                     {
                                         hits++;
                                         damageDone = parsedCombatAttack.damage;
                                         damageType = DamageType(parsedCombatAttack.damage_type);
                                         if (parsedCombatAttack.critical == 1)
                                             crititcalHit = true;
-                                        combatInfo += $"{damageDone},{damageType},{crititcalHit}\r\n";
+                                        combatInfo += $"{parsedCombatAttack.defenders_name},{damageDone},{damageType},{crititcalHit}\r\n";
 
                                     }
                                 }
@@ -111,19 +112,19 @@ namespace aclogview.Tools.Scrapers
                 }
             }
 
-            return (hits, messageExceptions);
+            return (hits, messageExceptions, combatInfo);
         }
 
-        public override void WriteOutput(string destinationRoot, ref bool writeOutputAborted)
+        public void WriteOutput(string destinationRoot, string scrapeResults, string fileNameHeading, ref bool writeOutputAborted)
         {
             var sb = new StringBuilder();
-            string header = $"Combat Damage for {creatureName} \r\n" +
-                            $"Damage,DamageType,Critical\r\n";
+            string header = $"Combat Damage \r\n" +
+                            $"Creature,Damage,DamageType,Critical\r\n";
             //string combatInfo = $"{damageDone},{damageType},{crititcalHit}";
 
-            var fileName = GetFileNameCombat(destinationRoot, creatureName, ".csv");
-            if (creatureName != "")
-                File.WriteAllText(fileName, header + combatInfo);
+            var fileName = GetFileNameCombat(destinationRoot, fileNameHeading, ".csv");
+            //if (creatureName != "")
+                File.WriteAllText(fileName, header + scrapeResults);
 
             haveCreatureName = false;
         }

@@ -119,6 +119,7 @@ namespace aclogview {
             this.queueMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.iterationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.serverPortMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItem5 = new System.Windows.Forms.MenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_Main)).BeginInit();
             this.splitContainer_Main.Panel1.SuspendLayout();
             this.splitContainer_Main.Panel2.SuspendLayout();
@@ -625,6 +626,7 @@ namespace aclogview {
             this.mnuItem_ToolFindOpcodeInFiles,
             this.menuItem_ToolFindTextInFiles,
             this.menuItem_ToolPcapScraper,
+            this.menuItem5,
             this.menuItem2,
             this.menuItem_ToolBad,
             this.mnuItem_ToolFragDatListTool,
@@ -652,29 +654,29 @@ namespace aclogview {
             // 
             // menuItem2
             // 
-            this.menuItem2.Index = 3;
+            this.menuItem2.Index = 4;
             this.menuItem2.Text = "-";
             // 
             // menuItem_ToolBad
             // 
-            this.menuItem_ToolBad.Index = 4;
+            this.menuItem_ToolBad.Index = 5;
             this.menuItem_ToolBad.Text = "Find Bad Parsers";
             this.menuItem_ToolBad.Click += new System.EventHandler(this.menuItem_ToolBad_Click);
             // 
             // mnuItem_ToolFragDatListTool
             // 
-            this.mnuItem_ToolFragDatListTool.Index = 5;
+            this.mnuItem_ToolFragDatListTool.Index = 6;
             this.mnuItem_ToolFragDatListTool.Text = "Frag Dat List Tool";
             this.mnuItem_ToolFragDatListTool.Click += new System.EventHandler(this.menuItem_ToolFragDatListTool_Click);
             // 
             // menuItem4
             // 
-            this.menuItem4.Index = 6;
+            this.menuItem4.Index = 7;
             this.menuItem4.Text = "-";
             // 
             // menuItem_Options
             // 
-            this.menuItem_Options.Index = 7;
+            this.menuItem_Options.Index = 8;
             this.menuItem_Options.Text = "Options";
             this.menuItem_Options.Click += new System.EventHandler(this.menuItem_Options_Click);
             // 
@@ -976,6 +978,12 @@ namespace aclogview {
             this.serverPortMenuItem.Size = new System.Drawing.Size(131, 22);
             this.serverPortMenuItem.Text = "Server Port";
             // 
+            // menuItem5
+            // 
+            this.menuItem5.Index = 3;
+            this.menuItem5.Text = "Combat Scraper";
+            this.menuItem5.Click += new System.EventHandler(this.menuItem5_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1127,6 +1135,7 @@ namespace aclogview {
         private System.Windows.Forms.ToolStripMenuItem iterationMenuItem;
         private System.Windows.Forms.ToolStripMenuItem serverPortMenuItem;
         private System.Windows.Forms.MenuItem menuItem_ToolPcapScraper;
+        private System.Windows.Forms.MenuItem menuItem5;
     }
 }
 

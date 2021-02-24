@@ -23,7 +23,7 @@ namespace aclogview.Tools
         {
             base.OnLoad(e);
 
-            tbCreatureName.Text = Settings.Default.CreatureNameCombat;
+            tbCreatureName.Text = Settings.Default.CreatureNameCombat1;
 
         }
 
@@ -35,7 +35,7 @@ namespace aclogview.Tools
             if (tbCreatureName.Text =="")
                 MessageBox.Show("Creature Name is blank", "Warning!");
             creatureName = tbCreatureName.Text;
-            Settings.Default.CreatureNameCombat = tbCreatureName.Text;
+            Settings.Default.CreatureNameCombat1 = tbCreatureName.Text;
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
