@@ -13,6 +13,19 @@ namespace aclogview.Tools.Scrapers
 
         public string Description => "Exports Damage given to a creature by a player from a melee or missile weapon";
 
+
+        // Lists for Magic Verbs (for getting Magic Damage Type)
+        List<string> SlashVerbs = new List<string>(new string[] { "mangle", "mangles", "slash", "slashes", "cuts", "scratch", "scratches" });
+        List<string> PierceVerbs = new List<string>(new string[] { "gore", "gores", "impale", "impales", "stab", "stabs", "nick", "nicks" });
+        List<string> BludgeVerbs = new List<string>(new string[] { "crush", "crushes", "smash", "smashes", "bash", "bashes", "graze", "grazes" });
+        List<string> FireVerbs = new List<string>(new string[] { "incinerate", "incinerates", "burn", "burns", "scorch", "scorches", "singe", "singes" });
+        List<string> ColdVerbs = new List<string>(new string[] { "freeze", "freezes", "frost", "frosts", "chill", "chills", "numb", "numbs" });        
+        List<string> AcidVerbs = new List<string>(new string[] { "dissolve", "dissolves", "corrode", "corrodes", "sear", "sears", "blister", "blisters" });
+        List<string> ElectricVerbs = new List<string>(new string[] { "blast", "blasts", "jolt", "jolts", "shock", "shocks", "spark", "sparks" });        
+        List<string> NetherVerbs = new List<string>(new string[] { "eradicate", "eradicates", "wither", "withers", "twist", "twists", "scar", "scars" });
+        List<string> HealthVerbs = new List<string>(new string[] { "deplete", "depletes", "siphon", "siphons", "exhaust", "exhausts", "drain", "drains" });
+
+
         private uint damageDone = 0;
         private string damageType = "";
         private bool crititcalHit = false;
@@ -166,6 +179,70 @@ namespace aclogview.Tools.Scrapers
             if (creature == "")
                 creature = "BlankCreature";
             return Path.Combine(destinationRoot, creature + "-" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss") + " " + GetType().Name + extension);
+        }
+        protected (string magicDamageType, string creatureName, int damageAmount) DecodeMagicDamageMessage(string magicMessage)
+        {
+            string magicDamageType = "";
+            string creatureName = "";
+            int damageAmount = 0;
+
+
+
+
+
+
+
+            return (magicDamageType, creatureName, damageAmount);
+        }
+        protected string GetMagicDamageType(string magicVerb)
+        {
+            string magicDamageType = "Unknown";
+
+            if (SlashVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Slash";
+                return magicDamageType;
+            }
+            if (PierceVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Pierce";
+                return magicDamageType;
+            }
+            if (BludgeVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Bludge";
+                return magicDamageType;
+            }
+            if (FireVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Fire";
+                return magicDamageType;
+            }
+            if (ColdVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Cold";
+                return magicDamageType;
+            }
+            if (AcidVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Acid";
+                return magicDamageType;
+            }
+            if (ElectricVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Electric";
+                return magicDamageType;
+            }
+            if (NetherVerbs.Contains(magicVerb) == true)
+            {
+                magicDamageType = "Nether";
+                return magicDamageType;
+            }
+            if (HealthVerbs.Contains(magicVerb) == true)
+                magicDamageType = "HealthDrain";
+
+            return magicDamageType;
+
         }
     }
 }
