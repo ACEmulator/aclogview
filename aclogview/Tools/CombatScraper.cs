@@ -119,6 +119,8 @@ namespace aclogview.Tools
 
         private void btnStartScrape_Click(object sender, EventArgs e)
         {
+            scrapeResults = "";
+
             if (tbCreatureName1.Text =="")
             {
                 MessageBox.Show("Creature Name is blank", "Warning!");
@@ -141,10 +143,6 @@ namespace aclogview.Tools
             // Scrape starts here
             try
             {
-                btnStartScrape.Enabled = false;
-
-                filesToProcess = ToolUtil.GetPcapsInFolder(tbSearchPathRoot.Text);
-
                 filesProcessed = 0;
                 totalHits = 0;
                 totalExceptions = 0;
@@ -152,6 +150,12 @@ namespace aclogview.Tools
                 writeOutputAborted = false;
                 searchCompleted = false;
 
+                toolStripStatusLabel4.Text = "Status: Getting File List, pleae wait...";
+                
+
+                btnStartScrape.Enabled = false;
+
+                filesToProcess = ToolUtil.GetPcapsInFolder(tbSearchPathRoot.Text);
 
                 UpdateToolStrip("Processing Files");
 
@@ -215,7 +219,7 @@ namespace aclogview.Tools
                 totalHits += results.hits;
                 totalExceptions += results.messageExceptions;
                 }
-            scrapeResults = results.combatInfo;
+            scrapeResults += results.combatInfo;
 
             filesProcessed++;
 
