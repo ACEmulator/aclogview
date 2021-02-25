@@ -74,8 +74,8 @@ namespace aclogview.Tools.Scrapers
                     if (record.data.Length <= 4)
                         continue;
 
-                    if (record.isSend)
-                        continue;
+                    //if (record.isSend)
+                    //    continue;
 
                     using (var memoryStream = new MemoryStream(record.data))
                     using (var binaryReader = new BinaryReader(memoryStream))
@@ -114,10 +114,15 @@ namespace aclogview.Tools.Scrapers
                         {
                             var sequence = binaryReader.ReadUInt32(); // Sequence
                             var _event = binaryReader.ReadUInt32(); // Event
-                            if (_event == (uint)PacketOpcode.INVENTORY_WIELD_OBJ_EVENT) // Seeing if event matches 
+                            if (_event == (uint)PacketOpcode.Evt_Inventory__GetAndWieldItem_ID) // Seeing if event matches 
                             {
                                 var parsedWieldInfo = CM_Inventory.GetAndWieldItem.read(binaryReader);
-                                wieldedItemID = parsedWieldInfo.i_item;
+
+                                if ((parsedWieldInfo.i_equipMask == 1048576) || (parsedWieldInfo.i_equipMask == 4194304) || (parsedWieldInfo.i_equipMask == 16777216))
+                                {
+                                    wieldedItemID = parsedWieldInfo.i_item;
+                                }
+                                
                             }
                         }
                         // Getting Melee/Missile Damage
@@ -188,7 +193,7 @@ namespace aclogview.Tools.Scrapers
                                         string magicCharName = "Not Found";
                                         if (defenderCharID != 0)
                                             magicCharName = GetCharacterName(defenderCharID);
-                                        combatInfo += $"{magicCharName},{"Magic"},{decodedMagicChat.magicDamageType},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
+                                        combatInfo += $"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
                                     }
                                 }
                             }
@@ -205,7 +210,7 @@ namespace aclogview.Tools.Scrapers
                                         string magicCharName = "Not Found";
                                         if (defenderCharID != 0)
                                             magicCharName = GetCharacterName(defenderCharID);
-                                        combatInfo += $"{magicCharName},{"Magic"},{decodedMagicChat.magicDamageType},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
+                                        combatInfo += $"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
                                     }
                                 }
                             }
@@ -408,6 +413,9 @@ namespace aclogview.Tools.Scrapers
             {
                 wieldedItemName = nameValue;
             }
+
+            // For now just sending ID as text
+            wieldedItemName = wieldedItemID.ToString();
 
             return wieldedItemName;
         }
