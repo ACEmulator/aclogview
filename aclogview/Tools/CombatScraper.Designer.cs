@@ -60,6 +60,7 @@ namespace aclogview.Tools
             this.tbCreatureName2 = new System.Windows.Forms.TextBox();
             this.chkExcludeNonRetailPcaps = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -200,24 +201,27 @@ namespace aclogview.Tools
             // 
             this.rdbMeleeDamage.AutoSize = true;
             this.rdbMeleeDamage.Checked = true;
-            this.rdbMeleeDamage.Location = new System.Drawing.Point(326, 152);
+            this.rdbMeleeDamage.Enabled = false;
+            this.rdbMeleeDamage.Location = new System.Drawing.Point(326, 171);
             this.rdbMeleeDamage.Name = "rdbMeleeDamage";
             this.rdbMeleeDamage.Size = new System.Drawing.Size(133, 17);
             this.rdbMeleeDamage.TabIndex = 11;
             this.rdbMeleeDamage.TabStop = true;
             this.rdbMeleeDamage.Text = "Melee/Missile Damage";
             this.rdbMeleeDamage.UseVisualStyleBackColor = true;
+            this.rdbMeleeDamage.Visible = false;
             // 
             // rdbMagicDamage
             // 
             this.rdbMagicDamage.AutoSize = true;
             this.rdbMagicDamage.Enabled = false;
-            this.rdbMagicDamage.Location = new System.Drawing.Point(465, 151);
+            this.rdbMagicDamage.Location = new System.Drawing.Point(465, 170);
             this.rdbMagicDamage.Name = "rdbMagicDamage";
             this.rdbMagicDamage.Size = new System.Drawing.Size(97, 17);
             this.rdbMagicDamage.TabIndex = 12;
             this.rdbMagicDamage.Text = "Magic Damage";
             this.rdbMagicDamage.UseVisualStyleBackColor = true;
+            this.rdbMagicDamage.Visible = false;
             this.rdbMagicDamage.CheckedChanged += new System.EventHandler(this.rdbMagicDamage_CheckedChanged);
             // 
             // groupBox1
@@ -233,7 +237,7 @@ namespace aclogview.Tools
             this.groupBox1.Controls.Add(this.tbCreatureName2);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.tbCreatureName1);
-            this.groupBox1.Location = new System.Drawing.Point(15, 126);
+            this.groupBox1.Location = new System.Drawing.Point(15, 151);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(294, 188);
             this.groupBox1.TabIndex = 13;
@@ -327,17 +331,30 @@ namespace aclogview.Tools
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(388, 132);
+            this.label9.Location = new System.Drawing.Point(388, 151);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(96, 16);
             this.label9.TabIndex = 25;
             this.label9.Text = "DamageType:";
+            this.label9.Visible = false;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(80, 129);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(448, 15);
+            this.label10.TabIndex = 26;
+            this.label10.Text = "This Scraper creates a csv file with both Magic and Melee/Missile Attack damage.";
+            this.label10.Click += new System.EventHandler(this.label10_Click);
             // 
             // CombatScraper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(596, 450);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.chkExcludeNonRetailPcaps);
             this.Controls.Add(this.groupBox1);
@@ -354,7 +371,7 @@ namespace aclogview.Tools
             this.Controls.Add(this.btnStartScrape);
             this.Name = "CombatScraper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "CombatScraper";
+            this.Text = "CombatScraper - Gets damage given to a creature from a player";
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -396,5 +413,6 @@ namespace aclogview.Tools
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
     }
 }
