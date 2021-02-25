@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace aclogview.Tools
 {
@@ -120,6 +121,7 @@ namespace aclogview.Tools
         private void btnStartScrape_Click(object sender, EventArgs e)
         {
             scrapeResults = "";
+            creatureNames.Clear();
 
             if (tbCreatureName1.Text =="")
             {
@@ -150,8 +152,7 @@ namespace aclogview.Tools
                 writeOutputAborted = false;
                 searchCompleted = false;
 
-                toolStripStatusLabel4.Text = "Status: Getting File List, pleae wait...";
-                
+                UpdateToolStrip("Status: Getting File List, pleae wait...");
 
                 btnStartScrape.Enabled = false;
 
@@ -166,12 +167,17 @@ namespace aclogview.Tools
                 timer1.Start();
 
                 // Do the actual search here
-                DoSearch();
+                ThreadPool.QueueUserWorkItem((state) =>
+                {
+                    DoSearch();
 
-                searchCompleted = true;
+                    searchCompleted = true;
 
-                if (!Disposing && !IsDisposed)
-                    BeginInvoke((Action)(() => btnStopScrape_Click(null, null)));
+                    if (!Disposing && !IsDisposed)
+                        BeginInvoke((Action)(() => btnStopScrape_Click(null, null)));
+
+                });
+                
             }
             catch (Exception ex)
             {
@@ -219,10 +225,12 @@ namespace aclogview.Tools
                 totalHits += results.hits;
                 totalExceptions += results.messageExceptions;
                 }
+
             scrapeResults += results.combatInfo;
 
-            filesProcessed++;
+            // filesProcessed++;
 
+            Interlocked.Increment(ref filesProcessed);
         }
 
         private void WriteOutput(string scrapeResults)
@@ -257,11 +265,6 @@ namespace aclogview.Tools
                 UpdateToolStrip("Writing Output Complete");
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
-        {
-            UpdateToolStrip();
-        }
-
         private void UpdateToolStrip(string status = null)
         {
             if (status != null)
@@ -272,12 +275,18 @@ namespace aclogview.Tools
             toolStripStatusLabel2.Text = "Total Hits: " + totalHits.ToString("N0");
 
             toolStripStatusLabel3.Text = "Message Exceptions: " + totalExceptions.ToString("N0");
+            // statusStrip1.Refresh();
         }
 
         private void rdbMagicDamage_CheckedChanged(object sender, EventArgs e)
         {
             MessageBox.Show("Magic Damage is not supported currently.", "Warning!");
             rdbMeleeDamage.Checked = true;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            UpdateToolStrip();
         }
     }
 }

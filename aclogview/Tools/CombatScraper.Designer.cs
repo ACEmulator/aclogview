@@ -49,16 +49,16 @@ namespace aclogview.Tools
             this.rdbMeleeDamage = new System.Windows.Forms.RadioButton();
             this.rdbMagicDamage = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.tbCreatureName2 = new System.Windows.Forms.TextBox();
-            this.tbCreatureName3 = new System.Windows.Forms.TextBox();
-            this.tbCreatureName4 = new System.Windows.Forms.TextBox();
-            this.tbCreatureName5 = new System.Windows.Forms.TextBox();
-            this.chkExcludeNonRetailPcaps = new System.Windows.Forms.CheckBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.tbCreatureName5 = new System.Windows.Forms.TextBox();
+            this.tbCreatureName4 = new System.Windows.Forms.TextBox();
+            this.tbCreatureName3 = new System.Windows.Forms.TextBox();
+            this.tbCreatureName2 = new System.Windows.Forms.TextBox();
+            this.chkExcludeNonRetailPcaps = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -113,6 +113,10 @@ namespace aclogview.Tools
             this.tbOutputFolder.Name = "tbOutputFolder";
             this.tbOutputFolder.Size = new System.Drawing.Size(517, 20);
             this.tbOutputFolder.TabIndex = 5;
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // btnChangeSearchPathRoot
             // 
@@ -236,72 +240,14 @@ namespace aclogview.Tools
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Creature Name";
             // 
-            // tbCreatureName2
+            // label8
             // 
-            this.tbCreatureName2.Location = new System.Drawing.Point(30, 78);
-            this.tbCreatureName2.Name = "tbCreatureName2";
-            this.tbCreatureName2.Size = new System.Drawing.Size(247, 20);
-            this.tbCreatureName2.TabIndex = 1;
-            // 
-            // tbCreatureName3
-            // 
-            this.tbCreatureName3.Location = new System.Drawing.Point(30, 104);
-            this.tbCreatureName3.Name = "tbCreatureName3";
-            this.tbCreatureName3.Size = new System.Drawing.Size(247, 20);
-            this.tbCreatureName3.TabIndex = 2;
-            // 
-            // tbCreatureName4
-            // 
-            this.tbCreatureName4.Location = new System.Drawing.Point(30, 130);
-            this.tbCreatureName4.Name = "tbCreatureName4";
-            this.tbCreatureName4.Size = new System.Drawing.Size(247, 20);
-            this.tbCreatureName4.TabIndex = 3;
-            // 
-            // tbCreatureName5
-            // 
-            this.tbCreatureName5.Location = new System.Drawing.Point(30, 156);
-            this.tbCreatureName5.Name = "tbCreatureName5";
-            this.tbCreatureName5.Size = new System.Drawing.Size(247, 20);
-            this.tbCreatureName5.TabIndex = 4;
-            // 
-            // chkExcludeNonRetailPcaps
-            // 
-            this.chkExcludeNonRetailPcaps.AutoSize = true;
-            this.chkExcludeNonRetailPcaps.Checked = true;
-            this.chkExcludeNonRetailPcaps.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(382, 100);
-            this.chkExcludeNonRetailPcaps.Name = "chkExcludeNonRetailPcaps";
-            this.chkExcludeNonRetailPcaps.Size = new System.Drawing.Size(150, 17);
-            this.chkExcludeNonRetailPcaps.TabIndex = 24;
-            this.chkExcludeNonRetailPcaps.Text = "Exclude Non-Retail Pcaps";
-            this.chkExcludeNonRetailPcaps.UseVisualStyleBackColor = true;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(8, 55);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(16, 13);
-            this.label4.TabIndex = 5;
-            this.label4.Text = "1.";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(8, 133);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(16, 13);
-            this.label5.TabIndex = 6;
-            this.label5.Text = "4.";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(8, 159);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(16, 13);
-            this.label6.TabIndex = 7;
-            this.label6.Text = "5.";
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(8, 81);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(16, 13);
+            this.label8.TabIndex = 9;
+            this.label8.Text = "2.";
             // 
             // label7
             // 
@@ -312,14 +258,70 @@ namespace aclogview.Tools
             this.label7.TabIndex = 8;
             this.label7.Text = "3.";
             // 
-            // label8
+            // label6
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(8, 81);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(16, 13);
-            this.label8.TabIndex = 9;
-            this.label8.Text = "2.";
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(8, 159);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(16, 13);
+            this.label6.TabIndex = 7;
+            this.label6.Text = "5.";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(8, 133);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(16, 13);
+            this.label5.TabIndex = 6;
+            this.label5.Text = "4.";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(8, 55);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(16, 13);
+            this.label4.TabIndex = 5;
+            this.label4.Text = "1.";
+            // 
+            // tbCreatureName5
+            // 
+            this.tbCreatureName5.Location = new System.Drawing.Point(30, 156);
+            this.tbCreatureName5.Name = "tbCreatureName5";
+            this.tbCreatureName5.Size = new System.Drawing.Size(247, 20);
+            this.tbCreatureName5.TabIndex = 4;
+            // 
+            // tbCreatureName4
+            // 
+            this.tbCreatureName4.Location = new System.Drawing.Point(30, 130);
+            this.tbCreatureName4.Name = "tbCreatureName4";
+            this.tbCreatureName4.Size = new System.Drawing.Size(247, 20);
+            this.tbCreatureName4.TabIndex = 3;
+            // 
+            // tbCreatureName3
+            // 
+            this.tbCreatureName3.Location = new System.Drawing.Point(30, 104);
+            this.tbCreatureName3.Name = "tbCreatureName3";
+            this.tbCreatureName3.Size = new System.Drawing.Size(247, 20);
+            this.tbCreatureName3.TabIndex = 2;
+            // 
+            // tbCreatureName2
+            // 
+            this.tbCreatureName2.Location = new System.Drawing.Point(30, 78);
+            this.tbCreatureName2.Name = "tbCreatureName2";
+            this.tbCreatureName2.Size = new System.Drawing.Size(247, 20);
+            this.tbCreatureName2.TabIndex = 1;
+            // 
+            // chkExcludeNonRetailPcaps
+            // 
+            this.chkExcludeNonRetailPcaps.AutoSize = true;
+            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(382, 100);
+            this.chkExcludeNonRetailPcaps.Name = "chkExcludeNonRetailPcaps";
+            this.chkExcludeNonRetailPcaps.Size = new System.Drawing.Size(150, 17);
+            this.chkExcludeNonRetailPcaps.TabIndex = 24;
+            this.chkExcludeNonRetailPcaps.Text = "Exclude Non-Retail Pcaps";
+            this.chkExcludeNonRetailPcaps.UseVisualStyleBackColor = true;
             // 
             // label9
             // 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -10,28 +11,31 @@ namespace aclogview.Tools.Scrapers
 {
     class CombatDamageGiven
     {
-
         public string Description => "Exports Damage given to a creature by a player from a melee or missile weapon";
 
-
         // Lists for Magic Verbs (for getting Magic Damage Type)
-        List<string> SlashVerbs = new List<string>(new string[] { "mangle", "mangles", "slash", "slashes", "cuts", "scratch", "scratches" });
-        List<string> PierceVerbs = new List<string>(new string[] { "gore", "gores", "impale", "impales", "stab", "stabs", "nick", "nicks" });
-        List<string> BludgeVerbs = new List<string>(new string[] { "crush", "crushes", "smash", "smashes", "bash", "bashes", "graze", "grazes" });
-        List<string> FireVerbs = new List<string>(new string[] { "incinerate", "incinerates", "burn", "burns", "scorch", "scorches", "singe", "singes" });
-        List<string> ColdVerbs = new List<string>(new string[] { "freeze", "freezes", "frost", "frosts", "chill", "chills", "numb", "numbs" });        
-        List<string> AcidVerbs = new List<string>(new string[] { "dissolve", "dissolves", "corrode", "corrodes", "sear", "sears", "blister", "blisters" });
-        List<string> ElectricVerbs = new List<string>(new string[] { "blast", "blasts", "jolt", "jolts", "shock", "shocks", "spark", "sparks" });        
-        List<string> NetherVerbs = new List<string>(new string[] { "eradicate", "eradicates", "wither", "withers", "twist", "twists", "scar", "scars" });
-        List<string> HealthVerbs = new List<string>(new string[] { "deplete", "depletes", "siphon", "siphons", "exhaust", "exhausts", "drain", "drains" });
+        List<string> SlashVerbs = new List<string>() { "mangle", "mangles", "slash", "slashes", "cut", "cuts", "scratch", "scratches" };
+        List<string> PierceVerbs = new List<string>() { "gore", "gores", "impale", "impales", "stab", "stabs", "nick", "nicks" };
+        List<string> BludgeVerbs = new List<string>() { "crush", "crushes", "smash", "smashes", "bash", "bashes", "graze", "grazes" };
+        List<string> FireVerbs = new List<string>() { "incinerate", "incinerates", "burn", "burns", "scorch", "scorches", "singe", "singes" };
+        List<string> ColdVerbs = new List<string>() { "freeze", "freezes", "frost", "frosts", "chill", "chills", "numb", "numbs" };        
+        List<string> AcidVerbs = new List<string>() { "dissolve", "dissolves", "corrode", "corrodes", "sear", "sears", "blister", "blisters" };
+        List<string> ElectricVerbs = new List<string>() { "blast", "blasts", "jolt", "jolts", "shock", "shocks", "spark", "sparks" };        
+        List<string> NetherVerbs = new List<string>() { "eradicate", "eradicates", "wither", "withers", "twist", "twists", "scar", "scars" };
+        List<string> HealthVerbs = new List<string>() { "deplete", "depletes", "siphon", "siphons", "exhaust", "exhausts", "drain", "drains" };
 
+        string rxPattern = @"^You (\w+) (.+) for (.+) point.* with.+$";
+        string rxPatternCrit = @"^Critical hit! You (\w+) (.+) for (.+) point.* with .+$";
+        // string rxPatternBoth = @" ^ Critical hit! You(\w+) (.+) for (.+) point.* with.+$|^You (\w+) (.+) for (.+) point.* with.+$";
 
         private uint damageDone = 0;
         private string damageType = "";
         private bool crititcalHit = false;
-        private string creatureName = "";
         private string combatInfo = "";
-        private bool haveCreatureName = false;
+        //private bool haveCreatureName = false;
+        //private string creatureName = "";
+
+
         public void Reset()
         {
             damageDone = 0;
@@ -45,25 +49,6 @@ namespace aclogview.Tools.Scrapers
             int hits = 0;
             int messageExceptions = 0;
             string combatInfoResults = "";
-            //if (haveCreatureName == false)
-            //{
-            //    using (CreatureName form = new CreatureName())
-            //    {
-            //        DialogResult dr = form.ShowDialog();
-            //        if (dr == DialogResult.OK)
-            //        {
-            //            creatureName = form.creatureName;
-            //            haveCreatureName = true;
-            //            if (creatureName == "")
-            //                return (hits, messageExceptions);
-            //        }
-            //        else
-            //        {
-            //            searchAborted = true;
-            //            //return (hits, messageExceptions);
-            //        }
-            //    }
-            //}
 
             foreach (PacketRecord record in records)
             {
@@ -82,7 +67,7 @@ namespace aclogview.Tools.Scrapers
                     using (var binaryReader = new BinaryReader(memoryStream))
                     {
                         var messageCode = binaryReader.ReadUInt32();
-
+                        // Getting Melee/Missile Damage
                         if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT) // 0x7BD
                         {
 
@@ -90,27 +75,61 @@ namespace aclogview.Tools.Scrapers
                             var sequence = binaryReader.ReadUInt32(); // Sequence
                             var _event = binaryReader.ReadUInt32(); // Event
 
-                            if (_event == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // Tell
+                            if (_event == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // Seeing if event matches 
                             {
 
                                 var parsedCombatAttack = CM_Combat.AttackerNotificationEvent.read(binaryReader);
 
                                 lock (this)
                                 {
-                                    //if (parsedCombatAttack.defenders_name.ToString() == creatureName)
-                                    if (creatureNames.Contains(parsedCombatAttack.defenders_name.ToString()) == true)
+                                    if (creatureNames.Contains(parsedCombatAttack.defenders_name.ToString()) == true)  // Seeing if creature Name matches list of creatures searching for.
                                     {
                                         hits++;
                                         damageDone = parsedCombatAttack.damage;
                                         damageType = DamageType(parsedCombatAttack.damage_type);
                                         if (parsedCombatAttack.critical == 1)
                                             crititcalHit = true;
-                                        combatInfo += $"{parsedCombatAttack.defenders_name},{damageDone},{damageType},{crititcalHit}\r\n";
-
+                                        combatInfo += $"{"Melee/Missile"},{damageType},{damageDone},{parsedCombatAttack.defenders_name},{crititcalHit}\r\n";
+                                        Reset();
                                     }
                                 }
                             }
-                            Reset();
+
+                        }
+                        // Getting Magic Attack Damage
+                        if (messageCode == (uint)PacketOpcode.Evt_Communication__TextboxString_ID) // 0xF7E0
+                        {
+                            var parsedChat = CM_Communication.TextBoxString.read(binaryReader); // Chat
+                            var chatType = parsedChat.ChatMessageType;
+
+                            if (chatType == 7)  // Magic Message
+                            {
+                                // Non Critical Magic Hits
+                                Regex regex = new Regex(rxPattern);
+                                if (regex.IsMatch(parsedChat.MessageText.ToString())) // Seeing if Magic Message has magic damage
+                                {
+                                    var decodedMagicChat = DecodeMagicDamageMessage(parsedChat.MessageText.ToString());
+                                    if (creatureNames.Contains(decodedMagicChat.creatureName) == true)  // Seeing if creature Name matches list of creatures searching for.
+                                    {
+                                        hits++;
+                                        combatInfo += $"{"Magic"},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
+                                    }
+                                }
+                            }
+                            if (chatType == 7)   // Magic Message
+                            {
+                                // Critical Magic Hits
+                                Regex regex = new Regex(rxPatternCrit);
+                                if (regex.IsMatch(parsedChat.MessageText.ToString())) // Seeing if Magic Message has magic damage
+                                {
+                                    var decodedMagicChat = DecodeMagicDamageCriticalMessage(parsedChat.MessageText.ToString());
+                                    if (creatureNames.Contains(decodedMagicChat.creatureName) == true)  // Seeing if creature Name matches list of creatures searching for.
+                                    {
+                                        hits++;
+                                        combatInfo += $"{"Magic"},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -124,26 +143,28 @@ namespace aclogview.Tools.Scrapers
                     // Do something with the exception maybe
                 }
             }
-
+            
             return (hits, messageExceptions, combatInfo);
         }
 
         public void WriteOutput(string destinationRoot, string scrapeResults, string fileNameHeading, ref bool writeOutputAborted)
         {
             var sb = new StringBuilder();
-            string header = $"Combat Damage \r\n" +
-                            $"Creature,Damage,DamageType,Critical\r\n";
+            string header = $"Combat Damage Given to a creature from a player \r\n" +
+                            $"Attack,DamageType,Damage,Creature,Critical\r\n";
             //string combatInfo = $"{damageDone},{damageType},{crititcalHit}";
 
             var fileName = GetFileNameCombat(destinationRoot, fileNameHeading, ".csv");
             //if (creatureName != "")
                 File.WriteAllText(fileName, header + scrapeResults);
 
-            haveCreatureName = false;
+            // haveCreatureName = false;
         }
 
         private string DamageType (uint dtype)
         {
+            // Figuring out Damage Type for Melee/Missile Attacks
+
             string damageType = "";
             switch (dtype)
             {
@@ -180,22 +201,54 @@ namespace aclogview.Tools.Scrapers
                 creature = "BlankCreature";
             return Path.Combine(destinationRoot, creature + "-" + DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss") + " " + GetType().Name + extension);
         }
-        protected (string magicDamageType, string creatureName, int damageAmount) DecodeMagicDamageMessage(string magicMessage)
+        protected (string magicDamageType, string creatureName, int damageAmount, bool crit) DecodeMagicDamageMessage(string magicMessage)
         {
-            string magicDamageType = "";
-            string creatureName = "";
+            // Decoding Magic Message via RegEx
+            string magicDamageType = "Undefined";
+            string creatureName = "Unknown";
             int damageAmount = 0;
+            bool critHit = false;
 
+            Regex magicNonCrit = new Regex(rxPattern);
+            if (magicNonCrit.IsMatch(magicMessage))
+            {
+                Match rxMatch = Regex.Match(magicMessage, rxPattern);
 
+                magicDamageType = GetMagicDamageType(rxMatch.Groups[1].ToString());
+                creatureName = rxMatch.Groups[2].ToString();
+                damageAmount = ConvertToInteger(rxMatch.Groups[3].ToString());
+                return (magicDamageType, creatureName, damageAmount, critHit);
+            }
 
-
-
-
-
-            return (magicDamageType, creatureName, damageAmount);
+            return (magicDamageType, creatureName, damageAmount, critHit);
         }
+
+        protected (string magicDamageType, string creatureName, int damageAmount, bool crit) DecodeMagicDamageCriticalMessage(string magicMessage)
+        {
+            string magicDamageType = "Undefined";
+            string creatureName = "Unknown";
+            int damageAmount = 0;
+            bool critHit = false;
+
+            Regex magicCrit = new Regex(rxPatternCrit);
+            if (magicCrit.IsMatch(magicMessage))
+            {
+                Match rxMatch = Regex.Match(magicMessage, rxPatternCrit);
+
+                magicDamageType = GetMagicDamageType(rxMatch.Groups[1].ToString());
+                creatureName = rxMatch.Groups[2].ToString();
+                damageAmount = ConvertToInteger(rxMatch.Groups[3].ToString());
+                critHit = true;
+                return (magicDamageType, creatureName, damageAmount, critHit);
+            }
+
+            return (magicDamageType, creatureName, damageAmount, critHit);
+        }
+
         protected string GetMagicDamageType(string magicVerb)
         {
+            // Determining Magic Damage Type
+
             string magicDamageType = "Unknown";
 
             if (SlashVerbs.Contains(magicVerb) == true)
@@ -243,6 +296,12 @@ namespace aclogview.Tools.Scrapers
 
             return magicDamageType;
 
+        }
+        public static int ConvertToInteger(string text)
+        {
+            int i = 0;
+            Int32.TryParse(text, out i);
+            return i;
         }
     }
 }
