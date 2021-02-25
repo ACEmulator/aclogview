@@ -61,6 +61,9 @@ namespace aclogview.Tools
             this.chkExcludeNonRetailPcaps = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
+            this.chkCharList = new System.Windows.Forms.CheckBox();
+            this.tbFileNameDescription = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
             this.statusStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -83,7 +86,7 @@ namespace aclogview.Tools
             // 
             // btnStartScrape
             // 
-            this.btnStartScrape.Location = new System.Drawing.Point(373, 378);
+            this.btnStartScrape.Location = new System.Drawing.Point(373, 388);
             this.btnStartScrape.Name = "btnStartScrape";
             this.btnStartScrape.Size = new System.Drawing.Size(103, 23);
             this.btnStartScrape.TabIndex = 2;
@@ -93,7 +96,7 @@ namespace aclogview.Tools
             // 
             // btnStopScrape
             // 
-            this.btnStopScrape.Location = new System.Drawing.Point(482, 378);
+            this.btnStopScrape.Location = new System.Drawing.Point(482, 388);
             this.btnStopScrape.Name = "btnStopScrape";
             this.btnStopScrape.Size = new System.Drawing.Size(102, 23);
             this.btnStopScrape.TabIndex = 3;
@@ -349,11 +352,40 @@ namespace aclogview.Tools
             this.label10.Text = "This Scraper creates a csv file with both Magic and Melee/Missile Attack damage.";
             this.label10.Click += new System.EventHandler(this.label10_Click);
             // 
+            // chkCharList
+            // 
+            this.chkCharList.AutoSize = true;
+            this.chkCharList.Location = new System.Drawing.Point(26, 346);
+            this.chkCharList.Name = "chkCharList";
+            this.chkCharList.Size = new System.Drawing.Size(262, 17);
+            this.chkCharList.TabIndex = 27;
+            this.chkCharList.Text = "Use Character List (pre compiled list of characters)";
+            this.chkCharList.UseVisualStyleBackColor = true;
+            // 
+            // tbFileNameDescription
+            // 
+            this.tbFileNameDescription.Location = new System.Drawing.Point(15, 391);
+            this.tbFileNameDescription.Name = "tbFileNameDescription";
+            this.tbFileNameDescription.Size = new System.Drawing.Size(292, 20);
+            this.tbFileNameDescription.TabIndex = 28;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(12, 375);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(288, 13);
+            this.label11.TabIndex = 29;
+            this.label11.Text = "File Name Description: (if blank, creature name will be used)";
+            // 
             // CombatScraper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(596, 450);
+            this.Controls.Add(this.label11);
+            this.Controls.Add(this.tbFileNameDescription);
+            this.Controls.Add(this.chkCharList);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.chkExcludeNonRetailPcaps);
@@ -414,5 +446,8 @@ namespace aclogview.Tools
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.CheckBox chkCharList;
+        private System.Windows.Forms.TextBox tbFileNameDescription;
+        private System.Windows.Forms.Label label11;
     }
 }

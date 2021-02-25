@@ -30,6 +30,8 @@ namespace aclogview.Tools
         private string scrapeResults;
         private string fileNameHeading;
 
+        bool useCharList = false;
+
         public CombatScraper()
         {
             InitializeComponent();
@@ -123,6 +125,8 @@ namespace aclogview.Tools
             scrapeResults = "";
             creatureNames.Clear();
 
+            useCharList = chkCharList.Checked;
+
             if (tbCreatureName1.Text =="")
             {
                 MessageBox.Show("Creature Name is blank", "Warning!");
@@ -140,7 +144,11 @@ namespace aclogview.Tools
             if (tbCreatureName5.Text != "")
                 creatureNames.Add(tbCreatureName5.Text);
 
-            fileNameHeading = tbCreatureName1.Text.Split(' ')[0];
+            // Beginning of File Name
+            fileNameHeading = tbCreatureName1.Text;
+            if (tbFileNameDescription.Text != "")
+                fileNameHeading = tbFileNameDescription.Text;
+            
 
             // Scrape starts here
             try
@@ -218,7 +226,7 @@ namespace aclogview.Tools
                 if (searchAborted || Disposing || IsDisposed)
                     return;
 
-            var results = scraper.ProcessFileRecords(fileName, records, creatureNames, ref searchAborted);
+            var results = scraper.ProcessFileRecords(fileName, records, creatureNames, ref useCharList, ref searchAborted);
 
                 lock (resultsLockObject)
                 {
