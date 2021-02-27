@@ -56,6 +56,7 @@ namespace aclogview.Tools
         {
             using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
             {
+                openFolder.SelectedPath = txtSearchPathRoot.Text;
                 if (openFolder.ShowDialog() == DialogResult.OK)
                     txtSearchPathRoot.Text = openFolder.SelectedPath;
             }

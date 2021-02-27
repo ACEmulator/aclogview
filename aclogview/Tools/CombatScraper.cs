@@ -29,6 +29,8 @@ namespace aclogview.Tools
         private bool searchCompleted;
         private string scrapeResults;
         private string fileNameHeading;
+        private string pcapFileNameList = "Creature Hits are in the following PCAP Files:\r\n";
+
 
         bool useCharList = false;
 
@@ -70,7 +72,7 @@ namespace aclogview.Tools
 
             using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
             {
-                openFolder.SelectedPath = Settings.Default.FindOpcodeInFilesRoot;
+                openFolder.SelectedPath = tbSearchPathRoot.Text;
                 if (openFolder.ShowDialog() == DialogResult.OK)
                     tbSearchPathRoot.Text = openFolder.SelectedPath;
             }
@@ -80,7 +82,7 @@ namespace aclogview.Tools
         {
             using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
             {
-                openFolder.SelectedPath = Settings.Default.FragDatFileOutputFolder;
+                openFolder.SelectedPath = tbOutputFolder.Text;
                 if (openFolder.ShowDialog() == DialogResult.OK)
                     tbOutputFolder.Text = openFolder.SelectedPath;
             }
@@ -124,6 +126,7 @@ namespace aclogview.Tools
         {
             scrapeResults = "";
             creatureNames.Clear();
+            pcapFileNameList = "Creature Hits are in the following PCAP Files:\r\n";
 
             useCharList = chkCharList.Checked;
 
@@ -235,6 +238,8 @@ namespace aclogview.Tools
                 }
 
             scrapeResults += results.combatInfo;
+            if (results.hits > 0)
+                pcapFileNameList += fileName + "\r\n";
 
             // filesProcessed++;
 
@@ -257,7 +262,7 @@ namespace aclogview.Tools
 
                 try
                 {
-                    scraper.WriteOutput(tbOutputFolder.Text, scrapeResults, fileNameHeading, ref writeOutputAborted);
+                    scraper.WriteOutput(tbOutputFolder.Text, pcapFileNameList + scrapeResults, fileNameHeading, ref writeOutputAborted);
                 }
                 catch (Exception ex)
                 {
