@@ -57,7 +57,7 @@ namespace aclogview.Tools.Scrapers
             //haveCreatureName = false;
         }
     
-        public (int hits, int messageExceptions, string combatInfo) ProcessFileRecords(string fileName, List<PacketRecord> records, List<string> creatureNames, ref bool useCharList, ref bool searchAborted)
+        public (int hits, int messageExceptions, string combatInfo, HashSet<uint> wieldedItemIDs) ProcessFileRecords(string fileName, List<PacketRecord> records, List<string> creatureNames, ref bool useCharList, ref bool searchAborted)
         {
             int hits = 0;
             int messageExceptions = 0;
@@ -71,7 +71,7 @@ namespace aclogview.Tools.Scrapers
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return (hits, messageExceptions, combatInfoResults.ToString());
+                    return (hits, messageExceptions, combatInfoResults.ToString(), wieldedItemIDs);
 
                 try
                 {
@@ -126,6 +126,7 @@ namespace aclogview.Tools.Scrapers
                                 {
                                     wieldedItemID = parsedWieldInfo.i_item;
                                     wieldedItemIDs.Add(parsedWieldInfo.i_item);
+
                                 }
                                 
                             }
@@ -233,19 +234,19 @@ namespace aclogview.Tools.Scrapers
                 }
             }
             
-            return (hits, messageExceptions, combatInfoResults.ToString());
+            return (hits, messageExceptions, combatInfoResults.ToString(), wieldedItemIDs);
         }
 
         public void WriteOutput(string destinationRoot, string scrapeResults, string fileNameHeading, ref bool writeOutputAborted)
         {
             var sb = new StringBuilder();
-            string header = $"Combat Damage Given to a creature from a player \r\n" +
-                            $"CharName,Attack,WeaponName,DamageType,Damage,Creature,Critical\r\n";
+            //string header = $"Combat Damage Given to a creature from a player \r\n" +
+            //                $"CharName,Attack,WeaponName,DamageType,Damage,Creature,Critical\r\n";
             //string combatInfoResults.Append( = $"{damageDone},{damageType},{crititcalHit}";
 
             var fileName = GetFileNameCombat(destinationRoot, fileNameHeading, ".csv");
             //if (creatureName != "")
-                File.WriteAllText(fileName, header + scrapeResults);
+                File.WriteAllText(fileName, scrapeResults);
 
             // haveCreatureName = false;
         }

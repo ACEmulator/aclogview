@@ -22,6 +22,8 @@ namespace aclogview.Tools
 
         private List<string> pcapFileNameList = new List<string>();
 
+        private HashSet<uint> wieldedItemIDs = new HashSet<uint>();
+
         StringBuilder scrapeResults = new StringBuilder();
 
         private int filesProcessed;
@@ -245,6 +247,7 @@ namespace aclogview.Tools
             if (results.hits > 0)
                 pcapFileNameList.Add(fileName);
 
+            wieldedItemIDs = results.wieldedItemIDs;
             // filesProcessed++;
 
             Interlocked.Increment(ref filesProcessed);
@@ -266,9 +269,20 @@ namespace aclogview.Tools
 
             // TODO:  Redo the way final csv file is put together.
 
-                try
+            //string scrapeResultsTemp = string.Join("\r\n", scrapeResults.ToArray());
+            string tempPcapFileNameList = string.Join("\r\n", pcapFileNameList.ToArray());
+
+            string combatHeader = $"Combat Damage Given to a creature from a player \r\n" +
+                $"CharName,Attack,WeaponName,DamageType,Damage,Creature,Critical\r\n";
+
+            string fileListHeader = "The follwing PCAP files contained combat with your creature search list:";
+
+            string fileToWrite = fileListHeader + "\r\n" + tempPcapFileNameList + "\r\n" + "\r\n" + combatHeader  + scrapeResults;
+            
+
+            try
                 {
-                    scraper.WriteOutput(tbOutputFolder.Text, pcapFileNameList + scrapeResults, fileNameHeading, ref writeOutputAborted);
+                    scraper.WriteOutput(tbOutputFolder.Text, fileToWrite, fileNameHeading, ref writeOutputAborted);
                 }
                 catch (Exception ex)
                 {
