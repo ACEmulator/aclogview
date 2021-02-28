@@ -213,7 +213,7 @@
     <Compile Include="Tools\Parsers\SampleParser.cs" />
     <Compile Include="Tools\Parsers\TextSearcher.cs" />
     <Compile Include="Tools\Scrapers\PacketTypesCountScraper.cs" />
-    <Compile Include="Tools\Scrapers\PlayerWeaponExport.cs" />
+    <Compile Include="Tools\Scrapers\PlayerWeaponExporter.cs" />
     <Compile Include="Tools\Scrapers\PlayerExporter.cs" />
     <Compile Include="Tools\Scrapers\Scraper.cs" />
     <Compile Include="Tools\Scrapers\ServerAddressScraper.cs" />
