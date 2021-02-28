@@ -64,8 +64,11 @@ namespace aclogview.Tools
             this.chkCharList = new System.Windows.Forms.CheckBox();
             this.tbFileNameDescription = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.chkExportCharsWeapons = new System.Windows.Forms.CheckBox();
             this.statusStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -86,7 +89,7 @@ namespace aclogview.Tools
             // 
             // btnStartScrape
             // 
-            this.btnStartScrape.Location = new System.Drawing.Point(373, 388);
+            this.btnStartScrape.Location = new System.Drawing.Point(447, 391);
             this.btnStartScrape.Name = "btnStartScrape";
             this.btnStartScrape.Size = new System.Drawing.Size(103, 23);
             this.btnStartScrape.TabIndex = 2;
@@ -96,7 +99,7 @@ namespace aclogview.Tools
             // 
             // btnStopScrape
             // 
-            this.btnStopScrape.Location = new System.Drawing.Point(482, 388);
+            this.btnStopScrape.Location = new System.Drawing.Point(556, 391);
             this.btnStopScrape.Name = "btnStopScrape";
             this.btnStopScrape.Size = new System.Drawing.Size(102, 23);
             this.btnStopScrape.TabIndex = 3;
@@ -108,14 +111,14 @@ namespace aclogview.Tools
             // 
             this.tbSearchPathRoot.Location = new System.Drawing.Point(15, 25);
             this.tbSearchPathRoot.Name = "tbSearchPathRoot";
-            this.tbSearchPathRoot.Size = new System.Drawing.Size(517, 20);
+            this.tbSearchPathRoot.Size = new System.Drawing.Size(585, 20);
             this.tbSearchPathRoot.TabIndex = 4;
             // 
             // tbOutputFolder
             // 
             this.tbOutputFolder.Location = new System.Drawing.Point(15, 74);
             this.tbOutputFolder.Name = "tbOutputFolder";
-            this.tbOutputFolder.Size = new System.Drawing.Size(517, 20);
+            this.tbOutputFolder.Size = new System.Drawing.Size(585, 20);
             this.tbOutputFolder.TabIndex = 5;
             // 
             // timer1
@@ -124,7 +127,7 @@ namespace aclogview.Tools
             // 
             // btnChangeSearchPathRoot
             // 
-            this.btnChangeSearchPathRoot.Location = new System.Drawing.Point(538, 25);
+            this.btnChangeSearchPathRoot.Location = new System.Drawing.Point(612, 25);
             this.btnChangeSearchPathRoot.Name = "btnChangeSearchPathRoot";
             this.btnChangeSearchPathRoot.Size = new System.Drawing.Size(46, 23);
             this.btnChangeSearchPathRoot.TabIndex = 6;
@@ -152,7 +155,7 @@ namespace aclogview.Tools
             // 
             // btnChangeOutputFolder
             // 
-            this.btnChangeOutputFolder.Location = new System.Drawing.Point(539, 70);
+            this.btnChangeOutputFolder.Location = new System.Drawing.Point(612, 74);
             this.btnChangeOutputFolder.Name = "btnChangeOutputFolder";
             this.btnChangeOutputFolder.Size = new System.Drawing.Size(45, 23);
             this.btnChangeOutputFolder.TabIndex = 7;
@@ -169,7 +172,7 @@ namespace aclogview.Tools
             this.toolStripStatusLabel3});
             this.statusStrip1.Location = new System.Drawing.Point(0, 428);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(596, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(670, 22);
             this.statusStrip1.TabIndex = 10;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -205,7 +208,7 @@ namespace aclogview.Tools
             this.rdbMeleeDamage.AutoSize = true;
             this.rdbMeleeDamage.Checked = true;
             this.rdbMeleeDamage.Enabled = false;
-            this.rdbMeleeDamage.Location = new System.Drawing.Point(326, 171);
+            this.rdbMeleeDamage.Location = new System.Drawing.Point(122, 391);
             this.rdbMeleeDamage.Name = "rdbMeleeDamage";
             this.rdbMeleeDamage.Size = new System.Drawing.Size(133, 17);
             this.rdbMeleeDamage.TabIndex = 11;
@@ -218,7 +221,7 @@ namespace aclogview.Tools
             // 
             this.rdbMagicDamage.AutoSize = true;
             this.rdbMagicDamage.Enabled = false;
-            this.rdbMagicDamage.Location = new System.Drawing.Point(465, 170);
+            this.rdbMagicDamage.Location = new System.Drawing.Point(19, 391);
             this.rdbMagicDamage.Name = "rdbMagicDamage";
             this.rdbMagicDamage.Size = new System.Drawing.Size(97, 17);
             this.rdbMagicDamage.TabIndex = 12;
@@ -240,7 +243,7 @@ namespace aclogview.Tools
             this.groupBox1.Controls.Add(this.tbCreatureName2);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.tbCreatureName1);
-            this.groupBox1.Location = new System.Drawing.Point(15, 151);
+            this.groupBox1.Location = new System.Drawing.Point(10, 151);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(294, 188);
             this.groupBox1.TabIndex = 13;
@@ -323,7 +326,9 @@ namespace aclogview.Tools
             // chkExcludeNonRetailPcaps
             // 
             this.chkExcludeNonRetailPcaps.AutoSize = true;
-            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(382, 100);
+            this.chkExcludeNonRetailPcaps.Checked = true;
+            this.chkExcludeNonRetailPcaps.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(9, 23);
             this.chkExcludeNonRetailPcaps.Name = "chkExcludeNonRetailPcaps";
             this.chkExcludeNonRetailPcaps.Size = new System.Drawing.Size(150, 17);
             this.chkExcludeNonRetailPcaps.TabIndex = 24;
@@ -334,11 +339,11 @@ namespace aclogview.Tools
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(388, 151);
+            this.label9.Location = new System.Drawing.Point(93, 362);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(96, 16);
+            this.label9.Size = new System.Drawing.Size(54, 16);
             this.label9.TabIndex = 25;
-            this.label9.Text = "DamageType:";
+            this.label9.Text = "Options";
             this.label9.Visible = false;
             // 
             // label10
@@ -355,7 +360,9 @@ namespace aclogview.Tools
             // chkCharList
             // 
             this.chkCharList.AutoSize = true;
-            this.chkCharList.Location = new System.Drawing.Point(26, 346);
+            this.chkCharList.Checked = true;
+            this.chkCharList.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkCharList.Location = new System.Drawing.Point(9, 46);
             this.chkCharList.Name = "chkCharList";
             this.chkCharList.Size = new System.Drawing.Size(262, 17);
             this.chkCharList.TabIndex = 27;
@@ -364,7 +371,7 @@ namespace aclogview.Tools
             // 
             // tbFileNameDescription
             // 
-            this.tbFileNameDescription.Location = new System.Drawing.Point(15, 391);
+            this.tbFileNameDescription.Location = new System.Drawing.Point(6, 156);
             this.tbFileNameDescription.Name = "tbFileNameDescription";
             this.tbFileNameDescription.Size = new System.Drawing.Size(292, 20);
             this.tbFileNameDescription.TabIndex = 28;
@@ -372,23 +379,47 @@ namespace aclogview.Tools
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(12, 375);
+            this.label11.Location = new System.Drawing.Point(6, 137);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(288, 13);
             this.label11.TabIndex = 29;
             this.label11.Text = "File Name Description: (if blank, creature name will be used)";
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.chkExportCharsWeapons);
+            this.groupBox2.Controls.Add(this.label11);
+            this.groupBox2.Controls.Add(this.chkCharList);
+            this.groupBox2.Controls.Add(this.chkExcludeNonRetailPcaps);
+            this.groupBox2.Controls.Add(this.tbFileNameDescription);
+            this.groupBox2.Location = new System.Drawing.Point(332, 151);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(314, 188);
+            this.groupBox2.TabIndex = 30;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Options";
+            this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
+            // 
+            // chkExportCharsWeapons
+            // 
+            this.chkExportCharsWeapons.AutoSize = true;
+            this.chkExportCharsWeapons.Checked = true;
+            this.chkExportCharsWeapons.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkExportCharsWeapons.Location = new System.Drawing.Point(9, 69);
+            this.chkExportCharsWeapons.Name = "chkExportCharsWeapons";
+            this.chkExportCharsWeapons.Size = new System.Drawing.Size(237, 17);
+            this.chkExportCharsWeapons.TabIndex = 28;
+            this.chkExportCharsWeapons.Text = "Export Characters and Weapons to Weenies";
+            this.chkExportCharsWeapons.UseVisualStyleBackColor = true;
+            // 
             // CombatScraper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(596, 450);
-            this.Controls.Add(this.label11);
-            this.Controls.Add(this.tbFileNameDescription);
-            this.Controls.Add(this.chkCharList);
+            this.ClientSize = new System.Drawing.Size(670, 450);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label10);
             this.Controls.Add(this.label9);
-            this.Controls.Add(this.chkExcludeNonRetailPcaps);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.rdbMagicDamage);
             this.Controls.Add(this.rdbMeleeDamage);
@@ -408,6 +439,8 @@ namespace aclogview.Tools
             this.statusStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -449,5 +482,7 @@ namespace aclogview.Tools
         private System.Windows.Forms.CheckBox chkCharList;
         private System.Windows.Forms.TextBox tbFileNameDescription;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.CheckBox chkExportCharsWeapons;
     }
 }

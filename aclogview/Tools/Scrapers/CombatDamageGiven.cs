@@ -19,8 +19,10 @@ namespace aclogview.Tools.Scrapers
         // private Dictionary<uint, string> wieldedItems = new Dictionary<uint, string>();
 
         //List<uint> wieldedItemIDs = new List<uint>;
+
+        // For exporting weenies
         HashSet<uint> wieldedItemIDs = new HashSet<uint>();
-        
+        HashSet<uint> characterIDs = new HashSet<uint>();
 
         // Lists for Magic Verbs (for getting Magic Damage Type)
         List<string> SlashVerbs = new List<string>() { "mangle", "mangles", "slash", "slashes", "cut", "cuts", "scratch", "scratches" };
@@ -108,6 +110,7 @@ namespace aclogview.Tools.Scrapers
                                         {
                                             account[character.gid_] = character.name_.m_buffer;
                                             charNames.Add(ConvertToUinteger(character.gid_.ToString()), character.name_.m_buffer);
+                                            characterIDs.Add(character.gid_);
                                         }
                                     }
                                 }
@@ -155,6 +158,7 @@ namespace aclogview.Tools.Scrapers
                                         crititcalHit = true;
 
                                     combatInfoResults.Append($"{GetCharacterName(character)},{"Melee/Missile"},{GetWieldedItemName(wieldedItemID)},{damageType},{damageDone},{parsedCombatAttack.defenders_name},{crititcalHit}\r\n");
+                                    characterIDs.Add(character);
                                     Reset();
                                 }
                             }
@@ -199,6 +203,7 @@ namespace aclogview.Tools.Scrapers
                                         string magicCharName = "Not Found";
                                         if (defenderCharID != 0)
                                             magicCharName = GetCharacterName(defenderCharID);
+                                        characterIDs.Add(defenderCharID);
                                         combatInfoResults.Append($"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n");
                                     }
                                 }
@@ -216,6 +221,7 @@ namespace aclogview.Tools.Scrapers
                                         string magicCharName = "Not Found";
                                         if (defenderCharID != 0)
                                             magicCharName = GetCharacterName(defenderCharID);
+                                        characterIDs.Add(defenderCharID);
                                         combatInfoResults.Append($"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n");
                                     }
                                 }

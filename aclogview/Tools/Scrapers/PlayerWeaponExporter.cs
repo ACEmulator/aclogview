@@ -432,10 +432,20 @@ namespace aclogview.Tools.Scrapers
 
         public override void WriteOutput(string destinationRoot, ref bool writeOutputAborted)
         {
-            var playerExportsFolder = Path.Combine(destinationRoot, "Player Exports");
 
-            if (!Directory.Exists(playerExportsFolder))
-                Directory.CreateDirectory(playerExportsFolder);
+            HashSet<uint> testWCIDs = new HashSet<uint> { 2443969781, 2444221587, 2471506009, 2277838217 };
+            HashSet<uint> testCharWCIDs = new HashSet<uint> { 1342259520, 1343430166 };
+
+            //var playerExportsFolder = Path.Combine(destinationRoot, "Player Exports");
+            //if (!Directory.Exists(playerExportsFolder))
+            //    Directory.CreateDirectory(playerExportsFolder);
+
+            var playerWeaponExportsFolder = Path.Combine(destinationRoot, "Player and Weapon Weenies");
+            if (!Directory.Exists(playerWeaponExportsFolder))
+                Directory.CreateDirectory(playerWeaponExportsFolder);
+
+            // Weapon Details for Combat Report
+            StringBuilder weaponDetails = new StringBuilder();
 
 
             var notes = new StringBuilder();
@@ -486,8 +496,8 @@ namespace aclogview.Tools.Scrapers
                 }
             }
 
-            var notesFileName = Path.Combine(playerExportsFolder, "notes.txt");
-            File.WriteAllText(notesFileName, notes.ToString());
+            //var notesFileName = Path.Combine(playerExportsFolder, "notes.txt");
+            //File.WriteAllText(notesFileName, notes.ToString());
 
 
             var biotaWriter = new ACE.Database.SQLFormatters.Shard.BiotaSQLWriter();
@@ -499,7 +509,7 @@ namespace aclogview.Tools.Scrapers
             // Export players by login event
             foreach (var server in playerLoginsByServer)
             {
-                var serverDirectory = Path.Combine(playerExportsFolder, server.Key);
+                //var serverDirectory = Path.Combine(playerExportsFolder, server.Key);
 
                 foreach (var player in server.Value)
                 {
@@ -515,12 +525,12 @@ namespace aclogview.Tools.Scrapers
 
                     var name = loginEvent.Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
 
-                    var playerDirectoryRoot = Path.Combine(serverDirectory, name);
+                    //var playerDirectoryRoot = Path.Combine(serverDirectory, name);
 
-                    var loginEventDirectory = Path.Combine(playerDirectoryRoot, loginEvent.TSec.ToString());
+                    //var loginEventDirectory = Path.Combine(playerDirectoryRoot, loginEvent.TSec.ToString());
 
-                    if (!Directory.Exists(loginEventDirectory))
-                        Directory.CreateDirectory(loginEventDirectory);
+                    //if (!Directory.Exists(loginEventDirectory))
+                    //    Directory.CreateDirectory(loginEventDirectory);
 
                     var sb = new StringBuilder();
 
@@ -545,8 +555,11 @@ namespace aclogview.Tools.Scrapers
                     // Biota
                     {
                         var defaultFileName = biotaWriter.GetDefaultFileName(loginEvent.Biota);
-
-                        var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+                        //var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+                        var fileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
+                        // Hack for changing GUID in file name from Hex to Decimal
+                        string idHex = loginEvent.Biota.Id.ToString("X8");
+                        defaultFileName = fileName.Replace(idHex, loginEvent.Biota.Id.ToString());
 
                         // Update to the latest position seen
                         if (biotasByServer.TryGetValue(server.Key, out var biotaServer) && biotaServer.TryGetValue(player.Key, out var biotaEx) && biotaEx.LastPosition != null)
@@ -555,22 +568,28 @@ namespace aclogview.Tools.Scrapers
                         loginEvent.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
 
                         SetBiotaPopulatedCollections(loginEvent.Biota);
-
-                        using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                            biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
+                        if (testCharWCIDs.Contains(loginEvent.Character.Id))
+                        {
+                            using (StreamWriter outputFile = new StreamWriter(defaultFileName, false))
+                                biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
+                        }
                     }
 
                     // Character
-                    {
-                        loginEvent.Character.Name = name;
+                    // Only writing if it finds guid in list, and Changing folder and filename
+                    //{
 
-                        var defaultFileName = loginEvent.Character.Id.ToString("X8") + " " + name + " - Character.sql";
+                    //    loginEvent.Character.Name = name;
 
-                        var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+                    //    var defaultFileName = loginEvent.Character.Id.ToString() + " " + name + " - Character.sql";
+                    //    var fileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
 
-                        using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                            characterWriter.CreateSQLINSERTStatement(loginEvent.Character, outputFile);
-                    }
+                    //    if (testCharWCIDs.Contains(loginEvent.Character.Id))
+                    //    {
+                    //        using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                    //            characterWriter.CreateSQLINSERTStatement(loginEvent.Character, outputFile);
+                    //    }
+                    //}
 
                     // Possessions
                     foreach (var woi in loginEvent.WorldObjects)
@@ -627,7 +646,7 @@ namespace aclogview.Tools.Scrapers
 
                         defaultFileName = String.Concat(defaultFileName.Split(Path.GetInvalidFileNameChars()));
 
-                        var fileName = Path.Combine(loginEventDirectory, defaultFileName);
+                        //var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
                         woiBeingUsed.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
 
@@ -643,14 +662,32 @@ namespace aclogview.Tools.Scrapers
                         SetBiotaPopulatedCollectionsItem(woiBeingUsed.Biota);
 
 
-                        // Only going to write weenies that match GUIDs from list.
+                        // Only going to write weenies that match GUIDs from HashSet.
                         // if (woiBeingUsed.Biota.WeenieClassId )
 
-                        if ((woiBeingUsed.Biota.WeenieType == 3)||(woiBeingUsed.Biota.WeenieType == 6)||(woiBeingUsed.Biota.WeenieType == 35))
+                        // Hack for changing GUID in file name from Hex to Decimal
+                        string idHex = woiBeingUsed.Biota.Id.ToString("X8");
+                        defaultFileName = defaultFileName.Replace(idHex, woiBeingUsed.Biota.Id.ToString());
+
+                        var pweFileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
+
+
+
+
+                        if (testWCIDs.Contains(woiBeingUsed.Biota.Id))
                         {
-                            using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                            using (StreamWriter outputFile = new StreamWriter(pweFileName, false))
                                 biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
+                            if ((woiBeingUsed.Biota.WeenieType == 3) || (woiBeingUsed.Biota.WeenieType == 6) || (woiBeingUsed.Biota.WeenieType == 35))
+                            {
+                                // weaponDetails.Append($"{woiBeingUsed.Biota.Id},{woiBeingUsed.Name},Mod={woiBeingUsed.Biota.BiotaPropertiesFloat.})
+                            }
                         }
+                        //if ((woiBeingUsed.Biota.WeenieType == 3)||(woiBeingUsed.Biota.WeenieType == 6)||(woiBeingUsed.Biota.WeenieType == 35))
+                        //{
+                        //    using (StreamWriter outputFile = new StreamWriter(fileName, false))
+                        //        biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
+                        //}
                     }
 
                     if (failedExportsUnknownWeenie.Count > 0)
@@ -702,7 +739,7 @@ namespace aclogview.Tools.Scrapers
             // Export player biotas that don't have login events
             foreach (var server in biotasByServer)
             {
-                var serverDirectory = Path.Combine(playerExportsFolder, server.Key);
+                //var serverDirectory = Path.Combine(playerExportsFolder, server.Key);
 
                 foreach (var biotaEx in server.Value)
                 {
@@ -727,18 +764,23 @@ namespace aclogview.Tools.Scrapers
 
                     var name = biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
 
-                    var playerDirectoryRoot = Path.Combine(serverDirectory, name);
+                    //var playerDirectoryRoot = Path.Combine(serverDirectory, name);
 
-                    var playerDirectoryInstance = Path.Combine(playerDirectoryRoot, "0");
+                    //var playerDirectoryInstance = Path.Combine(playerDirectoryRoot, "0");
 
-                    if (!Directory.Exists(playerDirectoryInstance))
-                        Directory.CreateDirectory(playerDirectoryInstance);
+                    //if (!Directory.Exists(playerDirectoryInstance))
+                    //    Directory.CreateDirectory(playerDirectoryInstance);
 
                     // Biota
                     {
                         var defaultFileName = biotaWriter.GetDefaultFileName(biota);
+                        //var fileName = Path.Combine(playerDirectoryInstance, defaultFileName);
+                        //string idHex = woiBeingUsed.Biota.Id.ToString("X8");
 
-                        var fileName = Path.Combine(playerDirectoryInstance, defaultFileName);
+                        string idHex = biota.Id.ToString("X8");
+                        defaultFileName = defaultFileName.Replace(idHex, biota.Id.ToString());
+
+                        var pweFileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
 
                         // Update to the latest position seen
                         if (biotaEx.Value.LastPosition != null)
@@ -748,8 +790,11 @@ namespace aclogview.Tools.Scrapers
 
                         SetBiotaPopulatedCollectionsCharacter(biota);
 
-                        using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                            biotaWriter.CreateSQLINSERTStatement(biota, outputFile);
+                        if (testWCIDs.Contains(biota.Id))
+                        {
+                            using (StreamWriter outputFile = new StreamWriter(pweFileName, false))
+                                biotaWriter.CreateSQLINSERTStatement(biota, outputFile);
+                        }
                     }
                 }
             }
