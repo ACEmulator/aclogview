@@ -16,7 +16,11 @@ namespace aclogview.Tools.Scrapers
         // List for Character Names
         private readonly Dictionary<string, Dictionary<uint, string>> accounts = new Dictionary<string, Dictionary<uint, string>>();
         private Dictionary<uint, string> charNames = new Dictionary<uint, string>();
-        private Dictionary<uint, string> wieldedItemNames = new Dictionary<uint, string>();
+        // private Dictionary<uint, string> wieldedItems = new Dictionary<uint, string>();
+
+        //List<uint> wieldedItemIDs = new List<uint>;
+        HashSet<uint> wieldedItemIDs = new HashSet<uint>();
+        
 
         // Lists for Magic Verbs (for getting Magic Damage Type)
         List<string> SlashVerbs = new List<string>() { "mangle", "mangles", "slash", "slashes", "cut", "cuts", "scratch", "scratches" };
@@ -36,7 +40,7 @@ namespace aclogview.Tools.Scrapers
         private uint damageDone = 0;
         private string damageType = "";
         private bool crititcalHit = false;
-        private string combatInfo = "";
+        private string combatInfo;
 
         // private bool useCharList = false;
 
@@ -57,8 +61,8 @@ namespace aclogview.Tools.Scrapers
         {
             int hits = 0;
             int messageExceptions = 0;
-            string combatInfoResults = "";
-            
+            //string combatInfoResults.Append(Results = "";
+            StringBuilder combatInfoResults= new StringBuilder();
 
             // Loads Character List from file if checked
             if (useCharList)
@@ -67,7 +71,7 @@ namespace aclogview.Tools.Scrapers
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return (hits, messageExceptions, combatInfoResults);
+                    return (hits, messageExceptions, combatInfoResults.ToString());
 
                 try
                 {
@@ -121,6 +125,7 @@ namespace aclogview.Tools.Scrapers
                                 if ((parsedWieldInfo.i_equipMask == 1048576) || (parsedWieldInfo.i_equipMask == 4194304) || (parsedWieldInfo.i_equipMask == 16777216))
                                 {
                                     wieldedItemID = parsedWieldInfo.i_item;
+                                    wieldedItemIDs.Add(parsedWieldInfo.i_item);
                                 }
                                 
                             }
@@ -148,7 +153,7 @@ namespace aclogview.Tools.Scrapers
                                     if (parsedCombatAttack.critical == 1)
                                         crititcalHit = true;
 
-                                    combatInfo += $"{GetCharacterName(character)},{"Melee/Missile"},{GetWieldedItemName(wieldedItemID)},{damageType},{damageDone},{parsedCombatAttack.defenders_name},{crititcalHit}\r\n";
+                                    combatInfoResults.Append($"{GetCharacterName(character)},{"Melee/Missile"},{GetWieldedItemName(wieldedItemID)},{damageType},{damageDone},{parsedCombatAttack.defenders_name},{crititcalHit}\r\n");
                                     Reset();
                                 }
                             }
@@ -193,7 +198,7 @@ namespace aclogview.Tools.Scrapers
                                         string magicCharName = "Not Found";
                                         if (defenderCharID != 0)
                                             magicCharName = GetCharacterName(defenderCharID);
-                                        combatInfo += $"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
+                                        combatInfoResults.Append($"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n");
                                     }
                                 }
                             }
@@ -210,7 +215,7 @@ namespace aclogview.Tools.Scrapers
                                         string magicCharName = "Not Found";
                                         if (defenderCharID != 0)
                                             magicCharName = GetCharacterName(defenderCharID);
-                                        combatInfo += $"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n";
+                                        combatInfoResults.Append($"{magicCharName},{"Magic"},{GetWieldedItemName(wieldedItemID)},{decodedMagicChat.magicDamageType},{decodedMagicChat.damageAmount},{decodedMagicChat.creatureName},{decodedMagicChat.crit}\r\n");
                                     }
                                 }
                             }
@@ -228,7 +233,7 @@ namespace aclogview.Tools.Scrapers
                 }
             }
             
-            return (hits, messageExceptions, combatInfo);
+            return (hits, messageExceptions, combatInfoResults.ToString());
         }
 
         public void WriteOutput(string destinationRoot, string scrapeResults, string fileNameHeading, ref bool writeOutputAborted)
@@ -236,7 +241,7 @@ namespace aclogview.Tools.Scrapers
             var sb = new StringBuilder();
             string header = $"Combat Damage Given to a creature from a player \r\n" +
                             $"CharName,Attack,WeaponName,DamageType,Damage,Creature,Critical\r\n";
-            //string combatInfo = $"{damageDone},{damageType},{crititcalHit}";
+            //string combatInfoResults.Append( = $"{damageDone},{damageType},{crititcalHit}";
 
             var fileName = GetFileNameCombat(destinationRoot, fileNameHeading, ".csv");
             //if (creatureName != "")

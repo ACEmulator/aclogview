@@ -20,6 +20,10 @@ namespace aclogview.Tools
         private List<string> filesToProcess = new List<string>();
         private List<string> creatureNames = new List<string>();
 
+        private List<string> pcapFileNameList = new List<string>();
+
+        StringBuilder scrapeResults = new StringBuilder();
+
         private int filesProcessed;
         private readonly Object resultsLockObject = new Object();
         private long totalHits;
@@ -27,9 +31,9 @@ namespace aclogview.Tools
         private bool searchAborted;
         private bool writeOutputAborted;
         private bool searchCompleted;
-        private string scrapeResults;
+        //private string scrapeResults;
         private string fileNameHeading;
-        private string pcapFileNameList = "Creature Hits are in the following PCAP Files:\r\n";
+        // private string pcapFileNameList = "Creature Hits are in the following PCAP Files:\r\n";
 
 
         bool useCharList = false;
@@ -124,9 +128,9 @@ namespace aclogview.Tools
 
         private void btnStartScrape_Click(object sender, EventArgs e)
         {
-            scrapeResults = "";
+            //scrapeResults = "";
             creatureNames.Clear();
-            pcapFileNameList = "Creature Hits are in the following PCAP Files:\r\n";
+            // pcapFileNameList = "Creature Hits are in the following PCAP Files:\r\n";
 
             useCharList = chkCharList.Checked;
 
@@ -204,7 +208,7 @@ namespace aclogview.Tools
             foreach (var currentFile in filesToProcess)
                 ProcessFile(currentFile);
 
-            WriteOutput(scrapeResults);
+            WriteOutput(scrapeResults.ToString());
         }
 
         private void ProcessFile(string fileName)
@@ -237,9 +241,9 @@ namespace aclogview.Tools
                 totalExceptions += results.messageExceptions;
                 }
 
-            scrapeResults += results.combatInfo;
+            scrapeResults.Append(results.combatInfo);
             if (results.hits > 0)
-                pcapFileNameList += fileName + "\r\n";
+                pcapFileNameList.Add(fileName);
 
             // filesProcessed++;
 
@@ -259,6 +263,8 @@ namespace aclogview.Tools
             var scraper = new CombatDamageGiven();
             if (writeOutputAborted || Disposing || IsDisposed)
                 return;
+
+            // TODO:  Redo the way final csv file is put together.
 
                 try
                 {
