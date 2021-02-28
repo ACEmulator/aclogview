@@ -432,13 +432,9 @@ namespace aclogview.Tools.Scrapers
 
         public override void WriteOutput(string destinationRoot, ref bool writeOutputAborted)
         {
-
+            // From Combat Scraper guid matches
             HashSet<uint> testWCIDs = new HashSet<uint> { 2443969781, 2444221587, 2471506009, 2277838217 };
             HashSet<uint> testCharWCIDs = new HashSet<uint> { 1342259520, 1343430166 };
-
-            //var playerExportsFolder = Path.Combine(destinationRoot, "Player Exports");
-            //if (!Directory.Exists(playerExportsFolder))
-            //    Directory.CreateDirectory(playerExportsFolder);
 
             var playerWeaponExportsFolder = Path.Combine(destinationRoot, "Player and Weapon Weenies");
             if (!Directory.Exists(playerWeaponExportsFolder))
@@ -447,18 +443,8 @@ namespace aclogview.Tools.Scrapers
             // Weapon Details for Combat Report
             StringBuilder weaponDetails = new StringBuilder();
 
-
+            // Not Used
             var notes = new StringBuilder();
-            notes.AppendLine("The following command will import all the sql files into your retail shard. It can take many hours");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Darktide\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_dt < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Frostfell\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_ff < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Harvestgain\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_hg < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Leafcull\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_lc < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Morningthaw\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_mt < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Solclaim\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_sc < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Thistledown\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_td < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Verdantine\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_vt < \"%f\"");
-            notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\WintersEbb\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_we < \"%f\"");
 
             // Find guid collisions across servers
             Dictionary<string, HashSet<uint>> guidsByServer = new Dictionary<string, HashSet<uint>>();
@@ -496,14 +482,8 @@ namespace aclogview.Tools.Scrapers
                 }
             }
 
-            //var notesFileName = Path.Combine(playerExportsFolder, "notes.txt");
-            //File.WriteAllText(notesFileName, notes.ToString());
-
-
             var biotaWriter = new ACE.Database.SQLFormatters.Shard.BiotaSQLWriter();
-            var characterWriter = new ACE.Database.SQLFormatters.Shard.CharacterSQLWriter();
-
-            
+            var characterWriter = new ACE.Database.SQLFormatters.Shard.CharacterSQLWriter();           
             var rwLock = new ReaderWriterLockSlim();
 
             // Export players by login event
@@ -524,14 +504,6 @@ namespace aclogview.Tools.Scrapers
                         continue;
 
                     var name = loginEvent.Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
-
-                    //var playerDirectoryRoot = Path.Combine(serverDirectory, name);
-
-                    //var loginEventDirectory = Path.Combine(playerDirectoryRoot, loginEvent.TSec.ToString());
-
-                    //if (!Directory.Exists(loginEventDirectory))
-                    //    Directory.CreateDirectory(loginEventDirectory);
-
                     var sb = new StringBuilder();
 
                     sb.AppendLine("Source: ");
@@ -555,7 +527,6 @@ namespace aclogview.Tools.Scrapers
                     // Biota
                     {
                         var defaultFileName = biotaWriter.GetDefaultFileName(loginEvent.Biota);
-                        //var fileName = Path.Combine(loginEventDirectory, defaultFileName);
                         var fileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
                         // Hack for changing GUID in file name from Hex to Decimal
                         string idHex = loginEvent.Biota.Id.ToString("X8");
@@ -574,22 +545,6 @@ namespace aclogview.Tools.Scrapers
                                 biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
                         }
                     }
-
-                    // Character
-                    // Only writing if it finds guid in list, and Changing folder and filename
-                    //{
-
-                    //    loginEvent.Character.Name = name;
-
-                    //    var defaultFileName = loginEvent.Character.Id.ToString() + " " + name + " - Character.sql";
-                    //    var fileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
-
-                    //    if (testCharWCIDs.Contains(loginEvent.Character.Id))
-                    //    {
-                    //        using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                    //            characterWriter.CreateSQLINSERTStatement(loginEvent.Character, outputFile);
-                    //    }
-                    //}
 
                     // Possessions
                     foreach (var woi in loginEvent.WorldObjects)
@@ -643,10 +598,7 @@ namespace aclogview.Tools.Scrapers
                         processed:
 
                         var defaultFileName = biotaWriter.GetDefaultFileName(woiBeingUsed.Biota);
-
                         defaultFileName = String.Concat(defaultFileName.Split(Path.GetInvalidFileNameChars()));
-
-                        //var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
                         woiBeingUsed.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
 
@@ -663,25 +615,19 @@ namespace aclogview.Tools.Scrapers
 
 
                         // Only going to write weenies that match GUIDs from HashSet.
-                        // if (woiBeingUsed.Biota.WeenieClassId )
-
                         // Hack for changing GUID in file name from Hex to Decimal
                         string idHex = woiBeingUsed.Biota.Id.ToString("X8");
                         defaultFileName = defaultFileName.Replace(idHex, woiBeingUsed.Biota.Id.ToString());
 
                         var pweFileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
-
-
-
-
                         if (testWCIDs.Contains(woiBeingUsed.Biota.Id))
                         {
                             using (StreamWriter outputFile = new StreamWriter(pweFileName, false))
                                 biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
-                            if ((woiBeingUsed.Biota.WeenieType == 3) || (woiBeingUsed.Biota.WeenieType == 6) || (woiBeingUsed.Biota.WeenieType == 35))
-                            {
-                                // weaponDetails.Append($"{woiBeingUsed.Biota.Id},{woiBeingUsed.Name},Mod={woiBeingUsed.Biota.BiotaPropertiesFloat.})
-                            }
+                            //if ((woiBeingUsed.Biota.WeenieType == 3) || (woiBeingUsed.Biota.WeenieType == 6) || (woiBeingUsed.Biota.WeenieType == 35))
+                            //{
+                            //    // weaponDetails.Append($"{woiBeingUsed.Biota.Id},{woiBeingUsed.Name},Mod={woiBeingUsed.Biota.BiotaPropertiesFloat.})
+                            //}
                         }
                         //if ((woiBeingUsed.Biota.WeenieType == 3)||(woiBeingUsed.Biota.WeenieType == 6)||(woiBeingUsed.Biota.WeenieType == 35))
                         //{
@@ -728,13 +674,8 @@ namespace aclogview.Tools.Scrapers
                         if (!loginEvent.WorldObjects.ContainsKey(value))
                             sb.AppendLine($"{value:X8}");
                     }
-
-
-                    // var resutlsFileName = Path.Combine(loginEventDirectory, "results.txt");
-                    // File.WriteAllText(resutlsFileName, sb.ToString());
                 }
             }
-
 
             // Export player biotas that don't have login events
             foreach (var server in biotasByServer)
@@ -763,15 +704,6 @@ namespace aclogview.Tools.Scrapers
                         ACEBiotaCreator.Update(biotaEx.Value.LastAppraisalProfile, biota, rwLock);
 
                     var name = biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
-
-                    //var playerDirectoryRoot = Path.Combine(serverDirectory, name);
-
-                    //var playerDirectoryInstance = Path.Combine(playerDirectoryRoot, "0");
-
-                    //if (!Directory.Exists(playerDirectoryInstance))
-                    //    Directory.CreateDirectory(playerDirectoryInstance);
-
-                    // Biota
                     {
                         var defaultFileName = biotaWriter.GetDefaultFileName(biota);
                         //var fileName = Path.Combine(playerDirectoryInstance, defaultFileName);
