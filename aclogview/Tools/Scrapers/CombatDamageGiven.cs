@@ -59,7 +59,7 @@ namespace aclogview.Tools.Scrapers
             //haveCreatureName = false;
         }
     
-        public (int hits, int messageExceptions, string combatInfo, HashSet<uint> wieldedItemIDs) ProcessFileRecords(string fileName, List<PacketRecord> records, List<string> creatureNames, ref bool useCharList, ref bool searchAborted)
+        public (int hits, int messageExceptions, string combatInfo, HashSet<uint> characterIDs, HashSet<uint> wieldedItemIDs) ProcessFileRecords(string fileName, List<PacketRecord> records, List<string> creatureNames, ref bool useCharList, ref bool searchAborted)
         {
             int hits = 0;
             int messageExceptions = 0;
@@ -73,7 +73,7 @@ namespace aclogview.Tools.Scrapers
             foreach (PacketRecord record in records)
             {
                 if (searchAborted)
-                    return (hits, messageExceptions, combatInfoResults.ToString(), wieldedItemIDs);
+                    return (hits, messageExceptions, combatInfoResults.ToString(), characterIDs, wieldedItemIDs);
 
                 try
                 {
@@ -138,51 +138,40 @@ namespace aclogview.Tools.Scrapers
                         if (messageCode == (uint)PacketOpcode.WEENIE_ORDERED_EVENT) // 0xF7B0)
                         {
 
-                        var character = binaryReader.ReadUInt32(); // Character
-                        var sequence = binaryReader.ReadUInt32(); // Sequence
-                        var _event = binaryReader.ReadUInt32(); // Event
+                            var character = binaryReader.ReadUInt32(); // Character
+                            var sequence = binaryReader.ReadUInt32(); // Sequence
+                            var _event = binaryReader.ReadUInt32(); // Event
 
-                        if (_event == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // Seeing if event matches 
-                        {
-
-                            var parsedCombatAttack = CM_Combat.AttackerNotificationEvent.read(binaryReader);
-
-                            lock (this)
+                            if (_event == (uint)PacketOpcode.ATTACKER_NOTIFICATION_EVENT) // Seeing if event matches 
                             {
-                                if (creatureNames.Contains(parsedCombatAttack.defenders_name.ToString()) == true)  // Seeing if creature Name matches list of creatures searching for.
-                                {
-                                    hits++;
-                                    damageDone = parsedCombatAttack.damage;
-                                    damageType = DamageType(parsedCombatAttack.damage_type);
-                                    if (parsedCombatAttack.critical == 1)
-                                        crititcalHit = true;
 
-                                    combatInfoResults.Append($"{GetCharacterName(character)},{"Melee/Missile"},{GetWieldedItemName(wieldedItemID)},{damageType},{damageDone},{parsedCombatAttack.defenders_name},{crititcalHit}\r\n");
-                                    characterIDs.Add(character);
-                                    Reset();
+                                var parsedCombatAttack = CM_Combat.AttackerNotificationEvent.read(binaryReader);
+
+                                lock (this)
+                                {
+                                    if (creatureNames.Contains(parsedCombatAttack.defenders_name.ToString()) == true)  // Seeing if creature Name matches list of creatures searching for.
+                                    {
+                                        hits++;
+                                        damageDone = parsedCombatAttack.damage;
+                                        damageType = DamageType(parsedCombatAttack.damage_type);
+                                        if (parsedCombatAttack.critical == 1)
+                                            crititcalHit = true;
+
+                                        combatInfoResults.Append($"{GetCharacterName(character)},{"Melee/Missile"},{GetWieldedItemName(wieldedItemID)},{damageType},{damageDone},{parsedCombatAttack.defenders_name},{crititcalHit}\r\n");
+                                        characterIDs.Add(character);
+                                        Reset();
+                                    }
                                 }
                             }
-                        }
-                        // for getting charID for Magic chars
-                        if (_event == (uint)PacketOpcode.DEFENDER_NOTIFICATION_EVENT) // Seeing if event matches
-                        {
-                            defenderCharID = character;
+
+                            // for getting charID for Magic chars
+                            if (_event == (uint)PacketOpcode.DEFENDER_NOTIFICATION_EVENT) // Seeing if event matches
+                            {
+                                defenderCharID = character;
+
+                            }
 
                         }
-
-                        }
-                        // Getting Character ID from 0x01BF: Combat_QueryHealth 
-                        //if (messageCode == (uint)PacketOpcode.Evt_Combat__QueryHealth_ID) // 0xF7E0
-                        //{
-                        //    var character = binaryReader.ReadUInt32(); // Character
-                        //    var sequence = binaryReader.ReadUInt32(); // Sequence
-                        //    var _event = binaryReader.ReadUInt32(); // Event
-
-                        //    var parsedHealth = CM_Combat.QueryHealth.read(binaryReader);
-
-
-                        //}
-
 
                         // Getting Magic Attack Damage
                         if (messageCode == (uint)PacketOpcode.Evt_Communication__TextboxString_ID) // 0xF7E0
@@ -240,7 +229,7 @@ namespace aclogview.Tools.Scrapers
                 }
             }
             
-            return (hits, messageExceptions, combatInfoResults.ToString(), wieldedItemIDs);
+            return (hits, messageExceptions, combatInfoResults.ToString(), characterIDs, wieldedItemIDs);
         }
 
         public void WriteOutput(string destinationRoot, string scrapeResults, string fileNameHeading, ref bool writeOutputAborted)

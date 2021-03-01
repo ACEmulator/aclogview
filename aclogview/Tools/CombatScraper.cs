@@ -23,9 +23,12 @@ namespace aclogview.Tools
         private List<string> pcapFileNameList = new List<string>();
 
         private HashSet<uint> wieldedItemIDs = new HashSet<uint>();
+        private HashSet<uint> characterIDs = new HashSet<uint>();
+
 
         StringBuilder scrapeResults = new StringBuilder();
 
+        private int numberFilesToProcess = 0;
         private int filesProcessed;
         private readonly Object resultsLockObject = new Object();
         private long totalHits;
@@ -211,10 +214,22 @@ namespace aclogview.Tools
                 ProcessFile(currentFile);
 
             WriteOutput(scrapeResults.ToString());
+
+            totalHits = 0;
+            totalExceptions = 0;
+            filesProcessed = 0;
+            UpdateToolStrip("Scraping Characters and Weapons");
+            if (chkExportCharsWeapons.Checked)
+            {
+                foreach (var currentFile in pcapFileNameList)
+                    ExportCharacterWeapons(currentFile);
+            }
+            Interlocked.Increment(ref filesProcessed);
         }
 
         private void ProcessFile(string fileName)
         {
+            numberFilesToProcess = filesToProcess.Count;
             if (searchAborted || Disposing || IsDisposed)
                 return;
 
@@ -247,8 +262,8 @@ namespace aclogview.Tools
             if (results.hits > 0)
                 pcapFileNameList.Add(fileName);
 
-            wieldedItemIDs = results.wieldedItemIDs;
-            // filesProcessed++;
+            characterIDs.UnionWith(results.characterIDs);
+            wieldedItemIDs.UnionWith(results.wieldedItemIDs);          
 
             Interlocked.Increment(ref filesProcessed);
         }
@@ -261,7 +276,7 @@ namespace aclogview.Tools
             if (!Directory.Exists(tbOutputFolder.Text))
                 Directory.CreateDirectory(tbOutputFolder.Text);
 
-            UpdateToolStrip("Writing Output ...");
+            UpdateToolStrip("Writing Combat Report...");
 
             var scraper = new CombatDamageGiven();
             if (writeOutputAborted || Disposing || IsDisposed)
@@ -273,7 +288,7 @@ namespace aclogview.Tools
             string tempPcapFileNameList = string.Join("\r\n", pcapFileNameList.ToArray());
 
             string combatHeader = $"Combat Damage Given to a creature from a player \r\n" +
-                $"CharName,Attack,WeaponName,DamageType,Damage,Creature,Critical\r\n";
+                $"CharName,Attack,WeaponGUID,DamageType,Damage,Creature,Critical\r\n";
 
             string fileListHeader = "The follwing PCAP files contained combat with your creature search list:";
 
@@ -296,6 +311,52 @@ namespace aclogview.Tools
                 UpdateToolStrip("Writing Output Aborted");
             else
                 UpdateToolStrip("Writing Output Complete");
+
+        }
+        private void ExportCharacterWeapons(string fileName)
+        {
+            if (searchAborted || Disposing || IsDisposed)
+                return;
+
+            var records = PCapReader.LoadPcap(fileName, true, ref searchAborted, out _);
+
+            if (chkExcludeNonRetailPcaps.Checked)
+            {
+                if (records.Count > 0)
+                {
+                    var servers = ServerList.FindBy(records[0].ipHeader, records[0].isSend);
+
+                    if (servers.Count != 1 || !servers[0].IsRetail)
+                        return;
+                }
+            }
+
+            // Start Exporter
+            var charWeaponExport = new PlayerWeaponExporter();
+            if (searchAborted || Disposing || IsDisposed)
+                return;
+
+
+            var results = charWeaponExport.ProcessFileRecords(fileName, records, characterIDs, wieldedItemIDs, ref searchAborted);
+
+            lock (resultsLockObject)
+            {
+                totalHits += results.hits;
+                totalExceptions += results.messageExceptions;
+            }
+
+            numberFilesToProcess = pcapFileNameList.Count;
+            UpdateToolStrip("Writing Weenies. Please Wait...");
+            lock (resultsLockObject)
+            {
+                totalHits += results.hits;
+                totalExceptions += results.messageExceptions;
+            }
+            Interlocked.Increment(ref filesProcessed);
+
+            charWeaponExport.WriteOutput(tbOutputFolder.Text, ref searchAborted);
+            UpdateToolStrip("Combat Scrape Completed");
+
         }
 
         private void UpdateToolStrip(string status = null)
@@ -303,7 +364,7 @@ namespace aclogview.Tools
             if (status != null)
                 toolStripStatusLabel4.Text = "Status: " + status;
 
-            toolStripStatusLabel1.Text = "Files Processed: " + filesProcessed.ToString("N0") + " of " + filesToProcess.Count.ToString("N0");
+            toolStripStatusLabel1.Text = "Files Processed: " + filesProcessed.ToString("N0") + " of " + numberFilesToProcess.ToString("N0");
 
             toolStripStatusLabel2.Text = "Total Hits: " + totalHits.ToString("N0");
 

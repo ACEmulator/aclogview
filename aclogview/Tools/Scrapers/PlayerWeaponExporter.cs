@@ -11,13 +11,17 @@ using aclogview.ACE_Helpers;
 
 namespace aclogview.Tools.Scrapers
 {
-    class PlayerWeaponExporter : Scraper
+    class PlayerWeaponExporter
     {
-        public override string Description => "Exports players and their weapons";
+        public string Description => "Exports players and their weapons";
 
         // TODO: player.Character.CharacterPropertiesQuestRegistry
         // TODO: player.Character.HairTexture
         // TODO: player.Character.DefaultHairTexture
+
+        // From Combat Scraper guid matches
+        public HashSet<uint> weaponGUIDs = new HashSet<uint>();
+        public HashSet<uint> characterGUIDs = new HashSet<uint>();
 
         class WorldObjectItem
         {
@@ -127,16 +131,19 @@ namespace aclogview.Tools.Scrapers
 
         private readonly Dictionary<string, Dictionary<uint, BiotaEx>> biotasByServer = new Dictionary<string, Dictionary<uint, BiotaEx>>();
 
-        public override void Reset()
+        public  void Reset()
         {
             playerLoginsByServer.Clear();
             biotasByServer.Clear();
         }
 
-        public override (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, ref bool searchAborted)
+        public (int hits, int messageExceptions) ProcessFileRecords(string fileName, List<PacketRecord> records, HashSet<uint> CharIdMatch, HashSet<uint> WeaponIdMatch, ref bool searchAborted)
         {
             int hits = 0;
             int messageExceptions = 0;
+
+            weaponGUIDs = WeaponIdMatch;
+            characterGUIDs = CharIdMatch;
 
             string serverName = "Unknown";
 
@@ -430,11 +437,9 @@ namespace aclogview.Tools.Scrapers
             return (hits, messageExceptions);
         }
 
-        public override void WriteOutput(string destinationRoot, ref bool writeOutputAborted)
+        public void WriteOutput(string destinationRoot, ref bool writeOutputAborted)
         {
-            // From Combat Scraper guid matches
-            HashSet<uint> testWCIDs = new HashSet<uint> { 2443969781, 2444221587, 2471506009, 2277838217 };
-            HashSet<uint> testCharWCIDs = new HashSet<uint> { 1342259520, 1343430166 };
+
 
             var playerWeaponExportsFolder = Path.Combine(destinationRoot, "Player and Weapon Weenies");
             if (!Directory.Exists(playerWeaponExportsFolder))
@@ -539,7 +544,7 @@ namespace aclogview.Tools.Scrapers
                         loginEvent.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
 
                         SetBiotaPopulatedCollections(loginEvent.Biota);
-                        if (testCharWCIDs.Contains(loginEvent.Character.Id))
+                        if (characterGUIDs.Contains(loginEvent.Character.Id))
                         {
                             using (StreamWriter outputFile = new StreamWriter(defaultFileName, false))
                                 biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
@@ -620,7 +625,7 @@ namespace aclogview.Tools.Scrapers
                         defaultFileName = defaultFileName.Replace(idHex, woiBeingUsed.Biota.Id.ToString());
 
                         var pweFileName = Path.Combine(playerWeaponExportsFolder, defaultFileName);
-                        if (testWCIDs.Contains(woiBeingUsed.Biota.Id))
+                        if (weaponGUIDs.Contains(woiBeingUsed.Biota.Id))
                         {
                             using (StreamWriter outputFile = new StreamWriter(pweFileName, false))
                                 biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
@@ -722,7 +727,7 @@ namespace aclogview.Tools.Scrapers
 
                         SetBiotaPopulatedCollectionsCharacter(biota);
 
-                        if (testWCIDs.Contains(biota.Id))
+                        if (weaponGUIDs.Contains(biota.Id))
                         {
                             using (StreamWriter outputFile = new StreamWriter(pweFileName, false))
                                 biotaWriter.CreateSQLINSERTStatement(biota, outputFile);
