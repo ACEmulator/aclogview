@@ -12,7 +12,7 @@ namespace aclogview.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.8.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "16.8.1.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -163,6 +163,66 @@ namespace aclogview.Properties {
             }
             set {
                 this["ACEStyleHeaders"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CreatureNameCombat1 {
+            get {
+                return ((string)(this["CreatureNameCombat1"]));
+            }
+            set {
+                this["CreatureNameCombat1"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CreatureNameCombat2 {
+            get {
+                return ((string)(this["CreatureNameCombat2"]));
+            }
+            set {
+                this["CreatureNameCombat2"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CreatureNameCombat3 {
+            get {
+                return ((string)(this["CreatureNameCombat3"]));
+            }
+            set {
+                this["CreatureNameCombat3"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CreatureNameCombat4 {
+            get {
+                return ((string)(this["CreatureNameCombat4"]));
+            }
+            set {
+                this["CreatureNameCombat4"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CreatureNameCombat5 {
+            get {
+                return ((string)(this["CreatureNameCombat5"]));
+            }
+            set {
+                this["CreatureNameCombat5"] = value;
             }
         }
     }

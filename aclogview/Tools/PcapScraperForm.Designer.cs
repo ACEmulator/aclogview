@@ -83,14 +83,14 @@ namespace aclogview.Tools
             // 
             this.toolStripStatusLabel2.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(60, 17);
+            this.toolStripStatusLabel2.Size = new System.Drawing.Size(59, 17);
             this.toolStripStatusLabel2.Text = "Total Hits:";
             // 
             // toolStripStatusLabel3
             // 
             this.toolStripStatusLabel3.Margin = new System.Windows.Forms.Padding(20, 3, 0, 2);
             this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(115, 17);
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(116, 17);
             this.toolStripStatusLabel3.Text = "Message Exceptions:";
             // 
             // btnChangeSearchPathRoot
@@ -108,7 +108,7 @@ namespace aclogview.Tools
             // 
             this.btnStopSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnStopSearch.Enabled = false;
-            this.btnStopSearch.Location = new System.Drawing.Point(651, 81);
+            this.btnStopSearch.Location = new System.Drawing.Point(651, 105);
             this.btnStopSearch.Name = "btnStopSearch";
             this.btnStopSearch.Size = new System.Drawing.Size(121, 23);
             this.btnStopSearch.TabIndex = 12;
@@ -119,7 +119,7 @@ namespace aclogview.Tools
             // btnStartSearch
             // 
             this.btnStartSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnStartSearch.Location = new System.Drawing.Point(524, 81);
+            this.btnStartSearch.Location = new System.Drawing.Point(524, 105);
             this.btnStartSearch.Name = "btnStartSearch";
             this.btnStartSearch.Size = new System.Drawing.Size(121, 23);
             this.btnStartSearch.TabIndex = 11;
@@ -160,15 +160,15 @@ namespace aclogview.Tools
             // 
             this.txtOutputFolder.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtOutputFolder.Location = new System.Drawing.Point(122, 55);
+            this.txtOutputFolder.Location = new System.Drawing.Point(92, 55);
             this.txtOutputFolder.Name = "txtOutputFolder";
-            this.txtOutputFolder.Size = new System.Drawing.Size(616, 20);
+            this.txtOutputFolder.Size = new System.Drawing.Size(646, 20);
             this.txtOutputFolder.TabIndex = 18;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(24, 58);
+            this.label4.Location = new System.Drawing.Point(15, 58);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(71, 13);
             this.label4.TabIndex = 19;
@@ -182,7 +182,7 @@ namespace aclogview.Tools
             // chkMultiThread
             // 
             this.chkMultiThread.AutoSize = true;
-            this.chkMultiThread.Location = new System.Drawing.Point(384, 85);
+            this.chkMultiThread.Location = new System.Drawing.Point(248, 105);
             this.chkMultiThread.Name = "chkMultiThread";
             this.chkMultiThread.Size = new System.Drawing.Size(134, 17);
             this.chkMultiThread.TabIndex = 21;
@@ -201,10 +201,10 @@ namespace aclogview.Tools
             this.columnEnabled,
             this.columnName,
             this.columnDescription});
-            this.dataGridView1.Location = new System.Drawing.Point(12, 110);
+            this.dataGridView1.Location = new System.Drawing.Point(12, 135);
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.RowHeadersVisible = false;
-            this.dataGridView1.Size = new System.Drawing.Size(760, 426);
+            this.dataGridView1.Size = new System.Drawing.Size(760, 402);
             this.dataGridView1.TabIndex = 22;
             // 
             // columnEnabled
@@ -232,7 +232,7 @@ namespace aclogview.Tools
             this.chkExcludeNonRetailPcaps.AutoSize = true;
             this.chkExcludeNonRetailPcaps.Checked = true;
             this.chkExcludeNonRetailPcaps.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(219, 85);
+            this.chkExcludeNonRetailPcaps.Location = new System.Drawing.Point(92, 105);
             this.chkExcludeNonRetailPcaps.Name = "chkExcludeNonRetailPcaps";
             this.chkExcludeNonRetailPcaps.Size = new System.Drawing.Size(150, 17);
             this.chkExcludeNonRetailPcaps.TabIndex = 23;

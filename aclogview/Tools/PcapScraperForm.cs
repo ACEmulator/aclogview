@@ -60,6 +60,7 @@ namespace aclogview.Tools
         {
             using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
             {
+                openFolder.SelectedPath = txtSearchPathRoot.Text;
                 if (openFolder.ShowDialog() == DialogResult.OK)
                     txtSearchPathRoot.Text = openFolder.SelectedPath;
             }
@@ -69,6 +70,7 @@ namespace aclogview.Tools
         {
             using (FolderBrowserDialog openFolder = new FolderBrowserDialog())
             {
+                openFolder.SelectedPath = txtOutputFolder.Text;
                 if (openFolder.ShowDialog() == DialogResult.OK)
                     txtOutputFolder.Text = openFolder.SelectedPath;
             }
@@ -107,6 +109,7 @@ namespace aclogview.Tools
                 searchAborted = false;
                 writeOutputAborted = false;
                 searchCompleted = false;
+                
 
                 UpdateToolStrip("Processing Files");
 
@@ -114,7 +117,6 @@ namespace aclogview.Tools
                 btnChangeSearchPathRoot.Enabled = false;
                 dataGridView1.Enabled = false;
                 btnStopSearch.Enabled = true;
-
                 timer1.Start();
 
                 ThreadPool.QueueUserWorkItem((state) =>
@@ -272,5 +274,7 @@ namespace aclogview.Tools
 
             toolStripStatusLabel3.Text = "Message Exceptions: " + totalExceptions.ToString("N0");
         }
+
+
     }
 }

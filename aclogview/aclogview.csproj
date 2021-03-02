@@ -90,6 +90,18 @@
     </Compile>
     <Compile Include="Server.cs" />
     <Compile Include="ServerList.cs" />
+    <Compile Include="Tools\CombatScraper.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\CombatScraper.Designer.cs">
+      <DependentUpon>CombatScraper.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\CreatureName.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Tools\CreatureName.Designer.cs">
+      <DependentUpon>CreatureName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\OptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -195,11 +207,13 @@
     <Compile Include="Enums\StatTypes.cs" />
     <Compile Include="Tools\Parsers\OpcodeFinder.cs" />
     <Compile Include="Tools\Scrapers\AccountExporter.cs" />
+    <Compile Include="Tools\Scrapers\CombatDamageGiven.cs" />
     <Compile Include="Tools\Scrapers\HeatMapGenerator.cs" />
     <Compile Include="Tools\Scrapers\PacketSizeScraperC2S.cs" />
     <Compile Include="Tools\Parsers\SampleParser.cs" />
     <Compile Include="Tools\Parsers\TextSearcher.cs" />
     <Compile Include="Tools\Scrapers\PacketTypesCountScraper.cs" />
+    <Compile Include="Tools\Scrapers\PlayerWeaponExporter.cs" />
     <Compile Include="Tools\Scrapers\PlayerExporter.cs" />
     <Compile Include="Tools\Scrapers\Scraper.cs" />
     <Compile Include="Tools\Scrapers\ServerAddressScraper.cs" />
@@ -221,6 +235,12 @@
     <Compile Include="Utility.cs" />
     <EmbeddedResource Include="GotoLine.resx">
       <DependentUpon>GotoLine.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\CombatScraper.resx">
+      <DependentUpon>CombatScraper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\CreatureName.resx">
+      <DependentUpon>CreatureName.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\OptionsForm.resx">
       <DependentUpon>OptionsForm.cs</DependentUpon>
@@ -281,7 +301,12 @@
       <Name>Be.Windows.Forms.HexBox</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="CharacterList.txt" />
+    <Content Include="Lists\CharacterList.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
