@@ -444,7 +444,8 @@ public class Position {
 }
 
 public class Skill {
-    public uint _level_from_pp;
+    public ushort _level_from_pp;
+    public ushort _adjust_pp;
     public SKILL_ADVANCEMENT_CLASS _sac;
     public uint _pp;
     public uint _init_level;
@@ -455,7 +456,8 @@ public class Skill {
     public static Skill read(BinaryReader binaryReader) {
         Skill newObj = new Skill();
         var startPosition = binaryReader.BaseStream.Position;
-        newObj._level_from_pp = binaryReader.ReadUInt32();
+        newObj._level_from_pp = binaryReader.ReadUInt16();
+        newObj._adjust_pp = binaryReader.ReadUInt16();
         newObj._sac = (SKILL_ADVANCEMENT_CLASS)binaryReader.ReadUInt32();
         newObj._pp = binaryReader.ReadUInt32();
         newObj._init_level = binaryReader.ReadUInt32();
@@ -467,7 +469,9 @@ public class Skill {
 
     public void contributeToTreeNode(TreeNode node) {
         node.Nodes.Add("_level_from_pp = " + _level_from_pp);
-        ContextInfo.AddToList(new ContextInfo { Length = 4 });
+        ContextInfo.AddToList(new ContextInfo { Length = 2 });
+        node.Nodes.Add("_adjust_pp = " + _adjust_pp);
+        ContextInfo.AddToList(new ContextInfo { Length = 2 });
         node.Nodes.Add("_sac = " + _sac);
         ContextInfo.AddToList(new ContextInfo { Length = 4 });
         node.Nodes.Add("_pp = " + _pp);
