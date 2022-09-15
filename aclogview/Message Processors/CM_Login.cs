@@ -937,23 +937,7 @@ public class CM_Login : MessageProcessor
                     }
                 }
             }
-            /*
-            for (int i = 0; i < m_ItersWithoutKeys.m_Lists.list.Count; i++)
-            {
-                TreeNode m_ListsNode = m_ItersWithoutKeysNode.Nodes.Add("m_Lists");
-                m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Type);
-                m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Id);
-                TreeNode listNode = m_ListsNode.Nodes.Add("List");
-                listNode.Nodes.Add("totalIterations = " + m_ItersWithoutKeys.m_Lists.list[i].List.totalIterations);
-                TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
 
-                for (int j = 0; j < m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count; j++)
-                {
-                    mIntsNode.Nodes.Add(m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints[j].ToString());
-                }
-                mIntsNode.Nodes.Add("m_bSorted = " + m_ItersWithoutKeys.m_Lists.list[i].List.m_bSorted);
-            }
-            */
             rootNode.Nodes.Add("m_dwFlags = " + m_dwFlags);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
