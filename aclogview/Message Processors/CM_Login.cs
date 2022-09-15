@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -873,14 +872,7 @@ public class CM_Login : MessageProcessor
 
          public static DDD_InterrogationResponseMessage read(BinaryReader binaryReader)
          {
-            /*
-            using (Stream outStream = File.OpenWrite(@"D:\\Web Development\\logs\\DDD_InterrogationResponseMessage\\really_broken.bin"))
-            {
-                binaryReader.BaseStream.CopyTo(outStream);
-            }
-            */
-
-            DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
+             DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
              newObj.m_ClientLanguage = binaryReader.ReadUInt32();
 
              newObj.m_ItersWithKeys = CAllIterationList.read(binaryReader);
