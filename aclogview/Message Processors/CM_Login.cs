@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -872,7 +873,14 @@ public class CM_Login : MessageProcessor
 
          public static DDD_InterrogationResponseMessage read(BinaryReader binaryReader)
          {
-             DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
+            /*
+            using (Stream outStream = File.OpenWrite(@"D:\\Web Development\\logs\\DDD_InterrogationResponseMessage\\really_broken.bin"))
+            {
+                binaryReader.BaseStream.CopyTo(outStream);
+            }
+            */
+
+            DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
              newObj.m_ClientLanguage = binaryReader.ReadUInt32();
 
              newObj.m_ItersWithKeys = CAllIterationList.read(binaryReader);
@@ -896,39 +904,64 @@ public class CM_Login : MessageProcessor
             TreeNode m_ItersWithKeysNode = rootNode.Nodes.Add("m_ItersWithKeys = ");
             ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithKeys.m_Lists.Length }, updateDataIndex: false);
             // Skip PackableHashTable count dword
-            ContextInfo.DataIndex += 4;
+            // ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_ItersWithKeys.m_Lists.list.Count; i++)
             {
                 TreeNode m_ListsNode = m_ItersWithKeysNode.Nodes.Add("m_Lists");
                 m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Type);
                 m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Id);
                 TreeNode listNode = m_ListsNode.Nodes.Add("List");
+                listNode.Nodes.Add("totalIterations = " + m_ItersWithKeys.m_Lists.list[i].List.totalIterations);
+
                 TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
-                for (int j = 0; j < m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count; j++)
+                foreach (var e in m_ItersWithKeys.m_Lists.list[i].List.iterations)
                 {
-                    mIntsNode.Nodes.Add(m_ItersWithKeys.m_Lists.list[i].List.m_Ints[j].ToString());
+                    TreeNode mIntsNode_sub = mIntsNode.Nodes.Add("Iterations");
+                    mIntsNode_sub.Nodes.Add("consectutiveIterations = " + e.Value);
+                    mIntsNode_sub.Nodes.Add("startIteration = " + e.Key);
                 }
-                listNode.Nodes.Add("m_bSorted = " + m_ItersWithKeys.m_Lists.list[i].List.m_bSorted);
             }
 
             TreeNode m_ItersWithoutKeysNode = rootNode.Nodes.Add("m_ItersWithoutKeys = ");
             ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithoutKeys.m_Lists.Length }, updateDataIndex: false);
             // Skip PackableHashTable count dword
-            ContextInfo.DataIndex += 4;
+            //ContextInfo.DataIndex += 4;
+            for (int i = 0; i < m_ItersWithoutKeys.m_Lists.list.Count; i++)
+            {
+                TreeNode m_ListsNode = m_ItersWithKeysNode.Nodes.Add("m_Lists");
+                m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Type);
+                m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Id);
+                TreeNode listNode = m_ListsNode.Nodes.Add("List");
+                listNode.Nodes.Add("totalIterations = " + m_ItersWithoutKeys.m_Lists.list[i].List.totalIterations);
+
+                if (m_ItersWithoutKeys.m_Lists.list[i].List.iterations.Count != 0)
+                {
+                    TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
+                    foreach (var e in m_ItersWithoutKeys.m_Lists.list[i].List.iterations)
+                    {
+                        TreeNode mIntsNode_sub = mIntsNode.Nodes.Add("Iterations");
+                        mIntsNode_sub.Nodes.Add("consectutiveIterations = " + e.Value);
+                        mIntsNode_sub.Nodes.Add("startIteration = " + e.Key);
+                    }
+                }
+            }
+            /*
             for (int i = 0; i < m_ItersWithoutKeys.m_Lists.list.Count; i++)
             {
                 TreeNode m_ListsNode = m_ItersWithoutKeysNode.Nodes.Add("m_Lists");
                 m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Type);
                 m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Id);
                 TreeNode listNode = m_ListsNode.Nodes.Add("List");
+                listNode.Nodes.Add("totalIterations = " + m_ItersWithoutKeys.m_Lists.list[i].List.totalIterations);
                 TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
+
                 for (int j = 0; j < m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count; j++)
                 {
                     mIntsNode.Nodes.Add(m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints[j].ToString());
                 }
                 mIntsNode.Nodes.Add("m_bSorted = " + m_ItersWithoutKeys.m_Lists.list[i].List.m_bSorted);
             }
-
+            */
             rootNode.Nodes.Add("m_dwFlags = " + m_dwFlags);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
@@ -966,16 +999,25 @@ public class CM_Login : MessageProcessor
 
     public class CMostlyConsecutiveIntSet
     {
-        public List<int> m_Ints = new List<int>();
-        public bool m_bSorted;
+        // These properties are not named anywhere I could find in the client and are made up by me -- OptimShi
+        public int totalIterations; // Should equal 2072 in an up-to-date retail portal
+        
+        // Key is the iteration number, value is the consecutive iterations
+        public Dictionary<int, int> iterations = new Dictionary<int, int>();
 
         public static CMostlyConsecutiveIntSet read(BinaryReader binaryReader)
         {
             CMostlyConsecutiveIntSet newObj = new CMostlyConsecutiveIntSet();
-            newObj.m_Ints.Add(binaryReader.ReadInt32());
-            newObj.m_Ints.Add(binaryReader.ReadInt32());
-            newObj.m_bSorted = binaryReader.ReadBoolean();
-            Util.readToAlign(binaryReader);
+            newObj.totalIterations = binaryReader.ReadInt32();
+
+            var iterationCount = newObj.totalIterations;
+            while(iterationCount > 0)
+            {
+                var consectutiveIterations = binaryReader.ReadInt32();
+                var startIteration = binaryReader.ReadInt32();
+                newObj.iterations.Add(startIteration, consectutiveIterations);
+                iterationCount += consectutiveIterations;
+            }
 
             return newObj;
         }
