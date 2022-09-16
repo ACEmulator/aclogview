@@ -860,9 +860,6 @@ public class CM_Login : MessageProcessor
         }
     }
 
-    /// <summary>
-    /// TODO -- FINISH THIS ... This is all sorts of wrong - OptimShi
-    /// </summary>
     public class DDD_InterrogationResponseMessage : Message
     {
         public uint m_ClientLanguage;
@@ -872,7 +869,7 @@ public class CM_Login : MessageProcessor
 
          public static DDD_InterrogationResponseMessage read(BinaryReader binaryReader)
          {
-             DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
+            DDD_InterrogationResponseMessage newObj = new DDD_InterrogationResponseMessage();
              newObj.m_ClientLanguage = binaryReader.ReadUInt32();
 
              newObj.m_ItersWithKeys = CAllIterationList.read(binaryReader);
@@ -895,45 +892,34 @@ public class CM_Login : MessageProcessor
 
             TreeNode m_ItersWithKeysNode = rootNode.Nodes.Add("m_ItersWithKeys = ");
             ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithKeys.m_Lists.Length }, updateDataIndex: false);
-            // Skip PackableHashTable count dword
-            // ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_ItersWithKeys.m_Lists.list.Count; i++)
             {
                 TreeNode m_ListsNode = m_ItersWithKeysNode.Nodes.Add("m_Lists");
                 m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Type);
                 m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Id);
                 TreeNode listNode = m_ListsNode.Nodes.Add("List");
-                listNode.Nodes.Add("totalIterations = " + m_ItersWithKeys.m_Lists.list[i].List.totalIterations);
-
                 TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
-                foreach (var e in m_ItersWithKeys.m_Lists.list[i].List.iterations)
+                for(var j = 0; j < m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count; j++)
                 {
-                    TreeNode mIntsNode_sub = mIntsNode.Nodes.Add("Iterations");
-                    mIntsNode_sub.Nodes.Add("consectutiveIterations = " + e.Value);
-                    mIntsNode_sub.Nodes.Add("startIteration = " + e.Key);
+                    mIntsNode.Nodes.Add(m_ItersWithKeys.m_Lists.list[i].List.m_Ints[j].ToString());
                 }
             }
 
             TreeNode m_ItersWithoutKeysNode = rootNode.Nodes.Add("m_ItersWithoutKeys = ");
             ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithoutKeys.m_Lists.Length }, updateDataIndex: false);
-            // Skip PackableHashTable count dword
-            //ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_ItersWithoutKeys.m_Lists.list.Count; i++)
             {
                 TreeNode m_ListsNode = m_ItersWithKeysNode.Nodes.Add("m_Lists");
                 m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Type);
                 m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Id);
                 TreeNode listNode = m_ListsNode.Nodes.Add("List");
-                listNode.Nodes.Add("totalIterations = " + m_ItersWithoutKeys.m_Lists.list[i].List.totalIterations);
 
-                if (m_ItersWithoutKeys.m_Lists.list[i].List.iterations.Count != 0)
+                if (m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count != 0)
                 {
                     TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
-                    foreach (var e in m_ItersWithoutKeys.m_Lists.list[i].List.iterations)
+                    for (var j = 0; j < m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count; j++)
                     {
-                        TreeNode mIntsNode_sub = mIntsNode.Nodes.Add("Iterations");
-                        mIntsNode_sub.Nodes.Add("consectutiveIterations = " + e.Value);
-                        mIntsNode_sub.Nodes.Add("startIteration = " + e.Key);
+                        mIntsNode.Nodes.Add(m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints[j].ToString());
                     }
                 }
             }
@@ -975,24 +961,59 @@ public class CM_Login : MessageProcessor
 
     public class CMostlyConsecutiveIntSet
     {
-        // These properties are not named anywhere I could find in the client and are made up by me -- OptimShi
-        public int totalIterations; // Should equal 2072 in an up-to-date retail portal
-        
-        // Key is the iteration number, value is the consecutive iterations
-        public Dictionary<int, int> iterations = new Dictionary<int, int>();
+        public List<int> m_Ints = new List<int>();
 
         public static CMostlyConsecutiveIntSet read(BinaryReader binaryReader)
         {
             CMostlyConsecutiveIntSet newObj = new CMostlyConsecutiveIntSet();
-            newObj.totalIterations = binaryReader.ReadInt32();
 
-            var iterationCount = newObj.totalIterations;
-            while(iterationCount > 0)
+            newObj.m_Ints.Add(binaryReader.ReadInt32()); // This is the total iterations accounted for in the dat file (note that not every iteration will have a file)
+
+            var iterationCount = newObj.m_Ints[0]; // Store this so we can check when we've got everything
+
+            // Negative Ints means Consecutive Iterations, starting at the next int.
+            // Single positive values are iterations the client has.
+
+            // Read a full "set" on each loop
+            // Due to the "peeking" ahead, we also need to ensure we don't read past the end of our message
+            while (iterationCount > 0 && binaryReader.BaseStream.Position < binaryReader.BaseStream.Length)
             {
-                var consectutiveIterations = binaryReader.ReadInt32();
-                var startIteration = binaryReader.ReadInt32();
-                newObj.iterations.Add(startIteration, consectutiveIterations);
-                iterationCount += consectutiveIterations;
+
+                newObj.m_Ints.Add(binaryReader.ReadInt32()); // This should be the negative value start of the set
+                iterationCount += newObj.m_Ints.Last(); // Subtract this from our running total
+
+                var value = binaryReader.ReadInt32(); // This is the start iteration of this set
+                newObj.m_Ints.Add(value);
+
+                while (iterationCount > 0 && value > 0)
+                {
+                    value = binaryReader.ReadInt32(); 
+
+                    // Negative values are the start of a new "set"
+                    if (value < 0)
+                    {
+                        binaryReader.BaseStream.Position -= 4; // Move our stream position back because we've gone too far!
+                        continue;
+                    }
+                    else
+                    {
+                        // Check if we've read our entire List
+                        if(iterationCount >= 0) 
+                        {
+                            // If the last item we added was already in this set, we need to deduct one to account for this "missing" iteration
+                            if(newObj.m_Ints.Last() > 0)
+                                iterationCount-= 1;
+
+                            newObj.m_Ints.Add(value);
+
+                        }
+                        else
+                        {
+                            binaryReader.BaseStream.Position -= 4; // Move our stream position back because we've gone too far!
+                            continue;
+                        }
+                    }
+                }
             }
 
             return newObj;
