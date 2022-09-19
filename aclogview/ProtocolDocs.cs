@@ -106,7 +106,7 @@ namespace aclogview
         {
             var html = await GetWebDocumentAsString(_latestReleasePageUrl);
             var pattern = @"browser_download_url\""\:\S(.+(Protocol_Documentation-(.+)\.zip))";
-            var match = Regex.Match(html, pattern);     
+            var match = Regex.Match(html, pattern);
             if (!match.Success)
                 throw new Exception("Could not retrieve the latest protocol\n" +
                     $"documentation release from: {_latestReleasePageUrl}");
