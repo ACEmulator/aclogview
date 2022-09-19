@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Reflection;
@@ -30,7 +30,7 @@ namespace aclogview
             _projectDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location) + @"\";
             _documentationDirectory = _projectDirectory + @"Protocol Documentation\";
             _localReleaseVersionFilePath = _documentationDirectory + @"\" + _localReleaseVersionFile;
-            _latestReleasePageUrl = @"https://github.com/ACEmulator/acemulator.github.io/releases/latest";
+            _latestReleasePageUrl = @"https://api.github.com/repos/ACEmulator/acemulator.github.io/releases/latest";
         }
 
         public bool IsTimeForUpdateCheck()
@@ -105,12 +105,12 @@ namespace aclogview
         private static async Task FillLatestReleaseInfo()
         {
             var html = await GetWebDocumentAsString(_latestReleasePageUrl);
-            var pattern = @"a href=\S(.+(Protocol_Documentation-(.+)\.zip))";
+            var pattern = @"browser_download_url\""\:\S(.+(Protocol_Documentation-(.+)\.zip))";
             var match = Regex.Match(html, pattern);
             if (!match.Success)
                 throw new Exception("Could not retrieve the latest protocol\n" +
                     $"documentation release from: {_latestReleasePageUrl}");
-            _latestReleaseFileUrl = "https://github.com" + match.Groups[1].Value;
+            _latestReleaseFileUrl = match.Groups[1].Value;
             _latestReleaseFileName = match.Groups[2].Value;
             _latestReleaseVersion = match.Groups[3].Value;
         }
@@ -119,12 +119,15 @@ namespace aclogview
         {
             string document;
             using (var client = new HttpClient())
-            using (var response = await client.GetAsync(url))
-            using (var content = response.Content)
             {
-                document = await content.ReadAsStringAsync();
+                client.DefaultRequestHeaders.UserAgent.TryParseAdd("aclogview");
+                using (var response = await client.GetAsync(url))
+                using (var content = response.Content)
+                {
+                    document = await content.ReadAsStringAsync();
+                }
+                return document;
             }
-            return document;
         }
 
         private static async Task InstallDocumentation()
