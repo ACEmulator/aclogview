@@ -111,6 +111,9 @@ namespace aclogview
             //if (!match.Success)
             //    throw new Exception("Could not retrieve the latest protocol\n" +
             //        $"documentation release from: {_latestReleasePageUrl}");
+            //_latestReleaseFileUrl = "https://github.com" + match.Groups[1].Value;
+            //_latestReleaseFileName = match.Groups[2].Value;
+            //_latestReleaseVersion = match.Groups[3].Value;
             dynamic json = JsonConvert.DeserializeObject(html);
             if (json.assets.Count < 0)
                 throw new Exception("Could not retrieve the latest protocol\n" +
