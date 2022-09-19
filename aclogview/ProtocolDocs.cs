@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using aclogview.Properties;
 using System.Net.Http;
-using Newtonsoft.Json;
 
 namespace aclogview
 {
@@ -106,22 +105,14 @@ namespace aclogview
         private static async Task FillLatestReleaseInfo()
         {
             var html = await GetWebDocumentAsString(_latestReleasePageUrl);
-            //var pattern = @"a href=\S(.+(Protocol_Documentation-(.+)\.zip))";
-            //var match = Regex.Match(html, pattern);
-            //if (!match.Success)
-            //    throw new Exception("Could not retrieve the latest protocol\n" +
-            //        $"documentation release from: {_latestReleasePageUrl}");
-            //_latestReleaseFileUrl = "https://github.com" + match.Groups[1].Value;
-            //_latestReleaseFileName = match.Groups[2].Value;
-            //_latestReleaseVersion = match.Groups[3].Value;
-            dynamic json = JsonConvert.DeserializeObject(html);
-            if (json.assets.Count < 0)
+            var pattern = @"browser_download_url\""\:\S(.+(Protocol_Documentation-(.+)\.zip))";
+            var match = Regex.Match(html, pattern);     
+            if (!match.Success)
                 throw new Exception("Could not retrieve the latest protocol\n" +
                     $"documentation release from: {_latestReleasePageUrl}");
-            _latestReleaseFileUrl = json.assets[0].browser_download_url;
-            _latestReleaseFileName = json.assets[0].name;
-            _latestReleaseVersion = json.assets[0].name;
-            _latestReleaseVersion = _latestReleaseVersion.Replace("Protocol_Documentation-", "").Replace(".zip", "");
+            _latestReleaseFileUrl = match.Groups[1].Value;
+            _latestReleaseFileName = match.Groups[2].Value;
+            _latestReleaseVersion = match.Groups[3].Value;
         }
 
         private static async Task<string> GetWebDocumentAsString(string url)
