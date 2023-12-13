@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,7 +19,8 @@ namespace aclogview {
             pictureBox1.Image = image;
         }
 
-        private void menuItem_Save_Click(object sender, EventArgs e) {
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
 			using (SaveFileDialog saveDialog = new SaveFileDialog())
 			{
 				saveDialog.Filter = "Images|*.png;*.bmp;*.jpg";
