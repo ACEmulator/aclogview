@@ -152,6 +152,81 @@
             Gets or sets the image of the "Select All" ContextMenuStrip item.
             </summary>
         </member>
+        <member name="T:Be.Windows.Forms.IByteCharConverter">
+            <summary>
+            The interface for objects that can translate between characters and bytes.
+            </summary>
+        </member>
+        <member name="M:Be.Windows.Forms.IByteCharConverter.ToChar(System.Byte)">
+            <summary>
+            Returns the character to display for the byte passed across.
+            </summary>
+            <param name="b"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Be.Windows.Forms.IByteCharConverter.ToByte(System.Char)">
+            <summary>
+            Returns the byte to use when the character passed across is entered during editing.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Be.Windows.Forms.DefaultByteCharConverter">
+            <summary>
+            The default <see cref="T:Be.Windows.Forms.IByteCharConverter"/> implementation.
+            </summary>
+        </member>
+        <member name="M:Be.Windows.Forms.DefaultByteCharConverter.ToChar(System.Byte)">
+            <summary>
+            Returns the character to display for the byte passed across.
+            </summary>
+            <param name="b"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Be.Windows.Forms.DefaultByteCharConverter.ToByte(System.Char)">
+            <summary>
+            Returns the byte to use for the character passed across.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Be.Windows.Forms.DefaultByteCharConverter.ToString">
+            <summary>
+            Returns a description of the byte char provider.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:Be.Windows.Forms.EbcdicByteCharProvider">
+            <summary>
+            A byte char provider that can translate bytes encoded in codepage 500 EBCDIC
+            </summary>
+        </member>
+        <member name="F:Be.Windows.Forms.EbcdicByteCharProvider._ebcdicEncoding">
+            <summary>
+            The IBM EBCDIC code page 500 encoding. Note that this is not always supported by .NET,
+            the underlying platform has to provide support for it.
+            </summary>
+        </member>
+        <member name="M:Be.Windows.Forms.EbcdicByteCharProvider.ToChar(System.Byte)">
+            <summary>
+            Returns the EBCDIC character corresponding to the byte passed across.
+            </summary>
+            <param name="b"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Be.Windows.Forms.EbcdicByteCharProvider.ToByte(System.Char)">
+            <summary>
+            Returns the byte corresponding to the EBCDIC character passed across.
+            </summary>
+            <param name="c"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Be.Windows.Forms.EbcdicByteCharProvider.ToString">
+            <summary>
+            Returns a description of the byte char provider.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:Be.Windows.Forms.ByteCollection">
             <summary>
             Represents a collection of bytes.
@@ -1629,81 +1704,6 @@
             <summary>
             Converts all characters to lowercase.
             </summary>
-        </member>
-        <member name="T:Be.Windows.Forms.IByteCharConverter">
-            <summary>
-            The interface for objects that can translate between characters and bytes.
-            </summary>
-        </member>
-        <member name="M:Be.Windows.Forms.IByteCharConverter.ToChar(System.Byte)">
-            <summary>
-            Returns the character to display for the byte passed across.
-            </summary>
-            <param name="b"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Be.Windows.Forms.IByteCharConverter.ToByte(System.Char)">
-            <summary>
-            Returns the byte to use when the character passed across is entered during editing.
-            </summary>
-            <param name="c"></param>
-            <returns></returns>
-        </member>
-        <member name="T:Be.Windows.Forms.DefaultByteCharConverter">
-            <summary>
-            The default <see cref="T:Be.Windows.Forms.IByteCharConverter"/> implementation.
-            </summary>
-        </member>
-        <member name="M:Be.Windows.Forms.DefaultByteCharConverter.ToChar(System.Byte)">
-            <summary>
-            Returns the character to display for the byte passed across.
-            </summary>
-            <param name="b"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Be.Windows.Forms.DefaultByteCharConverter.ToByte(System.Char)">
-            <summary>
-            Returns the byte to use for the character passed across.
-            </summary>
-            <param name="c"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Be.Windows.Forms.DefaultByteCharConverter.ToString">
-            <summary>
-            Returns a description of the byte char provider.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:Be.Windows.Forms.EbcdicByteCharProvider">
-            <summary>
-            A byte char provider that can translate bytes encoded in codepage 500 EBCDIC
-            </summary>
-        </member>
-        <member name="F:Be.Windows.Forms.EbcdicByteCharProvider._ebcdicEncoding">
-            <summary>
-            The IBM EBCDIC code page 500 encoding. Note that this is not always supported by .NET,
-            the underlying platform has to provide support for it.
-            </summary>
-        </member>
-        <member name="M:Be.Windows.Forms.EbcdicByteCharProvider.ToChar(System.Byte)">
-            <summary>
-            Returns the EBCDIC character corresponding to the byte passed across.
-            </summary>
-            <param name="b"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Be.Windows.Forms.EbcdicByteCharProvider.ToByte(System.Char)">
-            <summary>
-            Returns the byte corresponding to the EBCDIC character passed across.
-            </summary>
-            <param name="c"></param>
-            <returns></returns>
-        </member>
-        <member name="M:Be.Windows.Forms.EbcdicByteCharProvider.ToString">
-            <summary>
-            Returns a description of the byte char provider.
-            </summary>
-            <returns></returns>
         </member>
         <member name="T:Be.Windows.Forms.IByteProvider">
             <summary>

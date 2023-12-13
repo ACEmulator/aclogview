@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <Compile Update="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="GotoLine.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\CombatScraper.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\CreatureName.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\FindOpcodeInFilesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\FindTextInFilesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\FragDatListToolForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\ImagePopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\OptionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\PcapScraperForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Tools\TextPopup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 using CommandLine.Text;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace aclogview {
+namespace aclogview
+{
 
     public class Globals
     {
@@ -30,43 +31,30 @@ namespace aclogview {
 
     public class Options
     {
-        [Option('f', "file",
-          HelpText = "Input file to be processed.")]
+        [Option('f', "file", HelpText = "Input file to be processed.")]
         public string InputFile { get; set; }
 
-        [Option('o', "opcode",
-          HelpText = "The message opcode to search for.")]
+        [Option('o', "opcode", HelpText = "The message opcode to search for.")]
         public int Opcode { get; set; }
 
-        [Option('m', "asmessages", DefaultValue = true,
-          HelpText = "Process the file in 'as messages' mode.")]
+        [Option('m', "asmessages", Default = true, HelpText = "Process the file in 'as messages' mode.")]
         public bool AsMessages { get; set; }
 
-        [Option("cst",
-          HelpText = "A case-sensitive text search.")]
+        [Option("cst", HelpText = "A case-sensitive text search.")]
         public string CSTextToSearch { get; set; }
 
-        [Option("cit",
-          HelpText = "A case-insensitive text search.")]
+        [Option("cit", HelpText = "A case-insensitive text search.")]
         public string CITextToSearch { get; set; }
-
-        [ParserState]
-        public IParserState LastParserState { get; set; }
-
-        [HelpOption]
-        public string GetUsage()
-        {
-            return HelpText.AutoBuild(this,
-              (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
-        }
     }
 
-    static class Program {
+    static class Program
+    {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args) {
+        static void Main(string[] args)
+        {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1(args));

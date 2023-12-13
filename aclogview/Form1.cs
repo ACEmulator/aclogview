@@ -125,7 +125,7 @@ namespace aclogview
             HighlightMode_comboBox.Items.Add(textModeCI);
             HighlightMode_comboBox.Items.Add(uintMode);
 
-            var options = new Options();
+            /* todo fixvar options = new Options();
             if (CommandLine.Parser.Default.ParseArguments(args, options))
             {
                 if (options.Opcode > 0)
@@ -158,7 +158,7 @@ namespace aclogview
 
                 if (args.Length == 1 && !args[0].StartsWith("-") && File.Exists(args[0]))
                     loadPcap(args[0], options.AsMessages);
-            }
+            }*/
             // Turn on listview double buffering to prevent flickering
             var prop = listView_Packets.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             prop.SetValue(listView_Packets, true, null);
@@ -807,6 +807,9 @@ namespace aclogview
         private void findBadParsersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var files = ToolUtil.GetPcapsInFolder();
+
+            if (files == null) // No path was selected
+                return;
 
             OrderedDictionary opcodeOccurrences = new OrderedDictionary();
 
