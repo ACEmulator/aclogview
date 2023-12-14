@@ -14,6 +14,7 @@ using aclogview.Properties;
 using aclogview.Tools;
 
 using Be.Windows.Forms;
+using CommandLine;
 
 namespace aclogview
 {
@@ -125,26 +126,26 @@ namespace aclogview
             HighlightMode_comboBox.Items.Add(textModeCI);
             HighlightMode_comboBox.Items.Add(uintMode);
 
-            /* todo fixvar options = new Options();
-            if (CommandLine.Parser.Default.ParseArguments(args, options))
+            Parser.Default.ParseArguments<Options>(args)
+            .WithParsed<Options>(option =>
             {
-                if (options.Opcode > 0)
+                if (option.Opcode > 0)
                 {
                     HighlightMode_comboBox.SelectedItem = opcodeMode;
-                    opCodesToHighlight.Add(options.Opcode);
-                    currentOpcode = options.Opcode;
+                    opCodesToHighlight.Add(option.Opcode);
+                    currentOpcode = option.Opcode;
                     textBox_Search.Text += "0x" + currentOpcode.ToString("X4");
                 }
-                else if (options.CSTextToSearch != null)
+                else if (option.CSTextToSearch != null)
                 {
                     HighlightMode_comboBox.SelectedItem = textModeCS;
-                    currentCSText = options.CSTextToSearch;
+                    currentCSText = option.CSTextToSearch;
                     textBox_Search.Text = currentCSText;
                 }
-                else if (options.CITextToSearch != null)
+                else if (option.CITextToSearch != null)
                 {
                     HighlightMode_comboBox.SelectedItem = textModeCI;
-                    currentCIText = options.CITextToSearch;
+                    currentCIText = option.CITextToSearch;
                     textBox_Search.Text = currentCIText;
                 }
                 else
@@ -153,12 +154,12 @@ namespace aclogview
                     HighlightMode_comboBox.SelectedItem = opcodeMode;
                 }
 
-                if (options.InputFile != null)
-                    loadPcap(options.InputFile, options.AsMessages);
+                if (option.InputFile != null)
+                    loadPcap(option.InputFile, option.AsMessages);
 
                 if (args.Length == 1 && !args[0].StartsWith("-") && File.Exists(args[0]))
-                    loadPcap(args[0], options.AsMessages);
-            }*/
+                    loadPcap(args[0], option.AsMessages);
+            });
             // Turn on listview double buffering to prevent flickering
             var prop = listView_Packets.GetType().GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic);
             prop.SetValue(listView_Packets, true, null);
