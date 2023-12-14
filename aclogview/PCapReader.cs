@@ -494,7 +494,8 @@ namespace aclogview
 				}
 				catch (Exception e)
 				{
-					packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
+                    if (packet != null)
+					    packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
 				}
 			}
             return true;
