@@ -5,7 +5,7 @@ branches:
   only:
   - ACE
 skip_tags: true
-image: Visual Studio 2017
+image: Visual Studio 2022
 configuration: Release
 before_build:
 - cmd: nuget restore
