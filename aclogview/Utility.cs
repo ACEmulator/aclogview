@@ -55,7 +55,7 @@ namespace aclogview
                     ticks = Convert.ToInt64(pcapngMicroseconds * 10);
                 }
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
                 ticks = long.MaxValue;
             }

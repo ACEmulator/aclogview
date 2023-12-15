@@ -67,7 +67,7 @@ namespace aclogview.Tools.Scrapers
                 {
                     // This is a pcap parse error
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     messageExceptions++;
                     // Do something with the exception maybe
