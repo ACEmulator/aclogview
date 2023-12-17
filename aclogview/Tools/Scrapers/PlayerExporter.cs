@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 
-using ACE.Database.Models.Shard;
+using ACE.Entity.Enum;
+using ACE.Entity.Enum.Properties;
+using ACE.Entity.Models;
 
 using aclogview.ACE_Helpers;
 
@@ -30,6 +33,17 @@ namespace aclogview.Tools.Scrapers
             {
                 Biota.Id = guid;
                 Name = name;
+
+                Biota.PropertiesPosition = new Dictionary<PositionType, PropertiesPosition>();
+
+                Biota.PropertiesSpellBook = new Dictionary<int, float>();
+
+                Biota.PropertiesAnimPart = new List<PropertiesAnimPart>();
+                Biota.PropertiesPalette = new List<PropertiesPalette>();
+                Biota.PropertiesTextureMap = new List<PropertiesTextureMap>();
+
+                // Biota additions over Weenie
+                Biota.PropertiesEnchantmentRegistry = new Collection<PropertiesEnchantmentRegistry>();
             }
         }
 
@@ -39,7 +53,7 @@ namespace aclogview.Tools.Scrapers
             public readonly uint TSec;
 
             public readonly Biota Biota = new Biota();
-            public readonly Character Character = new Character();
+            public readonly ACE.Database.Models.Shard.Character Character = new ACE.Database.Models.Shard.Character();
 
             public readonly List<(uint guid, uint containerProperties)> Inventory = new List<(uint guid, uint containerProperties)>();
             public readonly List<(uint guid, uint location, uint priority)> Equipment = new List<(uint guid, uint location, uint priority)>();
@@ -56,6 +70,23 @@ namespace aclogview.Tools.Scrapers
 
                 Biota.Id = guid;
                 Character.Id = guid;
+
+                Biota.PropertiesPosition = new Dictionary<PositionType, PropertiesPosition>();
+
+                Biota.PropertiesSpellBook = new Dictionary<int, float>();
+
+                Biota.PropertiesAnimPart = new List<PropertiesAnimPart>();
+                Biota.PropertiesPalette = new List<PropertiesPalette>();
+                Biota.PropertiesTextureMap = new List<PropertiesTextureMap>();
+
+                // Properties for creatures
+                Biota.PropertiesAttribute = new Dictionary<PropertyAttribute, PropertiesAttribute>();
+                Biota.PropertiesAttribute2nd = new Dictionary<PropertyAttribute2nd, PropertiesAttribute2nd>();
+                Biota.PropertiesBodyPart = new Dictionary<CombatBodyPart, PropertiesBodyPart>();
+                Biota.PropertiesSkill = new Dictionary<ACE.Entity.Enum.Skill, PropertiesSkill>();
+
+                // Biota additions over Weenie
+                Biota.PropertiesEnchantmentRegistry = new Collection<PropertiesEnchantmentRegistry>();
             }
 
             public bool IsPossessedItem(uint guid)
@@ -188,7 +219,7 @@ namespace aclogview.Tools.Scrapers
                             var message = Proto_UI.EnterWorld.read(binaryReader);
 
                             loginEvent = new LoginEvent(fileName, record.tsSec, message.gid);
-                            loginEvent.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyString.PCAPRecordedServerName, serverName, rwLock, out _);
+                            loginEvent.Biota.SetProperty(PropertyString.PCAPRecordedServerName, serverName, rwLock, out _);
                             continue;
                         }
 
@@ -204,7 +235,7 @@ namespace aclogview.Tools.Scrapers
                                     ACEBiotaCreator.Update(message, loginEvent.Biota, rwLock, true);
 
                                     var position = new ACE.Entity.Position(message.physicsdesc.pos.objcell_id, message.physicsdesc.pos.frame.m_fOrigin.x, message.physicsdesc.pos.frame.m_fOrigin.y, message.physicsdesc.pos.frame.m_fOrigin.z, message.physicsdesc.pos.frame.qx, message.physicsdesc.pos.frame.qy, message.physicsdesc.pos.frame.qz, message.physicsdesc.pos.frame.qw);
-                                    loginEvent.Biota.SetPosition(ACE.Entity.Enum.Properties.PositionType.Location, position, rwLock, out _);
+                                    loginEvent.Biota.SetPosition(PositionType.Location, position, rwLock);
                                 }
 
                                 // Record inventory items
@@ -304,7 +335,8 @@ namespace aclogview.Tools.Scrapers
                                 {
                                     hits++;
 
-                                    ACEBiotaCreator.Update(message, loginEvent.Character, loginEvent.Biota, loginEvent.Inventory, loginEvent.Equipment, rwLock);
+                                    ACECharacterCreator.Update(message, loginEvent.Character);
+                                    ACEBiotaCreator.Update(message, loginEvent.Biota, loginEvent.Inventory, loginEvent.Equipment, rwLock);
 
                                     lock (playerLoginsByServer)
                                     {
@@ -336,10 +368,10 @@ namespace aclogview.Tools.Scrapers
                                 // We only process player create/update messages for player biotas during the login process
                                 if (loginEvent != null && !loginEvent.PlayerLoginCompleted)
                                 {
-                                    loginEvent.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.CharacterTitleId, (int)message.mDisplayTitle, rwLock, out _);
+                                    loginEvent.Biota.SetProperty(PropertyInt.CharacterTitleId, (int)message.mDisplayTitle, rwLock, out _);
 
                                     foreach (var value in message.mTitleList.list)
-                                        loginEvent.Character.CharacterPropertiesTitleBook.Add(new CharacterPropertiesTitleBook { TitleId = (uint)value });
+                                        loginEvent.Character.CharacterPropertiesTitleBook.Add(new ACE.Database.Models.Shard.CharacterPropertiesTitleBook { TitleId = (uint)value });
                                 }
                             }
                             else if (opCode == (uint)PacketOpcode.Evt_Social__SendClientContractTrackerTable_ID)
@@ -505,13 +537,13 @@ namespace aclogview.Tools.Scrapers
                         return;
 
                     // We only export the last login event
-                    var loginEvent = player.Value.LoginEvents.Where(r => r.Biota.BiotaPropertiesDID.Count > 0).OrderBy(r => r.TSec).LastOrDefault();
+                    var loginEvent = player.Value.LoginEvents.Where(r => r.Biota.PropertiesDID.Count > 0).OrderBy(r => r.TSec).LastOrDefault();
 
                     // no valid result
                     if (loginEvent == null)
                         continue;
 
-                    var name = loginEvent.Biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
+                    var name = loginEvent.Biota.GetProperty(PropertyString.Name, rwLock);
 
                     var playerDirectoryRoot = Path.Combine(serverDirectory, name);
 
@@ -542,20 +574,22 @@ namespace aclogview.Tools.Scrapers
 
                     // Biota
                     {
-                        var defaultFileName = biotaWriter.GetDefaultFileName(loginEvent.Biota);
+                        var defaultFileName = ACE.Database.SQLFormatters.Shard.BiotaSQLWriter.GetDefaultFileName(loginEvent.Biota.Id, loginEvent.Biota.GetName());
 
                         var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
                         // Update to the latest position seen
                         if (biotasByServer.TryGetValue(server.Key, out var biotaServer) && biotaServer.TryGetValue(player.Key, out var biotaEx) && biotaEx.LastPosition != null)
-                            ACEBiotaCreator.Update(ACE.Entity.Enum.Properties.PositionType.Location, biotaEx.LastPosition, loginEvent.Biota, rwLock);
+                            ACEBiotaCreator.Update(PositionType.Location, biotaEx.LastPosition, loginEvent.Biota, rwLock);
 
-                        loginEvent.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
+                        loginEvent.Biota.WeenieType = ACEBiotaCreator.DetermineWeenieType(loginEvent.Biota, rwLock);
 
-                        SetBiotaPopulatedCollections(loginEvent.Biota);
+                        var databaseBiota = ACE.Database.Adapter.BiotaConverter.ConvertFromEntityBiota(loginEvent.Biota);
+
+                        ACE.Database.ShardDatabase.SetBiotaPopulatedCollections(databaseBiota);
 
                         using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                            biotaWriter.CreateSQLINSERTStatement(loginEvent.Biota, outputFile);
+                            biotaWriter.CreateSQLINSERTStatement(databaseBiota, outputFile);
                     }
 
                     // Character
@@ -592,12 +626,12 @@ namespace aclogview.Tools.Scrapers
                         {
                             if (loginEvent.Inventory[i].guid == woiBeingUsed.Biota.Id)
                             {
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Owner, loginEvent.Biota.Id, rwLock, out _);
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Container, loginEvent.Biota.Id, rwLock, out _);
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.InventoryOrder, i, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(PropertyInstanceId.Owner, loginEvent.Biota.Id, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(PropertyInstanceId.Container, loginEvent.Biota.Id, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(PropertyInt.InventoryOrder, i, rwLock, out _);
 
-                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInt.CurrentWieldedLocation, out _, rwLock);
-                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Wielder, out _, rwLock);
+                                woiBeingUsed.Biota.TryRemoveProperty(PropertyInt.CurrentWieldedLocation, rwLock);
+                                woiBeingUsed.Biota.TryRemoveProperty(PropertyInstanceId.Wielder, rwLock);
 
                                 goto processed;
                             }
@@ -608,12 +642,12 @@ namespace aclogview.Tools.Scrapers
                             var index = container.Value.IndexOf(woiBeingUsed.Biota.Id);
                             if (index != -1)
                             {
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Owner, container.Key, rwLock, out _);
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Container, container.Key, rwLock, out _);
-                                woiBeingUsed.Biota.SetProperty(ACE.Entity.Enum.Properties.PropertyInt.InventoryOrder, index, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(PropertyInstanceId.Owner, container.Key, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(PropertyInstanceId.Container, container.Key, rwLock, out _);
+                                woiBeingUsed.Biota.SetProperty(PropertyInt.InventoryOrder, index, rwLock, out _);
 
-                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInt.CurrentWieldedLocation, out _, rwLock);
-                                woiBeingUsed.Biota.TryRemoveProperty(ACE.Entity.Enum.Properties.PropertyInstanceId.Wielder, out _, rwLock);
+                                woiBeingUsed.Biota.TryRemoveProperty(PropertyInt.CurrentWieldedLocation, rwLock);
+                                woiBeingUsed.Biota.TryRemoveProperty(PropertyInstanceId.Wielder, rwLock);
 
                                 goto processed;
                             }
@@ -621,13 +655,13 @@ namespace aclogview.Tools.Scrapers
 
                         processed:
 
-                        var defaultFileName = biotaWriter.GetDefaultFileName(woiBeingUsed.Biota);
+                        var defaultFileName = ACE.Database.SQLFormatters.Shard.BiotaSQLWriter.GetDefaultFileName(woiBeingUsed.Biota.Id, woiBeingUsed.Biota.GetName());
 
                         defaultFileName = String.Concat(defaultFileName.Split(Path.GetInvalidFileNameChars()));
 
                         var fileName = Path.Combine(loginEventDirectory, defaultFileName);
 
-                        woiBeingUsed.Biota.WeenieType = (int) ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
+                        woiBeingUsed.Biota.WeenieType = ACEBiotaCreator.DetermineWeenieType(woiBeingUsed.Biota, rwLock);
 
                         if (woiBeingUsed.Biota.WeenieType == 0)
                         {
@@ -638,10 +672,12 @@ namespace aclogview.Tools.Scrapers
                         if (!woiBeingUsed.AppraiseInfoReceived)
                             partialExportsNoAppraisalInfo.Add($"{woiBeingUsed.Biota.Id:X8}:{woiBeingUsed.Name}");
 
-                        SetBiotaPopulatedCollections(woiBeingUsed.Biota);
+                        var databaseBiota = ACE.Database.Adapter.BiotaConverter.ConvertFromEntityBiota(woiBeingUsed.Biota);
+
+                        ACE.Database.ShardDatabase.SetBiotaPopulatedCollections(databaseBiota);
 
                         using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                            biotaWriter.CreateSQLINSERTStatement(woiBeingUsed.Biota, outputFile);
+                            biotaWriter.CreateSQLINSERTStatement(databaseBiota, outputFile);
                     }
 
                     if (failedExportsUnknownWeenie.Count > 0)
@@ -711,12 +747,27 @@ namespace aclogview.Tools.Scrapers
 
                     biota.Id = biotaEx.Key;
 
+                    biota.PropertiesPosition = new Dictionary<PositionType, PropertiesPosition>();
+
+                    biota.PropertiesAnimPart = new List<PropertiesAnimPart>();
+                    biota.PropertiesPalette = new List<PropertiesPalette>();
+                    biota.PropertiesTextureMap = new List<PropertiesTextureMap>();
+
+                    // Properties for creatures
+                    biota.PropertiesAttribute = new Dictionary<PropertyAttribute, PropertiesAttribute>();
+                    biota.PropertiesAttribute2nd = new Dictionary<PropertyAttribute2nd, PropertiesAttribute2nd>();
+                    biota.PropertiesBodyPart = new Dictionary<CombatBodyPart, PropertiesBodyPart>();
+                    biota.PropertiesSkill = new Dictionary<ACE.Entity.Enum.Skill, PropertiesSkill>();
+
+                    // Biota additions over Weenie
+                    biota.PropertiesEnchantmentRegistry = new Collection<PropertiesEnchantmentRegistry>();
+
                     ACEBiotaCreator.Update(biotaEx.Value.LastCreateObject, biota, rwLock, true);
 
                     if (biotaEx.Value.LastAppraisalProfile != null)
                         ACEBiotaCreator.Update(biotaEx.Value.LastAppraisalProfile, biota, rwLock);
 
-                    var name = biota.GetProperty(ACE.Entity.Enum.Properties.PropertyString.Name);
+                    var name = biota.GetProperty(PropertyString.Name, rwLock);
 
                     var playerDirectoryRoot = Path.Combine(serverDirectory, name);
 
@@ -727,87 +778,25 @@ namespace aclogview.Tools.Scrapers
 
                     // Biota
                     {
-                        var defaultFileName = biotaWriter.GetDefaultFileName(biota);
+                        var defaultFileName = ACE.Database.SQLFormatters.Shard.BiotaSQLWriter.GetDefaultFileName(biota.Id, biota.GetName());
 
                         var fileName = Path.Combine(playerDirectoryInstance, defaultFileName);
 
                         // Update to the latest position seen
                         if (biotaEx.Value.LastPosition != null)
-                            ACEBiotaCreator.Update(ACE.Entity.Enum.Properties.PositionType.Location, biotaEx.Value.LastPosition, biota, rwLock);
+                            ACEBiotaCreator.Update(PositionType.Location, biotaEx.Value.LastPosition, biota, rwLock);
 
-                        biota.WeenieType = (int)ACEBiotaCreator.DetermineWeenieType(biota, rwLock);
+                        biota.WeenieType = ACEBiotaCreator.DetermineWeenieType(biota, rwLock);
 
-                        SetBiotaPopulatedCollections(biota);
+                        var databaseBiota = ACE.Database.Adapter.BiotaConverter.ConvertFromEntityBiota(biota);
+
+                        ACE.Database.ShardDatabase.SetBiotaPopulatedCollections(databaseBiota);
 
                         using (StreamWriter outputFile = new StreamWriter(fileName, false))
-                            biotaWriter.CreateSQLINSERTStatement(biota, outputFile);
+                            biotaWriter.CreateSQLINSERTStatement(databaseBiota, outputFile);
                     }
                 }
             }
-        }
-
-
-        [Flags]
-        enum PopulatedCollectionFlags
-        {
-            BiotaPropertiesAnimPart = 0x1,
-            BiotaPropertiesAttribute = 0x2,
-            BiotaPropertiesAttribute2nd = 0x4,
-            BiotaPropertiesBodyPart = 0x8,
-            BiotaPropertiesBook = 0x10,
-            BiotaPropertiesBookPageData = 0x20,
-            BiotaPropertiesBool = 0x40,
-            BiotaPropertiesCreateList = 0x80,
-            BiotaPropertiesDID = 0x100,
-            BiotaPropertiesEmote = 0x200,
-            BiotaPropertiesEnchantmentRegistry = 0x400,
-            BiotaPropertiesEventFilter = 0x800,
-            BiotaPropertiesFloat = 0x1000,
-            BiotaPropertiesGenerator = 0x2000,
-            BiotaPropertiesIID = 0x4000,
-            BiotaPropertiesInt = 0x8000,
-            BiotaPropertiesInt64 = 0x10000,
-            BiotaPropertiesPalette = 0x20000,
-            BiotaPropertiesPosition = 0x40000,
-            BiotaPropertiesSkill = 0x80000,
-            BiotaPropertiesSpellBook = 0x100000,
-            BiotaPropertiesString = 0x200000,
-            BiotaPropertiesTextureMap = 0x400000,
-            HousePermission = 0x800000,
-        }
-
-        // We just copy the function over here.
-        // If we call the one in ACE.Database, we need to add nuget packages log4net, EntityFrameworkCore, etc..
-        private static void SetBiotaPopulatedCollections(Biota biota)
-        {
-            PopulatedCollectionFlags populatedCollectionFlags = 0;
-
-            if (biota.BiotaPropertiesAnimPart != null && biota.BiotaPropertiesAnimPart.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesAnimPart;
-            if (biota.BiotaPropertiesAttribute != null && biota.BiotaPropertiesAttribute.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesAttribute;
-            if (biota.BiotaPropertiesAttribute2nd != null && biota.BiotaPropertiesAttribute2nd.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesAttribute2nd;
-            if (biota.BiotaPropertiesBodyPart != null && biota.BiotaPropertiesBodyPart.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesBodyPart;
-            if (biota.BiotaPropertiesBook != null) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesBook;
-            if (biota.BiotaPropertiesBookPageData != null && biota.BiotaPropertiesBookPageData.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesBookPageData;
-            if (biota.BiotaPropertiesBool != null && biota.BiotaPropertiesBool.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesBool;
-            if (biota.BiotaPropertiesCreateList != null && biota.BiotaPropertiesCreateList.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesCreateList;
-            if (biota.BiotaPropertiesDID != null && biota.BiotaPropertiesDID.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesDID;
-            if (biota.BiotaPropertiesEmote != null && biota.BiotaPropertiesEmote.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesEmote;
-            if (biota.BiotaPropertiesEnchantmentRegistry != null && biota.BiotaPropertiesEnchantmentRegistry.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesEnchantmentRegistry;
-            if (biota.BiotaPropertiesEventFilter != null && biota.BiotaPropertiesEventFilter.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesEventFilter;
-            if (biota.BiotaPropertiesFloat != null && biota.BiotaPropertiesFloat.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesFloat;
-            if (biota.BiotaPropertiesGenerator != null && biota.BiotaPropertiesGenerator.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesGenerator;
-            if (biota.BiotaPropertiesIID != null && biota.BiotaPropertiesIID.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesIID;
-            if (biota.BiotaPropertiesInt != null && biota.BiotaPropertiesInt.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesInt;
-            if (biota.BiotaPropertiesInt64 != null && biota.BiotaPropertiesInt64.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesInt64;
-            if (biota.BiotaPropertiesPalette != null && biota.BiotaPropertiesPalette.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesPalette;
-            if (biota.BiotaPropertiesPosition != null && biota.BiotaPropertiesPosition.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesPosition;
-            if (biota.BiotaPropertiesSkill != null && biota.BiotaPropertiesSkill.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesSkill;
-            if (biota.BiotaPropertiesSpellBook != null && biota.BiotaPropertiesSpellBook.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesSpellBook;
-            if (biota.BiotaPropertiesString != null && biota.BiotaPropertiesString.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesString;
-            if (biota.BiotaPropertiesTextureMap != null && biota.BiotaPropertiesTextureMap.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.BiotaPropertiesTextureMap;
-            if (biota.HousePermission != null && biota.HousePermission.Count > 0) populatedCollectionFlags |= PopulatedCollectionFlags.HousePermission;
-
-            biota.PopulatedCollectionFlags = (uint)populatedCollectionFlags;
         }
     }
 }

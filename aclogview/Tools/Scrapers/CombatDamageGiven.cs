@@ -383,6 +383,20 @@ namespace aclogview.Tools.Scrapers
 
         }
 
+        /// <summary>
+        /// These are player IDs that simultaneously exist for two players that existed on different servers.
+        /// </summary>
+        private static readonly HashSet<uint> DuplicatePlayerIDs = new HashSet<uint>
+        {
+            1342401215,
+            1342620788,
+            1342866589,
+            1343132953,
+            1343143799,
+            1343179227,
+            1343221089,
+        };
+
         private void GetCharList()
         {
             uint charID = 0;
@@ -392,7 +406,12 @@ namespace aclogview.Tools.Scrapers
             {
                 string[] listValues = line.Split(',');
 
-                charNames.Add(ConvertToUinteger(listValues[0]), listValues[1]);
+                var id = ConvertToUinteger(listValues[0]);
+
+                if (DuplicatePlayerIDs.Contains(id))
+                    continue;
+
+                charNames.Add(id, listValues[1]);
             }
 
         }
