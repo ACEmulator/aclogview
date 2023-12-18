@@ -470,7 +470,7 @@ namespace aclogview.Tools.Scrapers
 
 
             var notes = new StringBuilder();
-            notes.AppendLine("The following command will import all the sql files into your retail shard. It can take many hours");
+            notes.AppendLine("The following Windows command will import all the sql files into your retail shard. It can take many hours.");
             notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Darktide\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_dt < \"%f\"");
             notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Frostfell\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_ff < \"%f\"");
             notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Harvestgain\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_hg < \"%f\"");
@@ -480,6 +480,18 @@ namespace aclogview.Tools.Scrapers
             notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Thistledown\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_td < \"%f\"");
             notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\Verdantine\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_vt < \"%f\"");
             notes.AppendLine("for /f \"delims=\" %f in ('dir /b /s \"C:\\ACLogView Output\\Player Exports\\WintersEbb\\*.sql\"') do \"C:\\Program Files\\MySQL\\MySQL Server 8.0\\bin\\mysql\" --user=root --password=password ace_shard_retail_we < \"%f\"");
+            notes.AppendLine("The following Linux command will import all the sql files into your retail shard. It can take many hours...");
+            notes.AppendLine("Make sure you're in the Player Exports root folder.");
+            notes.AppendLine("for i in *.sql Darktide/* Darktide/*/* Darktide/*/*/*; do mysql --user=root --password=password ace_shard_retail_dt < \"$i\"; done");
+            notes.AppendLine("for i in *.sql Frostfell/* Frostfell/*/* Frostfell/*/*/*; do mysql --user=root --password=password ace_shard_retail_ff < \"$i\"; done");
+            notes.AppendLine("for i in *.sql Harvestgain/* Harvestgain/*/* Harvestgain/*/*/*; do mysql --user=root --password=password ace_shard_retail_hg < \"$i\"; done");
+            notes.AppendLine("for i in *.sql Leafcull/* Leafcull/*/* Leafcull/*/*/*; do mysql --user=root --password=password ace_shard_retail_lc < \"$i\"; done");
+            notes.AppendLine("for i in *.sql Morningthaw/* Morningthaw/*/* Morningthaw/*/*/*; do mysql --user=root --password=password ace_shard_retail_mt < \"$i\"; done");
+            notes.AppendLine("for i in *.sql Solclaim/* Solclaim/*/* Solclaim/*/*/*; do mysql --user=root --password=password ace_shard_retail_sc < \"$i\"; done");
+            notes.AppendLine("for i in *.sql Thistledown/* Thistledown/*/* Thistledown/*/*/*; do mysql --user=root --password=password ace_shard_retail_td < \"$i\"; done");
+            notes.AppendLine("for i in *.sql Verdantine/* Verdantine/*/* Verdantine/*/*/*; do mysql --user=root --password=password ace_shard_retail_vt < \"$i\"; done");
+            notes.AppendLine("for i in *.sql WintersEbb/* WintersEbb/*/* WintersEbb/*/*/*; do mysql --user=root --password=password ace_shard_retail_we < \"$i\"; done");
+
 
             // Find guid collisions across servers
             Dictionary<string, HashSet<uint>> guidsByServer = new Dictionary<string, HashSet<uint>>();
