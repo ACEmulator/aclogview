@@ -303,6 +303,8 @@ namespace aclogview.Tools.Scrapers
                                     }
                                 }
                             }
+
+                            continue;
                         }
 
                         if (messageCode == (uint)PacketOpcode.ORDERED_EVENT) // 0xF7B1 Game Action
