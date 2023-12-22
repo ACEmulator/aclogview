@@ -1,41 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E0F3D649-BD24-4A37-8BD5-4F421263E0F2}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>aclogview</RootNamespace>
-    <AssemblyName>aclogview</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <TargetFrameworkProfile />
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
     <Reference Include="ACE.Adapter">
       <HintPath>lib\ACE.Adapter.dll</HintPath>
@@ -49,270 +19,33 @@
     <Reference Include="ACE.Entity">
       <HintPath>lib\ACE.Entity.dll</HintPath>
     </Reference>
-    <Reference Include="CommandLine, Version=1.9.71.2, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="ACE Helpers\ACETeleloc.cs" />
-    <Compile Include="ACE Helpers\ACEBiotaCreator.cs" />
-    <Compile Include="BufferedTreeView.cs">
+    <Compile Update="BufferedTreeView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="ContextInfo.cs" />
-    <Compile Include="CustomListView.cs">
+    <Compile Update="CustomListView.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Enum Helpers\PropertyInt.cs" />
-    <Compile Include="Enums\MessageQueue.cs" />
-    <Compile Include="GotoLine.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GotoLine.Designer.cs">
-      <DependentUpon>GotoLine.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Server.cs" />
-    <Compile Include="ServerList.cs" />
-    <Compile Include="Tools\CombatScraper.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\CombatScraper.Designer.cs">
-      <DependentUpon>CombatScraper.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\CreatureName.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\CreatureName.Designer.cs">
-      <DependentUpon>CreatureName.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\OptionsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\OptionsForm.Designer.cs">
-      <DependentUpon>OptionsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ProtocolDocs.cs" />
-    <Compile Include="Tools\FindTextInFilesForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\FindTextInFilesForm.Designer.cs">
-      <DependentUpon>FindTextInFilesForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Message Processors\CM_Admin.cs" />
-    <Compile Include="Message Processors\CM_Advocate.cs" />
-    <Compile Include="Message Processors\CM_Allegiance.cs" />
-    <Compile Include="Message Processors\CM_Combat.cs" />
-    <Compile Include="Message Processors\CM_Fellowship.cs" />
-    <Compile Include="Message Processors\CM_Death.cs" />
-    <Compile Include="Message Processors\CM_Game.cs" />
-    <Compile Include="Message Processors\CM_House.cs" />
-    <Compile Include="Message Processors\CM_Magic.cs" />
-    <Compile Include="Message Processors\CM_Misc.cs" />
-    <Compile Include="Message Processors\CM_Movement.cs" />
-    <Compile Include="Message Processors\CM_Trade.cs" />
-    <Compile Include="Message Processors\CM_Train.cs" />
-    <Compile Include="Message Processors\CM_Vendor.cs" />
-    <Compile Include="Message Processors\CM_Writing.cs" />
-    <Compile Include="Enums\Account.cs" />
-    <Compile Include="Enums\Admin.cs" />
-    <Compile Include="Enums\Allegiance.cs" />
-    <Compile Include="Enums\Animation.cs" />
-    <Compile Include="Enums\Appraisal.cs" />
-    <Compile Include="Enums\Character.cs" />
-    <Compile Include="Enums\CharacterTitles.cs" />
-    <Compile Include="Message Processors\CM_Character.cs" />
-    <Compile Include="Message Processors\CM_Communication.cs" />
-    <Compile Include="Message Processors\CM_Examine.cs" />
-    <Compile Include="Message Processors\CM_Inventory.cs" />
-    <Compile Include="Message Processors\CM_Item.cs" />
-    <Compile Include="Message Processors\CM_Login.cs" />
-    <Compile Include="Message Processors\CM_Physics.cs" />
-    <Compile Include="Message Processors\CM_Qualities.cs" />
-    <Compile Include="Message Processors\CM_Social.cs" />
-    <Compile Include="Enums\Chat.cs" />
-    <Compile Include="Enums\Chess.cs" />
-    <Compile Include="Enums\Combat.cs" />
-    <Compile Include="Enums\Emote.cs" />
-    <Compile Include="Enums\Enums.cs" />
-    <Compile Include="Enums\House.cs" />
-    <Compile Include="Enums\Inventory.cs" />
-    <Compile Include="Enums\Item.cs" />
-    <Compile Include="Enums\LandDefs.cs" />
-    <Compile Include="Enums\MaterialType.cs" />
-    <Compile Include="Enums\Movement.cs" />
-    <Compile Include="Enums\Net.cs" />
-    <Compile Include="Enums\Physics.cs" />
-    <Compile Include="Enums\Portals.cs" />
-    <Compile Include="Enums\Script.cs" />
-    <Compile Include="Enums\Shop.cs" />
-    <Compile Include="Enums\Skills.cs" />
-    <Compile Include="Enums\Social.cs" />
-    <Compile Include="Enums\Sound.cs" />
-    <Compile Include="Enums\Trade.cs" />
-    <Compile Include="Enums\UI.cs" />
-    <Compile Include="Enums\WeenieClasses.cs" />
-    <Compile Include="Enums\WeenieError.cs" />
-    <Compile Include="Tools\FindOpcodeInFilesForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\FindOpcodeInFilesForm.Designer.cs">
-      <DependentUpon>FindOpcodeInFilesForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Form1.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\FragDatListFile.cs" />
-    <Compile Include="Tools\FragDatListToolForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\FragDatListToolForm.Designer.cs">
-      <DependentUpon>FragDatListToolForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\ImagePopup.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\ImagePopup.Designer.cs">
-      <DependentUpon>ImagePopup.cs</DependentUpon>
-    </Compile>
-    <Compile Include="PacketHeaders.cs" />
-    <Compile Include="PacketOpcode.cs" />
-    <Compile Include="PacketRecord.cs" />
-    <Compile Include="Packets.cs" />
-    <Compile Include="pcap.cs" />
-    <Compile Include="PCapReader.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Message Processors\Proto_UI.cs" />
-    <Compile Include="Enums\Spells.cs" />
-    <Compile Include="Enums\StatTypes.cs" />
-    <Compile Include="Tools\Parsers\OpcodeFinder.cs" />
-    <Compile Include="Tools\Scrapers\AccountExporter.cs" />
-    <Compile Include="Tools\Scrapers\CombatDamageGiven.cs" />
-    <Compile Include="Tools\Scrapers\HeatMapGenerator.cs" />
-    <Compile Include="Tools\Scrapers\PacketSizeScraperC2S.cs" />
-    <Compile Include="Tools\Parsers\SampleParser.cs" />
-    <Compile Include="Tools\Parsers\TextSearcher.cs" />
-    <Compile Include="Tools\Scrapers\PacketTypesCountScraper.cs" />
-    <Compile Include="Tools\Scrapers\PlayerWeaponExporter.cs" />
-    <Compile Include="Tools\Scrapers\PlayerExporter.cs" />
-    <Compile Include="Tools\Scrapers\Scraper.cs" />
-    <Compile Include="Tools\Scrapers\ServerAddressScraper.cs" />
-    <Compile Include="Tools\Scrapers\VendorBuySellAmountScraperC2S.cs" />
-    <Compile Include="Tools\PcapScraperForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\PcapScraperForm.Designer.cs">
-      <DependentUpon>PcapScraperForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\ToolUtil.cs" />
-    <Compile Include="TreeviewState.cs" />
-    <Compile Include="Tools\TextPopup.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Tools\TextPopup.Designer.cs">
-      <DependentUpon>TextPopup.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Utility.cs" />
-    <EmbeddedResource Include="GotoLine.resx">
-      <DependentUpon>GotoLine.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\CombatScraper.resx">
-      <DependentUpon>CombatScraper.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\CreatureName.resx">
-      <DependentUpon>CreatureName.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\OptionsForm.resx">
-      <DependentUpon>OptionsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\FindOpcodeInFilesForm.resx">
-      <DependentUpon>FindOpcodeInFilesForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\FindTextInFilesForm.resx">
-      <DependentUpon>FindTextInFilesForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\FragDatListToolForm.resx">
-      <DependentUpon>FragDatListToolForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\ImagePopup.resx">
-      <DependentUpon>ImagePopup.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <EmbeddedResource Include="Tools\PcapScraperForm.resx">
-      <DependentUpon>PcapScraperForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\TextPopup.resx">
-      <DependentUpon>TextPopup.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config">
-      <SubType>Designer</SubType>
-    </None>
-  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="Tools\map.png" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Be.Windows.Forms.HexBox\Be.Windows.Forms.HexBox.csproj">
-      <Project>{26c5f25f-b450-4caf-ad8b-b8d11ae73457}</Project>
-      <Name>Be.Windows.Forms.HexBox</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Be.Windows.Forms.HexBox\Be.Windows.Forms.HexBox.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <Content Include="Lists\CharacterList.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+  </ItemGroup>
+
 </Project>

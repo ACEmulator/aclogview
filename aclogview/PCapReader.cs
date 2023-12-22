@@ -134,7 +134,7 @@ namespace aclogview
                         continue;
                     }
                 }
-                catch (InvalidDataException e)
+                catch (InvalidDataException)
                 {
                     break;
                 }
@@ -160,7 +160,7 @@ namespace aclogview
 
                     curPacket++;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     binaryReader.BaseStream.Position += recordHeader.inclLen - (binaryReader.BaseStream.Position - packetStartPos);
                 }
@@ -220,7 +220,7 @@ namespace aclogview
                         continue;
                     }
                 }
-                catch (InvalidDataException e)
+                catch (InvalidDataException)
                 {
                     break;
                 }
@@ -246,7 +246,7 @@ namespace aclogview
 
                     curPacket++;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     binaryReader.BaseStream.Position += blockHeader.capturedLen - (binaryReader.BaseStream.Position - packetStartPos);
                 }
@@ -380,7 +380,7 @@ namespace aclogview
 
                     packet.extraInfo = extrInf;
 				}
-				catch (OutOfMemoryException e)
+				catch (OutOfMemoryException)
 				{
 					//MessageBox.Show("Out of memory (packet " + curPacket + "), stopping read: " + e);
 					return null;
@@ -487,14 +487,15 @@ namespace aclogview
 
                     }
 				}
-				catch (OutOfMemoryException e)
+				catch (OutOfMemoryException)
 				{
 					//MessageBox.Show("Out of memory (packet " + curPacket + "), stopping read: " + e);
 					return false;
 				}
 				catch (Exception e)
 				{
-					packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
+                    if (packet != null)
+					    packet.extraInfo += "EXCEPTION: " + e.Message + " " + e.StackTrace;
 				}
 			}
             return true;

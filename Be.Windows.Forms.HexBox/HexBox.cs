@@ -1197,15 +1197,15 @@ namespace Be.Windows.Forms
 		/// </summary>
 		int _lastThumbtrack;
 		/// <summary>
-		/// Contains the border´s left shift
+		/// Contains the borderÂ´s left shift
 		/// </summary>
 		int _recBorderLeft = SystemInformation.Border3DSize.Width;
 		/// <summary>
-		/// Contains the border´s right shift
+		/// Contains the borderÂ´s right shift
 		/// </summary>
 		int _recBorderRight = SystemInformation.Border3DSize.Width;
 		/// <summary>
-		/// Contains the border´s top shift
+		/// Contains the borderÂ´s top shift
 		/// </summary>
 		int _recBorderTop = SystemInformation.Border3DSize.Height;
 		/// <summary>
@@ -1949,7 +1949,7 @@ namespace Be.Windows.Forms
 		/// </summary>
 		/// <param name="m">the message to process.</param>
 		/// <returns>true, if the message was processed</returns>
-		[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true), SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
+		//[SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true), SecurityPermission(SecurityAction.InheritanceDemand, UnmanagedCode = true)]
 		public override bool PreProcessMessage(ref Message m)
 		{
 			switch (m.Msg)
@@ -3337,9 +3337,9 @@ namespace Be.Windows.Forms
 		} long _lineInfoOffset = 0;
 
 		/// <summary>
-		/// Gets or sets the hex box´s border style.
+		/// Gets or sets the hex boxÂ´s border style.
 		/// </summary>
-		[DefaultValue(typeof(BorderStyle), "Fixed3D"), Category("Hex"), Description("Gets or sets the hex box´s border style.")]
+		[DefaultValue(typeof(BorderStyle), "Fixed3D"), Category("Hex"), Description("Gets or sets the hex boxÂ´s border style.")]
 		public BorderStyle BorderStyle
 		{
 			get { return _borderStyle; }

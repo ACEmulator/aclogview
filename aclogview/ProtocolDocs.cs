@@ -158,7 +158,7 @@ namespace aclogview
                 || string.IsNullOrWhiteSpace(_latestReleaseFileName))
                 throw new Exception("Latest release information missing." +
                     " Fetching and parsing the latest release page must have failed.");
-            using (var webClient = new WebClient())
+            using (var webClient = new WebClient()) // todo switch this to use HttpClient. WebClient is obsolete
             {
                 var destinationFilePath = _projectDirectory + _latestReleaseFileName;
                 webClient.DownloadFile(_latestReleaseFileUrl, destinationFilePath);

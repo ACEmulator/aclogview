@@ -1,0 +1,22 @@
+version: '{branch}.1.0.{build}'
+pull_requests:
+  do_not_increment_build_number: true
+branches:
+  only:
+  - ACE
+skip_tags: true
+image: Visual Studio 2022
+configuration: Release
+before_build:
+- cmd: nuget restore
+build:
+  verbosity: minimal
+test: off
+artifacts:
+- path: aclogview\bin\$(configuration)
+  name: aclogview-$(appveyor_build_version)
+deploy:
+- provider: Environment
+  name: aclogview
+  on:
+    branch: ACE
