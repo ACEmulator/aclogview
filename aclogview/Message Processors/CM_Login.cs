@@ -848,6 +848,7 @@ public class CM_Login : MessageProcessor
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
             TreeNode supportedLanguageNode = rootNode.Nodes.Add("m_SupportedLanguages = ");
+            ContextInfo.AddToList(new ContextInfo { Length = 4 + m_SupportedLanguages.list.Count * 4 }, updateDataIndex: false);
             // skip count header
             ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_SupportedLanguages.list.Count; i++)
@@ -891,35 +892,50 @@ public class CM_Login : MessageProcessor
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
             TreeNode m_ItersWithKeysNode = rootNode.Nodes.Add("m_ItersWithKeys = ");
-            ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithKeys.m_Lists.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithKeys.m_Lists.Length }, updateDataIndex: false);
+            // skip count header
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_ItersWithKeys.m_Lists.list.Count; i++)
             {
                 TreeNode m_ListsNode = m_ItersWithKeysNode.Nodes.Add("m_Lists");
+                ContextInfo.AddToList(new ContextInfo { Length = 8 + (m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count * 4) }, updateDataIndex: false);
                 m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Type);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithKeys.m_Lists.list[i].idDatFile_Id);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 TreeNode listNode = m_ListsNode.Nodes.Add("List");
+                ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count * 4 }, updateDataIndex: false);
                 TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
-                for(var j = 0; j < m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count; j++)
+                ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count * 4 }, updateDataIndex: false);
+                for (var j = 0; j < m_ItersWithKeys.m_Lists.list[i].List.m_Ints.Count; j++)
                 {
                     mIntsNode.Nodes.Add(m_ItersWithKeys.m_Lists.list[i].List.m_Ints[j].ToString());
+                    ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 }
             }
 
             TreeNode m_ItersWithoutKeysNode = rootNode.Nodes.Add("m_ItersWithoutKeys = ");
-            ContextInfo.AddToList(new ContextInfo { Length = 4 + m_ItersWithoutKeys.m_Lists.Length }, updateDataIndex: false);
+            ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithoutKeys.m_Lists.Length }, updateDataIndex: false);
+            // skip count header
+            ContextInfo.DataIndex += 4;
             for (int i = 0; i < m_ItersWithoutKeys.m_Lists.list.Count; i++)
             {
                 TreeNode m_ListsNode = m_ItersWithKeysNode.Nodes.Add("m_Lists");
+                ContextInfo.AddToList(new ContextInfo { Length = 8 + (m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count * 4) }, updateDataIndex: false);
                 m_ListsNode.Nodes.Add("idDatFile.Type = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Type);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 m_ListsNode.Nodes.Add("idDatFile.Id = " + m_ItersWithoutKeys.m_Lists.list[i].idDatFile_Id);
+                ContextInfo.AddToList(new ContextInfo { Length = 4 });
                 TreeNode listNode = m_ListsNode.Nodes.Add("List");
-
+                ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count * 4 }, updateDataIndex: false);
+                TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
+                ContextInfo.AddToList(new ContextInfo { Length = m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count * 4 }, updateDataIndex: false);
                 if (m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count != 0)
                 {
-                    TreeNode mIntsNode = listNode.Nodes.Add("m_Ints");
                     for (var j = 0; j < m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints.Count; j++)
                     {
                         mIntsNode.Nodes.Add(m_ItersWithoutKeys.m_Lists.list[i].List.m_Ints[j].ToString());
+                        ContextInfo.AddToList(new ContextInfo { Length = 4 });
                     }
                 }
             }
@@ -998,14 +1014,13 @@ public class CM_Login : MessageProcessor
                     else
                     {
                         // Check if we've read our entire List
-                        if(iterationCount >= 0) 
+                        if (iterationCount >= 0) 
                         {
                             // If the last item we added was already in this set, we need to deduct one to account for this "missing" iteration
                             if(newObj.m_Ints.Last() > 0)
                                 iterationCount-= 1;
 
                             newObj.m_Ints.Add(value);
-
                         }
                         else
                         {
@@ -1064,7 +1079,8 @@ public class CM_Login : MessageProcessor
 
     public class MissingIteration
     {
-        public long idDatFile;
+        public int idDatFile_Type;
+        public int idDatFile_Id;
         public int idIteration;
         public PList<uint> IDsToDownload;
         public PList<uint> IDsToPurge;
@@ -1072,7 +1088,8 @@ public class CM_Login : MessageProcessor
         public static MissingIteration read(BinaryReader binaryReader)
         {
             MissingIteration newObj = new MissingIteration();
-            newObj.idDatFile = binaryReader.ReadInt32() | binaryReader.ReadInt32();
+            newObj.idDatFile_Type = binaryReader.ReadInt32();
+            newObj.idDatFile_Id = binaryReader.ReadInt32();
             newObj.idIteration = binaryReader.ReadInt32();
             newObj.IDsToDownload = PList<uint>.read(binaryReader);
             newObj.IDsToPurge = PList<uint>.read(binaryReader);
@@ -1081,10 +1098,13 @@ public class CM_Login : MessageProcessor
 
         public void contributeToTreeNode(TreeNode node)
         {
-            TreeNode ilistIIDNode = node.Nodes.Add("idDatFile = " + idDatFile);
-            ContextInfo.AddToList(new ContextInfo { Length = 8 });
+            TreeNode ilistDatFileType = node.Nodes.Add("idDatFile.Type = " + idDatFile_Type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
-            TreeNode ilistLocNode = node.Nodes.Add("idIteration = " + idIteration);
+            TreeNode ilistDatFileID = node.Nodes.Add("idDatFile.Id = " + idDatFile_Id);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+
+            TreeNode ilistIterationNode = node.Nodes.Add("idIteration = " + idIteration);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
             TreeNode IDsToDownloadNode = node.Nodes.Add("IDsToDownload = ");
@@ -1111,7 +1131,8 @@ public class CM_Login : MessageProcessor
 
     public class DDD_DataMessage : Message
     {
-        public long m_idDatFile;
+        public uint m_idDatFile_Type;
+        public uint m_idDatFile_Id;
         public uint m_qdid_Type;
         public uint m_qdid_Id;
         public int m_idIteration;
@@ -1122,7 +1143,8 @@ public class CM_Login : MessageProcessor
         {
             DDD_DataMessage newObj = new DDD_DataMessage();
             
-            newObj.m_idDatFile = binaryReader.ReadUInt32() | binaryReader.ReadUInt32();
+            newObj.m_idDatFile_Type = binaryReader.ReadUInt32();
+            newObj.m_idDatFile_Id = binaryReader.ReadUInt32();
             newObj.m_qdid_Type = binaryReader.ReadUInt32();
             newObj.m_qdid_Id = binaryReader.ReadUInt32();
             newObj.m_idIteration = binaryReader.ReadInt32();
@@ -1140,8 +1162,11 @@ public class CM_Login : MessageProcessor
 
             ContextInfo.AddToList(new ContextInfo { DataType = DataType.Opcode });
 
-            rootNode.Nodes.Add("m_idDatFile = " + m_idDatFile);
-            ContextInfo.AddToList(new ContextInfo { Length = 8 });
+            rootNode.Nodes.Add("m_idDatFile.Type = " + m_idDatFile_Type);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
+
+            rootNode.Nodes.Add("m_idDatFile.Id = " + m_idDatFile_Id);
+            ContextInfo.AddToList(new ContextInfo { Length = 4 });
 
             rootNode.Nodes.Add("m_qdid.Type = " + m_qdid_Type);
             ContextInfo.AddToList(new ContextInfo { Length = 4 });
